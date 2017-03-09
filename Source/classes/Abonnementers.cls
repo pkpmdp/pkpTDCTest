@@ -11,6 +11,7 @@ public class Abonnementers {
          public String priceSuffix{get;set;}
          public String Product{get;set;}
          public String SerieNr{get;set;}
+		 // pkp
     
     static testMethod void testAbonnementers(){
         Abonnementers a = new Abonnementers();
