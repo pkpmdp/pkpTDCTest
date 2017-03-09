@@ -1,0 +1,3 @@
+<apex:page controller="Amazon_DocUpload_CT" action="{!UpdateIsActive}">
+    Uploading.....
+</apex:page>

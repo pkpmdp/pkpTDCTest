@@ -1,0 +1,79 @@
+<apex:page standardController="Contact" extensions="ContactPermissionController" showHeader="false" sidebar="false" cache="false" applyHtmlTag="false">
+<html class="cvi2015"><!--SPOC 2206 -->
+  <apex:composition template="PermissionSiteTemplate">
+<apex:define name="body">
+<apex:form >
+<apex:pagemessages />
+<apex:pageBlock >
+<apex:pageBlockButtons location="bottom" style="float:right;text-align:right">
+<apex:outputText >Dine oplysninger gemmes først når du klikker på "Gem"</apex:outputText><br/>
+<apex:commandButton value="Gem" id="save" action="{!saveContact}" style="background-color:orange;background-image:none;;float:right;"/>
+</apex:pageBlockButtons>
+<apex:outputText >Her ser du dine oplysninger. Du kan tilføje og justere i felterne nedenfor.</apex:outputText>
+<apex:pageBlockSection id="contactInfo"> 
+<apex:pageBlockSectionItem >
+<apex:outputLabel >Navn:</apex:outputLabel> 
+<apex:outputText value="{!name}"></apex:outputText>
+</apex:pageBlockSectionItem>
+<apex:pageBlockSectionItem >
+<apex:outputLabel >Kundenr:</apex:outputLabel> 
+<apex:outputText value="{!anlaegsnr}"></apex:outputText>
+</apex:pageBlockSectionItem>
+<apex:pageBlockSectionItem >
+<apex:outputLabel >Fornavn:</apex:outputLabel> 
+<apex:outputPanel styleClass="requiredInput" layout="block">
+     <apex:outputPanel styleClass="requiredBlock" layout="block"/>   
+<apex:inputText value="{!firstName}" style="width:150px;" disabled="{!isSaved == true}"></apex:inputText>
+</apex:outputPanel>
+</apex:pageBlockSectionItem>
+<apex:pageBlockSectionItem >
+<apex:outputLabel >Efternavn:</apex:outputLabel> 
+<apex:outputPanel styleClass="requiredInput" layout="block">
+     <apex:outputPanel styleClass="requiredBlock" layout="block"/>   
+<apex:inputText value="{!lastName}" style="width:150px;" disabled="{!isSaved == true}"></apex:inputText>
+</apex:outputPanel>
+</apex:pageBlockSectionItem>
+<apex:pageBlockSectionItem >
+<apex:outputLabel >E-mail:</apex:outputLabel>
+<apex:outputPanel styleClass="requiredInput" layout="block">
+     <apex:outputPanel styleClass="requiredBlock" layout="block"/>   
+<apex:inputText value="{!email}" style="width:150px;" disabled="{!isSaved == true}"></apex:inputText>
+</apex:outputPanel>
+</apex:pageBlockSectionItem>
+<apex:pageBlockSectionItem >
+<apex:outputLabel >Mobil:</apex:outputLabel> 
+<apex:inputText value="{!mobile}" maxlength="8" disabled="{!isSaved == true}"></apex:inputText>
+</apex:pageBlockSectionItem>
+<apex:pageBlockSectionItem id="role">
+             <apex:outputLabel value="{!$ObjectType.Account_Contact_Role__c.fields.Role__c.label}"></apex:outputLabel>
+             <apex:actionRegion >
+                <apex:outputText >Vælg én eller flere roller ved at markere og klikke på >></apex:outputText>     
+                <apex:panelGrid columns="3" id="rolebox">  
+                <apex:selectList id="sel1" value="{!leftselected}" multiselect="true" style="width:150px;height:100px" size="5" tabindex="1">  
+                    <apex:selectOptions value="{!unselectedvalues}" />  
+                </apex:selectList>               
+                <apex:panelGroup >  
+                        <apex:commandButton disabled="{!isSaved == true}" action="{!selectclick}" value=">>" reRender="rolebox" tabindex="2"></apex:commandButton>
+                    <br/> 
+                        <apex:commandButton disabled="{!isSaved == true}" action="{!unselectclick}" value="<<" reRender="rolebox" tabindex="4"></apex:commandButton> 
+                 </apex:panelGroup>                  
+                    <apex:selectList id="sel2" value="{!rightselected}" multiselect="true" style="width:150px;height:100px" size="5" tabindex="3">  
+                        <apex:selectOptions value="{!SelectedValues}" />  
+                    </apex:selectList>  
+                </apex:panelGrid> 
+             </apex:actionRegion>
+                     </apex:pageBlockSectionItem>
+<apex:pageBlockSectionItem >
+<apex:inputCheckbox value="{!permission}" disabled="{!isSaved == true}"/>
+<apex:outputLabel >{!$Label.YS_Permission}<br/><br/>Jeg kan til enhver tid afmelde.</apex:outputLabel>
+<!--apex:outputLabel >Ja tak, jeg vil gerne modtage nyheder og rådgivning om YouSee’s produkter på e-mail og sms fra YouSee, som henvender sig til bestyrelser, formænd, kasserere, administratorer mv.
+
+<br/><br/>Jeg kan til enhver tid afmelde.
+</apex:outputLabel-->
+</apex:pageBlockSectionItem>
+</apex:pageBlockSection>  
+</apex:pageBlock>
+</apex:form>
+<!--/apex:outputPanel-->  
+</apex:define>
+</apex:composition></html></apex:page>

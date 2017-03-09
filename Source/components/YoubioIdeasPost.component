@@ -1,0 +1,89 @@
+<apex:component controller="IWLPostIdeaWidgetController" allowDml="true" layout="none" id="IWLPostIdeaWidgetView">
+    
+    <apex:attribute name="DeveloperName" type="String" required="true" description="The DeveloperName__c of the IWLWidget record that will be loaded by this widget" assignTo="{!widgetDeveloperName}" />
+    <apex:attribute name="Widget" type="IWLWidget__c" required="false" description="A Pre-loaded widget record to be used as the source of information for this widget" assignTo="{!widgetRecord}" />
+    <apex:attribute name="ThemeNo" type="String" required="false" description="The Id of IdeaTheme" assignTo="{!ThemeId}" />
+    <script type="text/javascript" src="{!$Resource.placeholder}"></script>
+    <script type="text/javascript">
+
+      $(function() {
+      	 $('input[type=text].IWLPostIdeaIdeaTitle').attr("placeholder", "Indsæt overskrift").placeholder();
+      	 
+      	 var editorPlaceholder = "Indsæt beskrivelse";
+      	 
+      	 editor.on("instanceReady",function() {
+      	 	editor.setData(editorPlaceholder);
+      	 });
+
+      	 editor.on("focus", function() {
+      	 	if(editor.document.getBody().getText() === editorPlaceholder) {
+      	 		editor.setData("");
+      	 		editor.focus();
+      	 	}
+      	 });
+      
+	     editor.on("blur", function() {
+	     	//alert("blur");
+	      	if(editor.getData() === "") { 
+	      		editor.setData(editorPlaceholder);
+	      		//editor.document.getBody().setStyle();
+	      		//editor.document.getBody().setCSS();
+	      	}
+	     });
+      });
+     
+      
+    </script>
+    <apex:outputPanel layout="block" rendered="{!loadWidget}">      
+        <!-- Begins widget content -->
+        <apex:outputPanel layout="block" styleclass="error" rendered="{!!$ObjectType.Idea.createable}">
+            <!-- This is an error message for when the user can't publish new ideas -->
+            Please login first.
+        </apex:outputPanel>
+        
+        <apex:outputPanel id="information"><apex:messages styleClass="error"/></apex:outputPanel>
+
+        <apex:outputPanel layout="block" styleclass="" rendered="{!$ObjectType.Idea.createable}">
+            <!-- This is the actual component to post the new idea -->
+            <apex:form id="postIdeaForm" styleClass="postIdeaForm" >                           
+                <!-- Idea Title -->
+                <apex:outputPanel layout="block" id="IWLPostIdeaIdeaTitleContainer" styleClass="">                                                          
+                    <apex:inputField required="false" value="{!newIdea.Title}" id="IWLPostIdeaIdeaTitle" styleClass="IWLPostIdeaIdeaTitle"/>
+                </apex:outputPanel>
+
+                   
+                <div class="">
+                    <apex:outputPanel layout="block" id="IWLPostIdeaIdeaBodyContainer" styleClass="">                      
+                        <apex:outputPanel layout="block" styleClass="">
+                            <apex:inputField id="IWLPostIdeaIdeaBody" value="{!newIdea.Body}" styleClass="IWLPostIdeaIdeaBody"/>
+                        </apex:outputPanel>
+                    </apex:outputPanel>
+    
+                    <!-- Categories -->
+                    <apex:outputPanel layout="block" id="IWLPostIdeaIdeaCategoriesContainer" styleClass="">
+                        <apex:outputPanel layout="block" styleClass="" >
+                            <!-- apex:repeat value="{!categoryOptions}" var="o">                                                               
+                                <apex:selectCheckboxes id="IWLPostIdeaIdeaCategories" layout="lineDirection" value="{!categoriesForIdea}" styleClass="">
+                                    <apex:selectOption itemValue="{!o.value}" itemLabel="{!o.label}" />
+                                </apex:selectCheckboxes>
+                            </apex:repeat-->
+                            <apex:selectRadio value="{!categoryForIdea}">
+            					<apex:selectOption id="radioOne" itemLabel="Klienter/platforme" itemValue="Klient/platforme"/>
+            					<apex:selectOption id="radioTwo" itemLabel="Design" itemValue="Design"/>
+            					<apex:selectOption id="radioThree" itemLabel="Indhold" itemValue="Indhold"/>
+            				</apex:selectRadio>
+                        </apex:outputPanel>
+                    </apex:outputPanel>
+                                       
+                    <!-- Submit Buttons -->
+                    <apex:outputPanel layout="block" styleClass="IWLPostIdeaSubmitButtons">                                              
+                        <apex:commandButton action="{!save}" title="{!$Label.IWL_POST}" styleClass="" reRender="IWLPostIdeaIdeaCategoriesContainer,IWLPostIdeaIdeaTitleContainer,IWLPostIdeaSaveResult, information" value="{!$Label.IWL_POST}" /><!--onclick="IWLCommons_showLoadingPanel('PostIdea', '.IWLPostIdeaWidgetView{!JSENCODE(DeveloperName)}', '/resource/IWLResources/styles/images/ajax-loader.gif');"-->                       
+                    </apex:outputPanel>
+                </div>
+                
+            </apex:form>
+        </apex:outputPanel>
+    
+    </apex:outputPanel> 
+    
+</apex:component>

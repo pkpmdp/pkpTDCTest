@@ -1,0 +1,22 @@
+<apex:page standardController="CampaignMember" extensions="Yousee13DeltageController" showHeader="false" sidebar="false" cache="false">
+  <apex:composition template="PermissionSiteTemplate">
+    <apex:define name="body">   
+  <apex:form >
+ <br></br>
+           <div class="k_mf_progress" style="width: 85%;margin:0 auto;">        
+                <div class="k_mf_progress_bg">            
+                    <div class="k_mf_progress_indicator" style="width:100%"> </div>
+                </div>    
+           </div>    
+           <ul class="k_mf_progress_list_3" style="width: 85%;margin:0 auto;">        
+                  <li>Kontaktpersoner registreret hos YouSee </li>        
+                  <li>Nye kontaktpersoner</li>        
+                  <li>Ledsager til kontaktpersoner</li>  
+                  <li  class="k_current">Kvittering</li>  
+           </ul>
+       <br></br> <br></br>
+       <apex:outputText value="{!emailBody}" escape="false"></apex:outputText>
+  </apex:form>
+  </apex:define>
+  </apex:composition>
+</apex:page>

@@ -1,0 +1,128 @@
+<apex:page controller="LookupPopupController" sidebar="false" showheader="false" >
+<!--<apex:page controller="LookupPopupController" sidebar="false" showheader="false" action="{!selectinstall}">-->
+
+<script language="javascript">
+   window.onload = new function() 
+   { 
+      // bring popup window to front
+      window.focus(); 
+      var ele=document.getElementById('{!$Component.form.block.section.query}');
+      if (ele)
+      {
+         ele.focus();
+      }
+   }
+   
+   function fillIn(name, id)
+   {   
+      var winMain=window.opener;
+      //  var tempid;
+     
+      if (null==winMain)
+      {
+         winMain=window.parent.opener;
+      }        
+      var ele=winMain.document.getElementById('{!$CurrentPage.parameters.namefield}');
+      var billAddress=winMain.document.getElementById('pg:frm:pgBlk:addresses:pgBlkSecItm:billingName');
+      var addType='{!$CurrentPage.parameters.type}';
+     
+      ele.value=name;
+      if(ele.value=='Dummyudlandsvej'&& addType=='billing')
+      { 
+            winMain.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddressType').disabled=false;
+                        
+        
+      }else if(ele.value!='Dummyudlandsvej'&& addType=='billing'){
+            winMain.document.getElementById('pg:frm:pgBlk:BUC_address:bucCountry').value='';
+            winMain.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddressType').value='';
+            winMain.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress1').value='';
+            winMain.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress2').value='';
+            winMain.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress3').value='';
+            winMain.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress4').value='';
+            winMain.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress5').value='';
+           
+            winMain.document.getElementById('pg:frm:pgBlk:BUC_address:bucCountry').disabled=true;
+            winMain.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddressType').disabled=true;
+            winMain.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress1').disabled=true;
+            winMain.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress2').disabled=true;
+            winMain.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress3').disabled=true;
+            winMain.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress4').disabled=true;
+            winMain.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress5').disabled=true;
+            winMain.document.getElementById('pg:frm:pgBlk:BUC_address:bucCountry_lkwgt').style.display='none';
+      <!-- spoc-1688  -->
+            
+           <!--tempid=winMain.document.getElementById('pg:frm:pgBlk:pickval:addid'); -->
+            <!-- tempid.innerHTML='<option value="">'+id+'</option>'  -->
+           <!-- tempid.value='{!Options}';  -->
+            <!-- var listd='{!Options}'; -->
+            
+        <!--   tempid.innerHTML.value = '{!Options}';  --->
+          <!-- tempid.value=listd; -->
+          <!--  var temp='{!temp}';  -->
+           
+        
+            
+      }
+      ele=winMain.document.getElementById('{!$CurrentPage.parameters.idfield}');
+      ele.value=id;
+      //winMain.document.getElementById('pg:frm:pgBlk:pickval:addid').value='99999';
+   //  var lookid= winMain.document.getElementById('pg:frm:pgBlk:hidid').value=id;
+      //alert('id value feteched'+lookid);
+    //  var url =window.opener.location.href+'&addid='+id;
+    <!--  window.open(url);   -->
+         
+      //winMain.location.reload();
+      CloseWindow();
+    //  window.open(url);
+ 
+      
+     
+   }
+   
+
+   function CloseWindow()
+   {
+      var winMain=window.opener;
+      if (null==winMain)
+      {
+         winMain=window.parent.opener;
+      }
+      winMain.closeLookupPopup();
+   }
+</script>
+
+  <apex:messages />
+  <apex:form id="form">  <!--form--> 
+     <div style="width 100%">
+        <apex:pageBlock title="Lookup" id="block">  
+          <apex:pageBlockSection id="section">
+              Klik 'Søg' for at finde adresse<br/>
+              <apex:inputText value="{!query}" id="query"/>
+              <apex:commandButton value="Søg" action="{!runQuery}"/>                             
+          </apex:pageBlockSection>         
+        </apex:pageBlock>
+
+<!--<apex:actionFunction name="installnet" action="{!selectinstall}" id="act" reRender="" >
+<apex:param name="firstParam" assignTo="{!enteredText1}" value=""/>
+</apex:actionFunction> -->
+
+        <apex:pageBlock >
+          <apex:pageBlockSection columns="1">
+              <apex:pageBlockTable value="{!addresses}" var="address">
+                <apex:column headerValue="Gadenavn">
+                  <!--apex:outputLink value="#" onclick="fillIn('{!address.Name}', '{!address.id}')">{!address.Name}</apex:outputLink>--> 
+                   <apex:outputLink value="#" onclick="fillIn('{!JSENCODE(address.Name)}','{!address.id}');">{!address.Name}</apex:outputLink>      
+                </apex:column>
+                <apex:column headerValue="Husnr" value="{!address.House_No__c}"/>
+                <apex:column headerValue="Opgang" value="{!address.Entrance__c}"/>
+                <apex:column headerValue="Etage" value="{!address.Floor__c}"/>
+                <apex:column headerValue="Side/dørnr" value="{!address.Door_No__c}"/>            
+                <apex:column headerValue="Postnr" value="{!address.Postcode__c}"/>
+              </apex:pageBlockTable>    
+          </apex:pageBlockSection>
+        </apex:pageBlock>
+        <button type="button" onclick="CloseWindow();">Luk Vindue</button>
+     </div>
+             
+   </apex:form>
+</apex:page>

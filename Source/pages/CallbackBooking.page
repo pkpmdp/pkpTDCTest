@@ -1,0 +1,44 @@
+<apex:page controller="CallbackBookingController" id="calendarPage" tabStyle="Case" title="{! $Label.CB_Case_Booking_Calendar}" action="{!redirectAction}">
+<apex:stylesheet value="{!URLFOR($Resource.calendar, 'calendarPage.css')}"/>
+<script type="text/javascript">
+function OnCreateCBCase(idCase){
+  var elemCalendar = document.getElementById("id_calendar_wrapper");
+  if (elemCalendar && elemCalendar.className != 'disabled'){
+    elemCalendar.className = 'disabled';
+    jsCreateCBCase(idCase);
+  }  
+}
+
+function OnCompleteCBCase(){
+  var elemCalendar = document.getElementById("id_calendar_wrapper");
+  if (elemCalendar){
+    elemCalendar.className = 'enabled';
+  }
+}
+</script>
+<apex:sectionHeader title="{! $Label.CB_Case_Page_Title}" subtitle="{! $Label.CB_Case_Booking_Slots} {! DateFromFormatted} - {! DateTillFormatted}" />
+<apex:pageMessages id="cb_calendarMessages" />
+
+<div class="filterOverview">
+<apex:form >
+<div class="bFilterView">
+  <span class="bFilter">
+    <apex:outputLabel value="{! $Label.CB_Case_Callback_Type} {! CaseTypeString }" for="cb_selType" style="text-align: left; font-weight: bold; padding-right: 0.69em;"/>
+    <span class="cb_selHidden"><apex:inputField rendered="{!IsNotCaseUpdate}" value="{! TempCase.Department__c }" styleClass="cb_selHidden" /><apex:inputField rendered="{!IsNotCaseUpdate}" value="{! TempCase.Product_2__c }" styleClass="cb_selHidden" /></span>
+    <span class="fBody">
+      <apex:inputField rendered="{!IsNotCaseUpdate}" value="{! TempCase.Type_Task__c }" id="cb_selType" onchange="jsRefresh()" />
+    </span>
+  </span>
+  <apex:actionFunction action="{!createCBCase}" name="jsCreateCBCase" oncomplete="OnCompleteCBCase()" rerender="cb_calendarComponent, cb_calendarMessages">
+    <apex:param name="UrlCBCase" assignTo="{!UrlCBCase}" value="" />  
+  </apex:actionFunction>  
+  <apex:actionFunction action="{!refresh}" name="jsRefresh" rerender="cb_calendarComponent, cb_calendarMessages" />
+</div>
+</apex:form>
+</div>
+
+<div id="id_calendar_wrapper" class="enabled">
+<c:Calendar CallbackBookingSlots="{! CallbackSlots}" StartHour="{! StartHour}" EndHour="{! EndHour}" NumberOfDays="{! NumberOfDays}" DateFrom="{! DateFrom}" id="cb_calendarComponent">
+</c:Calendar>
+</div>
+</apex:page>

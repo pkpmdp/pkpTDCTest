@@ -1,0 +1,49 @@
+<apex:page controller="ManualOrderingDocController" renderas="pdf" standardStylesheets="false" id="pageId" sidebar="false" showHeader="false" applyHtmlTag="false">
+    <html class="cvi2015">
+<header>
+    <title>Blanketter</title>
+</header> 
+
+<apex:form >
+ <body>
+   
+
+
+<apex:inputHidden value="{!DocumentID}" id="controllerCall"/>
+
+<p style="font-size:5px;">
+
+<br></br>
+<apex:pageBlock >
+
+<apex:outputLabel value="Forhandlernavn: {!dealerName}" /> 
+<apex:outputLabel value="Forhandlernummer: {!dealerNumber}" /> 
+<apex:outputLabel value="Dato : {!longDate}" />
+
+<br></br>
+<br></br>
+<apex:outputText value="{!formHeader}" styleClass="textHeader"  />    
+       <apex:dataTable value="{!orderingList}" var="list" width="100%" cellspacing="8" >
+           <apex:column rendered="{!(list.document.FieldType__c == 'TextBox')}" style="{!list.document.FontStyling__c}" >  
+                    <apex:outputText value="{!list.document.Description__c}" /> &nbsp; &nbsp; &nbsp;
+                    <apex:outputText value="{!list.document.FieldValue__c}"  />
+           </apex:column> 
+            <apex:column rendered="{!(list.document.FieldType__c == 'RadioButton')}" style="{!list.document.FontStyling__c}" > 
+               <img src="{!IF((list.fieldValue == list.description),$Resource.RadionButton_Checked,$Resource.RadionButton_UnChecked)}" style="width: 12px;height: 8px;" />  
+               &nbsp;  <apex:outputText value="{!list.description}"  />
+           </apex:column> 
+           <apex:column rendered="{!(list.document.FieldType__c == 'CheckBox')}" style="{!list.document.FontStyling__c}" > 
+               <img src="{!IF((list.document.FieldValue__c == 'true'),$Resource.CheckBox_Checked,$Resource.CheckBox_UnChecked)}" style="width: 12px;height: 8px;" />  
+               &nbsp;  <apex:outputText value="{!list.document.Description__c}"  />
+           </apex:column> 
+           <apex:column rendered="{!(list.document.FieldType__c == 'Text')}" style="{!list.document.FontStyling__c}" > 
+                <apex:outputText value="{!list.document.Description__c}"  /> &nbsp; &nbsp; &nbsp;
+           </apex:column> 
+       </apex:dataTable>
+</apex:pageBlock>
+</p>       
+
+</body>
+</apex:form>
+</html>
+</apex:page>

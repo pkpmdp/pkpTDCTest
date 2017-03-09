@@ -1,0 +1,32 @@
+<apex:page standardController="Contact" extensions="Yousee13LoginController" cache="false" showHeader="false" sidebar="false">
+<apex:composition template="PermissionSiteTemplate">
+<apex:define name="body">
+<apex:form >
+
+<style>
+h1 {color:red;}
+</style>
+
+
+<br></br>
+<br></br>
+
+<h1>
+YouSee LIVE '13 lørdag 9. marts 
+</h1>
+
+<br></br>
+
+<br></br>
+<div>
+Er du forhindret i at deltage, har du andre ændringer eller spørgsmål til din tilmelding, er du velkommen til at kontakte os på 70 70 40 00 på hverdage mellem kl. 09.00 og 15.00. Eller send os en e-mail: salgoest@yousee.dk
+</div>
+
+<br></br>
+ 
+
+
+</apex:form>
+</apex:define>
+</apex:composition>
+</apex:page>

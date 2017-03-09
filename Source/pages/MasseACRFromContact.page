@@ -1,0 +1,78 @@
+<apex:page standardController="Account_Contact_Role__c" extensions="MasseContactRoleController" tabStyle="Account_Contact_Role__c" showHeader="false" sidebar="false" cache="false"> 
+ <script type="text/javascript">
+    window.onload = init;                     
+    
+    function init() {
+        $('sel1').focus();
+    }                
+    </script>
+    <script type="text/javascript" src="{!$Resource.jQuery13}"></script>
+    <script type="text/javascript" src="{!$Resource.JQuery_tmpl}"></script>
+<apex:form id="contactRoleForm">
+   <apex:sectionHeader title="Ny kontaktpersonrolle" />  
+   <apex:pagemessages />
+   <!--apex:messages/-->
+   <apex:pageBlock mode="edit"> 
+    <apex:pageBlockButtons location="both">
+        <apex:commandButton value="{!$Label.Save}" action="{!save}" />
+        <apex:commandButton value="{!$Label.Cancel}" action="{!cancel}"/>
+    </apex:pageBlockButtons>         
+    <apex:pageblockSection >
+        <apex:pageBlockSectionItem >
+            <apex:outputLabel value="{!$ObjectType.Account_Contact_Role__c.fields.Contact__c.label}"></apex:outputLabel>           
+            <apex:outputPanel styleClass="requiredInput" layout="block">
+                <apex:outputPanel styleClass="requiredBlock" layout="block"/>            
+                <apex:outputField id="Contact" value="{!acr.Contact__c}"/>                            
+            </apex:outputPanel>
+        </apex:pageBlockSectionItem>
+        <apex:pageBlockSectionItem id="customer"> 
+              <apex:outputLabel id="customerLabel" value="{!$ObjectType.Account_Contact_Role__c.fields.Customer__c.label}"></apex:outputLabel>
+              <apex:outputPanel styleClass="requiredInput" layout="block">
+                <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+                <apex:actionRegion >             
+                <apex:inputField id="customerField" value="{!acr.Customer__c}">
+                <apex:actionSupport event="onchange" action="{!getContactRoles}" reRender="rolebox, totalInsight"/> 
+                </apex:inputField> 
+                </apex:actionRegion>                          
+              </apex:outputPanel>          
+        </apex:pageBlockSectionItem>     
+        <apex:pageBlockSectionItem id="role">
+             <apex:outputLabel value="{!$ObjectType.Account_Contact_Role__c.fields.Role__c.label}"></apex:outputLabel>
+             <apex:actionRegion >
+                <apex:panelGrid columns="3" id="rolebox">  
+                <apex:selectList id="sel1" value="{!leftselected}" multiselect="true" style="width:250px;height:400px" size="5" tabindex="1">  
+                    <apex:selectOptions value="{!unselectedvalues2}" />  
+                </apex:selectList>
+                
+                <apex:panelGroup >  
+                    <br/>
+                    <!--apex:image value="{!$Resource.multiselected}">   
+                        <apex:actionSupport event="onclick" action="{!selectclick2}" reRender="rolebox,totalInsight"/>  
+                    </apex:image--> 
+                    <apex:commandButton action="{!selectclick2}" value=">>" reRender="rolebox, totalInsight" tabindex="2"></apex:commandButton>
+                    <br/><br/>  
+                    <!--apex:image value="{!$Resource.multiunselected}"> 
+                        <apex:actionSupport event="onclick" action="{!unselectclick2}" reRender="rolebox, totalInsight"/>      
+                    </apex:image--> 
+                    <apex:commandButton action="{!unselectclick2}" value="<<" reRender="rolebox, totalInsight" tabindex="4"></apex:commandButton> 
+                 </apex:panelGroup> 
+                 
+                    <apex:selectList id="sel2" value="{!rightselected}" multiselect="true" style="width:200px;height:400px" size="5" tabindex="3">  
+                        <apex:selectOptions value="{!SelectedValues2}" />  
+                    </apex:selectList>  
+                </apex:panelGrid> 
+             </apex:actionRegion>
+        </apex:pageBlockSectionItem>
+            
+        <apex:pageBlockSectionItem >
+            <apex:outputLabel value="Total Insight" rendered="true"></apex:outputLabel>   
+            <apex:outputPanel id="totalInsight">
+                <apex:inputField value="{!acr.Total_Insight__c}" rendered="{!isShow}"/>
+            </apex:outputPanel>
+        </apex:pageBlockSectionItem>
+  </apex:pageblockSection>
+</apex:pageBlock>
+
+</apex:form>
+  
+</apex:page>

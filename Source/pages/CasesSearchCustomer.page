@@ -1,0 +1,76 @@
+<apex:page standardController="Case" extensions="clsCasesSearchCustomerController">
+<apex:includeScript value="/soap/ajax/26.0/connection.js"/>
+<apex:includeScript value="/support/console/26.0/integration.js"/>
+<script>
+function setFocusOnLoad() {} 
+ </script>
+
+  <apex:form id="theform">
+    <apex:panelGrid id="panel"  style="background-color: rgb(227, 222, 184)" width="100%" border="0" cellpadding="0" cellspacing="0" columns="2">
+      <apex:inputField value="{!Case.Address_Search_Term__c}" style="width:70%" id="searchTerm"/>
+      <apex:commandButton action="{!navigateToSearch}" oncomplete="gotoResults()" value="Søg" style="float:left"/>
+    </apex:panelGrid>
+  </apex:form>
+  
+
+  <script>
+   
+   var currentSubTabId;
+   var primaryTabId;
+    
+    var showTabId = function showTabId(result){
+         currentSubTabId  = result.id;
+       // alert('subtabID'+ currentSubTabId);
+    };
+    
+  
+    var openSubtab = function openSubtab(result) {    
+                primaryTabId = result.id;
+                var URLValue = "{!URLFOR($Page.CasesSearchCustomerResults)}?id={!case.Id}&isdtp=vw"; 
+                //var subtabid = sforce.console.getFocusedSubtabId(showTabId);
+                var caseid = "{!case.id}";
+                var casenr = "{!case.caseNumber}";  
+                if(currentSubTabId != null ) {
+                    //sforce.console.openSubtab(primaryTabId, URLValue,false, {!case.caseNumber}, null,refreshSuccess, null);                          
+                    sforce.console.openSubtab(primaryTabId, URLValue,true, casenr, null,null, null);
+                    //alert('subtab not null');
+                 }
+                else
+                    sforce.console.openSubtab(primaryTabId, URLValue,true, {!case.caseNumber}, null,null, null);     
+    }; 
+    
+     var refreshSuccess = function refreshSuccess(result){
+        var newSubtab = result.id;
+        //alert('newSubtab'+newSubtab+'currentsubtab'+currentSubTabId);
+        alert('primary'+primaryTabId);
+        sforce.console.refreshPrimaryTabById(primaryTabId); 
+        /*sforce.console.closeTab(currentSubTabId);
+        if(newSubtab !=currentSubTabId)  {  
+        alert('close');
+        sforce.console.closeTab(currentSubTabId); }
+        else
+        alert('don't close');*/
+    }
+   
+      
+    function gotoResults() {
+      var searchTerm = document.getElementById("{!$Component.theform.searchTerm}").value;
+      if (searchTerm != '') {               
+        if (sforce.console.isInConsole()){
+            var caseId = '{!case.Id}'; 
+            //alert('inconsole');
+            //sforce.console.getFocusedSubtabId(showTabId);
+            sforce.console.getEnclosingTabId(showTabId);    
+            sforce.console.getEnclosingPrimaryTabId(openSubtab);
+           //sforce.console.getFocusedSubtabId(showTabId);                                
+        }      
+     else {
+      //alert('outconsole');
+        parent.location.href = "{!URLFOR($Page.CasesSearchCustomerResults)}?id={!case.Id}";       
+        //window.parent.location.href = '/apex/CasesSearchCustomerResults?id='+'{!case.Id}';
+        }
+      }
+    }
+    
+        </script>
+</apex:page>

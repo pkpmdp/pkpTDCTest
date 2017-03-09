@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ApexPage xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>33.0</apiVersion>
+    <availableInTouch>false</availableInTouch>
+    <confirmationTokenRequired>false</confirmationTokenRequired>
+    <description>A Service Center administrator enters Email, Mobile and Name into this form on the Service Center portal</description>
+    <label>YouSee_O_customers_W2L_form</label>
+</ApexPage>

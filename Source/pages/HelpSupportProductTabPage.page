@@ -1,0 +1,78 @@
+<apex:page controller="HelpSupportProductTabController" sidebar="false" showHeader="false" >
+<head>
+        <script type="text/javascript"  src="{!productURL}"></script>
+      </head>
+<apex:form >
+<body>
+
+<script type="text/javascript" src="https://yousee.dk/sitecore/content/data/export/export.aspx?itemguid={F011BAAA-EF0B-4751-B782-587C8D8AD11F}&functions=true"></script>
+    <!-- Added for DW 750 -->
+    <c:TopMenuComponent ></c:TopMenuComponent>
+    <script type="text/javascript">printHeader();</script>
+    <script type="text/javascript">printTopMenu();</script>
+<script type="text/javascript">printContentAreaBegin();</script>
+ <script>
+function setBlanketter(){
+    newURL = window.location.protocol + "//" + (window.location.host).replace("//","/");
+    var blanketterlist=document.getElementById('productnavigation').childNodes;
+    var bListCount=0;
+    var bURL;
+    var flag = 'false';
+    for (p= 0; p < blanketterlist.length; p++){
+     if(blanketterlist[p].innerHTML =="Blanketter"){
+        flag ='true';
+     }
+     //if(flag = 'true'){
+       if(blanketterlist[p].nodeName=="UL" ){
+                 var mU=blanketterlist[p].childNodes;
+            for (l=0; l<mU.length; l++){
+            
+                if(mU[l].nodeName == "LI" ){
+                    bListCount = bListCount + 1 ;
+                }
+                var mBLA=mU[l].childNodes;
+                for(bL =0 ; bL < mBLA.length ;bL++){
+                
+                switch(bListCount){
+                                case 1:
+                                    
+                                    bURL = newURL + '/apex/HelpSupportProductTabPage?productType=Clear';
+                                    mBLA[bL].setAttribute('href',bURL);
+                                    break;
+                                case 2:
+                                    bURL = newURL + '/apex/HelpSupportProductTabPage?productType=Broadband';
+                                    mBLA[bL].setAttribute('href',bURL);
+                                    break;
+                                case 3:
+                                    bURL = newURL + '/apex/HelpSupportProductTabPage?productType=Digital';
+                                    mBLA[bL].setAttribute('href',bURL);
+                                    break;
+                                case 4:
+                                    bURL = newURL + '/apex/HelpSupportProductTabPage?productType=Ekstrakanaler';
+                                    mBLA[bL].setAttribute('href',bURL);
+                                    break;
+                                case 5:
+                                    bURL = newURL + '/apex/HelpSupportProductTabPage?productType=Telephony';
+                                    mBLA[bL].setAttribute('href',bURL);
+                                    break;
+                            }
+                    }
+            }
+        }
+    //}
+ }
+}
+document.onload = setBlanketter();
+</script>
+<apex:pageBlock >
+    <br> </br>     
+    <apex:dataTable value="{!information}" var="info">
+        <apex:column value="{!info.Description__c}"  headerValue=""/>
+    </apex:dataTable>                  
+</apex:pageBlock>
+<script type="text/javascript">printContentAreaEnd();</script>
+<script type="text/javascript">printFooter();</script>
+<script type="text/javascript" src="js/click.js" charset="ISO-8859-1"></script>
+</body>
+</apex:form>
+</apex:page>

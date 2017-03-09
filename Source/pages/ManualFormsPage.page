@@ -1,0 +1,119 @@
+<apex:page showHeader="false" sidebar="false" controller="ManualFormsController" applyHtmlTag="false">
+<html class="cvi2015"> <!--spoc 2206-->
+<header>
+    <title>Blanketter</title>
+</header>    
+<apex:pageMessages rendered="true" />
+
+<style>
+.outputLabel { width:100%; }
+.fontVerdana{ font-family: 'Verdana'; }
+</style>
+
+<!-- Added for DW 750 -->
+
+<apex:form rendered="{!$Label.DE_Login_Access}">
+    <center>
+    <apex:image url="{!$Resource.DW_Maintenance_Image_2}" width="400" height="400"/>
+        <br></br>
+    <apex:outputText style="color: #629E00;font-size: large;" value="{!$Label.DW_Maintenance_message}">
+        
+    </apex:outputText>
+    <br></br>
+    <a class="dialogbutton_orange Right" href="/secur/logout.jsp" style="position: relative; left: -15px;"><span>Back</span></a>
+    </center>
+    </apex:form>
+<apex:form rendered="{! If($Label.DE_Login_Access =='False' ,true,false) }">
+<script type="text/javascript" src="https://yousee.dk/sitecore/content/data/export/export.aspx?itemguid={E8D8D815-5C17-44A5-9B46-364B89821372}&functions=true" > </script>
+
+<c:TopMenuComponent ></c:TopMenuComponent>
+    <script type="text/javascript">printHeader();</script>
+    <script type="text/javascript">printTopMenu();</script>
+<script type="text/javascript">printContentAreaBegin();</script>
+   <apex:inputHidden id="selectedDocType" value="{!selectedDocType}"/>
+   <apex:inputHidden id="selectedDocTypeText" value="{!selectedDocTypeText}"/>
+    <body>
+    <script>
+function setDocValue(selectedValue,selectedText)
+{
+   
+   document.getElementById('{!$Component.selectedDocType}').value = selectedValue;
+    document.getElementById('{!$Component.selectedDocTypeText}').value = selectedText;
+
+   
+}
+function setBlanketter(){
+    newURL = window.location.protocol + "//" + (window.location.host).replace("//","/");
+    var blanketterlist=document.getElementById('productnavigation').childNodes;
+    var bListCount=0;
+    var bURL;
+    var flag = 'false';
+    for (p= 0; p < blanketterlist.length; p++){
+     if(blanketterlist[p].innerHTML =="Blanketter"){
+        flag ='true';
+     }
+     //if(flag = 'true'){
+       if(blanketterlist[p].nodeName=="UL" ){
+                 var mU=blanketterlist[p].childNodes;
+            for (l=0; l<mU.length; l++){
+            
+                if(mU[l].nodeName == "LI" ){
+                    bListCount = bListCount + 1 ;
+                }
+                var mBLA=mU[l].childNodes;
+                for(bL =0 ; bL < mBLA.length ;bL++){
+                
+                switch(bListCount){
+                                case 1:
+                                    
+                                    bURL = newURL + '/apex/BlanketterTabPage?productType=Clear';
+                                    mBLA[bL].setAttribute('href',bURL);
+                                    break;
+                                case 2:
+                                    bURL = newURL + '/apex/BlanketterTabPage?productType=Broadband';
+                                    mBLA[bL].setAttribute('href',bURL);
+                                    break;
+                                case 3:
+                                    bURL = newURL + '/apex/BlanketterTabPage?productType=Digital';
+                                    mBLA[bL].setAttribute('href',bURL);
+                                    break;
+                                case 4:
+                                    bURL = newURL + '/apex/BlanketterTabPage?productType=Ekstrakanaler';
+                                    mBLA[bL].setAttribute('href',bURL);
+                                    break;
+                                case 5:
+                                    bURL = newURL + '/apex/BlanketterTabPage?productType=Telephony';
+                                    mBLA[bL].setAttribute('href',bURL);
+                                    break;
+                                                                                                                                
+                            }
+                    }
+            }
+        }
+    //}
+ }
+}
+document.onload = setBlanketter();
+
+
+</script>
+<apex:message ></apex:message>
+   <apex:PageBlock >
+   <apex:pageMessages />
+     <apex:PageBlockSection title="Manuelle oprettelses blanketter" collapsible="false" columns="1" >
+     <apex:outputText value="{!topSectionContents}" styleClass="fontVerdana" escape="false" > </apex:outputText>
+   <apex:dataTable value="{!docList}" var="obj"  cellspacing="5" styleClass="fontVerdana">
+    <apex:column styleClass="fontVerdana">   
+        <apex:commandLink value="Hent {!obj.name}" onclick="setDocValue('{!obj.Id}','{!obj.name}')" action="{!redirectURL}">
+    </apex:commandLink>
+    </apex:column>   
+    </apex:dataTable>
+      <apex:outputText value="{!bottomSectionContents}" escape="false" styleClass="fontVerdana"> </apex:outputText>
+     </apex:PageBlockSection>
+</apex:PageBlock>
+      <script type="text/javascript">printContentAreaEnd();</script>
+<script type="text/javascript">printFooter();</script>
+</body>
+</apex:form>
+</html>
+</apex:page>

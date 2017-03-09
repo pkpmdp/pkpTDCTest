@@ -1,0 +1,215 @@
+<apex:page controller="scYousee_Store_Links_Controller_New" showHeader="false" applyHtmlTag="false" title="Links til egen hjemmeside">
+    <html class="cvi2015">
+        <apex:includescript value="https://code.jquery.com/jquery-1.11.1.min.js" />
+        <apex:includescript value="https://cdn.datatables.net/1.10.4/js/jquery.dataTables.min.js" />
+        <apex:stylesheet value="https://cdn.datatables.net/1.10.4/css/jquery.dataTables.css" />
+        <style>
+               
+            .mainTitle
+            {
+                font-family: "Times New Roman", Times, serif !important;
+                font-size: 13px;
+                font-weight: bold;
+            }
+            .headerRow div
+            {
+                  color: white;
+                  font-family: "Times New Roman", Times, serif !important;
+                  font-size: 13px;
+                  font-weight: bold;
+            }
+            .list tr.even td, .list tr.odd td {
+            border-bottom-width: 1px;
+            word-break : break-all;
+            }
+            .custPopup
+            {
+                background-color: white;
+                border-width: 2px;
+                border-style: solid;
+                z-index: 9999;
+                left: 61%;
+                padding:10px;
+                position: fixed;
+                /* These are the 3 css properties you will need to change so the popup 
+                displays in the center of the screen. First set the width. Then set 
+                margin-left to negative half of what the width is. You can add 
+                the height property for a fixed size pop up if you want.*/
+                width: 500px;
+                margin-left: -355px;
+                top: 300px;
+            }
+            .popupBackground
+            {
+                background-color:black;
+                opacity: 0.30;
+                filter: alpha(opacity = 20);
+                position: fixed;
+                width: 100%;
+                height: 100%;
+                top: 0;
+                left: 0;
+                z-index: 9998;
+            }
+            table.dataTable thead .sorting_asc {
+        background-color: #676767;
+       }
+       table.dataTable thead .sorting_desc{
+        background-color: #676767;
+       }
+        table.dataTable thead .sorting {
+        background-color: #676767;
+       }
+        table.dataTable tr.odd { background-color: #CAE6C4;  border:1px lightgrey;}
+    table.dataTable tr.even{ background-color: white; border:1px lightgrey; }
+        </style>
+        <body id="servicepage">
+            <script type="text/javascript">
+                j$ = jQuery.noConflict();
+                var linktable;
+                j$(document).ready( function () {
+             linktable = j$('[id$="linktable"]').DataTable({     
+                 "order": [[ 1, "asc" ]],
+                 "ordering": true,
+                 "language": {
+                    "paginate": {
+                         "next": "Næste",
+                         "previous": "Forrige"
+                        },
+                     "info": "Vis _START_ til _END_ af _TOTAL_ poster",
+                     "infoEmpty": "Vis 0 til 0 af 0 poster",
+                     "search": "Søg",
+                    "infoFiltered":   "(filtreret fra _MAX_ poster )",
+                    "loadingRecords": "Henter...",
+                    "search":         "Søg",
+                    "zeroRecords":    "Ingen poster fundet",
+                     "emptyTable": "Ingen data fundet",
+                     "lengthMenu":  'Vis <select>'+
+                                    '<option value="10">10</option>'+
+                                    '<option value="25">25</option>'+
+                                    '<option value="50">50</option>'+
+                                    '<option value="100">100</option>'+
+                                    '<option value="500">500</option>'+
+                                    '<option value="-1">Alle</option>'+
+                                    '</select> poster'
+                     
+                     }
+
+                    });
+                });
+                function pageLoad(isRenderError,e)
+                {
+                    if(isRenderError == 'false')
+                    {
+                        alert('PageLoad Method');
+                        location.reload(true);
+                    }
+                    if(isRenderError == 'true')
+                    {
+                      //e.preventDefault();  
+                      return false;
+                      }
+                }
+                function Onclickbtn()
+                {
+                    alert('before');
+                    OnclickbtnaF();
+                    alert('after');
+                }
+            </script>
+            <script type="text/javascript" src="{!siteCoreUrl}/sitecore/content/data/export/export.aspx?itemguid={8507F3E3-E057-4FA5-A3AE-96762A6151DF}&functions=true"></script> 
+            <script type="text/javascript">printHeader();</script>
+            <script type="text/javascript">printTopMenu();
+            </script>
+            <script type="text/javascript">printContentAreaBegin();
+            </script>
+            <c:SCLinksComponent CableUnitName="{!cableUnitName}" PortalBrugerRole="{!portalBrugerRole}" /> 
+            <div class="bullets">
+            <ul>
+                <li>
+                    <p style="font-size: 12px;"> Her kan du indtaste, redigere og slette links til din forenings egen hjemmeside. YouSee benytter disse link både online på yousee.dk og som en hjælp til kundeservice. Har du f.eks. særlige regler for Bland Selv TV, kan du indtaste et link under denne kategori. Linket bliver så vist på YouSee.dk i forbindelse med at jeres beboere/medlemmer bestiller Bland Selv TV.</p>
+                </li>
+            </ul>
+            </div>
+            <apex:outputPanel id="err">
+                <apex:pageMessages rendered="{!isRenderError}" />
+            </apex:outputPanel>
+            <apex:form >
+                <apex:pageBlock rendered="{!renderSection}">
+                <apex:pageBlock title="Tilføj links" id="pgblock1" rendered="true">
+                    <apex:pageBlockSection columns="1">
+                        <apex:pageblockSectionItem >
+                            <apex:outputLabel value="Link"></apex:outputLabel>
+                            <apex:outputPanel >
+                                <div class="requiredInput">
+                                <div class="requiredBlock"></div>
+                                    <apex:inputText value="{!LinkInput}" style="width: 500px;"/>
+                                    <img src="/resource/1428399894000/Info_Icon" title="Skriv altid hele linket inklusiv http:// eller https://. Du kan teste om dit link virker ved at klikke på det nedenfor, efter du har tilføjet det." style="width: 22px; height: 19px; position: absolute;"/>
+                                </div>
+                            </apex:outputPanel>
+                        </apex:pageblockSectionItem>
+                        <apex:pageBlockSectionItem >
+                            <apex:outputPanel style="float: left; margin-left: 63px;">
+                                <apex:outputLabel value="Kategori" style="font-family: Arial, Helvetica, sans-serif; font-weight: bold;"></apex:outputLabel>
+                                <apex:outputPanel style="margin-left: 130px; margin-top: -17px;">
+                                    <div class="requiredInput" style=" margin-top: -17px; margin-left: 67px;">
+                                    <div class="requiredBlock"></div>
+                                    <apex:selectList value="{!Category}" multiselect="false" size="1" style="width: 504px; margin-left: 0px;">
+                                        <apex:selectOptions value="{!CategoryAll}">
+                                        </apex:selectOptions>
+                                    </apex:selectList>
+                                    </div>
+                                </apex:outputPanel>
+                            </apex:outputPanel>
+                        </apex:pageBlockSectionItem>
+                        <apex:pageBlockSectionItem >
+                            <apex:outputLabel value="Kommentar"></apex:outputLabel>
+                            <apex:inputtextarea value="{!Comment}" style="width: 498px;"/>
+                        </apex:pageBlockSectionItem>
+                        <apex:pageBlockSectionItem >
+                            <apex:commandButton value="Tilføj" onclick="Onclickbtn()" style="margin-left: 576px;"/>
+                        </apex:pageBlockSectionItem>
+                    </apex:pageBlockSection>
+                </apex:pageBlock>
+                <apex:actionFunction action="{!onSubmit}" name="OnclickbtnaF" oncomplete="pageLoad('{!isRenderError}',event)" reRender="err" />               
+                <apex:pageblock rendered="{!renderpgblock2}" id="pgblock2">
+                    <apex:pageblockSection columns="1">
+                        <apex:pageBlocktable id="linktable" value="{!listLinks}" var="link">
+                            <apex:column headerValue="Links" width="200px">
+                                <a href="{!link.URL__c}">{!link.URL__c}</a>
+                            </apex:column>
+                            <apex:column headerValue="Kategori" style="word-break: break-word;" width="150px">
+                                <apex:outputText value="{!link.Category__c}">
+                                </apex:outputText>
+                            </apex:column>
+                            <apex:column headerValue="Kommentar" style="word-break: break-word;" width="250px">
+                                <apex:outputText value="{!link.Comment__c}">
+                                </apex:outputText>
+                            </apex:column>
+                            <apex:column headerValue="Redigér/Slet" width="85px">
+                                <apex:commandButton value="Redigér" styleClass="dialogbutton_orange" action="{!editLink}" reRender="pgblock1">
+                                    <apex:param name="linkID" value="{!link.id}" assignTo="{!linkID}"/>
+                                </apex:commandButton>
+                                <br/>
+                                <apex:commandButton value="Slet" action="{!showPopup}" styleClass="dialogbutton_orange" rerender="popupPanl" style="width: 72px; top: 1px;"/>
+                                <apex:outputPanel id="popupPanl">
+                                    <apex:outputPanel styleClass="popupBackground" layout="block" rendered="{!displayPopUp}"/>
+                                    <apex:outputPanel styleClass="custPopup" layout="block" rendered="{!displayPopUp}">
+                                        <apex:outputText value="Er du sikker på, at du vil slette dette link?"></apex:outputText><br/><br/><br/>
+                                        <apex:commandButton value="Slet" action="{!delLink}" styleClass="dialogbutton_orange" reRender="linktable,pgblock2" oncomplete="location.reload(true);">
+                                            <apex:param name="linkId" value="{!link.Id}" assignTo="{!linkId}"/>
+                                        </apex:commandButton>
+                                        &nbsp;&nbsp;&nbsp;&nbsp;
+                                        <apex:commandButton value="Nej" styleClass="dialogbutton_orange" action="{!closePopup}" rerender="popupPanl"/>
+                                    </apex:outputPanel>
+                                </apex:outputPanel>
+                            </apex:column>
+                        </apex:pageBlocktable>
+                    </apex:pageblockSection>
+                </apex:pageblock>
+                </apex:pageBlock>
+                <apex:pageMessage detail="{!$Label.CableUnitNotMatched}" rendered="{!!renderSection}" severity="error"></apex:pageMessage>
+            </apex:form>
+        </body>
+    </html>
+</apex:page>

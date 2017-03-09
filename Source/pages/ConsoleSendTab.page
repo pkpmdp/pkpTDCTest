@@ -1,0 +1,28 @@
+<apex:page standardController="Account" extensions="clsConsoleSendTabController" action="{!pageAction}" showHeader="true" sidebar="false" cache="true">
+  <apex:pageMessages />
+  <apex:form id="form">
+    <apex:pageBlock id="sendPageBlock">
+      <apex:pageBlockButtons >
+                <apex:commandButton action="{!infoRequestAction}" value="{!$Label.CO_NewInfoRequest}" />
+                <apex:commandButton action="{!giftCodesAction}" value="{!$Label.CO_SendGiftCodes}"/>
+            </apex:pageBlockButtons>
+      <apex:inputHidden value="{!Account.Customer_No__c}"/>
+      <apex:inputHidden value="{!Account.Currency_Format__c}"/>
+      <apex:outputField value="{!Account.Street_YK__r.External_Id__c}" rendered="false"/>
+      <apex:pageBlockSection columns="1" title="{!$Label.Campaign_History}">
+        <apex:pageBlockTable value="{!campaignHistory}" var="campaign" id="campaignHistoryTable" rules="rows">
+          <apex:column title="{!campaign.mouseOverText}" headerValue="{!$Label.Subject}">
+            <apex:outputLink rendered="{!IF(campaign.contentURL != '', true, false)}" value="{!campaign.contentURL}" id="scriptLink" styleClass="viewLink">{!campaign.subject}</apex:outputLink>
+            <apex:outputText rendered="{!IF(campaign.contentURL == '', true, false)}" styleClass="viewLink" value="{!IF(campaign.type == 'Gave koder', campaign.type , campaign.subject)}" />
+          </apex:column>
+          <apex:column headerValue="{!$Label.Category}" value="{!campaign.category}" />
+          <apex:column headerValue="{!$Label.Type}" value="{!campaign.type}" />
+          <apex:column headerValue="{!$Label.Sender}" value="{!campaign.sender}" />
+          <apex:column headerValue="{!$Label.Receiver}" value="{!campaign.receiver}" />
+          <apex:column headerValue="{!$Label.Campaign_Time}" value="{!campaign.timeDate}" />
+          <apex:column headerValue="{!$Label.Campaign_Status}" value="{!campaign.responseStatus}" />
+        </apex:pageBlockTable>
+      </apex:pageBlockSection>
+    </apex:pageBlock>
+  </apex:form>
+</apex:page>

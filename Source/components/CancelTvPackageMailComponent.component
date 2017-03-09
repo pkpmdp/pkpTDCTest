@@ -1,0 +1,71 @@
+<apex:component controller="ViewAddressesForInstallationsController" access="global">
+  <style type="text/css"> body { font-family: verdana; font-size : 11pt} </style>
+  <form>    
+      <body>  
+      <apex:outputText value="Kære" style="font-family: verdana;font-size: 11pt"/>&nbsp;
+      <apex:outputText value="{!firstName}" style="font-family: verdana;font-size: 11pt"/>&nbsp;
+      <apex:outputText value="{!lastName}" style="font-family: verdana;font-size: 11pt"/> <br/>
+      <apex:outputText value="Tak for din bestilling på skift af tv-pakker." style="font-family: verdana;font-size: 11pt"/> <br/>
+      <apex:outputText value="Vi har " style="font-family: verdana;font-size: 11pt"/>
+      <apex:outputText value=" {!TodayDate}" style="font-family: verdana;font-size: 11pt"/>
+      <apex:outputText value=" modtaget følgende bestilling på nedenstående kunde:" style="font-family: verdana;font-size: 11pt"/> <br/>
+      <P><apex:outputText value="{!cableUnitName1}" style="font-family: verdana;font-size: 11pt"/>
+      <apex:outputText value=" - Kundenr: {!cableUnitNumber1}" style="font-family: verdana;font-size: 11pt"/></P> 
+      <Table width="80%" border="1">
+        <tr>
+           <td width="40%" bgcolor="#B2B2B2"><b><apex:outputText value="Addresse" style="font-family: verdana;font-size: 11pt"/></b></td>           
+           <td width="15%" bgcolor="#B2B2B2"><b><apex:outputText value="Nuværende tv-pakke" style="font-family: verdana;font-size: 11pt"/></b></td>
+           <td width="15%" bgcolor="#B2B2B2"><b><apex:outputText value="Ønsket ikrafttrædelsesdato" style="font-family: verdana;font-size: 11pt"/></b></td>
+           <td width="15%" bgcolor="#B2B2B2"><b><apex:outputText value="Ny tv-pakke" style="font-family: verdana;font-size: 11pt"/></b></td>  
+        </tr>
+        <apex:repeat var="order" value="{!dslOrderListForMail}">
+          <apex:outputText rendered="{!order.Order_type__c == 'Cancellation'}">   
+            <tr> 
+               <apex:repeat var="installation" value="{!confirmedInstallationsForMail}">
+                 <apex:outputText rendered="{!installation.amsId == order.Address_Id__c}">
+                   <td><apex:outputText value="{!installation.FormattedAddress}" style="font-family: verdana;font-size: 11pt"/></td>
+                   <!--  <td>{!installation.FullAddress}</td> -->
+                 </apex:outputText>                                 
+               </apex:repeat>
+               <apex:outputText rendered="{!NOT(ISNULL(order.packageBeforeChange__c))}">
+                   <td><apex:outputText value="{!order.packageBeforeChange__c}" style="font-family: verdana;font-size: 11pt"/></td>
+               </apex:outputText>
+               <apex:outputText rendered="{!ISNULL(order.packageBeforeChange__c)}">
+                    <td width="15%"><apex:outputText style="font-family: verdana;font-size: 11pt">&nbsp;&nbsp;</apex:outputText></td>
+               </apex:outputText>           
+               <td><apex:outputText value="{!order.ChangePackageDate__c}" style="font-family: verdana;font-size: 11pt"/></td>
+               <td><apex:outputText value="{!order.Product_Name__c}" style="font-family: verdana;font-size: 11pt"/></td>               
+            </tr>  
+          </apex:outputText>  
+        </apex:repeat>
+     </table> 
+     <br/>
+     <br/>
+     <apex:outputText value="Bemærk at ændringerne først kan ses på YouSees Selvbetjening, når de er trådt i kraft." style="font-family: verdana;font-size: 11pt"/><br/>
+     <br/>
+     <apex:outputText value="I tilfælde af, at du fortryder din bestilling på skift af tv-pakker, kan du rette henvendelse til YouSee på" style="font-family: verdana;font-size: 11pt"/>
+     <a href="{!$Label.SC_forening}"><apex:outputText style="font-family: verdana;font-size: 11pt" value="foreningsservice@yousee.dk"/></a><br/><br/>
+     
+     </body>
+     <b><apex:outputText style="font-family: verdana;font-size: 10pt" value="{!$Label.SC_AutoReplySmall}"/></b><br/>  
+     <apex:outputText style="font-family: verdana;font-size: 10pt" value="{!$Label.SC_AutoReplyLarge}"/> 
+     <a href="{!$Label.SC_AutoReplyLinkUrl}"><apex:outputText style="font-family: verdana;font-size: 10pt" value="{!$Label.SC_AutoReplyLink}"/></a><br/><br/>
+     
+    
+     
+     <body>
+     <apex:outputText value="Venlig hilsen" style="font-family: verdana;font-size: 11pt"/><br/> 
+     <apex:outputText value="Foreningsservice" style="font-family: verdana;font-size: 11pt"/><br/> 
+     
+     <apex:outputText value="YouSee A/S" style="font-family: verdana;font-size: 11pt"/><br/> 
+     <apex:outputText value="Teglholmsgade 1 " style="font-family: verdana;font-size: 11pt"/><br/>
+     <apex:outputText value="0900 København C " style="font-family: verdana;font-size: 11pt"/><br/>
+     <apex:outputText value="Tlf. 70 70 40 44 " style="font-family: verdana;font-size: 11pt"/><br/>
+     <apex:outputText value="E-mail: " style="font-family: verdana;font-size: 11pt"/>
+     <a href="{!$Label.SC_forening}"><apex:outputText style="font-family: verdana;font-size: 11pt" value="foreningsservice@yousee.dk"/></a><br/>
+     <apex:outputText value="Web: Yousee.dk " style="font-family: verdana;font-size: 11pt"/><br/>
+     <apex:outputText value="CVR-nr. 14 77 39 08" style="font-family: verdana;font-size: 11pt"/><br/>
+     </body>
+  </form>
+
+</apex:component>

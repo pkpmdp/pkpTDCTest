@@ -1,0 +1,98 @@
+<apex:page standardController="Account" extensions="SampleController" sidebar="False"  showHeader="False" id="thePage" tabStyle="Invoice_Usage__c" action="{!pageActionFun}"> 
+  <apex:includeScript value="{!URLFOR($Resource.DynaTree_JS,'jquery/jquery.js')}"/> 
+    <apex:includeScript value="/support/console/32.0/integration.js"/>
+<!-- <apex:includeScript value="/soap/ajax/28.0/connection.js"/>   -->
+<!-- <apex:includeScript value="/xdomain/xdomain.js"/>  -->
+<!--  <apex:includeScript value="/soap/ajax/28.0/apex.js"/> -->
+  <apex:includeScript value="{!URLFOR($Resource.jQuery160)}"/> 
+    <script type="text/javascript">
+    
+   
+
+    window.onload = function(){
+        if(sforce.console.isInConsole()){
+        sforce.console.setTabTitle('Invoice Payment');
+        }
+        } 
+       
+    
+       function closewindow(){ 
+           var j$ = jQuery.noConflict();       
+           if(sforce.console.isInConsole()){ 
+                    
+               sforce.console.getFocusedSubtabId( function(success){
+                   sforce.console.closeTab(success.id);
+               });            
+           } else{
+                   window.close();
+           
+           }
+       } 
+       
+       window.onunload = refreshParent;
+       function refreshParent() {
+            window.opener.location.reload();
+        }
+   
+   </script>
+  <!-- <apex:pageBlock rendered="{!NoKlippikort}">
+            <b>No Klippikort invoices are present for this customer.</b>
+        </apex:pageBlock>-->
+   <apex:pageBlock id="thePageBlock">
+        <div></div><div></div> 
+        <div align="center"><h3 style="font-size:12pt"><i> Tilbagebetal  </i></h3></div>
+        <br/>
+       <apex:form id="myForm">
+       <!--  <apex:inputHidden value="{!Account.Aria_Account_No__c}" id="theHiddenInput"/> -->
+           
+         <apex:pageBlock id="theSecondPageBlock">
+            <apex:pageBlockButtons location="bottom">                
+                <apex:commandButton id="cancelBtn" value="Annuller" immediate="true" action="{!Cancel}"><!-- action="{!Cancel}" onclick="javascript:window.close();return false;"-->
+                </apex:commandButton>
+                <apex:commandButton id="saveBtn" action="{!onGemClick}" value="Gem"></apex:commandButton>    
+            </apex:pageBlockButtons>
+             <div align="right"><apex:commandButton value="Tilbage til oversigt" immediate="true" action="{!Cancel}">
+                 </apex:commandButton>
+            </div>
+ 
+              
+            <apex:pageMessages />
+            <apex:outputPanel >
+                <apex:pageBlockSection title="Kundeoplysninger" columns="2"  >
+                    <apex:outputText value="{!Account.Name}"  label="Kundenavn"/>
+                    <apex:outputText value="{!Account.Customer_No__c}"  label="Kundenummer"/>
+                    <apex:outputText value="{!Account.Betaler_ID__c}"  label="Betaler_ID"/>
+                    <apex:outputText value="{!Account.PersonEmail}"  label="Email"/>
+                </apex:pageBlockSection>
+            </apex:outputPanel> 
+            
+          <apex:pageBlockSection collapsible="false" id="thePageBlockSec" columns="1" title="Tilbagebetalings Information">       
+             <!--  <apex:pageBlocksectionItem id="thePageBlkSecItem">               
+                 <!--  <apex:outputLabel value="VÃ¦lg type" for="radioOption"/>
+                      <apex:selectRadio id="radioOption"  value="{!creditType}" onClick=""  style="margin-top:-9px;margin-left:-16px">
+                      <apex:outputPanel styleClass="requiredInput" />    
+                      <apex:selectOptions value="{!creditTypes}"  />
+                   </apex:selectRadio> 
+                   
+               </apex:pageBlocksectionItem>-->
+                <apex:outputText value="{!klipCount}" label="Resterende klips" rendered="{!fakturaid == ''}"/>
+                <apex:inputCheckbox value="{!isFullRefund}" label="Refund All klips" rendered="{!fakturaid == '' && isFullRefundrender == true}"/>     
+                <apex:outputText value="{!titleName}" label="Film titel" rendered="{!fakturaid != ''}" escape="false"/>                 
+               <div align="left" id="ariaPayMethod" style="color:black"></div>   
+                <apex:pageBlocksectionItem >  
+                <apex:outputLabel value="Bemærkning" for="CommentsList"/>  
+                    <apex:outputPanel styleClass="requiredInput" layout="block" > 
+                    <apex:outputPanel styleClass="requiredBlock" layout="block"/>                         
+                        <apex:selectList id="CommentsList"  value="{!selectComments}" size="1">
+                            <!--<apex:selectOptions value="{!commentsList}"/> -->
+                            <apex:selectOptions value="{!refundcommentsList}"/>
+                        </apex:selectList>
+                    </apex:outputPanel>       
+                </apex:pageBlocksectionItem><br/>
+          </apex:pageBlockSection> 
+         </apex:pageBlock>
+       </apex:form>
+   </apex:pageBlock>     
+  
+    
+</apex:page>

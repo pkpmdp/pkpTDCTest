@@ -1,0 +1,17 @@
+<apex:page standardController="Net_Installations__c" extensions="ViewNetInstallationHistory" sidebar="false" showHeader="false" readOnly="true">
+<apex:form >
+    <apex:PageMessages id="infoMSg"/>
+    <apex:pageBlock rendered="{!displayFlag}">
+        <apex:pageBlockTable value="{!instwpaList}" var="inst" >
+            <apex:column headerValue="SRC/TARGET" value="{!inst.instDestination}"/> 
+            <apex:column headerValue="Address" value="{!inst.netObj.Address_Merge_Field__c}"/>   
+            <apex:column headerValue="Cable Unit No." value="{!inst.netObj.Cable_Unit_No__c}"/>
+            <apex:column headerValue="Start Date" value="{!inst.netObj.Start_Date__c}"/>
+            <apex:column headerValue="Status" value="{!inst.netObj.Status__c}"/>
+            <apex:column headerValue="Løbe nr" value="{!inst.netObj.AddressId_InstLbnr__c}"/> 
+            <apex:column headerValue="Under Flyt" value="{!inst.netObj.Move_Flag__c}"/>
+        </apex:pageBlockTable>
+    </apex:pageBlock> 
+    
+</apex:form>
+</apex:page>

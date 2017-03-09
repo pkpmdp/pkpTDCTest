@@ -1,0 +1,6 @@
+<apex:page >
+<br></br> <div style="DISPLAY: none" id="HideCustNoCopyHomePageElement"> 
+<script type="text/javascript" src="/resource/1307969043000/jQuery160"></script> 
+<script type="text/javascript" src="/resource/1346697283000/HideCustNoCopyJS"></script> </div>
+
+</apex:page>

@@ -1,0 +1,2 @@
+<apex:page standardController="Account" extensions="clsAccountCreationDispatchController" action="{!nullValue(redir.url, urlFor($Action.Account.New))}">
+</apex:page>

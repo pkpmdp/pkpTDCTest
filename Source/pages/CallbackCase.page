@@ -1,0 +1,61 @@
+<apex:page controller="CallbackCaseController" tabStyle="Case" title="{!$Label.CB_Case_Page_Title}">
+ <apex:includeScript value="{!URLFOR($Resource.jQuery160)}"/>
+ <script type='text/javascript'>
+ var j$ = jQuery.noConflict();
+ function jsUpdateCase(){
+   // get current values for required fields
+   var arr = new Array();
+   j$('#cb_wrapper .cls_required').each(function(index){     
+     var classes = j$(this).attr('class').match(/arg[0-9]+/g);
+     if (classes && classes.length == 1){     
+       arr[classes[0].replace('arg', '')] = j$(this).val();
+     }
+   });
+   // create 0-based index array
+   var arr_arg = new Array();
+   for(i in arr){
+     arr_arg.push(arr[i]);
+   }
+   // call "updateCase" function
+   updateCase.apply(this||window, arr_arg);
+ }
+ </script>
+ <apex:sectionHeader title="{!$Label.CB_Case_Page_Title}" subtitle="{!Case.CaseNumber}"/>
+ <apex:pageMessages />
+ <div id="cb_wrapper">
+ <apex:form >
+  <apex:actionFunction name="updateCase" action="{!updateCase}" immediate="true" rerender="id_pb">
+   <apex:param name="CB_phone_number__c" value="" />
+   <apex:param name="Subject" value="" />
+   <apex:param name="Description" value="" />
+  </apex:actionFunction>
+  <apex:pageBlock title="{!$Label.CB_Case_Page_Title}" mode="edit" id="id_pb">
+   <apex:pageBlockButtons >
+    <apex:commandButton action="{!save}" value="{!$Label.Save}"/>
+    <apex:commandButton action="{!cancelCase}" value="{!$Label.Cancel}" immediate="true"/> 
+    <apex:commandButton onclick="jsUpdateCase()" value="{!$Label.CB_Reschedule_Label}" immediate="true" rerender="id_pb"/>
+   </apex:pageBlockButtons>
+   <apex:pageBlockSection title="{!$Label.Case_Information}" columns="2">
+    <apex:outputField value="{!Case.CaseNumber}"/>
+    <apex:outputField value="{!Case.Department__c}"/>   
+    <apex:outputField value="{!Case.Product_2__c}"/>
+    <apex:outputField value="{!Case.Type_Task__c}"/>
+   </apex:pageBlockSection>
+   <apex:pageBlockSection title="{!$Label.CB_Callback_Section_Title}" columns="2">
+    <apex:pageBlockSectionItem >
+     <apex:outputLabel value="{!$ObjectType.Case.fields.CB_phone_number__c.label}" for="id_cb_phone_number"/>
+     <apex:inputField value="{!Case.CB_phone_number__c}" required="true" styleClass="cls_required arg3" id="id_cb_phone_number"/>
+    </apex:pageBlockSectionItem>
+    <apex:pageBlockSectionItem >
+     <apex:outputLabel value="{!$ObjectType.Case.fields.Callback_Time__c.label}"/>
+     <span>{!Case.Call_Back__r.CB_time__c}</span>
+    </apex:pageBlockSectionItem>    
+   </apex:pageBlockSection> 
+   <apex:pageBlockSection title="{!$Label.CB_Description_Information_section_title}" columns="1">
+    <apex:inputField value="{!Case.Subject}" required="true" style="width:75%" styleClass="cls_required arg4" />
+    <apex:inputField value="{!Case.Description}" required="true" style="width:75%" styleClass="cls_required arg5" />    
+   </apex:pageBlockSection>
+  </apex:pageBlock>  
+ </apex:form> 
+ </div>
+</apex:page>

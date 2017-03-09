@@ -1,0 +1,71 @@
+<apex:page controller="CableUnitDetailsController" showHeader="false" sidebar="false" action="{!FetchcableUnitdata}" applyHtmlTag="false">
+<html class="cvi2015">
+    <body id="servicepage">
+<script type="text/javascript" src="{!siteCoreUrl}/sitecore/content/data/export/export.aspx?itemguid={6BB73624-FD1A-47A3-B2E5-C366F1D4A0B9}&functions=true"></script> 
+<!--Test2 SiteCore Ids <script type="text/javascript" src="https://yousee.dk/sitecore/content/data/export/export.aspx?itemguid={7FA150DE-4F4A-4282-AFF8-E023E93DF1F9}&amp;functions=true"></script> -->
+<!-- <script type="text/javascript" src="http://yousee.dk/sitecore/content/data/export/export.aspx?itemguid={59DE8AFC-9FE8-40A1-8323-9DA9602F870A}&functions=true"></script>-->
+    
+<apex:form >
+<apex:pageMessages rendered="true" />
+<style>
+outputLabel { width:100%; }
+</style>
+<script type="text/javascript">printHeader();</script>
+<script type="text/javascript">printTopMenu();</script>
+<script type="text/javascript">printContentAreaBegin();</script> 
+<script type="text/javascript"> var portalBrugerRole = '{!portalBrugerRole}'; </script> 
+<c:SCLinksComponent CableUnitName="{!cableUnitName}" PortalBrugerRole="{!portalBrugerRole}" />
+<script type="text/javascript">
+        window.onload = function(){
+            document.getElementById('shifttvpakkeID').setAttribute('class','none'); 
+        }
+</script>
+
+ <apex:pageBlock rendered="{!renderSection}">
+      <apex:pageBlockSection title="Kundedetaljer" columns="2" collapsible="false" > <!-- sf160 -->
+          <apex:pageBlockSectionItem >
+                 <apex:outputLabel value="Kundenavn:"  />  <!-- sf160 -->
+                 <apex:outputLabel value="{!cableUnitName}" />
+                 
+          </apex:pageBlockSectionItem>
+             
+          <apex:pageBlockSectionItem >
+             <apex:outputLabel value="Kundenr:" /> <!-- sf160 -->
+             <apex:outputLabel value="{!$CurrentPage.parameters.cableunitnumber}" />
+          </apex:pageBlockSectionItem>
+          
+          <!-- <apex:pageBlockSectionItem >
+             <apex:outputLabel value="Status:"/>
+             <apex:outputLabel value="{!status}" />
+          </apex:pageBlockSectionItem> -->
+                              
+          <apex:pageBlockSectionItem >
+             <apex:outputLabel value="Tv/radio :"/>
+             <apex:outputLabel value="{!tvRadio}" />
+          </apex:pageBlockSectionItem>
+          
+          <apex:pageBlockSectionItem >
+             <apex:outputLabel value="Bredbånd :"/>
+             <apex:outputLabel value="{!broadband}" />
+          </apex:pageBlockSectionItem>
+ 
+          <apex:pageBlockSectionItem >
+             <apex:outputLabel value="Telefoni :"/>
+             <apex:outputLabel value="{!telephony}" />
+          </apex:pageBlockSectionItem>
+      </apex:pageBlockSection>
+       
+      <apex:pageBlockSection columns="1" collapsible="false">
+          <apex:pageBlockSectionItem >
+             <apex:outputLabel value="Løsning :"/>
+             <apex:outputLabel value="{!solution}" />
+          </apex:pageBlockSectionItem> 
+      </apex:pageBlockSection>
+</apex:pageBlock>
+<apex:pageMessage detail="{!$Label.CableUnitNotMatched}" rendered="{!!renderSection}" severity="error"></apex:pageMessage>
+<script type="text/javascript">printContentAreaEnd();</script>
+<script type="text/javascript">printFooter();</script>
+</apex:form>
+</body>
+</html>
+</apex:page>

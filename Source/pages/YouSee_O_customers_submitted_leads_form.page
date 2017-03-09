@@ -1,0 +1,160 @@
+<apex:page controller="YouSee_O_customers_view_submitted_leads" title="Medlemmer under registrering" showHeader="false" standardStyleSheets="true" applyHtmlTag="false">
+<html class="cvi2015">
+    <apex:includescript value="https://code.jquery.com/jquery-1.11.1.min.js" />
+    <apex:includescript value="https://cdn.datatables.net/1.10.4/js/jquery.dataTables.min.js" />
+    <apex:stylesheet value="https://cdn.datatables.net/1.10.4/css/jquery.dataTables.css" />
+   <style>
+        table.dataTable thead th{
+        padding: 5px 14px;
+       }
+       .list tr.even td, .list tr.odd td {
+            border-bottom-width: 1px;
+        }
+       .bPageBlock .list .last>td{
+            border-bottom-width: 1px;
+        }
+       table.dataTable thead .sorting_asc {
+        background-color: #676767;
+       }
+       table.dataTable thead .sorting_desc{
+        background-color: #676767;
+       }
+        table.dataTable thead .sorting {
+        background-color: #676767;
+       }
+       table.dataTable tr.odd { background-color: #CAE6C4;  border:1px lightgrey;}
+    table.dataTable tr.even{ background-color: white; border:1px lightgrey; }
+    </style>
+    <body id="SubmittedLeads">
+        <script type="text/javascript">
+          j$ = jQuery.noConflict();
+              var leadTable;
+            j$(document).ready( function () {
+             leadTable = j$('[id$="leadtable"]').DataTable({     
+                 "order": [[ 1, "asc" ]],
+                 "language": {
+                    "paginate": {
+                         "next": "Næste",
+                         "previous": "Forrige"
+                        },
+                     "info": "Vis _START_ til _END_ af _TOTAL_ poster",
+                     "infoEmpty": "Vis 0 til 0 af 0 poster",
+                     "search": "Søg",
+                    "infoFiltered":   "(filtreret fra _MAX_ poster)",
+                    "loadingRecords": "Henter...",
+                    "search":         "Søg",
+                    "zeroRecords":    "Ingen poster fundet",
+                     "emptyTable": "Ingen data fundet",
+                     "lengthMenu":  'Vis <select>'+
+                                    '<option value="10">10</option>'+
+                                    '<option value="25">25</option>'+
+                                    '<option value="50">50</option>'+
+                                    '<option value="100">100</option>'+
+                                    '<option value="500">500</option>'+
+                                    '<option value="-1">Alle</option>'+
+                                    '</select> poster'
+                     
+                     }
+                    });
+                });
+    </script>
+       <script>
+function myFunction(t) {
+    
+    if(t == 'false') // its taking the false as a string 
+    {
+      return resendEmail();
+    }
+    else
+    {        
+      return false;
+    }
+}
+</script>
+    <script type ="text/javascript" src="{!siteCoreUrl}/sitecore/content/data/export/export.aspx?itemguid={3D4AB0AD-1446-46D5-91CE-39D0471B894F}&functions=true"></script>
+    
+    <apex:form >
+     <apex:actionFunction name="resendEmail" action="{!resendEmail}"/>
+     <apex:actionFunction name="cancelEmail" action="{!cancelEmail}" /> 
+      <script type="text/javascript">printHeader();</script>
+      <script type="text/javascript">printTopMenu();</script>
+      <script type="text/javascript">printContentAreaBegin();</script>
+      
+      <c:SCLinksComponent CableUnitName="{!cableUnitName}" PortalBrugerRole="{!portalBrugerRole}" />
+       <div class="bullets">
+             <ul>
+               <li>
+                    Denne liste viser de medlemmer du eller en anden i din forening har registreret samt hvor i registreringsforløbet de befinder sig.
+               </li>
+             </ul>
+           </div>
+<apex:pageMessage detail="{!$Label.CableUnitNotMatched}" rendered="{!!renderSection}" severity="error"></apex:pageMessage>         
+      <apex:pageBlock id="form" rendered="{!renderSection}">
+          <apex:pageBlockSection columns="1">
+          <apex:outputPanel id="msg1">
+              <apex:pageBlockSectionItem >
+                 <apex:outputText rendered="{!showmsg}" id="msg" value="{!successmsg}" style="color: #6ba912;font-weight:bold;margin-left: 10px;"  ></apex:outputText> 
+              </apex:pageBlockSectionItem>
+              </apex:outputPanel>
+           </apex:pageBlockSection>
+        
+     <div align="center" >       
+           <!-- <apex:commandButton style="align:center;" value="Gensend" action="{!checkStatus}" oncomplete="myFunction({!send});">-->
+         <apex:outputPanel id="gen">    
+         <apex:commandButton style="align:center;" value="Gensend" action="{!checkStatus}" rendered="{!isButtonShow}" oncomplete="myFunction('{!send}');" reRender="buttonPanel,msg1,gen" styleClass="dialogbutton_orange" status="queryStatus">
+                <!--<apex:actionSupport event="onclick" action="{!resendEmail}" rendered="{!send}" />-->
+            </apex:commandButton></apex:outputPanel>
+            </div>
+          
+          <div align="center">
+              
+          <apex:outputPanel id="buttonPanel">
+           <apex:commandButton value="Gensend" action="{!resendEmail}" style="align:center;margin-right: 10px;" rendered="{!displayStatus}" styleClass="dialogbutton_orange"/>
+             <apex:commandButton value="Nej" action="{!cancelEmail}" style="align:center;" rendered="{!displayStatus}" styleClass="dialogbutton_orange"/> 
+           </apex:outputPanel>
+          </div>
+            <div style="height:10px;" ></div>
+          <!-- <apex:outputText value="{!message}" id="messageBox" style="color: #6ba912;font-weight:bold;"></apex:outputText>-->
+          
+            <apex:pageBlockTable value="{!submittedLeads}" var="ld" columns="7" id="leadtable">
+                <apex:column headerValue="" >
+                    <apex:inputcheckbox value="{!ld.resend}">
+                    </apex:inputcheckbox>
+                </apex:column>
+                <apex:column headerValue="Navn" > 
+                    <apex:outputText value="{!ld.Name}"/>               
+                </apex:column>
+                <apex:column headerValue="Email">
+                    <apex:outputText value="{!ld.Email}" style="word-break: break-word;"/>     
+                </apex:column>
+                <apex:column headerValue="Medlemsstatus" >
+                    <apex:outputText value="{!ld.Status}"/>     
+                </apex:column>
+            <!--    <apex:column headerValue="Unsubscribed" >                   
+                    <apex:inputcheckbox value="{!ld.unsubscribed}" disabled="true"/>
+                </apex:column>-->
+                <!--<apex:column headerValue="AMS Id" >                   
+                    <apex:outputText value="{!ld.amsId}"/>     
+                </apex:column>-->
+                <apex:column headerValue="Adresse" >                   
+                    <apex:outputText value="{!ld.address}" style="border-bottom-width: 1px;" />     
+                </apex:column>
+              <!--  <apex:column headerValue="Created Date" >
+                    <apex:outputText value="{!ld.createdDate}"/>     
+                </apex:column>-->
+                              
+          </apex:pageBlockTable>
+       <apex:actionStatus id="queryStatus">
+            <apex:facet name="start">
+                <c:SC_LoadingComponent BackColor="#efefef" borderColor="#336699" borderSize="3" height="50px" width="120px" 
+                ImageUrl="{!$Resource.Loading}" Message="Loading..." messageStyle="color:darkred;font-size:11pt;font-weight:bold;" />
+            </apex:facet>
+        </apex:actionStatus>
+      </apex:pageBlock>
+     
+    <script type="text/javascript">printContentAreaEnd();</script>
+    <script type="text/javascript">printFooter();</script>
+    </apex:form>
+</body>
+</html>
+</apex:page>

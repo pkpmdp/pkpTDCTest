@@ -1,0 +1,23 @@
+<apex:page showHeader="false" controller="netfeeinvoicesPDFBillsController" action="{!GetBillAsDocument}">
+ <script>
+ 
+    var nVer = navigator.appVersion;
+    var nAgt = navigator.userAgent;
+    var browserName  = navigator.appName;
+    var fullVersion  = ''+parseFloat(navigator.appVersion); 
+    var majorVersion = parseInt(navigator.appVersion,10);
+    var nameOffset,verOffset,ix;
+    
+    // In MSIE, the true version is after "MSIE" in userAgent
+    if (nVer.indexOf('MSIE') != -1 || nVer.indexOf('Trident') != -1 || nVer.indexOf('Edge') != -1) {
+        if('{!strPdfUrl}'!=''){
+            window.location.href = "/servlet/servlet.FileDownload?file={!strPdfUrl}";   
+        }       
+    }
+    else{
+        if('{!bData}'!='')
+            window.location.href = "data:application/pdf;base64,{!bData}";  
+    }
+ 
+</script>
+</apex:page>

@@ -1,0 +1,9 @@
+<apex:component controller="PortalUserMailService" access="global">
+<form>
+<apex:outputPanel >
+<apex:outputText value="Hej"/>&nbsp;
+<apex:outputText value="{!userMailTest[0].Name}"/>
+
+</apex:outputPanel>
+</form>
+</apex:component>

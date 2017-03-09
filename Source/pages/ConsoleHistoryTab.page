@@ -1,0 +1,47 @@
+<apex:page standardController="Account" extensions="clsActivityLogsControllerYK" showHeader="true" sidebar="false" cache="true">
+  <apex:pageMessages />
+  <apex:form >
+    <apex:inputHidden value="{!Account.Customer_No__c}"/>
+  </apex:form>
+
+  <apex:pageBlock >
+    <apex:pageBlockSection columns="1" title="{!$Label.CustomerLogLabel}">
+      <apex:outputPanel layout="block" style="overflow-y:scroll;overflow-x:hidden;max-height:150px;width:100%;">
+        <!-- IE hack - prevents IE from inserting unnecessary horizontal scroll -->
+        <apex:outputPanel layout="block" style="margin-right:18px;">
+          <apex:pageBlockTable value="{!existingActivityLogs}" var="log" id="existingProductsTable" rules="rows">  
+            <apex:column headerValue="{!$Label.Date}" value="{!log.logDateAccount.Permission_Updated__c}" width="70px"/>
+            <apex:column headerValue="{!$Label.User_Initials}" value="{!log.user}"/>
+            <apex:column headerValue="{!$Label.Business_Group}" value="{!log.contactType}"/>
+            <apex:column headerValue="{!$Label.Text}">
+              <apex:outputField value="{!log.textAccount.Serial_Numbers__c}"/>
+            </apex:column>
+          </apex:pageBlockTable>
+        </apex:outputPanel>
+      </apex:outputPanel>
+    </apex:pageBlockSection>
+
+    <apex:pageBlockSection columns="1" title="{!$Label.CallHistoryLabel}">
+      <apex:relatedList list="ActivityHistories" subject="{!account}"></apex:relatedList>
+    </apex:pageBlockSection>
+      
+    <apex:pageBlockSection columns="1" title="{!$Label.PersonCustomerHistoryLabel}">
+      <apex:pageBlockSectionItem >
+        <apex:outputPanel layout="block" style="overflow-y:scroll;overflow-x:hidden;max-height:150px;width:100%;">
+          <!-- IE hack - prevents IE from inserting unnecessary horizontal scroll -->
+          <apex:outputPanel layout="block" style="margin-right:18px;">
+            <apex:pageBlockTable value="{!personAccountHistory}" var="accountHistory" id="historyTableID" rules="rows">
+              <apex:column headerValue="Date" value="{!accountHistory.createddate}"/>
+              <apex:column headerValue="User" value="{!accountHistory.CreatedById}"/>
+              <apex:column headerValue="Field">
+                <apex:outputText value="{!accountHistory.field}"/>
+              </apex:column>
+              <apex:column headerValue="Old value" value="{!accountHistory.oldValue}"/>
+              <apex:column headerValue="New value" value="{!accountHistory.newValue}"/>
+            </apex:pageBlockTable>
+          </apex:outputPanel>
+        </apex:outputPanel>
+      </apex:pageBlockSectionItem>
+    </apex:pageBlockSection>
+  </apex:pageBlock>
+</apex:page>

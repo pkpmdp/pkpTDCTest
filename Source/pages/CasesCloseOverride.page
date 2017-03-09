@@ -1,0 +1,10 @@
+<apex:page standardController="Case" extensions="CasesCloseOverrideController" action="{!closeOverride}">
+  <apex:form >
+    <apex:pageMessages />
+    <apex:pageBlock title="{!$Label.Unread_Email_Messages_Header}">
+      <apex:outputLabel >{!$Label.Unread_Email_Messages_Warning}</apex:outputLabel>
+      <br/><br/>
+      <apex:outputLink value="{!backLink}">{!$Label.Back}</apex:outputLink>
+    </apex:pageBlock>
+  </apex:form>
+</apex:page>

@@ -1,0 +1,112 @@
+<apex:page standardController="Case" extensions="clsCasesViewCustomerCases" cache="true" showHeader="false" sidebar="false">
+<apex:includeScript value="{!URLFOR($Resource.jQuery160)}"/>
+<apex:includeScript value="/support/console/28.0/integration.js"/>  
+<script type="text/javascript">
+    
+    function setFocusOnLoad() {} 
+    
+    var j$ = jQuery.noConflict();
+    j$(document).ready(function() {
+
+    });
+</script>
+  <apex:form id="frm">
+    <apex:inputHidden value="{!case.AccountId}"/>
+    <apex:outputpanel id="opRelatedCases">
+    <apex:pageBlock id="relatedCaseBlock" rendered="{!viewRelatedCasesList}">
+      <h3 style="font-size: 14px;">{!IF(showTitle, $Label.Related_Cases, '')}</h3>
+      <apex:pageBlockSection columns="1">
+        <apex:pageBlockTable value="{!cases}" var="c" rules="rows">
+         <apex:column width="5%">
+            <apex:commandLink value="Preview" action="{!navigateToCase}" rerender="opPreview,opRelatedCases">
+              <apex:param assignTo="{!relatedCaseId}" name="relatedCaseId" value="{!c.Id}"/>
+            </apex:commandLink>
+          </apex:column>
+          <!--apex:column width="5%">
+            <apex:outputLink value="/{!c.Id}" target="_blank">Åbn</apex:outputLink>
+          </apex:column-->
+         <apex:column headerValue="{!$Label.Case_Number}" width="10%">
+<!--            <apex:outputLink target="_blank" onclick="openCase('{!c.Id}');">{!c.CaseNumber}</apex:outputLink>-->
+                <span style="text-decoration:underline;cursor:pointer" onclick = "openCase('{!c.Id}');">{!c.CaseNumber}</span>
+          </apex:column>                  
+          <apex:column headerValue="{!$Label.Subject}" width="20%">
+            <apex:outputField value="{!c.Subject}"/>
+          </apex:column>
+          <apex:column headerValue="{!$ObjectType.Case.Fields.CreatedDate.Label}" width="10%">
+             <apex:outputField value="{!c.CreatedDate}"/>
+          </apex:column>
+          <apex:column headerValue="Status" width="20%">
+            <apex:outputField value="{!c.Status}"/>
+          </apex:column>
+          <apex:column headerValue="{!$Label.Case_Owner}" width="20%">
+<!--            <apex:outputLink value="/{!c.OwnerId}">{!c.Owner.Name}</apex:outputLink>-->
+          <span style="text-decoration:underline;cursor:pointer" onclick = "openOwner('{!c.OwnerId}');">{!c.Owner.Name}</span>
+          </apex:column>                    
+        </apex:pageBlockTable>
+      </apex:pageBlockSection>
+    </apex:pageBlock>
+    </apex:outputpanel>
+   <!-- <apex:detail subject="{!relatedCaseId}" relatedList="false" rendered="{!viewMiniProfile}"/> -->
+   <apex:outputpanel id="opPreview">
+   <apex:pageBlock title="Preview" rendered="{!viewMiniProfile}">
+     <apex:pageBlockButtons >
+       <apex:commandButton value="{!$Label.Back}" action="{!navigateToListView}" rerender="opPreview,opRelatedCases"/>
+     </apex:pageBlockButtons>
+     <apex:pageBlockSection >
+       <apex:outputText value="{!alert}"/>
+     </apex:pageBlockSection>
+     <apex:PageBlockSection title="{!$Label.Case_Information}" showHeader="true">
+      <apex:outputField value="{!relatedCase.CaseNumber}"/>
+       <apex:outputField value="{!relatedCase.Department__c}"/>
+       <apex:outputField value="{!relatedCase.Origin}"/>
+       <apex:outputField value="{!relatedCase.Product_2__c}"/>
+       <apex:outputField value="{!relatedCase.Status}"/>
+       <apex:outputField value="{!relatedCase.Type_Task__c}"/>
+       <apex:outputField value="{!relatedCase.Cancellation_Reason__c}"/>   
+       <apex:outputField value="{!relatedCase.OwnerId}"/>
+       <apex:outputField value="{!relatedCase.CreatedDate}"/>
+       <apex:outputField value="{!relatedCase.Urgent__c}"/>
+       <apex:outputField value="{!relatedCase.ClosedDate}"/>
+     </apex:PageBlockSection>
+     <apex:PageBlockSection title="{!$Label.Case_Description}" showHeader="true" columns="1">                                                                          
+       <apex:outputField value="{!relatedCase.Subject}"/>    
+       <apex:outputField value="{!relatedCase.Description}"/>
+       <apex:outputField value="{!relatedCase.Internal_Comments_Close_Reason__c}" />                                                      
+     </apex:PageBlockSection>
+   </apex:pageBlock></apex:outputpanel>
+   <script>
+        function openCase(strcaseId){
+
+            var caseurl = '/' + strcaseId;
+            if (sforce.console.isInConsole()){      
+                sforce.console.openPrimaryTab(null, caseurl , true,'');
+            }
+            else
+            {       
+                window.open(caseurl,'_blank');
+            }
+        }
+        function openOwner(strOwnerId){
+            
+            var ownerurl = '/' + strOwnerId;
+            if (sforce.console.isInConsole()){      
+                sforce.console.openPrimaryTab(null, ownerurl , true,'');
+            }
+            else
+            {       
+                window.open(ownerurl,'_blank');
+            }
+        }
+        function refresh(){
+            if (sforce.console.isInConsole()){
+                sforce.console.getEnclosingTabId(function(subtabId){
+                    sforce.console.refreshSubtabById(subtabId.id, true);
+                });
+            }
+            else{
+                parent.location.href = "{!URLFOR($Action.Case.View, Case.Id)}";
+            }
+        }
+   </script>
+  </apex:form>
+</apex:page>

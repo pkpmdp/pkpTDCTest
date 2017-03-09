@@ -1,0 +1,137 @@
+<apex:page standardController="Account" showHeader="true" sidebar="false" cache="true" extensions="clsCustomerHeaderDetail">
+    <style> 
+        .mLabel{font-weight:bold;}
+        .hidden{display:none;}
+        .bPageBlock .detailList .labelCol{
+            width: 6%;
+        }
+        .bPageBlock .detailList .dataCol{
+            width: 10%;
+        }
+        .bPageBlock .labelCol {
+            text-align: left;
+        }
+        body .apexp .bPageBlock.apexDefaultPageBlock .pbBottomButtons {
+            margin-top: 0px;
+        }
+        body .bPageBlock {
+            margin-bottom: 0px;
+        }
+    </style>
+    
+    <script src="/soap/ajax/16.0/connection.js" type="text/javascript"></script>
+    <script src="/soap/ajax/16.0/apex.js" type="text/javascript"></script>
+    <apex:includeScript value="/support/console/25.0/integration.js"/>
+
+    <script>
+    function actionCasper(){
+       var result = sforce.apex.execute('clsCasperButton' , 'sendToCasper', {accountId:'{!Account.Id}'});
+    }
+    
+    function actionTriple(){
+        var q = "Select Customer_no__c From Account Where Id = '{!Account.Id}'"; 
+        var result = sforce.connection.query(q); 
+        var records = result.getArray('records'); 
+        var record = records[0]; 
+        var url = 'http://tripoli-wls-prod:9020/?customerId=' + record.Customer_No__c; 
+        window.open(url, 'triple');
+    }
+    
+    function actionRAS(){
+        var q = "Select Customer_no__c From Account Where Id = '{!Account.Id}'";
+        var result = sforce.connection.query(q);
+        var records = result.getArray('records');
+        var record = records[0];
+        var url = 'http://localhost:7332/RAS_INTEGRATION?customer_no=' + record.Customer_No__c;
+        sendCTIMessage(url);           
+    }
+               
+    function actionSCN(){
+        var q = "Select Customer_no__c From Account Where Id = '{!Account.Id}'";
+        var result = sforce.connection.query(q);
+        var records = result.getArray('records');
+        var record = records[0];
+        var url = 'http://localhost:7332/SAVE_CUSTNO?customer_no=' + record.Customer_No__c;
+        sendCTIMessage(url);
+    }
+    
+    function openNewSaveSurvey(){
+          sforce.console.getEnclosingPrimaryTabId(getSurveyId);
+    }
+     
+    var getSurveyId = function getSurveyId(result) {
+          var tabId = result.id;
+          if(tabId != null){
+            sforce.console.openSubtab(tabId ,'{!URLFOR($Action.SAVE_Survey__c.New, null, [CF00N20000001Wv4U=Account.Name, CF00N20000001Wv4U_lkid= Account.Id, retURL= Account.Id, saveURL= Account.Id ])}',true,'{!$Label.CO_NewSaveSurvey}',null, null,'NewSurvey');          
+          }
+          
+    };
+   </script>
+   
+   <table width="100%">
+   <tr>
+   <td width="100%" valign="top">
+   <apex:form >
+    <apex:pageBlock id="thePageBlock" > 
+    <apex:pageMessages />
+    <apex:pageBlockSection columns="6">
+        <apex:outputField value="{!Account.Name}"/>
+        <apex:outputField value="{!Account.Customer_No__c}"/>
+        <apex:outputField value="{!Account.Customer_Lock__c}"/>
+        <apex:outputField value="{!Account.Permission__c}"/>
+        <apex:outputField value="{!Account.PersonMobilePhone}"/>
+        <apex:pageBlockSectionItem >
+            <apex:outputLabel value="" for="thePanel_1"/>
+            <apex:outputPanel id="thePanel_1" layout="block">
+                <apex:outputText value="{!contactInfoWarning}" rendered="{!contactShowWarning}" style="display: block; float: left;" />
+                <apex:image url="{!URLFOR($Resource.calendar, 'excs.png')}" rendered="{!contactShowWarning}" style="display: block; float: left; margin-left: 10px;"/>
+            </apex:outputPanel>
+        </apex:pageBlockSectionItem>
+       
+        <apex:outputField value="{!Account.CustomerInformation__c}"/>
+        <apex:outputField value="{!Account.DKTV_Customer_Number__c}"/>
+        <apex:outputField value="{!Account.BillingRating__c}"/>
+        <apex:outputField value="{!Account.PersonEmail}"/>
+        <apex:outputField value="{!Account.PersonHomePhone}"/>
+        <apex:outputField value="{!Account.Robinson_Formula__c}"/>
+         
+        <apex:outputField value="{!Account.CustomerSubType__c}"/>
+        <apex:outputField value="{!Account.Customer_type__c}"/>
+        <apex:pageBlockSectionItem >
+            <apex:outputLabel value="Åben Sag" for="thePanel"/>
+            <apex:outputPanel id="thePanel" layout="block">
+                <apex:outputText value="{!info}" style="display: block; float: left;" />  
+                <apex:image url="{!URLFOR($Resource.calendar, 'excs.png')}" rendered="{!showWarning}" style="display: block; float: left; margin-left: 10px;" />
+            </apex:outputPanel>
+        </apex:pageBlockSectionItem>
+
+        <apex:outputField value="{!Account.No_Email__c}"/>
+        <apex:outputField value="{!Account.Phone}"/> 
+        <apex:outputField value="{!Account.No_Thankyou__c}"/>
+<!--        
+        <apex:outputField value="{!Account.Status_YK__c}"/>
+        <apex:outputField value="{!Account.Customer_type__c}"/>
+        <apex:outputField value="{!Account.DKTV_Customer_Number__c}"/>
+        <apex:outputField value="{!Account.Customer_Lock__c}"/> 
+        <apex:outputField value="{!Account.BillingRating__c}"/>
+        <apex:outputField value="{!Account.No_Email__c}"/>
+-->
+        <apex:inlineEditSupport event="ondblClick" resetFunction="resetInlineEdit" showOnEdit="saveButton,cancelButton" hideOnEdit="casperButtonID,tripleButtonID,rasButtonID,scnButtonID,gcButtonID"/>
+    </apex:pageBlockSection>  
+                   
+            <apex:pageBlockButtons location="bottom"> 
+                <apex:commandButton value="Save" action="{!save}" id="saveButton" styleClass="hidden"/>
+                <apex:commandButton value="Cancel" action="{!cancel}" id="cancelButton" styleClass="hidden"/>
+                <apex:commandButton value="Casper" id="casperButtonID" onclick="javascript:actionCasper();"/>
+                <apex:commandButton value="Triple" id="tripleButtonID" onclick="javascript:actionTriple();"/>
+                <apex:commandButton value="RAS" id="rasButtonID" onclick="javascript:actionRAS();"/>
+                <apex:commandButton value="Save Customer Number" id="scnButtonID" onclick="javascript:actionSCN();"/>
+                <apex:commandButton value="{!$Label.CO_NewSaveSurvey}" onclick="openNewSaveSurvey(); return false;"/>
+            </apex:pageBlockButtons> 
+    
+   </apex:pageBlock> 
+    </apex:form> 
+</td>
+</tr>
+</table>
+</apex:page>

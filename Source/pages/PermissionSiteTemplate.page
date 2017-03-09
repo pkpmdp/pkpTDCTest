@@ -1,0 +1,55 @@
+<apex:page showHeader="false" id="SiteTemplate" applyHtmlTag="false">
+<html class="cvi2015"><!--SPOC 2206 -->
+<style type="text/css">
+.luksag a:link, a:visited, a:hover,a:active
+{
+color: #000000;
+}
+.bPageBlock .pbTitle {width:18%;}
+.luksag #topbanner
+{
+overflow:hidden;
+}
+.luksag .apexp
+{
+posititon:relative;
+margin: 10px;
+}
+
+.bPageBlock {
+border:0px;
+background: none #ffffff;
+background-color: #ffffff;
+}
+body .bPageBlock.secondaryPalette, .bPageBlock.secondaryPalette
+{
+background: none #ffffff;
+background-color: #ffffff;
+}
+
+</style>
+<script type="text/javascript" src="https://yousee.dk/sitecore/content/data/export/export.aspx?itemguid={914C24BD-AD95-467C-84F9-CAD6AD3752CB}&functions=true"></script>
+   <apex:insert name="header">
+       <script type="text/javascript">printHeader();</script>
+       <!--script type="text/javascript">printTopMenu();</script-->
+   </apex:insert>
+   <script type="text/javascript">printContentAreaBegin();</script>
+   <apex:insert name="body"/>
+   <script type="text/javascript" language="javascript">
+            $j(document).ready(function () {
+                if ($j("#mainarea").height() < $(window).height() - 425) {
+                //alert($j('#mainarea').height());
+                //alert($(window).height());
+                heightNumb = $(window).height() - 425
+                $j('#mainarea .wrapper').height(heightNumb);
+                }
+            });
+  </script>
+  
+  <script type="text/javascript">printContentAreaEnd();</script>
+
+  <apex:insert name="footer">
+      <!--script type="text/javascript">printFooter();</script-->
+  </apex:insert>
+  </html>
+  </apex:page>

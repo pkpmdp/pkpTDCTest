@@ -1,0 +1,23 @@
+<apex:page standardController="Case" extensions="clsCasesBackToQueueController">
+    <apex:includeScript value="/soap/ajax/26.0/connection.js"/>
+<apex:includeScript value="/support/console/26.0/integration.js"/>
+<script type="text/javascript">
+var isConsole;
+window.onload = function() { testIsInConsole();}
+function testIsInConsole(){
+if(sforce.console.isInConsole()){
+isConsole = 'true';
+//alert('in console');
+}else{
+isConsole = 'false';
+}
+backToQueue(isConsole);
+}
+</script>
+    <apex:form >
+        <apex:inputHidden value="{!Case.Status}" />
+        <apex:actionFunction name="backToQueue" action="{!backToQueue}">
+<apex:param name="isConsole" value="" assignTo="{!isConsole}" />
+</apex:actionFunction>
+    </apex:form>
+</apex:page>

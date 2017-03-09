@@ -1,0 +1,9 @@
+<apex:page standardController="NP_Order__c" extensions="clsNpOrderHandlerController">
+    <apex:form >
+        <apex:outputText value="{!$ObjectType.NP_Order__c.Fields.Cancellation_Reason__c.Label}  " />
+        <apex:inputField value="{!NP_Order__c.Cancellation_Reason__c}" />
+        <P></P>
+        <apex:commandButton value="{!$Label.Save}" action="{!save}" />
+        <apex:commandButton value="{!$Label.Cancel}" action="{!cancel}" />
+    </apex:form>
+</apex:page>

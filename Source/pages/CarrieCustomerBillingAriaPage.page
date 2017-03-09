@@ -1,0 +1,27 @@
+<apex:page standardcontroller="Aria_Account__c"  id="apexPage" sidebar="False"  showHeader="False" >
+<br/><br/><br/><br/><br/><br/>
+<div align="center" id="abc" style="display:none"><h1 style="font-size: 14px"><big>  Please enable popup for this browser.</big></h1></div>
+ <script type="text/javascript">
+ function init()    {  
+     var recType = '{!Aria_Account__c.RecordType.Name}';  
+     if(recType == 'Carrie Blockbuster'){
+        window.location = '/{!Aria_Account__c.Account__c}?nooverride=1';
+     }else{
+         windowRef=window.open("apex/CarrieBillingBatchPage?id={!Aria_Account__c.Id}","_blank","toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,width=800,height=600");
+         if (!windowRef || typeof windowRef.closed == 'undefined') //  For Mozilla firefox
+         {
+           document.getElementById("abc").style.display="block";
+           setTimeout('window.history.go(-1);',3700); 
+         }
+         else if(windowRef.screenX === 0 )  // for Google Chrome
+         {
+           document.getElementById("abc").style.display="block";
+           setTimeout('window.history.go(-1);',3700); 
+         }
+         else       
+          window.history.go(-1);      //redirect to back page 
+      }
+   } 
+ window.onload = init();
+ </script> 
+</apex:page>

@@ -1,0 +1,337 @@
+<apex:page controller="ViewDealerOrdersController" showHeader="false" sidebar="false" id="historyID" applyHtmlTag="false">
+<html class="cvi2015"> <!--spoc 2206-->
+<style>
+ .fontVerdana{ font-family: 'Verdana'; }
+ .SøgBtnCls {border-width: 0;padding: 0 15px;text-transform: capitalize;margin: 0 2px;background-position: left top;background-repeat: repeat-x;border-color: -moz-use-text-color #FF4500;border-right: 1px solid #FF4500;border-style: none solid solid none;display: inline;font-family: 'Verdana','Geneva',sans-serif;font-size: 80%;color: #FFFFFF;font-weight: bold;height: 26px;background-color: #FF4500;}
+ .TilbagetilBtnCls{border-width: 0;padding: 0 15px;text-transform: capitalize;margin: 0 2px;background-position: left top;background-repeat: repeat-x;border-color: -moz-use-text-color #FF4500;border-right: 1px solid #FF4500;border-style: none solid solid none;display: inline;font-family: 'Verdana','Geneva',sans-serif;font-size: 80%;color: #FFFFFF;font-weight: bold;height: 26px;background-color: #FF4500;}
+  body button, body .x-btn, body .btn, body .btnDisabled, body .btnCancel, body .menuButton .menuButtonButton {background-color:#585858;color:#FFFFFF;background:#585858;font-weight:bold;height:26px;}   
+ .errorMessage {color: red; font-weight: bold;}     
+</style> 
+<apex:form id="historyFormID" styleClass="fontVerdana">
+<script type="text/javascript" src="https://yousee.dk/sitecore/content/data/export/export.aspx?itemguid={F011BAAA-EF0B-4751-B782-587C8D8AD11F}&functions=true"></script>
+<!-- Added for DW 750 -->
+<c:TopMenuComponent ></c:TopMenuComponent>
+<script type="text/javascript">printHeader();</script>
+<script type="text/javascript">printTopMenu();</script>
+<script type="text/javascript">printContentAreaBegin();</script>
+
+<script type="text/javascript">
+var validated = false;
+if(error != undefined){
+    if(error !=null || error != ''){
+        $("#errorBlock").html = 'Ingen order fundet';
+    }
+}
+function findOrder(){
+    //alert('Find Order Called');
+    //$("#errorBlock").html = '';
+    //document.getElementById("jsErrorSection").style.display = 'none';
+    //document.getElementById("jsErrorText").innerHTML = '';
+    //var orderNumStr = document.getElementById("historyID:historyFormID:ListBlock:blockSectionID:orderNumber:oNumber").value;
+    //orderNumStr = orderNumStr.trim();
+    //if(orderNumStr.length > 0 && orderNumStr != ''){
+        searchOrder();
+    //}else{
+        
+    //  $("#errorBlock").html('Ingen order fundet');
+    //  return false;
+    //}
+    
+}
+</script>
+
+ <div class="message errorM3" id="jsErrorSection" style="display:none;font-family: 'Verdana';">
+            <table border="0" cellpadding="0" cellspacing="0" class="messageTable" style="padding:0px;margin:0px;">
+                <tr valign="top">
+                    <td>
+                        <img alt="Fejl" src="/s.gif" class="msgIcon" title="Fejl" />
+                     </td>
+                     <td class="messageCell">
+                        <div class="messageText">
+                            <span style="color:#cc0000">
+                                <h4>Fejl:</h4>
+                            </span> 
+                            <div id="jsErrorText"></div>
+                            <br/>
+                        </div>
+                     </td>
+                </tr>
+                <tr>
+                </tr>
+            </table>
+   </div>
+        
+<apex:stylesheet value="{!URLFOR($Resource.CalendarControl, 'CalendarControl/CalendarControl.css')}"/>
+<apex:includeScript value="{!URLFOR($Resource.CalendarControl, 'CalendarControl/CalendarControl.js')}"/> 
+<font style="font-family:verdana; font-size:18px;font-weight:bold;">Ordre Historik</font>
+<br></br> 
+
+<apex:dataTable value="{!historyHeaderInformation}" var="info">
+     <apex:column value="{!info.Description__c}" styleClass="fontVerdana"/>
+</apex:dataTable>  
+<div id="errorBlock" class="errorMessage" align="center" rendered="{!NOT(showOrderList)}"></div>
+<apex:outputpanel rendered="{!NOT(ordLine)}">
+<apex:pageBlock id="ListBlock">
+<div class="fontVerdana">
+<apex:pageMessages rendered="true" id="msg2"/>  
+</div>  
+<apex:inputHidden value="{!searchEndDate}" id="searchEndDate"/>
+<apex:inputHidden value="{!startDate}" id="startDate"/>
+
+ <apex:PageBlockSection title="Find Ordre" collapsible="false" columns="1" id="blockSectionID">
+     <apex:pageBlockSectionItem id="blockSectionItemID">
+                 <apex:outputLabel style="font-weight:bold" value="Søg på  " styleClass="fontVerdana"/>
+                <apex:outputPanel id="panelID"> 
+           <apex:selectList value="{!assignedItems}" id="sType"  size="1" >
+                 <apex:actionSupport event="onchange" reRender="Panel" action="{!selectionChange}"  />
+                 <apex:selectOptions value="{!items}"/>
+            </apex:selectList> 
+           
+    </apex:outputPanel>
+   
+</apex:pageBlockSectionItem>
+      <apex:outputpanel id="Panel" style="font-weight:normal">
+        &nbsp;        &nbsp;        &nbsp;        
+        <apex:pageBlockSectionItem id="orderNumber"  rendered="{!assignedItems == '1'}"  ><br/>
+         <apex:outputPanel >
+            <b>Ordrenummer </b>&nbsp;&nbsp;<apex:inputText id="oNumber" value="{!orderNumber}" onKeyPress="return submitenter(event);"/>
+            </apex:outputPanel>
+        </apex:pageBlockSectionItem>
+
+      &nbsp;        
+             <apex:pageBlockSectionItem id="frmDate" rendered="{!assignedItems == '2'}"  >
+            <br/>
+                 <!-- <apex:outputLabel style="font-weight:bold" value="Fra dato " /> -->
+                 
+                <apex:outputPanel > 
+                     <b>Fra dato</b>&nbsp;&nbsp;<apex:inputText id="orderStartDate" value="{!strDate}" styleClass="txtReadOnly"  disabled="true" style="background-color:#D3D3D3"  />
+                        <apex:outputPanel onclick="openCalender('{!$Component.orderStartDate}','{!$Component.startDate}');" > 
+                            <img class="datePickerIcon" alt="Pick A Date" title="Pick A Date" src="/s.gif"/>
+                        </apex:outputPanel>
+                </apex:outputPanel>
+        </apex:pageBlockSectionItem>
+        &nbsp;           
+         <apex:pageBlockSectionItem id="endDate" rendered="{!assignedItems == '2'}"  >
+                 <!-- <apex:outputLabel style="font-weight:bold" value="Til dato " /> -->
+                  
+                <apex:outputPanel > 
+                  <b>Til dato</b>&nbsp;&nbsp;<apex:inputText id="orderEndDate" value="{!enDate}" styleClass="txtReadOnly" disabled="true"  style="background-color:#D3D3D3" />
+                        <apex:outputPanel onclick="openCalender('{!$Component.orderEndDate}','{!$Component.searchEndDate}');" > 
+                            <img class="datePickerIcon" alt="Pick A Date" title="Pick A Date" src="/s.gif"/>
+                        </apex:outputPanel>
+                </apex:outputPanel>
+        </apex:pageBlockSectionItem>
+
+         &nbsp;    
+         <apex:pageBlockSectionItem id="frmLstDate" rendered="{!assignedItems == '3'}"  >
+             <br/>
+             &nbsp;&nbsp;<b>Last Fra dato: </b>
+             <apex:outputPanel >
+             <apex:outputText value=" {!lastMnthEndDate}" rendered="{!NOT(assignedItems == '0')}"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+             </apex:outputPanel>
+         </apex:pageBlockSectionItem>
+          &nbsp;
+          <apex:pageBlockSectionItem id="endLstDate" rendered="{!assignedItems == '3'}"  >
+                <b>Last Til dato: </b>
+                <apex:outputText value=" {!lastMnthStartDate}" rendered="{!NOT(assignedItems == '0')}"/>
+          </apex:pageBlockSectionItem>
+              
+        <apex:pageBlockSectionItem id="s1" rendered="{!NOT(assignedItems == '0' || assignedItems == '4' )}">
+                <apex:outputLabel value=" " />
+                  <apex:outputPanel >
+                    <apex:outputLabel value=" " />
+                        <!-- <apex:commandButton value="Søg" action="{!findOrders}"/> -->
+                        <input type="button" id="btnSearch" value="Søg" onclick="findOrder();" class="SøgBtnCls"/>
+                        <apex:commandButton value="Tilbage" action="{!viewHistory}" id="pgBlockButtonID"/>
+                       <!-- <input type="submit" onclick="history.go(-1);" value="Back" style="background-color:orangeRed; height:20px; color:#FFFFFF; font-weight:bold;"/> -->
+                </apex:outputPanel>
+         </apex:pageBlockSectionItem>
+         <!-- Comment the below line For Defect  -->
+       <div align="center"><br/> <apex:outputLabel value="Ingen ordre fundet." rendered="{!AND(NOT(showOrderList),resetOnChange)}" styleClass="fontVerdana"/>  </div>
+</apex:outputpanel>
+</apex:PageBlockSection> 
+        <p></p>
+          <apex:pageBlockSection id="pbsection1" title="{!dateListlabel}" collapsible="false"  columns="1" rendered="{!showOrderList}"> 
+               <c:PagingComponent pagecontroller="{!this}" rows="10" />
+               <apex:dataTable value="{!orderedProducts}" var="item" id="OrderListId" rendered="{!(orderedProducts.size > 0)}" width="100%">
+                   <apex:column styleClass="fontVerdana">
+                        <apex:facet name="header"><b>Ordrenummer</b></apex:facet>
+                        <apex:commandLink value="{!item.Name}" action="{!viewLineItems}" id="orderNumber">
+                            <apex:param name="oid" assignTo="{!selectedOrderNumber}" value="{!item.Name}"/>
+                            <apex:param name="ordDate" assignTo="{!selectedOrderDate}" value="{!item.OrderDateTime__c}" />
+                        </apex:commandLink>
+                   </apex:column>
+                   
+                   <apex:column styleClass="fontVerdana">
+                        <apex:facet name="header"><b>Ordredato</b></apex:facet>
+                        <apex:outputText value="{0,date, dd.MM.yyyy HH:mm}">
+                            <apex:param value="{!item.OrderDateTime__c}" />
+                            </apex:outputText>
+                   </apex:column>
+               </apex:dataTable>
+       </apex:pageBlockSection>
+        
+      <div align="center">
+       <apex:pageBlockButtons location="bottom" id="buttonID">
+            <apex:commandButton value="Tilbage til Bestil varer " action="{!dealerProductPage}" reRender="pbsection1"/>
+       </apex:pageBlockButtons>  
+      </div>
+    </apex:pageBlock>
+   
+ <script>
+ 
+
+ 
+  function noenter(ev)  {
+        if (window.event && window.event.keyCode == 13 || ev.which == 13) {
+            searchOrder();
+            return false;
+         } else {
+              return true;
+         }
+     }
+     
+function FetchVal(dateVal,orderNumber){
+               alert('Selected date'+dateVal);
+              // var orderNumber1= document.getElementById(orderNumber);
+                 alert(document.getElementById(orderNumber));
+               //orderNumber.rendered  ="true";
+               
+            }
+            
+function showButton(){
+    //document.getElementById("j_id0:j_id1:ListBlock:btnBack").style.display = "block";
+}  
+
+
+function submitenter(ev)
+{
+                        var keycode;
+                        if(ev.keyCode) //For IE
+                            keycode = ev.keyCode;
+                        else if(ev.Which)
+                            keycode = ev.Which; // For FireFox
+                        else
+                            keycode = ev.charCode;
+                        if ((keycode > 31 && (keycode < 48 || keycode > 57)) || keycode == 46 ){
+                            return false;
+                        }
+                        if(window.event && window.event.keyCode == 13) {
+                            searchOrder();
+                            findOrder();
+                            return false;
+                        }
+                            return true;
+}
+
+function validateOrders(){
+    findOrder();
+  }
+
+
+
+function showButton1(){
+//alert('a');
+    //document.getElementById("sType").assignedItems = '1';
+    //document.getElementByID("sType").
+    //document.getElementById("btnBack").style.visibility='visible';
+    //alert('a');
+    //document.getElementById("btnBack").disabled = true;
+    //if(checkone.selectedIndex != null){
+    //document.getElementById("historyID:historyFormID:ListBlock:blockSectionID:blockSectionItemID:panelID:sType").selectedIndex = 0;
+    //historyID:historyFormID:buttonID:btnBack
+    //}
+}
+
+function hideButton(){
+        
+      //document.getElementById("btnBack").disabled = false;
+    
+    //document.getElementById('btnBack').style.visibility='hidden';
+} 
+
+//window.onload=function(){
+//alert('handled button');
+//document.getElementById('btnBack').style.visibility='hidden';
+//document.getElementById('btnBack').style.display="block";
+
+//}         
+function submitMe() {
+
+//window.location="../ViewDealerOrderHistory.page"
+//alert('a');
+//window.location="/DealerProductPage.page"
+
+}
+
+//function validateOrder(val){
+//
+//if (e.KeyChar == (char)13){
+//   findOrders()                        
+//}
+//
+//}
+
+ 
+  
+//function noenter(ev) {
+//
+//if (window.event && window.event.keyCode == 13 || ev.which == 13) {
+//
+//findOrders();
+
+//return false;
+//
+//} else {
+//
+//return true;
+//
+//}
+//
+//}
+
+</script>
+</apex:outputpanel>
+<apex:actionFunction name="searchOrder" action="{!findOrders}" ></apex:actionFunction>
+
+<apex:outputpanel rendered="{!ordLine}" >
+<apex:pageBlock >
+<apex:actionSupport event="onload" oncomplete="hideButton()" />
+<apex:pageBlockSection title="Ordre detaler" columns="2" collapsible="false" id="orderDetails">
+         <apex:pageBlockSectionItem >
+             <apex:outputLabel value="Ordrenummer" for="ordNo" styleClass="fontVerdana"/>
+             <apex:outputLabel value="{!selectedOrderNumber}" id="ordNo" styleClass="fontVerdana"/>
+         </apex:pageBlockSectionItem>
+         <apex:pageBlockSectionItem >
+              <apex:outputLabel value="Ordredato" for="ordDate" styleClass="fontVerdana"/>
+              <apex:outputLabel id="ordDate" value="{!selectedOrderDate}" styleClass="fontVerdana"></apex:outputLabel>      
+         </apex:pageBlockSectionItem>
+     </apex:pageBlockSection>
+
+     <apex:repeat value="{!ProductLineItems}" var="prodLines">       
+        <apex:pageBlockSection title="{!prodLines.productGroup}" columns="1"  collapsible="false" id="orderLines">
+            <apex:dataTable value="{!prodLines.lineItemsListProp}" var="dealerProd" border="0"  width="100%">
+                    <apex:column styleClass="fontVerdana">
+                    <apex:facet name="header"><b>Varenavn</b></apex:facet>
+                        <apex:outputText value="{!(dealerProd.Product_Name__c)}"/>
+                    </apex:column>
+                    <apex:column styleClass="fontVerdana">
+                        <apex:facet name="header"><b>Beskrivelse/varenr</b></apex:facet>
+                        <apex:outputText value="{!(dealerProd.Product_Description__c)}"/>
+                    </apex:column>
+                    <apex:column styleClass="fontVerdana">
+                        <apex:facet name="header"><b>Antal</b></apex:facet>
+                        <apex:outputField value="{!dealerProd.Quantity__c}"/>
+                    </apex:column>
+            </apex:dataTable>
+          <!--   <script>colorPageBlock(document.getElementById("{!$Component.orderLines}"), "PaleGreen");</script> -->
+        </apex:pageBlockSection> 
+    </apex:repeat>
+     <div align="center">
+         <apex:commandButton value="Tilbage" action="{!backToHistoryPage}" id="pgBlockButtonID"/> 
+      </div>
+</apex:pageBlock>
+</apex:outputpanel>
+</apex:form>
+</html>
+</apex:page>

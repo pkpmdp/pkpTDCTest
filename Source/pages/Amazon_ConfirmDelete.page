@@ -1,0 +1,7 @@
+<apex:page controller="Amazon_FileList_CT" showHeader="false" sidebar="false">
+    <script type="text/javascript" >
+        alert('Filen er slettet');
+        
+        window.location.href ='/apex/Amazon_AccountFileList?id={!Id}';
+    </script> 
+</apex:page>

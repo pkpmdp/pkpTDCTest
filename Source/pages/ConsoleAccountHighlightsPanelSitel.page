@@ -1,0 +1,99 @@
+<apex:page standardController="account" tabStyle="Account" standardStylesheets="false"><!-- SPOC-2294 used to diplay the top bar components -->
+    <style>
+    .divRow  
+    {  
+        height: auto;   
+    }
+
+    fieldset {
+    border: 1px solid #ddd;
+    <!--padding: 0 1.4em 1.4em 1.4em;-->
+    margin: 0 0 1.5em 0;
+    border-radius: 8px;
+    margin: 0px 0px;
+    <!--height: 100%;-->
+    display: inline-block;
+    display: inline;
+}
+    legend
+    {
+        color: #B8B8B8;
+        font-family :Calibri,sans-serif;
+        font-size :15px;
+    }
+    .Container{
+        width: 100%;
+        <!--  height: 135px;  --> 
+    }
+    .Column1{
+       width: 15%; 
+       <!-- height: 135px;-->   
+    }
+    .Column2{
+       width: 17%;  
+       <!--  height: 135px;  --> 
+    }
+    .Column3{
+       width: 24%;
+       <!--  height: 135px;  -->     
+    }
+    .Column4{
+       width: 16%;
+      <!--  height: 135px;  --> 
+    }
+    .Column5{
+       width: 28%;
+      <!-- height: 135px;-->
+    }
+</style>        
+        <table class="Container">
+        <tr ><!-- style="height:100%" class="divRow"-->
+            <!--<td width="13%">
+                <c:ConsoleKundeLog currentId="{!Account.Id}"/>
+            </td>-->
+            
+            <td class="Column1"><!-- width="16%"  -->
+                <c:ConsoleAlertsComponentSitel currentId2="{!Account.Id}"/>
+            </td> 
+            <td class="Column2"> <!--width="20%"    -->
+                <c:ConsoleKundeInfoSitel currentId="{!Account.Id}"/>
+            </td>
+            <td class="Column3"> <!--width="20%"    -->
+                <c:ConsoleKundeAddressInfo currentId4="{!Account.Id}" />
+            </td>
+            <td class="Column4"> <!--width="20%"    -->
+                <c:ConsoleActivitiesCasesComponent currentId5="{!Account.Id}"/>
+            </td>
+           <td class="Column5"> <!--width="27%"  -->
+                <c:ConsolePermissionCompopnentSitel acctId1="{!Account.Id}"/>
+            </td>
+        </tr>
+        </table> 
+<script>
+        var nVer = navigator.appVersion;
+    var nAgt = navigator.userAgent;
+    var browserName  = navigator.appName;
+    var fullVersion  = ''+parseFloat(navigator.appVersion); 
+    var majorVersion = parseInt(navigator.appVersion,10);
+    var nameOffset,verOffset,ix;
+
+if ((verOffset=nAgt.indexOf("Chrome"))!=-1) {
+           
+         document.getElementById("activitycases").style.height= "100%";
+         document.getElementById("addressId").style.height= "100%";
+         document.getElementById("permissionId").style.height= "100%";
+         document.getElementById("kundeId").style.height= "100%";
+         document.getElementById("alertId").style.height= "100%";
+    }else{
+         document.getElementById("activitycases").style.height= "130px";
+         document.getElementById("addressId").style.height= "130px";
+         document.getElementById("permissionId").style.height= "130px";
+         document.getElementById("kundeId").style.height= "130px";
+         document.getElementById("alertId").style.height= "130px";
+          document.getElementById("activitycases").style.width= "90%";
+        document.getElementById("addressId").style.width= "94%";
+         document.getElementById("kundeId").style.width= "92%";
+         document.getElementById("alertId").style.width= "90%";
+    }
+</script>
+</apex:page>

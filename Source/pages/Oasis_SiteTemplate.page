@@ -1,0 +1,153 @@
+<apex:page showHeader="false" id="SiteTemplate" controller="Oasis_SiteTemplate_CT" action="{!onPageLoad}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <apex:includeScript value="{!URLFOR($Resource.Bootstrap,'js/jquery-1.9.1.min.js')}"/>  
+    <apex:includeScript value="{!URLFOR($Resource.Bootstrap,'js/bootstrap.min.js')}"/>  
+    <apex:includeScript value="{!URLFOR($Resource.Bootstrap,'js/jquery.validate.min.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.Bootstrap,'js/bootstrap-alert.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.Bootstrap,'js/bootstrap-button.js')}"/>
+    <apex:stylesheet value="{!URLFOR($Resource.Bootstrap,'css/bootstrap.min.css')}"/>      
+    <apex:stylesheet value="{!URLFOR($Resource.Bootstrap,'css/bootstrap-responsive.css')}"/>
+     <style>
+      	body {
+        	padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
+      	}
+         .form-horizontal .control-group {
+    		margin-bottom: 8px;
+		}
+         
+        .navbar-inverse .brand {
+			color: #ffffff;
+		} 
+         
+        .form-horizontal legend {
+         /*margin-bottom: 5px;*/
+         }
+         
+         .form-horizontal .errorStar {
+         	color: red;
+         	font-weight: bold;
+         }
+         
+         .readOnly {
+         	padding-top: 5px;
+         }
+         
+         /* Overriding the nav style for devices with max width 350 px */
+         /*@media (max-width: 349px) { 
+         	 .navbar .nav {
+         		margin: 0 1px 0 0;
+         		font-size: 12px;
+        	 }
+         
+         	.navbar .brand {
+         	 	font-size: 18px;
+         		padding: 10px 5px 5px 5px;
+         
+         	}       
+         }*/               
+        
+    </style> 
+    <script language = "javascript">
+    	// URLs for the various pages assigned to variables here. Makes it easy to change them
+    	var urlInstallationSearch = '{!$Site.prefix}/Oasis_InstallationSearch2';	// URL for the installation search page
+    	var urlCUSearch = '{!$Site.prefix}/Oasis_CUSearch2'; 						// URL for the CU search page    
+    	var urlPartyActorSearch = '{!$Site.prefix}/Oasis_PartyActorSearch';	
+    	var ERROR_MSG_SPECIAL_CHARS = 'Specialtegn ikke tilladt.';
+    
+    	// instantiate global variable for jQuery
+    	var $j = jQuery.noConflict();    
+       
+    	function openWindow(url)
+    	{
+         	window.location.href = url;   
+        }
+    	
+    	// This is necessary while using jQuery with VF, to escape the colons in the VF generated
+    	// ids.
+    	function esc(myid) {
+           return '#' + myid.replace(/(:|\.)/g,'\\\\$1');
+        }   
+    
+    	// custom validation rules for the registrering picklist
+    	function validateRegistrering(value, element)
+    	{
+          return value != 'Vælg';        
+        }
+    
+    	// enable form validation by calling this method.
+    	function enableFormValidation(formId) {
+            formId.validate({
+                    errorClass: "help-inline",
+                    errorElement: "span",
+                    highlight:function(element, errorClass, validClass)
+                                {
+                                    $j(element).parents('.control-group').addClass('error');
+                                } ,
+                    unhighlight: function(element, errorClass, validClass)
+                                {
+                                    $j(element).parents('.control-group').removeClass('error');
+                                    $j(element).parents('.control-group').addClass('success');
+                                }                 
+                 });
+                 
+            // register method to prevent special charachters
+            jQuery.validator.addMethod("specialChar", function(value, element) {
+    				 return this.optional(element) || /([0-9a-zA-Z\s])$/.test(value);
+  					}, "Please Fill Correct Value in Field.");     
+                
+        } 
+    
+    	// this function pads the cable unit number with the necessary zeros
+         function fixCUNo(cuNoField)
+         {
+                    var cuNo = cuNoField.value;
+                    if(cuNo != '') {                        
+                        var cuLength =  cuNo.length;
+                        var diff = 10 - cuLength;
+                        var zeroStr = '';
+                        for(var i = 0; i<= diff-1; i++)
+                        {
+                            zeroStr = zeroStr + '0';
+                        }
+                    
+                        cuNoField.value = zeroStr + cuNo;
+                    }
+          }       
+           
+    </script>    
+  <apex:insert name="header">  
+	  <apex:form >  
+	    <div class="navbar navbar-inverse navbar-fixed-top">
+	      <div class="navbar-inner">
+	        <div class="container">        
+	          <a class="brand active" href="{!$Site.prefix}/Oasis_InstallationSearch2">Oasis</a>
+	          <!--<div class="nav-collapse collapse"> -->
+	            <ul class="nav">                
+	              <li class="{!if($CurrentPage.Name == 'Oasis_InstallationSearch2', 'active', '')}">
+	                  <a href="{!$Site.prefix}/Oasis_InstallationSearch2">Søg Adresse</a>
+	              </li>
+	              <li class="{!if($CurrentPage.Name == 'Oasis_CUSearch2', 'active', '')}">
+	                  <a href="{!$Site.prefix}/Oasis_CUSearch2">Søg Anlæg</a>
+	              </li>
+	              <li class="{!if($CurrentPage.Name == 'Oasis_PartyActorSearch', 'active', '')}">
+	                  <a href="{!$Site.prefix}/Oasis_PartyActorSearch">Søg Kontaktperson</a>
+	              </li>                       
+	            </ul> 
+	          <!--</div>--><!--/.nav-collapse -->
+	          <div class = "pull-right" style = "line-height: 20px;padding: 10px 15px 10px;color: #ffffff;">         	
+	          	<apex:outputPanel rendered="{!oUser != null}">	          		
+	              Velkommen {!oUser.Oasis_User_Name__c}&nbsp;<apex:commandLink action="{!logout}" Value="Log ud"/>
+	          	</apex:outputPanel>	
+	          </div>
+	        </div>
+	      </div>
+	    </div>
+	  </apex:form>
+  </apex:insert>
+  
+  <apex:insert name="body"/>
+  
+  <apex:insert name="footer">
+   
+  </apex:insert>
+</apex:page>

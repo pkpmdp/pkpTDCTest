@@ -1,0 +1,445 @@
+<apex:page id="pageId" sidebar="false" showHeader="false" Controller="DealerProductPageController3" action="{!initializeText}" applyHtmlTag="false">
+   <html class="cvi2015"><!--SPOC 2206-->
+    <meta http-equiv="X-UA-Compatible" content="IE=7" />
+               <script type="text/javascript" src="https://yousee.dk/sitecore/content/data/export/export.aspx?itemguid={F545894B-61F9-4C9D-BC1C-833B7DB0853F}&functions=true" > </script>
+    <!-- <script type="text/javascript" src="https://yousee.dk/sitecore/content/data/export/export.aspx?itemguid={681E9B7C-C62C-43D8-95D1-1CF96F73E558}&functions=true" > </script> -->
+    <script src="{!$Resource.jquery}" type="text/javascript"></script>
+    <script src="{!$Resource.jqueryuijs}" type="text/javascript"></script>
+    <script src="{!$Resource.JQuery_tmpl}"></script>
+    <!-- Added for DW 750 -->
+  <!-- <apex:form rendered="{!$Label.DE_Login_Access}">
+    <center>
+    <apex:image url="{!$Resource.DW_Maintenance_Image_2}" width="400" height="400"/>
+        <br></br>
+    <apex:outputText style="color: #629E00;font-size: large;" value="{!$Label.DW_Maintenance_message}">
+        
+    </apex:outputText>
+    <br></br>
+    <a class="dialogbutton_orange Right" href="/secur/logout.jsp" style="position: relative; left: -15px;"><span>Back</span></a>
+    </center>
+    </apex:form>-->
+    
+    
+    <link class="user" href="{!$Resource.jqueryuicss}" rel="stylesheet" type="text/css" /> 
+    
+    <style>
+       .ui-autocomplete-loading { 
+            background: white url('/resource/1302513837000/Loading') right center no-repeat !important; 
+        } 
+       body button, body .x-btn, body .btn, body .btnDisabled, body .btnCancel, body .menuButton .menuButtonButton 
+       {background-color:#585858;color:#FFFFFF;background:#585858;font-weight:bold;height:26px;}   
+       .bPageBlock .pbTitle {color: #222;font-size: 0%;width:0%;}
+       .nextBtnCls {background-color:orangeRed;color:#FFFFFF;font-weight:bold;height:26px;}
+       .sogBtn {border-width: 0;padding: 0 15px;text-transform: capitalize;margin: 0 2px;background-position: left top;background-repeat: repeat-x;border-color: -moz-use-text-color #FF4500;border-right: 1px solid #FF4500;border-style: none solid solid none;display: inline;font-family: 'Verdana','Geneva',sans-serif;font-size: 80%;color: #FFFFFF;font-weight: bold;height: 26px;width:110px;background-color: #FF4500;}
+       .videreBtnCls {border-width: 0;padding: 0 15px;text-transform: capitalize;margin: 0 2px;background-position: left top;background-repeat: repeat-x;border-color: -moz-use-text-color #FF4500;border-right: 1px solid #FF4500;border-style: none solid solid none;display: inline;font-family: 'Verdana','Geneva',sans-serif;font-size: 80%;color: #FFFFFF;font-weight: bold;height: 26px;width:76px;background-color: #FF4500;}
+       .list .headerRow TH{background-color:#676767;color:#ffffff;text-align:left;font-weight:bold;!important;}
+       .list .headerStyleLeft TH{background-color:#676767;color:#ffffff;text-align:left;font-weight:bold;!important;}
+       .fontVerdana{ font-family: 'Verdana'; }       
+    </style>
+    
+    <script>
+        var myAddressJSONObject= new Array();
+    </script>
+    
+    <script type="text/javascript">       
+        window.onload=setFocus;
+        var streets = '';
+        var var_name = '';
+        var installNr = ''; 
+        var insSelected = '';
+        var netInstallationWarningMessage = "{!$Label.Net_Installations_warning_message}";
+        var hasMultipleInstallations = {!hasMultipleInstallations};
+        //Added for BS 
+        var freeChoiceFlag={!isFreeChoicePageFlag};   
+        var currentKundeNumber = '{!cCustInstAdd.customerNumber}'; 
+        if('{!cCustInstAdd.installationID}' != ''){
+            installNr = '{!cCustInstAdd.installationID}';
+        }  
+        jQuery(function(){ 
+            var streetAuto = $("#searchStreetText").autocomplete({
+                source: function (request, response){
+                    var streetIni = jQuery.trim(request.term);
+                    if(streetIni.length>0){
+                      findStreets(streetIni);
+                      streets = response;
+                    }  
+                 }
+            });
+            var postNr =jQuery.trim(document.getElementById('pageId:formId:block:sectionId:sectionItem1Id:searchText').value);
+            if(!isNaN(postNr) && postNr.length == 4){
+                document.getElementById('searchStreetText').disabled= false; 
+                document.getElementById('pageId:formId:block:sectionId:sectionItem3Id:searchHouseText').disabled= false; 
+            }
+        });
+    
+        function validatePostCode(val){ 
+            document.getElementById('searchStreetText').value = "";
+            document.getElementById("pageId:formId:block:sectionId:sectionItem3Id:searchHouseText").value = "";
+            var postNr = jQuery.trim(val);
+            if(postNr.length == 4){
+                if(isNaN(postNr)){
+                    document.getElementById('postNumberError').innerHTML ='Error: Postnummer skal være 4 cifre  ';
+                    document.getElementById('searchStreetText').disabled= true; 
+                    document.getElementById('pageId:formId:block:sectionId:sectionItem3Id:searchHouseText').disabled= true;          
+                }else{
+                    document.getElementById('s1').display = "block";
+                    findCityName(postNr); 
+                }
+            }
+        }
+ 
+        function renderCityName(){
+            if (a == '@@##'){             
+                document.getElementById('postNumberError').innerHTML ='Der findes ingen by for det angivet postnummer';
+                document.getElementById('searchStreetText').value='';
+                document.getElementById('pageId:formId:block:sectionId:sectionItem3Id:searchHouseText').value = '';
+                document.getElementById('searchStreetText').disabled= true;
+                document.getElementById('pageId:formId:block:sectionId:sectionItem3Id:searchHouseText').disabled= true;                            
+            }else {
+                document.getElementById('postNumberError').innerHTML =''; 
+                document.getElementById('pageId:formId:block:sectionId:sectionItem1Id:searchText').select();
+                document.getElementById('searchStreetText').disabled= false;
+                document.getElementById('pageId:formId:block:sectionId:sectionItem3Id:searchHouseText').disabled= false;
+            }
+            document.getElementById('searchStreetText').focus();
+        }
+        
+        function setFocus(){
+            if (document.getElementById('pageId:formId:block:sectionId:sectionItem1Id:searchText')!= null) {
+                document.getElementById('pageId:formId:block:sectionId:sectionItem1Id:searchText').focus();
+            }
+        }
+        
+        function displayStreets(){
+            streets(jsonStreet);
+            var evt = window.event;
+        } 
+        
+        function getAddresses(){
+            var husNo = document.getElementById('pageId:formId:block:sectionId:sectionItem3Id:searchHouseText').value;
+            var strNo = jQuery.trim(document.getElementById('searchStreetText').value);
+            var postNr =jQuery.trim(document.getElementById('pageId:formId:block:sectionId:sectionItem1Id:searchText').value); 
+            
+            if(postNr.length != 4 || isNaN(postNr)){
+                document.getElementById('postNumberError').innerHTML="Feltet Postnummer skal udfyldes.";
+            }else if(strNo.length < 1){
+                document.getElementById('postNumberError').innerHTML="Feltet Vejnavn skal udfyldes.";
+            }else if(husNo.length < 1){
+                document.getElementById('postNumberError').innerHTML="Feltet Husnummer skal udfyldes.";
+            }else{
+                document.getElementById('postNumberError').innerHTML = "";
+                searchAddress(strNo,husNo);
+            }
+       }
+
+        function getSelectedElements(){
+            var noOfcheckedElements = $("input:checked").length; 
+            var_name = $("input[name='selectedCustomer']:checked").val(); 
+            insSelected = $("input[name='insRadio']:checked").val();  
+                
+            //If installation number is empty, select a installation number from response
+            //if(installNr == '' && var_name != 'Ny Kunde'){
+            //Added for DealerWeb-755
+            if(installNr == '' && hasMultipleInstallations == false){
+                $("#errorBlock").html('');
+                $.each(myAddressJSONObject, function(j,myAddressJSONObject){
+                    if(myAddressJSONObject['status'] == 1 || myAddressJSONObject['status'] == 2){
+                        installNr = myAddressJSONObject['installation_lbnr'];
+                        document.getElementById('hiddenInstallNr').value=installNr;
+                    }
+                    return;
+                });  
+            }
+            //Added for DealerWeb-755
+            if((insSelected == '' || insSelected == undefined) && var_name == 'Ny Kunde' && hasMultipleInstallations){
+                $("#errorBlock").html(netInstallationWarningMessage);
+                return false;
+            }
+            if(var_name == undefined){
+                $("#errorBlock").html('Du skal vælge en kunde fra listen, eller vælge at oprette en ny kunde ');
+                return false;
+            }else{
+                if(installNr == ''){
+                   installNr = '0';
+                   //document.getElementById('hiddenInstallNr').value=installNr;
+                }  
+                /*if(installNr != '' && installNr != undefined){
+                    document.getElementById('hiddenInstallNr').value=installNr;
+                }  */
+                document.getElementById('hiddenInstallNr').value=installNr; 
+                productSelectionPage(installNr);
+            }                                   
+        }
+       
+        function takeKeyPressValue(e, txtObj) {
+        //alert('takeKeyPressValue  '+txtObj);
+            var evt = e || window.event;
+            var keyPressed = evt.which || evt.keyCode;
+            if (keyPressed == 13){
+                getAddresses();
+            }
+        }
+        
+        //Added for 755
+        function setInstallationNumber(element){
+            installNr = element;
+            document.getElementById('hiddenInstallNr').value=installNr; 
+        }
+        
+        function createHeaders(headers,tableId){
+            var trth = '<tr>'
+            $.each(headers,function(index,header){
+                trth = trth + '<th bgcolor="#A4A4A4"><b>'+header+'</b></th>';
+            });
+            trth = trth + '</tr>';
+            $(trth).appendTo($(tableId));
+            return $(tableId);
+        }
+        
+    </script>
+    <!--     Added for 755 -->
+    <script id="installTemplate" type="text/x-jQuery-tmpl">  
+        <tr>
+            <td width="33%"><input type="radio" name="insRadio" value="${installationId}" id="${installationId}" onClick="setInstallationNumber(${installationId});"/>${installationNumber}</td>
+            <td width="33%">${installationId}</td>       
+            <td width="33%">${location}</td>            
+        </tr>
+    </script>
+    
+    <body>
+        <!--<apex:form id="formId" styleClass="fontVerdana" rendered="{! If($Label.DE_Login_Access =='False' ,true,false) }">  -->
+        <apex:form id="formId" styleClass="fontVerdana">
+
+
+        <c:TopMenuComponent />  
+        <script type="text/javascript">printHeader();</script>
+    <script type="text/javascript">printTopMenu();</script>
+    <script type="text/javascript">printContentAreaBegin();</script>   
+        <apex:outputPanel >
+            <table>            
+                <tr>
+                    <td colspan="2" style="font-family:verdana; background-color: white;"><!-- css added for white background-->
+                        <apex:outputText value="{!salesFlowObj.messages[0]}" escape="false" rendered="{!NOT(secondPayee)}"/>
+                        <apex:outputText value="{!salesFlowObj.messages[1]}" escape="false" rendered="{!secondPayee}"/>
+                    </td>
+                </tr>
+            </table>
+        </apex:outputPanel> 
+        <apex:message />
+        <input type = "hidden" name="perviousPage" value = "/apex/DealerCustomerSearch"/>
+      
+        <apex:pageBlock id="block"> 
+       
+            <center><div id="errorBlock" class="pbError" style="display:block"/></center>
+            <apex:outputPanel id="searchAddMsg" styleClass="fontVerdana"><div id="postNumberError" class="pbError"><apex:messages /></div></apex:outputPanel>
+            <apex:outputPanel id="optId">                               
+                <apex:actionStatus id="searchStatus" startText="Søgning..." style="color:red;">
+                    <apex:facet name="start"><img src="{!URLFOR($Resource.Loading)}" border="0" height="18px" width="18px"/><span style="font-family: Verdana;">Søgning...Vent venligst</span></apex:facet> 
+                    <apex:facet name="stop" ></apex:facet>
+                </apex:actionStatus>
+            </apex:outputPanel>
+              
+            <div id="s1" style="display:none"><apex:outputLabel value=""/></div>
+            
+            <apex:pageBlockSection id="sectionId" title="Indtast kundens adresse og Søg" rendered="{!showCustomerAddress}" columns="1" collapsible="false">
+                <apex:pageBlockSectionItem id="sectionItem1Id">
+                    <apex:outputLabel value="Postnummer: " for="searchText" styleClass="fontVerdana"/>
+                    <apex:outputPanel id="innetoptID" styleClass="requiredInput" layout="block">
+                        <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+                        <apex:inputText maxlength="4" id="searchText" value="{!searchPostNrText}" onkeyup="validatePostCode(this.value);" required="true"/>
+                        &nbsp;&nbsp;
+                        <apex:outputText value="{!cityName}" rendered="{!NOT(OR(ISBLANK(cityName),cityName=='@@##'))}"/>
+                        <script type="text/javascript">
+                           var a = '{!cityName}';   
+                        </script>
+                    </apex:outputPanel>
+                </apex:pageBlockSectionItem>
+                    
+                <apex:pageBlockSectionItem id="sectionItem2Id" >
+                    <apex:outputLabel value="Vejnavn: " for="searchStreetText" styleClass="fontVerdana"/>
+                    <apex:outputPanel styleClass="requiredInput" layout="block">
+                        <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+                        <input type="text" value="{!searchStreetText}" name="q" id="searchStreetText" disabled="true" required="true" />
+                    </apex:outputPanel> 
+                </apex:pageBlockSectionItem>
+                    
+                <apex:pageBlockSectionItem id="sectionItem3Id" >
+                    <apex:outputLabel value="Husnummer: " for="searchHouseText" styleClass="fontVerdana"/>
+                    <apex:outputPanel styleClass="requiredInput" layout="block">
+                        <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+                        <apex:inputText id="searchHouseText" value="{!searchHouseText}" onkeyUp="takeKeyPressValue(event,this);" disabled="true" required="true"/>
+                    </apex:outputPanel> 
+                </apex:pageBlockSectionItem>
+                   
+                <apex:pageBlockSectionItem id="pBlockSecID">
+                    <apex:outputLabel ></apex:outputLabel>
+                    <div><input type="button" id="btnSøgAdresse" name="SøgAdresse" value="Søg Adresse" class="sogBtn" onclick="getAddresses();"/></div>                                  
+                    <!--  Here apexFunction is called through commandButton, so to avoid page refresh due to commandButton emty "oncomplete" is added -->
+                </apex:pageBlockSectionItem>
+            </apex:pageBlockSection>
+                    
+            <apex:pageBlockSection id="addressBlock" columns="1" rendered="{!showCustomerAddress}">
+                <apex:pageBlockTable value="{!addresses}" var="item" rendered="{!NOT(ISNULL(addresses))}" styleClass="fontVerdana">
+                    <apex:column headerValue="Vejnavn" headerClass="headerStyleLeft"> 
+                        <apex:commandLink value="{!item.Street__c}" action="{!showCustomers}" >      
+                          <apex:param name="amsId" value="{!item.External_Id__c}"/>
+                        </apex:commandLink>
+                      </apex:column>       
+                    <apex:column value="{!item.House_No__c}" headerValue="Husnr." headerClass="headerStyleLeft" />
+                    <apex:column value="{!item.Entrance__c}" headerValue="Opg" headerClass="headerStyleLeft"/>
+                    <apex:column value="{!item.Floor__c}" headerValue="Etage" headerClass="headerStyleLeft"/>
+                    <!--<apex:column value="{!item.Side__c}" headerValue="Side" headerClass="headerStyleLeft"/>-->
+                    <apex:column value="{!item.Door_No__c}" headerValue="Side/Dør" headerClass="headerStyleLeft"/>
+                    <apex:column value="{!item.Postcode__c}" headerValue="Postnummer" headerClass="headerStyleLeft"/>
+                    <apex:column value="{!item.Town__c}" headerValue="By" headerClass="headerStyleLeft"/>
+               </apex:pageBlockTable>
+               
+            </apex:pageBlockSection>
+                        
+           <script type="text/javascript">
+                myAddressJSONObject ={!addressJsonResponse};  
+                insSelected = $("input[name='insRadio']:checked").val();        
+           </script>
+           
+            <!-- ADDED FOR DW-770 : START -->
+            
+           <apex:pageBlockSection title="Vælg kundenummer – Aktive" id="customersBlock"  columns="1" rendered="{!showCustomerBlock}" collapsible="true">
+                <apex:pageBlockTable value="{!custLstActive}" var="item" rendered="{!customerFlag}" styleClass="fontVerdana">
+                    <apex:column >
+                        <apex:outputPanel rendered="{!item.customerSelected}">
+                            <input type="radio" name="selectedCustomer" id="{!item.customerNumber}" value = "{!item.customerNumber}" checked="checked" onclick="showInstallations();"></input>
+                        </apex:outputPanel>
+                        <apex:outputPanel rendered="{!NOT(item.customerSelected)}">
+                            <input type="radio" name="selectedCustomer" id="{!item.customerNumber}" value = "{!item.customerNumber}" onclick="showInstallations()"></input>
+                        </apex:outputPanel> 
+                   </apex:column>
+                   <apex:column value="{!item.customerNumber}" headerValue="Kundenummer" headerClass="headerStyleLeft"/>
+                   <apex:column value="{!item.customerName}" headerValue="Kundenavn" headerClass="headerStyleLeft"/>
+                </apex:pageBlockTable>                      
+            </apex:pageBlockSection>
+            
+            <apex:pageBlockSection title="Vælg kundenummer – Tidligere registrerede kunder" id="customersBlockInactive"  columns="1" rendered="{!AND(showCustomerBlock, custLstInactive.size>0)}" collapsible="true">
+                <script>
+                    var inactiveCustomers = '{!custLstInactive}';
+                    var inactiveSectionId = '{!$Component.customersBlockInactive}';
+                    if(inactiveCustomers.indexOf('customerSelected=true') == -1)
+                        twistSection(document.getElementById(inactiveSectionId).childNodes[0].childNodes[0]);
+                </script>
+                <apex:pageBlockTable value="{!custLstInactive}" var="item" rendered="{!customerFlag}" styleClass="fontVerdana">
+                    <apex:column >
+                        <apex:outputPanel rendered="{!item.customerSelected}">
+                            <input type="radio" name="selectedCustomer" id="{!item.customerNumber}" value = "{!item.customerNumber}" checked="checked" onclick="showInstallations()"></input>
+                        </apex:outputPanel>
+                        <apex:outputPanel rendered="{!NOT(item.customerSelected)}">
+                            <input type="radio" name="selectedCustomer" id="{!item.customerNumber}" value = "{!item.customerNumber}" onclick="showInstallations()"></input>
+                        </apex:outputPanel> 
+                   </apex:column>
+                   <apex:column value="{!item.customerNumber}" headerValue="Kundenummer" headerClass="headerStyleLeft"/>
+                   <apex:column value="{!item.customerName}" headerValue="Kundenavn" headerClass="headerStyleLeft"/>
+                </apex:pageBlockTable>                      
+            </apex:pageBlockSection>
+            <!-- ADDED FOR DW-770 : END -->
+            
+            <!--        Added for DW-751 -->
+            <apex:outputPanel id="outputInst">
+                <apex:pageBlockSection title="Vælg Installation" collapsible="false" columns="1" id="instId" rendered="{!hasMultipleInstallations}">
+                    <table id="instTable" class="zebra" width="100%" border="1" ></table>
+                </apex:pageBlockSection>
+            </apex:outputPanel>
+              
+            <apex:pageBlockButtons rendered="{!showCustomerBlock}" id="pgBlockButtonID" location="bottom">
+                <apex:commandButton action="{!cancel}" value="Annuller" style="margin-right:250px;"/>
+                <apex:commandButton action="{!backToDealerProduct}"  value="Tilbage"/>
+                <input type="button" id="prodSelection" name="prodSelection" value="Videre" class="videreBtnCls" onclick="getSelectedElements();"/>                                             
+            </apex:pageBlockButtons>                               
+        </apex:pageBlock>
+        
+        <script>
+        function getBackToDealerProduct(){
+           backToDealerProduct();
+        }
+        </script>
+       
+        <apex:actionFunction name="backToDealerProduct" action="{!backToDealerProduct}">
+        </apex:actionFunction> 
+        <apex:actionFunction name="productSelectionPage" action="{!productSelectionPage}">
+            <apex:param name="installNr" value=""/>
+        </apex:actionFunction>
+        <input type="hidden" id="hiddenInstallNr" name = "installNr" value="" />
+        <apex:actionFunction name="findCityName" status="searchStatus" action="{!findCityName}" oncomplete="renderCityName();" rerender="optId,innetoptID">
+            <apex:param name="pinCode" value=""/> 
+        </apex:actionFunction>
+        <apex:actionFunction name="findStreets" action="{!findStreets}" reRender="thePanel" oncomplete="displayStreets();">
+            <apex:Param name="streetName" value=""/>
+        </apex:actionFunction>
+        <apex:actionFunction name="searchAddress" action="{!searchAddress}" rerender="addressBlock,searchAddMsg,customersBlock"> 
+            <apex:Param name="streetName" value=""/>
+            <apex:Param name="houseNo" value=""/>
+        </apex:actionFunction>
+       
+        <apex:outPutPanel id="thePanel" >
+            <script type="text/javascript"> 
+                var jsonStreet = {!streetSuggestion};       
+            </script>
+        </apex:outPutPanel> 
+       
+        <apex:outputPanel id="jsinstpanel" >
+            <script type="text/javascript">
+                myAddressJSONObject ={!addressJsonResponse};
+            </script>
+        </apex:outputPanel>
+       
+        <script type="text/javascript">
+            var basicHeader = ["Installation Number","Installation ID","Location"];
+            var installArray = new Array();
+            var showSubSection = 'false';
+            myAddressJSONObject ={!addressJsonResponse};
+            var ams = {!amsId};
+            document.getElementById('{!$Component.pageId.formId.block.outputInst}').style.display = 'none';
+            var_name = $("input[name='selectedCustomer']:checked").val(); 
+            var stringJSON = JSON.stringify(myAddressJSONObject);
+            var jsonAdd = JSON.parse(stringJSON); 
+            if(var_name != undefined && var_name != '' && var_name == 'Ny Kunde' && jsonAdd.length > 1){
+                showInstallations();
+                if('{!cCustInstAdd.installationID}' != ''){
+                    $('#' + '{!cCustInstAdd.installationID}').attr('checked', true);
+                }   
+            }
+            else{
+                showSubSection = 'false';
+            }
+            function showInstallations(){
+                installArray = new Array();       
+                var_name = $("input[name='selectedCustomer']:checked").val();       
+                if(var_name != undefined && var_name != '' && var_name == 'Ny Kunde' && jsonAdd.length > 1){ 
+                    $.each(myAddressJSONObject,function(i,myAddressJSONObject){
+                        if(myAddressJSONObject['status'] == 1 || myAddressJSONObject['status'] == 2){
+                            ins = new Object();
+                            ins.installationNumber = ams;
+                            ins.installationId = myAddressJSONObject['installation_lbnr'];
+                            ins.location = myAddressJSONObject['lokation'];
+                            installArray.push(ins);
+                        }   
+                    });
+                    showSubSection = 'true';
+                }
+                else{
+                    showSubSection = 'false';
+                }
+                if(installArray.length > 0 && showSubSection == 'true'){
+                    $("#instTable").replaceWith('<table id=\"instTable\" class=\"zebra\" width=\"100%\" border=\"1\" ></table>');
+                    $("#installTemplate").tmpl(installArray).appendTo(createHeaders(basicHeader,"#instTable")); 
+                    document.getElementById('{!$Component.pageId.formId.block.outputInst}').style.display = 'block';   
+                }
+                else if(showSubSection == 'false'){
+                    document.getElementById('{!$Component.pageId.formId.block.outputInst}').style.display = 'none';
+                }
+            }
+            </script>
+        </apex:form>
+        
+    </body>
+    
+<script type="text/javascript">printContentAreaEnd();</script>
+</html>
+</apex:page>

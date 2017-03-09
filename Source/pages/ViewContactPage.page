@@ -1,0 +1,134 @@
+<apex:page showHeader="false" sidebar="false" controller="ViewContactController" applyHtmlTag="false">
+<html class="cvi2015">
+<body id="servicepage">
+<style>
+.labelStyle
+{
+        font-family: Arial, Helvetica, sans-serif;
+        font-size:12px;
+        font-weight:bold;
+        text-align:center;
+}
+</style>
+
+<script type="text/javascript" src="{!siteCoreUrl}/sitecore/content/data/export/export.aspx?itemguid={25D3B7CA-F6FA-46D6-A787-1A34AF420196}&functions=true"></script>
+<apex:form >
+<script type="text/javascript">printHeader();</script>
+<script type="text/javascript">printTopMenu();</script>
+<script type="text/javascript">printContentAreaBegin();</script>
+<script type="text/javascript"> var portalBrugerRole = '{!portalBrugerRole}'; </script> 
+ <c:SCLinksComponent CableUnitName="{!cableUnitName}" PortalBrugerRole="{!portalBrugerRole}"/>
+ 
+ <apex:outputPanel >
+    <div class="bullets">
+        <ul>
+         <li><apex:outputText value="{!$Label.SC_ViewContactPageHeaderLabel}"/> </li>   
+        </ul>
+    </div>
+</apex:outputPanel> 
+  <apex:PageBlock >
+             <apex:PageBlockSection title="Se Kontakt" collapsible="false" columns="2">
+                <apex:pageBlockSectionItem labelStyleClass="labelStyle" >
+                              <apex:outputLabel value="Fornavn" for="firstName"/>
+                              <apex:outputField id="firstName" value="{!contact.FirstName}"/>  
+                      </apex:pageBlockSectionItem>
+                      <apex:pageBlockSectionItem >
+                              <apex:outputLabel value="Efternavn" for="lastname"/>
+                              <apex:outputField id="lastName" value="{!contact.LastName}"/>  
+                      </apex:pageBlockSectionItem>
+                     <apex:pageBlockSectionItem >
+                              <apex:outputLabel value="E-mail" for="email"/>
+                              <apex:outputField id="email" value="{!contact.Email}"/>  
+                      </apex:pageBlockSectionItem>
+                      <apex:pageBlockSectionItem >
+                              <apex:outputLabel value="Alternativ e-mail" for="email"/>
+                              <apex:outputField id="alternateEmail" value="{!contact.AlternateEmail__c}"/>  
+                      </apex:pageBlockSectionItem>
+                      
+                      <apex:pageBlockSectionItem >
+                              <apex:outputLabel value="Arb.tlf." for="phone"/>
+                              <!-- <apex:outputLabel value="Telefon" for="phone"/> -->
+                              <apex:outputField id="Phone" value="{!contact.Phone}"/>  
+                      </apex:pageBlockSectionItem>
+                      <apex:pageBlockSectionItem >
+                              <apex:outputLabel value="Mobil" for="mobilePhone"/>
+                              <!-- <apex:outputLabel value="Mobiltelefon" for="mobilePhone"/> -->
+                              <apex:outputField id="mobilePhone" value="{!contact.MobilePhone}"/>  
+                      </apex:pageBlockSectionItem>
+                      <apex:pageBlockSectionItem >
+                              <apex:outputLabel value="Privat tlf." for="homePhone"/>
+                              <!-- <apex:outputLabel value="HomePhone" for="homePhone"/> -->
+                              <apex:outputField id="homePhone" value="{!contact.HomePhone}"/>  
+                      </apex:pageBlockSectionItem>
+                 </apex:PageBlockSection>
+              </apex:pageBlock>
+              <apex:PageBlock id="addressDetailsPB">
+                <apex:PageBlockSection id="addressDetailsPBS" title="Adresse information" collapsible="false" columns="2">
+                        <apex:pageBlockSectionItem >
+                          <apex:outputLabel value="Gadenavn" for="Gadenavn"/>
+                          <apex:outputField id="Gade" value="{!address.Street__c}"/>  
+                        </apex:pageBlockSectionItem>
+                        <apex:pageBlockSectionItem >
+                          <apex:outputLabel value="Husnr." for="Husnr"/>
+                          <apex:outputField id="Husnr" value="{!address.HouseNumber__c}"/>  
+                        </apex:pageBlockSectionItem>
+                        <apex:pageBlockSectionItem >
+                          <apex:outputLabel value="Opgang" for="Opgang"/>
+                          <apex:outputField id="Opgang" value="{!address.Entrance__c}"/>  
+                        </apex:pageBlockSectionItem>
+                        <apex:pageBlockSectionItem >
+                          <apex:outputLabel value="Side/dørnr" for="door"/>
+                          <apex:outputField id="door" value="{!address.Door_No__c}"/>  
+                        </apex:pageBlockSectionItem>
+                        <apex:pageBlockSectionItem >
+                          <apex:outputLabel value="Etage" for="Etage"/>
+                          <apex:outputField id="Etage" value="{!address.Floor__c}"/>  
+                        </apex:pageBlockSectionItem>
+                        <!-- <apex:pageBlockSectionItem >
+                          <apex:outputLabel value="Side" for="Side"/>
+                          <apex:outputField id="Side" value="{!address.Side__c}"/>  
+                        </apex:pageBlockSectionItem> -->
+                        <apex:pageBlockSectionItem >
+                          <apex:outputLabel value="Postnr" for="Postnr"/>
+                          <apex:outputField id="Postnr" value="{!address.Postcode__c}"/>  
+                        </apex:pageBlockSectionItem>
+                        <apex:pageBlockSectionItem >
+                          <apex:outputLabel value="By" for="By"/>
+                          <apex:outputField id="By" value="{!address.Town__c}"/>  
+                        </apex:pageBlockSectionItem>
+                        <!-- <apex:pageBlockSectionItem >
+                          <apex:outputLabel value="Postboks" for="Postboks"/>
+                          <apex:outputField id="Postboks" value="{!address.PO_Box__c}"/>  
+                        </apex:pageBlockSectionItem> -->
+                </apex:PageBlockSection>
+              </apex:PageBlock>
+              <apex:pageBlock >   
+              <apex:PageBlockSection title="Se Roller" collapsible="false"></apex:PageBlockSection>
+              <apex:dataList value="{!chosenRoles}" var="cRoles">
+              <div class="bullets">
+                <ul>
+                    <li>
+                        <apex:outputText value="{!cRoles.RoleName__c}"></apex:outputText>
+                     
+                         <apex:outputLabel value="Antal Kopier:  " for="antalKopier" rendered="{!cRoles.RoleName__c == indbliksadresseRoleChk}" style="padding:0px 0px 0px 55px;font-weight:bold" />
+                       &nbsp;  <apex:outputField id="antalKopier" value="{!cRoles.Total_Insight__c}" rendered="{!cRoles.RoleName__c == indbliksadresseRoleChk}" style="padding:0px 10px 0px 10px;"/>
+                              
+                   </li>
+                </ul>
+                
+              </div>            
+              </apex:dataList>  
+              
+                 
+        <apex:pageBlockButtons location="bottom">
+                      <apex:commandButton action="{!cancel}" value="{!$Label.SC_Back}" immediate="true" title="Tilbage" styleClass="dialogbutton_grey"/>
+                      <!--  Added for temporary purpose -->
+                      <!-- <apex:commandButton action="{!cancel}" value="Go Back"  immediate="true" title="Click to Go Back"/> -->
+        </apex:pageBlockButtons>
+   </apex:PageBlock>
+   <script type="text/javascript">printContentAreaEnd();</script>
+<script type="text/javascript">printFooter();</script>
+</apex:form>
+</body>
+</html>
+</apex:page>

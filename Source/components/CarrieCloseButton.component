@@ -1,0 +1,10 @@
+<apex:component >
+<script type="text/javascript">
+
+function closeWin()
+{
+window.close();
+}
+</script>
+<input type="button" value="Luk" onclick="closeWin()" class="btn" />
+</apex:component>

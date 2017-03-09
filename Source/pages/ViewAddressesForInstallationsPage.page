@@ -1,0 +1,510 @@
+<apex:page controller="ViewAddressesForInstallationsController" showHeader="false" sidebar="false" applyHtmlTag="false">
+<html class="cvi2015">
+<apex:includescript value="https://code.jquery.com/jquery-1.12.0.min.js" />
+    <apex:includescript value="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js" />
+    <apex:includescript value="https://cdn.datatables.net/plug-ins/1.10.11/sorting/alt-string.js"/>
+    <apex:includeScript value="https://cdn.datatables.net/plug-ins/1.10.11/sorting/natural.js"/>
+    <apex:includeScript value="//jquery.metadata.min.js"/>
+    <apex:stylesheet value="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.min.css" />
+    <apex:includeScript value="https://cdn.datatables.net/plug-ins/1.10.11/sorting/alt-string.js" />
+     <style>
+         table.dataTable tbody td {padding: 3px 0px 3px 0px;}
+      .list tr.even td, .list tr.odd td{vertical-align:middle}
+         table.dataTable thead th, table.dataTable thead td{padding: 5px 0px;}
+       .list tr.even td, .list tr.odd td {
+            border-bottom-width: 1px;
+        }
+       .bPageBlock .list .last>td{
+            border-bottom-width: 1px;
+        }
+       table.dataTable thead .sorting_asc {
+        background-color: #676767;
+       }
+       table.dataTable thead .sorting_desc{
+        background-color: #676767;
+       }
+        table.dataTable thead .sorting {
+        background-color: #676767;
+       }
+       table.dataTable tr.odd { background-color: #CAE6C4;  border:1px lightgrey;}
+    table.dataTable tr.even{ background-color: white; border:1px lightgrey; }
+         table.dataTable thead .sorting:after,
+table.dataTable thead .sorting_asc:after,
+table.dataTable thead .sorting_desc:after {
+    display: none;
+}
+  </style>
+         
+<body id="servicepage" >
+<script type="text/javascript">
+            j$ = jQuery.noConflict();
+            var installListPagId;
+            j$(document).ready(function(){
+            installListPagId = j$('[id$="installListPagId"]').DataTable({
+            "columnDefs": [ {
+              "orderable": false,
+                "targets"  : [0,1,5,6,7]                            
+    }, { "type": "alt-string", "targets": [2]}],
+      <!--{ "type": "natural", "targets":[1]}],-->
+            "ordering":true,
+            <!--"order": [[ 1, "asc" ]],-->
+            "paging":false,
+             "info": false,
+            "language":{
+                "info": "Vis _START_ til _END_ af _TOTAL_ poster",
+                 "infoEmpty": "Vis 0 til 0 af 0 poster",
+                 "search": "Søg",
+                 "infoFiltered":   "(filtreret fra _MAX_ poster)",
+                "loadingRecords": "Henter...",
+                "zeroRecords":    "Ingen poster fundet",
+                "emptyTable": "Ingen data fundet"
+                
+                }
+         });
+        });
+</script>
+<script type="text/javascript" src="{!siteCoreUrl}/sitecore/content/data/export/export.aspx?itemguid={6BB73624-FD1A-47A3-B2E5-C366F1D4A0B9}&functions=true"></script> 
+<script type="text/javascript">printHeader();</script>
+<script type="text/javascript">printTopMenu();</script>
+<script type="text/javascript">printContentAreaBegin();</script> 
+ 
+<script type="text/javascript"> var portalBrugerRole = '{!portalBrugerRole}'; </script> 
+<apex:stylesheet value="{!URLFOR($Resource.scStyleCss,'myStyle/myStyle.css')}"/>
+<script>
+      
+      var previousControlId;
+     
+      function hideObject(htmlObject){   
+         document.getElementById(htmlObject).style.visibility = "hidden";
+      } 
+     
+      function popup(custemail,customerName,popupId) {
+          
+          if(previousControlId  != null && previousControlId != popupId){
+             hideObject(previousControlId);
+          }   
+         // {!$Label.SC_No_Enkel}
+           var divTag = document.getElementById(popupId);
+           divTag.style.visibility='visible'; 
+           divTag.style.zIndex='150';
+            //divTag.style.position='relative';
+           var divIdName='';
+           if(customerName || custemail){
+              
+               divIdName = '<Table width="120%" style="background-color:#eeeeee;">';
+                   divIdName =divIdName+ '<tr style="background-color:#eeeeee;" width="140%">';
+                       divIdName =divIdName+ '<td style="background-color:#eeeeee;"><center><b> Enkel Info </b></center></td>';
+                       divIdName =divIdName+ '<td style="background-color:#eeeeee;"><right><a href="javascript:hideObject(\'' + popupId + '\');" style="float: right"><img src="{!$Resource.Nej_icon}"></img></a></right></td>';
+                   divIdName=divIdName + '</tr>'; 
+                   divIdName = divIdName+ '<tr style="background-color:#eeeeee;">';
+                       divIdName = divIdName+ '<td colspan=2 style="background-color:#eeeeee;"><b>Customer Name : </b>' + customerName+ '</td>';
+                   divIdName = divIdName + '</tr>';
+                   divIdName = divIdName+ '<tr style="background-color:#eeeeee;">';
+                       divIdName = divIdName+ '<td colspan=2 style="background-color:#eeeeee;"><b>Customer Email : </b>' + custemail+ '</td>';
+                   divIdName = divIdName + '</tr>';
+               divIdName = divIdName + '</Table>';
+               
+            }else{
+                divIdName = '<Table width="120%" style="background-color:#eeeeee;">';
+                   divIdName =divIdName+ '<tr style="background-color:#eeeeee;" width="140%">';
+                       divIdName =divIdName+ '<td style="background-color:#eeeeee;"><center><b> Enkel Info </b></center></td>';
+                       divIdName =divIdName+ '<td style="background-color:#eeeeee;"><right><a href="javascript:hideObject(\'' + popupId + '\');" style="float: right"><img src="{!$Resource.Nej_icon}"></img></a></right></td>';
+                   divIdName=divIdName + '</tr>'; 
+                   divIdName = divIdName+ '<tr style="background-color:#eeeeee;">';
+                       divIdName = divIdName+ '<td colspan=2 style="background-color:#eeeeee;"><center><b>Ingen Enkel Kunde til stede på denne adresse .</b></center></td>';
+                   divIdName = divIdName + '</tr>';
+               divIdName = divIdName + '</Table>';
+            }
+          
+            document.getElementById(popupId).innerHTML=divIdName;
+            previousControlId = popupId;
+           
+           
+     }       
+</script>
+<apex:stylesheet value="{!URLFOR($Resource.tooltipZip, '/tooltip/tooltip.css.php')}" />
+<apex:includeScript value="{!URLFOR($Resource.tooltipZip, '/tooltip/mootools.js')}" /> 
+<apex:includeScript value="{!URLFOR($Resource.tooltipZip, '/tooltip/tooltip.js')}" />
+<apex:includeScript value="{!URLFOR($Resource.tooltipZip, '/tooltip/styles/')}" /> 
+<style type="text/css">
+   .customPopup{
+      background-color: white;
+      border-style: 0;
+      padding:10px;
+      position: absolute;
+      left: 65%;
+      width: 320px;
+      margin-left: -150px;
+      border-width:1px; 
+  }
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+</style>
+
+ 
+<c:SCLinksComponent CableUnitName="{!cableUnitName}" PortalBrugerRole="{!portalBrugerRole}"/>
+<apex:pageMessages rendered="true"/>
+
+<script type="text/javascript"> 
+    
+    function validationFunction(){
+        var cnnnt = checkAll();
+        if(cnnnt==0){
+            alert('Vælg mindst én installationsadresse');
+            return false;
+        }
+        return true;
+    }
+    
+    function displayTVPackages(){
+        displayTvPackages();
+    }
+    function confirmMail(){
+        var locale = '{!localeSetting}';
+        var userInput;
+        if(locale == 'da_DK'){
+            userInput = confirm('Eksporterede adresser sendes til din e-mailadresse i csv-format. Er du sikker?');
+        }else{
+            userInput = confirm('Exported adresses will be sent to your e-mail in csv-format. Are you sure?');
+        }
+        return userInput;
+    }
+</script>
+
+<!-- 
+<script id="installationTableTemplate" type="text/x-jQuery-tmpl">
+        <tr>  
+            <td><input name="selectOneProduct" type="checkbox" id="${varenr}"/></td>
+            <td>${formattedAddress}</td>
+            <td>${status}</td>
+            <td>${dato}</td> 
+            <td>${package}</td>
+        </tr>
+    </script>
+--> 
+    <div id="listsize" style="display:none;height: 33px;padding-left: 50px;padding-top: 5px;border-color: red;color: grey;" class="mailError">
+        <apex:outputText />
+    </div>
+    <div id="productOfferingMsgDiv" style="display:none;height: 33px;padding-left: 50px;padding-top: 18px;border-color: red;color: grey;" class="mailError">
+            <apex:outputText id="Msg1" value="{!$Label.SC_commonError}"/>
+    </div>
+    <div id="checkBoxMessage" style="display:none;height: 33px;padding-left: 50px;padding-top: 18px;border-color: red;color: grey;" class="mailError">
+            <apex:outputText id="checkboxText" value="Du skal vælge mindst en installationsadresse ved skift af tv-pakke"/>
+    </div>
+            <div class="bullets">
+                    <ul>
+                        <li>Her kan du skifte tv-pakke for en eller flere adresser på kunde.</li> 
+                        <li>Du kan også se historik på adressens tv-pakke og gemme alle data med tv-pakker på alle adresser på kunde i dit eget excel-ark. </li> 
+                    </ul>
+                </div>
+              
+<apex:form id="instlForm" >
+  
+<apex:pageMessage detail="{!$Label.CableUnitNotMatched}" rendered="{!!renderSection}" severity="error"></apex:pageMessage>
+  
+       <apex:PageBlock id="block1" rendered="{!renderSection}">
+                                <apex:pageBlockSection title="Kundedetaljer" columns="2" collapsible="false">
+           <apex:pageBlockSectionItem >
+                  <apex:outputLabel value="Kundenavn: " />
+                  <apex:outputLabel value="{!cableUnitName}" />
+            </apex:pageBlockSectionItem>
+            <apex:pageBlockSectionItem >
+                  <apex:outputLabel value="Kundenr: " />
+                  <apex:outputLabel value="{!cableUnitNumber}" />
+            </apex:pageBlockSectionItem>
+        </apex:pageBlockSection>
+       </apex:PageBlock>   
+       <apex:PageBlock id="block2" rendered="{!NOT(errorFlag)&& renderSection}">    
+           <apex:pageBlockSection title="Søg adresse" collapsible="false" columns="3">
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Søg adresse"></apex:outputLabel>
+                    <apex:selectList value="{!searchValues}" size="1">
+                       <apex:selectOptions value="{!items}"/>
+                    </apex:selectList>
+                </apex:pageBlockSectionItem>
+                       
+               <apex:pageBlockSectionItem >   
+                     <apex:outputLabel value="Husnr."></apex:outputLabel> 
+                       <apex:inputText id="searchText" value="{!searchHsNoText}"/>
+               </apex:pageBlockSectionItem>
+               <apex:pageblocksectionItem >
+                   <apex:commandButton value=" Vis " action="{!search}" title="{!$Label.SC_ViewAddressesForInstallationsPage_Search}" styleClass="dialogbutton_orange"/> 
+               </apex:pageblocksectionItem>              
+           <!-- added for Bland selv fase 2 b-->
+               <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="TV-Pakke"></apex:outputLabel>
+                    <apex:selectList value="{!BSsearchValues}" size="1">
+                       <apex:selectOption itemValue="Alle" itemLabel="Alle"/>
+                        <apex:selectOption itemValue="BlandSelv" itemLabel="Bland Selv"/>
+                    </apex:selectList>
+                </apex:pageBlockSectionItem>
+                
+                 <!-- End of Bland selv fase 2 b-->
+           </apex:pageBlockSection> 
+       </apex:PageBlock> 
+       <c:PagingDropDownComponent pageController="{!this}" rendered="{!NOT(SogAddressFlag) && renderSection}"></c:PagingDropDownComponent> 
+       <apex:commandButton value="{!$Label.SC_Back}" rendered="{!SogAddressFlag}" styleClass="dialogbutton_orange" action="{!backToViewPage}"></apex:commandButton> 
+       <apex:PageBlock id="abc" rendered="{!NOT(SogAddressFlag) && renderSection}"> 
+           <apex:stylesheet value="{!URLFOR($Resource.scrowOddEvenStyle)}"/> 
+           <apex:outputPanel id="instListId" >
+              
+               <apex:pageBlockTable width="100%" value="{!installationList}" var="installation" rowClasses="even,odd" border="0" id="installListPagId" rendered="{!NOT(SogAddressFlag)}">
+                    <apex:column >
+                        <apex:facet name="header">
+                            <c:customSelectAllOrNoneByCheckbox />
+                        </apex:facet>
+                       <apex:inputCheckbox value="{!installation.selected}" id="checkedone" disabled="{!OR(installation.installation.HasFuturePackage__c,NOT(ISNULL(installation.subscription.Future_Subscription__c)),NOT(installation.installation.Installation_Status_Code__c == '1'))}"/>
+                    </apex:column>
+                <!--  <apex:column headervalue="id" value="{!installation.amsid}" style="text-align:left" headerClass="headerStyleLeft"/>  -->   
+                    <apex:column headervalue="Adresse" value="{!installation.formattedAddress}" style="text-align:left;width: 240px;" headerClass="headerStyleLeft"/>
+                    <apex:column headervalue="Status" style="text-align:center;width: 57px;" headerClass="headerStyleLeft">
+                    <!-- <apex:outputLabel value="{!installation.installation.Installation_Formula_Status__c}" escape="false"  rendered="{!AND(ISNULL(installation.subscription.Future_Subscription__c),installation.installation.HasFuturePackage__c == false)}" /> -->
+                    <!--  Added for SC-22 Sites -->
+
+                    <apex:image alt="{!installation.installation.Image_Status_Text__c}" url="{!URLFOR($Resource.Image_Status, installation.installation.Image_Status_Text__c)}" rendered="{!AND(ISNULL(installation.subscription.Future_Subscription__c),installation.installation.HasFuturePackage__c == false)}" />  
+                    <apex:image alt="sc_cu_status_red.gif" url="{!$Resource.sc_cu_status_red}" rendered="{!OR(NOT(ISNULL(installation.subscription.Future_Subscription__c)),installation.installation.HasFuturePackage__c)}"/>
+
+ 
+                    </apex:column>
+                    <apex:column headervalue="Dato" value="{!installation.subscription.Start_Date__c}" style="text-align:left;width: 85px;" headerClass="headerStyleLeft"/>   
+                    <apex:column headervalue="Tv-pakke" value="{!installation.CurrentProductName}" style="text-align:center;width: 99px;" headerClass="headerStyleLeft"/> 
+                    <!-- Added as per CR-111 -->
+                    <!--Added for Bland selv phase 2b-->
+                   <apex:column headerValue="Blokeret bestilling" style="text-align:center;width: 135px;">
+                       <apex:outputPanel layout="block">                             
+                            <apex:inputCheckbox value="{!installation.isBadPayee}" >
+                            </apex:inputCheckbox>                            
+                            </apex:outputPanel>
+                      
+                   </apex:column>
+                     
+                   <!--End Bland selv phase 2b-->
+                    
+                    <apex:column headerValue="Ændringer" style="width: 80px;"> 
+                       <apex:outputLink value="#" onclick="window.open('{!$Site.Prefix}/apex/ViewFuturePackageDetails?futureSubsId={!installation.amsid}','FuturePackageDetails','menubar=no,width=500,height=300,toolbar=no,scrollbars=yes');return false;" rendered="{!OR(NOT(ISNULL(installation.subscription.Future_Subscription__c)),installation.installation.HasFuturePackage__c)}">
+
+                         <apex:outputText value="Klik her" rendered="{!OR(NOT(ISNULL(installation.subscription.Future_Subscription__c)),installation.installation.HasFuturePackage__c)}" />
+                       </apex:outputLink>                                           
+                    </apex:column>
+                     <!--Added for Bland selv phase 2b-->                   
+                    <apex:column headerValue="Kd Info">
+                   <apex:outputPanel id="popupId" style="visibility:hidden;word-wrap:break-word;" styleClass="customPopup">
+                        <label id="{!installation.installation.Id}"></label>
+                    </apex:outputPanel>
+                      <apex:commandlink action="{!getEnkelInformation}" value="view" rendered="{!OR(installation.CurrentProductName =='Fuldpakke med Bland Selv',installation.CurrentProductName =='Mellempakke med Bland Selv')}" onComplete="popup('{!emailSTR}','{!customerName}','{!$Component.popupId}')" status="queryStatus">                            
+                             <apex:param name="installationIdStr"
+                                value="{!installation.installation.Address__r.External_Id__c}"
+                                assignTo="{!installationIdStr}"/>
+                       </apex:commandlink>                 
+                    </apex:column>
+                    <!--End of Bland selv phase 2b-->
+               </apex:pageBlockTable>
+         </apex:outputPanel>
+         
+         <apex:facet name="footer">
+            <apex:outputPanel layout="Centre" rendered="{!NOT(errorFlag)&& renderSection}"> 
+                <apex:commandButton action="{!displayTvPackages}" rendered="{!cableUnitLoop}" rerender="productOfferingId" status="queryStatus" oncomplete="changeTvPackage1()" value="{!$Label.SC_ViewAddressesForInstallationsPage_ChangeTVPackage}" title="{!$Label.SC_LoopCableUnits}" disabled="{!OR(installationList.size < 1,cableUnitLoop)}" id="btnChangePack" style="background:#808080;background-image:none;"></apex:commandButton>&nbsp;&nbsp;  
+                <apex:commandButton action="{!displayTvPackages}" rendered="{!NOT(cableUnitLoop)}" rerender="productOfferingId" status="queryStatus" oncomplete="changeTvPackage1()" value="{!$Label.SC_ViewAddressesForInstallationsPage_ChangeTVPackage}" title="{!$Label.SC_NonLoopCableUnits}" disabled="{!installationList.size < 1}" styleClass="dialogbutton_orange" id="btnChangePack1"></apex:commandButton>&nbsp;&nbsp;  
+                <apex:commandButton action="{!viewInstallationHistory}" value="{!$Label.SC_ViewAddressesForInstallationsPage_SeeHistory}" title="Klik for at Se historik" disabled="{!installationList.size < 1}"  onclick="return validationFunction()" styleClass="dialogbutton_orange"></apex:commandButton>&nbsp;&nbsp;
+                <apex:commandButton value="{!$Label.SC_ViewAddressesForInstallationsPage_SaveAddressList}" title="Gem adresseliste" disabled="{!installationList.size < 1}" rendered="{!NOT(addressesSize)}" styleClass="dialogbutton_orange" action="{!exportAddressesToExcel}"></apex:commandButton>&nbsp;&nbsp;
+                <apex:commandButton value="{!$Label.SC_ViewAddressesForInstallationsPage_SaveAddressList}" title="Gem adresseliste" disabled="{!installationList.size < 1}" rendered="{!addressesSize}" styleClass="dialogbutton_orange" action="{!exportAddressesToExcelAndSendMail}" onClick="return confirmMail();"></apex:commandButton>&nbsp;&nbsp;  
+               <apex:commandButton action="{!addAsBadPayee}" value="{!$Label.Add_BS_Bad_Payee}" title="Tilføj/fjern blokering af bestilling" disabled="{!installationList.size < 1}"  styleClass="dialogbutton_orange" status="calloutStatus"></apex:commandButton>&nbsp;&nbsp;
+               <apex:commandButton value="{!$Label.BS_List}" title="BS liste"  disabled="{!installationList.size < 1}" styleClass="dialogbutton_orange" action="{!exportAddressesToExcelBS}"></apex:commandButton>&nbsp;&nbsp;
+
+ 
+                
+           <!-- <apex:commandButton value="Demo for Karen" action="{!DemoPage}"/>  -->     
+                <c:PagingComponentSC pageController="{!this}" userSelectedPage="{!userSelectedPage}"></c:PagingComponentSC>  
+            </apex:outputPanel>   
+         </apex:facet> 
+       </apex:PageBlock>
+        <br></br> 
+        <br></br>
+<apex:outputText value="{!$Label.SCBlandSlevtext}" escape="false"/><br/>
+   <b> Blokeret bestilling </b><br/><apex:outputText value="{!$Label.Blokeret_bestilling}" escape="false"/><br/>
+   <b>Kd Info</b><br/><apex:outputText value="{!$Label.BS_Info}" escape="false"/><br/>
+
+     <br/>
+             <h2 style="font-size:medium;"><b>Symbolforklaring</b></h2>
+        <br></br><br></br>
+        <apex:image url="{!$Resource.sc_cu_status_green}" /> &nbsp;<apex:outputLabel value="{!$Label.SC_InstallationStik}" />&nbsp; &nbsp;&nbsp; &nbsp;
+        <apex:image url="{!$Resource.sc_cu_status_yellow}" /> &nbsp;<apex:outputLabel value="{!$Label.SC_InstallationTilslutning}" />&nbsp; &nbsp;&nbsp; &nbsp; 
+        <apex:image url="{!$Resource.sc_cu_status_grey}" /> &nbsp;<apex:outputLabel value="{!$Label.SC_InstallationNotPossible}" />&nbsp; &nbsp;&nbsp; &nbsp;
+        <apex:image url="{!$Resource.sc_cu_status_red}" /> &nbsp;<apex:outputLabel value="Igangværende pakkeændring*" />
+        <br></br><br></br> 
+        <apex:outputLabel value="*Opdateres sammen med kolonnen 'Ændringer', når bestillingen er registreret i bagvedliggende systemer. Dette sker typisk indenfor et par dage." />
+
+ 
+           
+        <!-- <apex:outputLabel value="(BS) Pakke med Bland Selv" /> -->
+    <!--    <div>
+           <table id="installationTable" class="tablesorter">
+            <thead>
+             <tr>
+               <th>&nbsp;</th>
+               <th>Addresse</th>
+               <th>Status</th>
+               <th>Dato</th>
+               <th>Pakke</th>
+             </tr>
+            </thead>
+            <tbody id="installationTableBody">
+            
+            </tbody>
+           </table>
+           
+<div id="pager" class="pager">
+    <form>
+        <img src="../addons/pager/icons/first.png" class="first"/>
+        <img src="../addons/pager/icons/prev.png" class="prev"/>
+        <input type="text" class="pagedisplay"/>
+        <img src="../addons/pager/icons/next.png" class="next"/>
+        <img src="../addons/pager/icons/last.png" class="last"/>
+        <select class="pagesize">
+            <option selected="selected"  value="10">10</option>
+            <option value="20">20</option>
+            <option value="30">30</option>
+            <option  value="40">40</option>
+        </select>
+    </form>
+</div>
+           
+        </div> --> 
+        
+        
+        
+        <apex:actionFunction name="changeTvPackage" action="{!changeTvPackage}"></apex:actionFunction>
+
+        
+        <apex:actionStatus id="queryStatus">
+            <apex:facet name="start">
+                <c:SC_LoadingComponent BackColor="#efefef" borderColor="#336699" borderSize="3" height="50px" width="120px" 
+                ImageUrl="{!$Resource.Loading}" Message="Loading..." messageStyle="color:darkred;font-size:11pt;font-weight:bold;" />
+            
+               </apex:facet>
+        </apex:actionStatus>
+       
+        <apex:actionStatus id="calloutStatus">
+            <apex:facet name="start">
+            <apex:outputPanel >
+                            <div class="waitingSearchDiv" id="el_loading" style="background-color: #fbfbfb;
+                                   height: 100%;opacity:0.65;width:100%;"> 
+                                <div class="waitingHolder" style="top: 74.2px; width: 91px;">
+                                    <img class="waitingImage" src="/img/loading.gif" title="Please Wait..." />
+                                    <span class="waitingDescription">Saving...</span>
+                                </div>
+                            </div>
+                   </apex:outputPanel> 
+            </apex:facet>
+        </apex:actionStatus>
+        <apex:outputPanel id="productOfferingId">
+            <script>
+                var flag = '{!productOfferingFlag}';
+                var selectedFlag = '{!selectedFlag}';
+
+                function changeTvPackage1(){ 
+                   if(flag == "true" && selectedFlag == "true"){
+
+                      changeTvPackage();
+                   }else{
+
+                       if(flag != "true"){
+
+ 
+                          if(selectedFlag == "false"){
+
+                              document.getElementById("productOfferingMsgDiv").style.display="none";
+                              document.getElementById("checkBoxMessage").style.display = "block";
+                          }else{
+
+ 
+ 
+ 
+                              document.getElementById("checkBoxMessage").style.display = "none";  
+                              document.getElementById("productOfferingMsgDiv").style.display="block";
+
+ 
+                              var inputElem = document.getElementsByTagName("input");
+                              var currentIndexCheckbox;
+                              var cnt = 0;
+                              for(var i=0; i < inputElem.length; i++){
+                                 if(inputElem[i].type == 'checkbox'){
+                                   inputElem[i].checked = false;     
+                                 }
+                              }
+                          } 
+                       }    
+                   }        
+                }
+
+            </script>
+        </apex:outputPanel>
+        
+        <!-- <script>
+           var installationArray = new Array();
+           installationArray = buildArrayFromInstallationList();
+           $("#installationTableTemplate").tmpl(installationArray).appendTo("#installationTableBody");
+           
+           function buildArrayFromInstallationList(){
+              var JSONString = [{"tvpackage":null,"testFlag":null,"subscription":{"attributes":{"type":"Subscription__c"}},"subsCount":null,"selectedmyBeboer":null,"selected":false,"productsList":null,"productName":null,"packageChangedDate":null,"optionsPackages":null,"nybeborList":null,"nybeboerMediaType":null,"nybeboerHref":null,"nybeboerFlag":null,"myBebeorTxt":null,"installationLbnr":null,"installation":{"attributes":{"type":"Net_Installations__c","url":"/services/data/v25.0/sobjects/Net_Installations__c/a1xM00000016ArLIAU"},"Id":"a1xM00000016ArLIAU","INSTALLATION_ID__c":"1","Cable_Unit__r":{"attributes":{"type":"Cable_Unit__c","url":"/services/data/v25.0/sobjects/Cable_Unit__c/a1TD00000000jfoMAA"},"Name":"FREDERIKSBERG ALLE 26-28"},"Address__r":{"attributes":{"type":"Address__c","url":"/services/data/v25.0/sobjects/Address__c/a0H200000039DToEAM"},"Name":"Frederiksberg Alle","Street__c":"Frederiksberg Alle","Entrance__c":null,"Floor__c":"KL","Town__c":"Frederiksberg C","Side__c":null,"External_Id__c":"1743374","Door_No__c":null,"District__c":null,"House_No__c":"26","Postcode__c":"1820"},"Installation_Status__c":"Stik opsagt","Installation_Status_Code__c":"1","HasFuturePackage__c":false,"Name":"1743374","Installation_Formula_Status__c":"<img src=\"/resource/sc_cu_status_green\" alt=\" \" border=\"0\"/>"},"futureSubsPackage":null,"formatAddress":null,"existingSortering":null,"exceptionHandler":{"ModuleName":"Change tv-package","functionName":null,"errlog":{},"className":"cInstallation"},"errorSubscFlag":null,"errorMessage":null,"errorFlag":null,"errorCode":null,"effectiveEndDate":null,"effectiveDate":null,"currentProduct":null,"countSubscFlag":null,"checkValidate":null,"amsId":"1743374"},{"tvpackage":null,"testFlag":null,"subscription":{"attributes":{"type":"Subscription__c"}},"subsCount":null,"selectedmyBeboer":null,"selected":false,"productsList":null,"productName":null,"packageChangedDate":null,"optionsPackages":null,"nybeborList":null,"nybeboerMediaType":null,"nybeboerHref":null,"nybeboerFlag":null,"myBebeorTxt":null,"installationLbnr":null,"installation":{"attributes":{"type":"Net_Installations__c","url":"/services/data/v25.0/sobjects/Net_Installations__c/a1xM00000016ArMIAU"},"Id":"a1xM00000016ArMIAU","INSTALLATION_ID__c":"1","Cable_Unit__r":{"attributes":{"type":"Cable_Unit__c","url":"/services/data/v25.0/sobjects/Cable_Unit__c/a1TD00000000jfoMAA"},"Name":"FREDERIKSBERG ALLE 26-28"},"Address__r":{"attributes":{"type":"Address__c","url":"/services/data/v25.0/sobjects/Address__c/a0H20000003CP6fEAG"},"Name":"Frederiksberg Alle","Street__c":"Frederiksberg Alle","Entrance__c":null,"Floor__c":"ST","Town__c":"Frederiksberg C","Side__c":null,"External_Id__c":"1743375","Door_No__c":null,"District__c":null,"House_No__c":"26","Postcode__c":"1820"},"Installation_Status__c":"Stik opsagt","Installation_Status_Code__c":"1","HasFuturePackage__c":false,"Name":"1743375","Installation_Formula_Status__c":"<img src=\"/resource/sc_cu_status_green\" alt=\" \" border=\"0\"/>"},"futureSubsPackage":null,"formatAddress":null,"existingSortering":null,"exceptionHandler":{"ModuleName":"Change tv-package","functionName":null,"errlog":{},"className":"cInstallation"},"errorSubscFlag":null,"errorMessage":null,"errorFlag":null,"errorCode":null,"effectiveEndDate":null,"effectiveDate":null,"currentProduct":null,"countSubscFlag":null,"checkValidate":null,"amsId":"1743375"},{"tvpackage":null,"testFlag":null,"subscription":{"attributes":{"type":"Subscription__c","url":"/services/data/v25.0/sobjects/Subscription__c/a23M00000003sUiIAI"},"Net_Installation__c":"a1xM00000016ArGIAU","Id":"a23M00000003sUiIAI","Name":"A-910578","Start_Date__c":"2012-08-01","End_Date__c":"2012-09-30","Product__r":{"attributes":{"type":"Product__c","url":"/services/data/v25.0/sobjects/Product__c/a1zM000000002EDIAY"},"Name":"Grundpakke"},"Address__c":"1743363","Future_Subscription__c":"a23M0000000HWGZIA4","Subscription_No__c":"-1305773026"},"subsCount":null,"selectedmyBeboer":null,"selected":false,"productsList":null,"productName":null,"packageChangedDate":null,"optionsPackages":null,"nybeborList":null,"nybeboerMediaType":null,"nybeboerHref":null,"nybeboerFlag":null,"myBebeorTxt":null,"installationLbnr":null,"installation":{"attributes":{"type":"Net_Installations__c","url":"/services/data/v25.0/sobjects/Net_Installations__c/a1xM00000016ArGIAU"},"Id":"a1xM00000016ArGIAU","INSTALLATION_ID__c":"1","Cable_Unit__r":{"attributes":{"type":"Cable_Unit__c","url":"/services/data/v25.0/sobjects/Cable_Unit__c/a1TD00000000jfoMAA"},"Name":"FREDERIKSBERG ALLE 26-28"},"Address__r":{"attributes":{"type":"Address__c","url":"/services/data/v25.0/sobjects/Address__c/a0H20000003B7MOEA0"},"Name":"Frederiksberg Alle","Street__c":"Frederiksberg Alle","Entrance__c":null,"Floor__c":"1","Town__c":"Frederiksberg C","Side__c":null,"External_Id__c":"1743363","Door_No__c":null,"District__c":null,"House_No__c":"26","Postcode__c":"1820"},"Installation_Status__c":"Stik opsagt","Installation_Status_Code__c":"1","HasFuturePackage__c":true,"Name":"1743363","Installation_Formula_Status__c":"<img src=\"/resource/sc_cu_status_green\" alt=\" \" border=\"0\"/>"},"futureSubsPackage":null,"formatAddress":null,"existingSortering":null,"exceptionHandler":{"ModuleName":"Change tv-package","functionName":null,"errlog":{},"className":"cInstallation"},"errorSubscFlag":null,"errorMessage":null,"errorFlag":null,"errorCode":null,"effectiveEndDate":null,"effectiveDate":null,"currentProduct":null,"countSubscFlag":null,"checkValidate":null,"amsId":"1743363"},{"tvpackage":null,"testFlag":null,"subscription":{"attributes":{"type":"Subscription__c","url":"/services/data/v25.0/sobjects/Subscription__c/a23M00000003rdKIAQ"},"Net_Installation__c":"a1xM00000016ArHIAU","Id":"a23M00000003rdKIAQ","Name":"A-907268","Start_Date__c":"2012-08-01","End_Date__c":"2100-01-01","Product__r":{"attributes":{"type":"Product__c","url":"/services/data/v25.0/sobjects/Product__c/a1zM000000003OvIAI"},"Name":"Fuldpakke"},"Address__c":"1743367","Future_Subscription__c":null,"Subscription_No__c":"-1305773504"},"subsCount":null,"selectedmyBeboer":null,"selected":true,"productsList":null,"productName":null,"packageChangedDate":null,"optionsPackages":null,"nybeborList":null,"nybeboerMediaType":null,"nybeboerHref":null,"nybeboerFlag":null,"myBebeorTxt":null,"installationLbnr":null,"installation":{"attributes":{"type":"Net_Installations__c","url":"/services/data/v25.0/sobjects/Net_Installations__c/a1xM00000016ArHIAU"},"Id":"a1xM00000016ArHIAU","INSTALLATION_ID__c":"1","Cable_Unit__r":{"attributes":{"type":"Cable_Unit__c","url":"/services/data/v25.0/sobjects/Cable_Unit__c/a1TD00000000jfoMAA"},"Name":"FREDERIKSBERG ALLE 26-28"},"Address__r":{"attributes":{"type":"Address__c","url":"/services/data/v25.0/sobjects/Address__c/a0H20000003DLVMEA4"},"Name":"Frederiksberg Alle","Street__c":"Frederiksberg Alle","Entrance__c":null,"Floor__c":"2","Town__c":"Frederiksberg C","Side__c":"TH","External_Id__c":"1743367","Door_No__c":null,"District__c":null,"House_No__c":"26","Postcode__c":"1820"},"Installation_Status__c":"Stik opsagt","Installation_Status_Code__c":"1","HasFuturePackage__c":false,"Name":"1743367","Installation_Formula_Status__c":"<img src=\"/resource/sc_cu_status_green\" alt=\" \" border=\"0\"/>"},"futureSubsPackage":null,"formatAddress":null,"existingSortering":null,"exceptionHandler":{"ModuleName":"Change tv-package","functionName":null,"errlog":{},"className":"cInstallation"},"errorSubscFlag":null,"errorMessage":null,"errorFlag":null,"errorCode":null,"effectiveEndDate":null,"effectiveDate":null,"currentProduct":null,"countSubscFlag":null,"checkValidate":null,"amsId":"1743367"},{"tvpackage":null,"testFlag":null,"subscription":{"attributes":{"type":"Subscription__c","url":"/services/data/v25.0/sobjects/Subscription__c/a23M00000003WkvIAE"},"Net_Installation__c":"a1xM0000001AWEGIA4","Id":"a23M00000003WkvIAE","Name":"A-827015","Start_Date__c":"2004-10-01","End_Date__c":"2012-08-31","Product__r":{"attributes":{"type":"Product__c","url":"/services/data/v25.0/sobjects/Product__c/a1zM000000003OvIAI"},"Name":"Fuldpakke"},"Address__c":"1743368","Future_Subscription__c":"a23M0000000HSiSIAW","Subscription_No__c":"1136671694"},"subsCount":null,"selectedmyBeboer":null,"selected":false,"productsList":null,"productName":null,"packageChangedDate":null,"optionsPackages":null,"nybeborList":null,"nybeboerMediaType":null,"nybeboerHref":null,"nybeboerFlag":null,"myBebeorTxt":null,"installationLbnr":null,"installation":{"attributes":{"type":"Net_Installations__c","url":"/services/data/v25.0/sobjects/Net_Installations__c/a1xM0000001AWEGIA4"},"Id":"a1xM0000001AWEGIA4","INSTALLATION_ID__c":"1","Cable_Unit__r":{"attributes":{"type":"Cable_Unit__c","url":"/services/data/v25.0/sobjects/Cable_Unit__c/a1TD00000000jfoMAA"},"Name":"FREDERIKSBERG ALLE 26-28"},"Address__r":{"attributes":{"type":"Address__c","url":"/services/data/v25.0/sobjects/Address__c/a0H20000003DonfEAC"},"Name":"Frederiksberg Alle","Street__c":"Frederiksberg Alle","Entrance__c":null,"Floor__c":"2","Town__c":"Frederiksberg C","Side__c":"TV","External_Id__c":"1743368","Door_No__c":null,"District__c":null,"House_No__c":"26","Postcode__c":"1820"},"Installation_Status__c":"Stik opsagt","Installation_Status_Code__c":"1","HasFuturePackage__c":true,"Name":"1743368","Installation_Formula_Status__c":"<img src=\"/resource/sc_cu_status_green\" alt=\" \" border=\"0\"/>"},"futureSubsPackage":null,"formatAddress":null,"existingSortering":null,"exceptionHandler":{"ModuleName":"Change tv-package","functionName":null,"errlog":{},"className":"cInstallation"},"errorSubscFlag":null,"errorMessage":null,"errorFlag":null,"errorCode":null,"effectiveEndDate":null,"effectiveDate":null,"currentProduct":null,"countSubscFlag":null,"checkValidate":null,"amsId":"1743368"},{"tvpackage":null,"testFlag":null,"subscription":{"attributes":{"type":"Subscription__c"}},"subsCount":null,"selectedmyBeboer":null,"selected":false,"productsList":null,"productName":null,"packageChangedDate":null,"optionsPackages":null,"nybeborList":null,"nybeboerMediaType":null,"nybeboerHref":null,"nybeboerFlag":null,"myBebeorTxt":null,"installationLbnr":null,"installation":{"attributes":{"type":"Net_Installations__c","url":"/services/data/v25.0/sobjects/Net_Installations__c/a1xM00000016ArIIAU"},"Id":"a1xM00000016ArIIAU","INSTALLATION_ID__c":"1","Cable_Unit__r":{"attributes":{"type":"Cable_Unit__c","url":"/services/data/v25.0/sobjects/Cable_Unit__c/a1TD00000000jfoMAA"},"Name":"FREDERIKSBERG ALLE 26-28"},"Address__r":{"attributes":{"type":"Address__c","url":"/services/data/v25.0/sobjects/Address__c/a0H200000037jb4EAA"},"Name":"Frederiksberg Alle","Street__c":"Frederiksberg Alle","Entrance__c":null,"Floor__c":"3","Town__c":"Frederiksberg C","Side__c":"TH","External_Id__c":"1743369","Door_No__c":null,"District__c":null,"House_No__c":"26","Postcode__c":"1820"},"Installation_Status__c":"Stik opsagt","Installation_Status_Code__c":"1","HasFuturePackage__c":false,"Name":"1743369","Installation_Formula_Status__c":"<img src=\"/resource/sc_cu_status_green\" alt=\" \" border=\"0\"/>"},"futureSubsPackage":null,"formatAddress":null,"existingSortering":null,"exceptionHandler":{"ModuleName":"Change tv-package","functionName":null,"errlog":{},"className":"cInstallation"},"errorSubscFlag":null,"errorMessage":null,"errorFlag":null,"errorCode":null,"effectiveEndDate":null,"effectiveDate":null,"currentProduct":null,"countSubscFlag":null,"checkValidate":null,"amsId":"1743369"},{"tvpackage":null,"testFlag":null,"subscription":{"attributes":{"type":"Subscription__c","url":"/services/data/v25.0/sobjects/Subscription__c/a23M0000000GursIAC"},"Net_Installation__c":"a1xM00000016ArJIAU","Id":"a23M0000000GursIAC","Name":"A-1017852","Start_Date__c":"2004-10-01","End_Date__c":"2012-09-30","Product__r":{"attributes":{"type":"Product__c","url":"/services/data/v25.0/sobjects/Product__c/a1zM000000003OvIAI"},"Name":"Fuldpakke"},"Address__c":"1743370","Future_Subscription__c":"a23M0000000HWHZIA4","Subscription_No__c":"1136672486"},"subsCount":null,"selectedmyBeboer":null,"selected":false,"productsList":null,"productName":null,"packageChangedDate":null,"optionsPackages":null,"nybeborList":null,"nybeboerMediaType":null,"nybeboerHref":null,"nybeboerFlag":null,"myBebeorTxt":null,"installationLbnr":null,"installation":{"attributes":{"type":"Net_Installations__c","url":"/services/data/v25.0/sobjects/Net_Installations__c/a1xM00000016ArJIAU"},"Id":"a1xM00000016ArJIAU","INSTALLATION_ID__c":"1","Cable_Unit__r":{"attributes":{"type":"Cable_Unit__c","url":"/services/data/v25.0/sobjects/Cable_Unit__c/a1TD00000000jfoMAA"},"Name":"FREDERIKSBERG ALLE 26-28"},"Address__r":{"attributes":{"type":"Address__c","url":"/services/data/v25.0/sobjects/Address__c/a0H200000039ZJWEA2"},"Name":"Frederiksberg Alle","Street__c":"Frederiksberg Alle","Entrance__c":null,"Floor__c":"3","Town__c":"Frederiksberg C","Side__c":"TV","External_Id__c":"1743370","Door_No__c":null,"District__c":null,"House_No__c":"26","Postcode__c":"1820"},"Installation_Status__c":"Stik opsagt","Installation_Status_Code__c":"1","HasFuturePackage__c":true,"Name":"1743370","Installation_Formula_Status__c":"<img src=\"/resource/sc_cu_status_green\" alt=\" \" border=\"0\"/>"},"futureSubsPackage":null,"formatAddress":null,"existingSortering":null,"exceptionHandler":{"ModuleName":"Change tv-package","functionName":null,"errlog":{},"className":"cInstallation"},"errorSubscFlag":null,"errorMessage":null,"errorFlag":null,"errorCode":null,"effectiveEndDate":null,"effectiveDate":null,"currentProduct":null,"countSubscFlag":null,"checkValidate":null,"amsId":"1743370"},{"tvpackage":null,"testFlag":null,"subscription":{"attributes":{"type":"Subscription__c","url":"/services/data/v25.0/sobjects/Subscription__c/a23M0000000H8cKIAS"},"Net_Installation__c":"a1xM00000016ArKIAU","Id":"a23M0000000H8cKIAS","Name":"A-1070704","Start_Date__c":"2004-10-01","End_Date__c":"2012-09-30","Product__r":{"attributes":{"type":"Product__c","url":"/services/data/v25.0/sobjects/Product__c/a1zM000000003OvIAI"},"Name":"Fuldpakke"},"Address__c":"1743371","Future_Subscription__c":"a23M0000000HWILIA4","Subscription_No__c":"1136671706"},"subsCount":null,"selectedmyBeboer":null,"selected":false,"productsList":null,"productName":null,"packageChangedDate":null,"optionsPackages":null,"nybeborList":null,"nybeboerMediaType":null,"nybeboerHref":null,"nybeboerFlag":null,"myBebeorTxt":null,"installationLbnr":null,"installation":{"attributes":{"type":"Net_Installations__c","url":"/services/data/v25.0/sobjects/Net_Installations__c/a1xM00000016ArKIAU"},"Id":"a1xM00000016ArKIAU","INSTALLATION_ID__c":"1","Cable_Unit__r":{"attributes":{"type":"Cable_Unit__c","url":"/services/data/v25.0/sobjects/Cable_Unit__c/a1TD00000000jfoMAA"},"Name":"FREDERIKSBERG ALLE 26-28"},"Address__r":{"attributes":{"type":"Address__c","url":"/services/data/v25.0/sobjects/Address__c/a0H20000003DsqiEAC"},"Name":"Frederiksberg Alle","Street__c":"Frederiksberg Alle","Entrance__c":null,"Floor__c":"4","Town__c":"Frederiksberg C","Side__c":"TH","External_Id__c":"1743371","Door_No__c":null,"District__c":null,"House_No__c":"26","Postcode__c":"1820"},"Installation_Status__c":"Stik opsagt","Installation_Status_Code__c":"1","HasFuturePackage__c":true,"Name":"1743371","Installation_Formula_Status__c":"<img src=\"/resource/sc_cu_status_green\" alt=\" \" border=\"0\"/>"},"futureSubsPackage":null,"formatAddress":null,"existingSortering":null,"exceptionHandler":{"ModuleName":"Change tv-package","functionName":null,"errlog":{},"className":"cInstallation"},"errorSubscFlag":null,"errorMessage":null,"errorFlag":null,"errorCode":null,"effectiveEndDate":null,"effectiveDate":null,"currentProduct":null,"countSubscFlag":null,"checkValidate":null,"amsId":"1743371"},{"tvpackage":null,"testFlag":null,"subscription":{"attributes":{"type":"Subscription__c","url":"/services/data/v25.0/sobjects/Subscription__c/a23M00000004AhCIAU"},"Net_Installation__c":"a1xM0000001AWEHIA4","Id":"a23M00000004AhCIAU","Name":"A-980544","Start_Date__c":"2004-10-01","End_Date__c":"2012-09-30","Product__r":{"attributes":{"type":"Product__c","url":"/services/data/v25.0/sobjects/Product__c/a1zM000000003OvIAI"},"Name":"Fuldpakke"},"Address__c":"1743372","Future_Subscription__c":"a23M0000000HWHuIAO","Subscription_No__c":"1136671718"},"subsCount":null,"selectedmyBeboer":null,"selected":false,"productsList":null,"productName":null,"packageChangedDate":null,"optionsPackages":null,"nybeborList":null,"nybeboerMediaType":null,"nybeboerHref":null,"nybeboerFlag":null,"myBebeorTxt":null,"installationLbnr":null,"installation":{"attributes":{"type":"Net_Installations__c","url":"/services/data/v25.0/sobjects/Net_Installations__c/a1xM0000001AWEHIA4"},"Id":"a1xM0000001AWEHIA4","INSTALLATION_ID__c":"1","Cable_Unit__r":{"attributes":{"type":"Cable_Unit__c","url":"/services/data/v25.0/sobjects/Cable_Unit__c/a1TD00000000jfoMAA"},"Name":"FREDERIKSBERG ALLE 26-28"},"Address__r":{"attributes":{"type":"Address__c","url":"/services/data/v25.0/sobjects/Address__c/a0H20000003FXn9EAG"},"Name":"Frederiksberg Alle","Street__c":"Frederiksberg Alle","Entrance__c":null,"Floor__c":"4","Town__c":"Frederiksberg C","Side__c":"TV","External_Id__c":"1743372","Door_No__c":null,"District__c":null,"House_No__c":"26","Postcode__c":"1820"},"Installation_Status__c":"Stik opsagt","Installation_Status_Code__c":"1","HasFuturePackage__c":true,"Name":"1743372","Installation_Formula_Status__c":"<img src=\"/resource/sc_cu_status_green\" alt=\" \" border=\"0\"/>"},"futureSubsPackage":null,"formatAddress":null,"existingSortering":null,"exceptionHandler":{"ModuleName":"Change tv-package","functionName":null,"errlog":{},"className":"cInstallation"},"errorSubscFlag":null,"errorMessage":null,"errorFlag":null,"errorCode":null,"effectiveEndDate":null,"effectiveDate":null,"currentProduct":null,"countSubscFlag":null,"checkValidate":null,"amsId":"1743372"},{"tvpackage":null,"testFlag":null,"subscription":{"attributes":{"type":"Subscription__c","url":"/services/data/v25.0/sobjects/Subscription__c/a23M00000003tUIIAY"},"Net_Installation__c":"a1xM00000016As0IAE","Id":"a23M00000003tUIIAY","Name":"A-914396","Start_Date__c":"2009-12-22","End_Date__c":"2012-09-30","Product__r":{"attributes":{"type":"Product__c","url":"/services/data/v25.0/sobjects/Product__c/a1zM000000003OvIAI"},"Name":"Fuldpakke"},"Address__c":"1743448","Future_Subscription__c":"a23M0000000HWGCIA4","Subscription_No__c":"-1713487111"},"subsCount":null,"selectedmyBeboer":null,"selected":false,"productsList":null,"productName":null,"packageChangedDate":null,"optionsPackages":null,"nybeborList":null,"nybeboerMediaType":null,"nybeboerHref":null,"nybeboerFlag":null,"myBebeorTxt":null,"installationLbnr":null,"installation":{"attributes":{"type":"Net_Installations__c","url":"/services/data/v25.0/sobjects/Net_Installations__c/a1xM00000016As0IAE"},"Id":"a1xM00000016As0IAE","INSTALLATION_ID__c":"1","Cable_Unit__r":{"attributes":{"type":"Cable_Unit__c","url":"/services/data/v25.0/sobjects/Cable_Unit__c/a1TD00000000jfoMAA"},"Name":"FREDERIKSBERG ALLE 26-28"},"Address__r":{"attributes":{"type":"Address__c","url":"/services/data/v25.0/sobjects/Address__c/a0H20000003CSojEAG"},"Name":"Frederiksberg Alle","Street__c":"Frederiksberg Alle","Entrance__c":null,"Floor__c":"ST","Town__c":"Frederiksberg C","Side__c":"TH","External_Id__c":"1743448","Door_No__c":null,"District__c":null,"House_No__c":"28","Postcode__c":"1820"},"Installation_Status__c":"Stik opsagt","Installation_Status_Code__c":"1","HasFuturePackage__c":true,"Name":"1743448","Installation_Formula_Status__c":"<img src=\"/resource/sc_cu_status_green\" alt=\" \" border=\"0\"/>"},"futureSubsPackage":null,"formatAddress":null,"existingSortering":null,"exceptionHandler":{"ModuleName":"Change tv-package","functionName":null,"errlog":{},"className":"cInstallation"},"errorSubscFlag":null,"errorMessage":null,"errorFlag":null,"errorCode":null,"effectiveEndDate":null,"effectiveDate":null,"currentProduct":null,"countSubscFlag":null,"checkValidate":null,"amsId":"1743448"}];
+              var i = 0;
+              $.each(JSONString, function(i, installationNode){
+                 var address = {};
+                 address.formattedAddress = 'Bredgade, 14, 1';
+                 address.status = 'Stik Opsat';
+                 address.dato = '01-01-2100';
+                 address.package = 'Fullpakke';
+                 installationArray[i] = address;
+                 i = i + 1;      
+              });
+              $.each(JSONString, function(i, installationNode){
+                 var address = {};
+                 address.formattedAddress = 'Aabenraavej, 24, 12';
+                 address.status = 'Stik Opsat';
+                 address.dato = '21-02-2100';
+                 address.package = 'Mellempakke';
+                 installationArray[i] = address;
+                 i = i + 1;      
+              });
+              return installationArray; 
+           }
+           
+           $("installationTable").tablesorter({widthFixed: true, widgets: ['zebra']})
+           $("installationTable").tablesorterPager({container: $("#pager")});
+        </script>  -->
+</apex:form>
+
+<script type="text/javascript">
+    
+    //$.noConflict();  
+    //  jQuery(document).ready(function($){  
+    //  $('.installListPagId').pajinate();  
+    //}); 
+ 
+    function  checkAll(){
+       var inputElem = document.getElementsByTagName("input");
+       var currentIndexCheckbox;
+       var cnt = 0;
+       for(var i=0; i < inputElem.length; i++){
+         if(inputElem[i].type == 'checkbox'){
+           if(inputElem[i].checked){     
+              cnt++;
+           }
+         }
+       }
+       return cnt;
+    }
+</script>
+
+<script type="text/javascript">printContentAreaEnd();</script>
+<script type="text/javascript">printFooter();</script>
+</body>
+</html>
+</apex:page>

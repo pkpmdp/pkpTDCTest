@@ -1,0 +1,15 @@
+<apex:page >
+<script>
+    if(document.URL.indexOf('home.jsp') != -1) 
+        window.onload = window.setTimeout(redirect(),5000);
+ 
+    function redirect()
+    {
+        var url1 = document.referrer;
+        var index = url1.indexOf(".com");
+        var strurl =url1.substring(0,index+5);
+        var strurl2 = strurl.concat("apex/KnowledgeHome"); 
+        window.open(strurl2,'_top'); 
+    }
+    </script>
+</apex:page>

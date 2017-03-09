@@ -1,0 +1,26 @@
+<apex:page standardController="Account" extensions="clsKissCasesByAnlaegnrController">
+  <!-- Begin Default Content REMOVE THIS 
+  <apex:pageBlock title="Kiss Sager">
+      <apex:pageBlockTable value="{!cases}" var="case">
+          <apex:column value="{!case.name}"/>
+          <apex:column value="{!case.Case_Type__c}"/>
+      </apex:pageBlockTable> 
+  </apex:pageBlock> -->
+  <!-- End Default Content REMOVE THIS -->
+  
+  <style type="text/css">
+        body {background: #F3F3EC; padding-top: 15px}
+    </style>
+  <apex:pageBlock title="Salgs sager">
+    <apex:pageBlockTable value="{!opptyCaseList}" var="oppty_Case">
+         <apex:column headerValue="KISS sagsnr">
+                <apex:outputLink value="/{!oppty_Case.Id}" target="_parent">{!oppty_Case.Name}</apex:outputLink>
+         </apex:column>
+         <apex:column headerValue="Sagstype" value="{!oppty_Case.Case_Type__c}"></apex:column>
+         <apex:column headerValue="Salgstype" value="{!oppty_Case.Sales_Type__c}"></apex:column>
+         <apex:column headerValue="Sagsstatus" value="{!oppty_Case.StageName}"></apex:column>
+         <apex:column headerValue="Forv. idr. dato" value="{!oppty_Case.Exp_Deploy_Date__c}"></apex:column>
+     </apex:pageBlockTable>
+  </apex:pageBlock>
+  
+</apex:page>

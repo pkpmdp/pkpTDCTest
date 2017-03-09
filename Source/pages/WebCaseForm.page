@@ -1,0 +1,224 @@
+<apex:page controller="BlockbusterGuestWebCaseFormController" showHeader="false">
+
+ <!-- <apex:stylesheet value="https://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css"/> 
+<apex:stylesheet value="{!stylsheet}"/>-->
+    <style>
+        .bPageBlock .detailList .labelCol {
+            width: 20%;
+            word-break: break-word;
+        }
+        .apexp .bPageBlock .pbBottomButtons .btn{
+        margin-left: -57px;
+        margin-top: 12px;
+        }
+    </style>
+    <apex:form id="frm">
+    <body>        
+    <h2><b>KONTAKT OS</b></h2><br/><br/>
+    Du kan sende en besked til vores kundeservice via kontaktformularen herunder. Vi svarer dig inden 24 timer.<br/><br/>
+    Du kan også skrive med os på&nbsp; <apex:outputLink target="_parent" value="http://www.facebook.dk/blockbusterdenmark/">Facebook</apex:outputLink>.<br/><br/>
+    Vi sidder klar alle hverdage mellem kl. 8-22 og i weekenderne fra kl. 12-22.<br/><br/><br/>
+        <center>
+            <apex:outputLabel style="display: list-item;background-color:#f05347;color:#fff;border-radius:3px;padding:0.5em;-moz-box-sizing:border-box;box-sizing:border-box;width: 100%;" value="{!errormessageVal}" rendered="{!errormessage}"/>    
+        </center>
+        <apex:inputHidden value="{!returnUrl}" id="theField" />     
+            <script> var theField = document.getElementById('{!$Component.theField}'); 
+        </script>
+        <!-- <table id = "tbl">         
+            <tr>
+                <td><apex:outputLabel value="Hvad handler din henvendelse om:"/></td>
+            </tr>
+            <tr>    
+                <td><apex:selectList id="comment" value="{!selectHvad}" multiselect="false" size="1" onchange="GoToDesc()">
+                    <apex:selectOptions value="{!HvadOptions}"/>
+                </apex:selectList></td>     
+            </tr>
+                
+            <tr>  
+                <td><apex:outputLabel value="Hvilken platform oplever du fejlen på:"/></td>
+            </tr>
+            <tr>   
+                <td><apex:selectList id="platfrm" value="{!selectHvilken}" multiselect="false" size="1" onchange="GoToDesc()">
+                <apex:selectOptions value="{!HvilkenOptions}"/>
+                </apex:selectList></td>
+            </tr>
+                
+            <tr>       
+                <td><apex:outputLabel value="Hvilken browser bruger du:"/></td>
+            </tr>
+            <tr>
+                <td><apex:selectList id="brwser" value="{!selectHvilken1}" multiselect="false" size="1" onchange="GoToDesc()">
+                <apex:selectOptions value="{!Hvilken1Options}"/>
+                </apex:selectList></td>
+            </tr>            
+            <tr>
+                <td>Mailadresse:</td>
+            </tr>
+            <tr>   
+                <td><apex:outputPanel styleClass="requiredBlock" layout="block" >
+                <apex:inputText value="{!test}" required="false" style="width:300px;" />
+                </apex:outputPanel></td>
+            </tr>
+     
+            <tr>
+                <td>Din besked:</td>
+            </tr>
+            <tr>
+                <td><apex:inputTextarea id="desc" value="{!description}" rows="8" cols="50"/></td>
+            </tr>    
+            <tr>
+                <td>Vedhæft fil:</td> 
+            </tr>
+            <tr>            
+                <td><apex:inputFile value="{!filebody}" fileName="{!filename}" /></td>            
+            </tr>           
+            <tr>
+                <td><apex:commandButton value="Send" action="{!doSubmit}" onclick="theField.value=url;" /></td>
+            </tr>
+        </table>--> 
+        <apex:Message rendered="{!errormessage}" ></apex:Message>
+       <apex:pageBlock mode="maindetail">
+            <apex:pageBlockButtons location="bottom">
+                <apex:commandButton value="Send" action="{!doSubmit}" onclick="theField.value=url;" style="align" />
+            </apex:pageBlockButtons>
+            <apex:pageBlockSection columns="1" showheader="false">
+            <apex:pageBlockSectionItem >
+                    Navn
+                    <apex:outputpanel > 
+                      <div class="requiredInput">
+                         <div class="requiredBlock"></div>
+                        <apex:inputtext value="{!name}" id="name"/></div>    
+                    </apex:outputpanel><!-- reRender="ajaxrequest"--> 
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    Hvad platform drejer din henvendelse sig om?
+                    <apex:outputpanel > 
+                      <div class="requiredInput">
+                         <div class="requiredBlock"></div>
+                        <apex:selectList id="platfrm" value="{!selectPlatform}" multiselect="false" size="1">
+                            <apex:selectOptions value="{!listPlatform}"/>
+                            <apex:actionSupport event="onchange" action="{!getPicklistValues}" /><!-- reRender="ajaxrequest" --> 
+                        </apex:selectList></div>    
+                    </apex:outputpanel><!-- reRender="ajaxrequest"--> 
+                </apex:pageBlockSectionItem>
+                </apex:pageBlockSection>
+                <apex:actionRegion >
+                <apex:pageBlockSection columns="1" showheader="false" rendered="{!selectPlatform != ''}">               
+                    <apex:pageBlockSectionItem rendered="{!showBrowser}">
+                        Hvilken browser benytter du til Blockbuster?
+                        <apex:outputpanel > 
+                            <div class="requiredInput">
+                              <div class="requiredBlock"></div>
+                                <apex:selectList id="brwser" value="{!selectBrowser}" multiselect="false" size="1">
+                                <apex:selectOptions value="{!listBrowser}"/>
+                                </apex:selectList>
+                            </div>
+                        </apex:outputpanel>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem rendered="{!showOS}">
+                        Hvilket styresystem benytter du?
+                        <apex:outputpanel > 
+                            <div class="requiredInput">
+                              <div class="requiredBlock"></div>
+                                <apex:selectList id="opsys" value="{!selectOpSys}" multiselect="false" size="1">
+                                    <apex:selectOptions value="{!listOpSys}"/>
+                                </apex:selectList>
+                            </div>
+                        </apex:outputpanel>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem rendered="{!showProd}">
+                        Hvad drejer din henvendelse sig om?
+                        <apex:outputpanel >
+                            <div class="requiredInput">
+                              <div class="requiredBlock"></div>
+                                <apex:selectList id="product" value="{!selectProduct}" multiselect="false" size="1">
+                                    <apex:selectOptions value="{!listProd}"/>
+                                    <apex:actionSupport event="onchange" action="{!getChildValue}" rerender="child"/>
+                                </apex:selectList>
+                            </div>
+                        </apex:outputpanel>
+                    </apex:pageBlockSectionItem>                    
+                    <apex:pageBlockSectionItem rendered="{!showEmail}" >
+                        Din mail
+                        <apex:outputpanel >
+                            <div class="requiredInput">
+                              <div class="requiredBlock"></div>
+                                <apex:inputText value="{!strEmail}" id="email"/>
+                              </div>
+                        </apex:outputpanel>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem rendered="{!showSubject}">
+                        Din besked
+                        <apex:outputpanel >
+                            <div class="requiredInput">
+                              <div class="requiredBlock"></div>
+                                <apex:inputTextarea value="{!subject}" id="subject" style="width: 167px; height: 30px;" />
+                            </div>
+                        </apex:outputpanel>
+                    </apex:pageBlockSectionItem>
+                                     
+                    <apex:pageBlockSectionItem rendered="{!showDevice}">
+                        Hvilken telefon/tablet benytter du til Blockbuster?
+                        <apex:outputpanel >
+                            <div class="requiredInput">
+                              <div class="requiredBlock"></div>
+                                <apex:inputText value="{!Device}" id="device"/>
+                            </div>
+                        </apex:outputpanel>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem rendered="{!showBBType}">
+                        Omhandler din henvendelse brugen af Blockbusters app eller Blockbuster mobilwebsite?
+                        <apex:outputpanel >
+                            <div class="requiredInput">
+                              <div class="requiredBlock"></div>
+                                <apex:selectList id="bbtype" value="{!BBType}" multiselect="false" size="1">
+                                    <apex:selectOptions value="{!listBBType}"/>
+                                </apex:selectList>
+                            </div>
+                        </apex:outputpanel>
+                    </apex:pageBlockSectionItem>            
+                    </apex:pageBlockSection></apex:actionRegion>
+            <!--    <apex:actionRegion >                
+                <apex:pageBlockSection columns="1" showheader="false" rendered="{!selectPlatform != ''}">
+                    <apex:pageBlockSectionItem rendered="{!showFile}">
+                        Vedhæft fil                 
+                            <apex:inputFile value="{!filebody}" fileName="{!filename}" id="file"/>                  
+                    </apex:pageBlockSectionItem>
+                </apex:pageBlockSection>
+                </apex:actionRegion>
+                -->
+                <apex:outputpanel id="child">               
+                    <apex:outputpanel rendered="{!(selectPlatform=='PC/MAC' || selectPlatform =='Playstation 4' || selectPlatform =='Playstation 3')&& selectProduct =='Afspilning'}">
+                        <c:PCMacChild Caseobj="{!objwrap1}"/>
+                    </apex:outputpanel>
+                    <apex:outputpanel rendered="{!(selectPlatform=='iPhone/iPad' || selectPlatform =='Android mobil/tablet')&& (selectProduct =='Afspilning via app' || selectProduct = 'Afspilning via Airplay' || selectProduct = 'Afspilning via ChromeCast')}">
+                        <c:IpadIphoneChild Caseobj="{!objwrap1}"/>
+                    </apex:outputpanel>
+                    <apex:outputpanel rendered="{!(selectPlatform == 'Smart TV - LG' || selectPlatform == 'Smart TV - Panasonic' || selectPlatform == 'Smart TV - Philips' || selectPlatform == 'Smart TV - Samsung' || selectPlatform == 'Smart TV - Sony') && selectProduct =='Afspilning'}">
+                        <c:SmartTvChild Caseobj="{!objwrap1}"/>
+                    </apex:outputpanel>
+           <!--
+                        <c:PCMacChild Caseobj="{!objwrap1}" rendered="{!(selectPlatform=='PC/MAC' || selectPlatform =='Playstation 4' || selectPlatform =='Playstation 3')&& selectProduct =='Afspilning'}"/>
+                    
+                    
+                        <c:IpadIphoneChild Caseobj="{!objwrap1}" rendered="{!(selectPlatform=='iPhone/iPad' || selectPlatform =='Android mobil/tablet')&& (selectProduct =='Afspilning via app' || selectProduct = 'Afspilning via Airplay' || selectProduct = 'Afspilning via ChromeCast')}"/>
+                    
+                    
+                        <c:SmartTvChild Caseobj="{!objwrap1}" rendered="{!selectPlatform=='Smart TV' && selectProduct =='Afspilning'}"/>
+                    -->
+                </apex:outputpanel>
+               
+                <apex:actionRegion >  
+                            
+                <apex:pageBlockSection columns="1" showheader="false" rendered="{!selectPlatform != ''}">
+                    <apex:pageBlockSectionItem rendered="{!showFile}">
+                        Vedhæft fil                 
+                            <apex:inputFile value="{!filebody}" fileName="{!filename}" id="file"/>                  
+                    </apex:pageBlockSectionItem>
+                </apex:pageBlockSection>
+                </apex:actionRegion>
+       </apex:pageBlock>
+        
+     </body>
+    </apex:form>
+</apex:page>

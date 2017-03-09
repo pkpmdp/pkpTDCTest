@@ -1,0 +1,66 @@
+<apex:component controller="ViewAddressesForInstallationsController" access="global">
+<form>
+      <apex:outputText value="Kære"/>&nbsp; 
+      <apex:outputText value="{!firstName}"/>&nbsp; 
+      <apex:outputText value="{!lastName}"/> <br/>
+      Tak for din bestilling på skift af tv-pakker. <br/>
+      Vi har {!TodayDate} modtaget følgende bestilling på nedenstående kunde: <br/>
+      <p>{!cableUnitName1} <apex:outputText value="- Kundenr:"/> {!cableUnitNumber1}</p>
+      <Table width="80%" border="1">
+        <tr>
+           <td width="40%" bgcolor="#B2B2B2"><b>Addresse</b></td>           
+           <td width="15%" bgcolor="#B2B2B2"><b>Nuværende tv-pakke</b></td>
+           <td width="15%" bgcolor="#B2B2B2"><b>Ønsket ikrafttrædelsesdato</b></td>
+           <td width="15%" bgcolor="#B2B2B2"><b>Ny tv-pakke</b></td>  
+           <apex:outputText rendered="{!AND(checkFlag,ordertypeFlag)}"> 
+           <td width="15%" bgcolor="#B2B2B2"><b>Ny beboer</b></td>
+           </apex:outputText> 
+        </tr>
+         <apex:repeat rendered="{!(ordertypeFlag)}"  var="order" value="{!dslOrderListForMail}">
+         <tr>
+             <apex:repeat var="installation" value="{!confirmedInstallationsForMail}">
+                    <!-- <td><apex:outputText rendered="{!installation.amsId == order.Address_Id__c}" value="{!installation.FullAddress}"></apex:outputText></td> -->
+                    <td><apex:outputText rendered="{!installation.amsId == order.Address_Id__c}" value="{!installation.formattedAddress}"></apex:outputText></td>
+             </apex:repeat>
+             <td><apex:outputText Value="{!order.packageBeforeChange__c}" rendered="{!NOT(ISNULL(order.packageBeforeChange__c))}"/></td>
+             <td><apex:outputText Value="{!order.ChangePackageDate__c}"></apex:outputText></td>
+             <td><apex:outputText Value="{!order.Product_Name__c}"></apex:outputText></td>
+             <apex:outputText rendered="{!AND(checkFlag, order.Order_type__c == 'Downgrade', order.selectedmyBeboer__c == true)}">
+                 <td width="15%">Ja</td>
+             </apex:outputText>
+            <apex:outputText rendered="{!AND(checkFlag, order.Order_type__c == 'Downgrade', order.selectedmyBeboer__c == false)}">
+                <td width="15%">Nej</td>
+            </apex:outputText>
+             </tr>
+         </apex:repeat>
+         
+         <apex:repeat rendered="{!NOT(ordertypeFlag)}"  var="order" value="{!dslOrderListForMail}">
+         <tr>
+             <apex:repeat var="installation" value="{!confirmedInstallationsForMail}">
+                    <!-- <td><apex:outputText rendered="{!installation.amsId == order.Address_Id__c}" value="{!installation.FullAddress}"></apex:outputText></td> -->
+                    <td><apex:outputText rendered="{!installation.amsId == order.Address_Id__c}" value="{!installation.formattedAddress}"></apex:outputText></td>
+             </apex:repeat>
+             <td><apex:outputText Value="{!order.packageBeforeChange__c}" rendered="{!NOT(ISNULL(order.packageBeforeChange__c))}"/></td>
+             <td><apex:outputText Value="{!order.ChangePackageDate__c}"></apex:outputText></td>
+             <td><apex:outputText Value="{!order.Product_Name__c}"></apex:outputText></td>
+             </tr>
+         </apex:repeat>
+       </Table> 
+       <br/>
+     <br/>
+     Bemærk at ændringerne først kan ses på YouSees Selvbetjening, når de er trådt i kraft. <br/>
+     <br/>
+     I tilfælde af, at du fortryder din bestilling på skift af tv-pakker, kan du rette henvendelse til YouSee på foreningsservice@yousee.dk<br/>
+     <br/>
+     Venlig hilsen<br/> 
+     Foreningsservice<br/> 
+     
+     YouSee A/S<br/> 
+     Teglholmsgade 1 <br/>
+     0900 København C <br/>
+     Tlf. 70 70 40 44 <br/>
+     E-mail: foreningsservice@yousee.dk <br/> 
+     Web: Yousee.dk <br/>
+     CVR-nr. 25 76 75 78 <br/>
+</form>
+</apex:component>

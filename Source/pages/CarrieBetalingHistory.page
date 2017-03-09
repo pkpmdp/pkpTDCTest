@@ -1,0 +1,19 @@
+<apex:page standardController="Aria_Account__c" extensions="CarrieBetalingsHistory" sidebar="False"  showHeader="False"  tabStyle="Invoice_Usage__c" action="{!retrieveBetalingsHistory}">
+ <apex:form id="form1"> 
+ 	<apex:pageBlock title="Betalingsmetode Historik">		
+ 		  <apex:pageBlockButtons location="top">
+ 		  	<apex:commandButton value="Luk" onclick="window.close();"/>
+ 		  </apex:pageBlockButtons>
+ 		  <apex:outputPanel id="accountDetails">             
+          	   		<apex:repeat value="{!listBetalingsWrapper}" var="item">
+          	   			 <apex:pageBlockTable value="{!item.acct_pay_methods}" var="pm" rendered="{!(item.error_code==0)}">
+	          	   			 <apex:column headervalue="Betalingsmetode" value="{!pm.pay_method_name}"/> 
+	          	   			 <apex:column headervalue="Fra Dato" value="{!pm.from_date_time}"/> 
+	          	   			 <apex:column headervalue="Til Dato" value="{!pm.to_date_time}"/> 	
+          	   			</apex:pageBlockTable>
+          	   		<apex:outputLabel value="{!item.error_msg}" rendered="{!(item.error_code!=0)}" styleClass="noRowsHeader"></apex:outputLabel>
+          	   		</apex:repeat>          	 
+         </apex:outputPanel>
+ 	</apex:pageBlock>
+ </apex:form>   	
+</apex:page>

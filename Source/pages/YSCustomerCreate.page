@@ -1,0 +1,228 @@
+<apex:page standardController="account" extensions="clsYSCustomerCreateController" tabStyle="account" id="AccPage">
+  <!-- Begin Default Content REMOVE THIS -->
+  <style>
+    .labelStyle
+    {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size:12px;
+            font-weight:bold;
+            text-align:center;
+    }
+   </style> 
+  <apex:stylesheet value="{!URLFOR($Resource.scStyleCss,'myStyle/myStyle.css')}"/>
+  <apex:sectionHeader title="Ny O-kunde" subtitle="Ny O-kunde"/>
+  <apex:form id="frm">
+     <div id="errorMesg" style="display:none;height: 21px;padding-left: 50px;padding-top: 18px;border-color: red;color: grey;" class="mailError">
+            <apex:outputText id="Msg1" value="Please Enter Email address"/>
+     </div>
+      <apex:pageBlock title="Ny O-kunde" id="Pblock">
+          <apex:pageBlockButtons location="both">
+              <apex:commandButton value="{!$Label.Save}" action="{!saveAccount}"/>
+              <apex:commandButton value="{!$Label.Cancel}" action="{!cancel}"/>
+          </apex:pageBlockButtons>
+          <apex:pageMessages />
+          <apex:pageBlockSection title="Kunde Information" columns="2">
+              <apex:inputField value="{!account.name}"/>
+              <apex:inputField value="{!account.Home_Phone__c}"/>              
+              <apex:inputField value="{!account.parentId}"/>
+              <apex:inputField value="{!account.Phone}"/>
+              
+<!--              <apex:pageBlockSectionItem >
+                <apex:outputLabel value="{!$Label.Cable_Unit}"></apex:outputLabel>
+                <apex:inputField value="{!cableUnit.name}" required="true" />
+              </apex:pageBlockSectionItem>  -->
+                <apex:pageBlockSectionItem > 
+              <apex:outputLabel value="{!$Label.YS_Installation}"></apex:outputLabel>
+              <apex:outputPanel styleClass="requiredInput" layout="block">
+              <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+              <apex:inputField value="{!cableUnit.Potential_Installations__c}" required="false" />
+              <br></br><apex:outputPanel styleClass="errorMsg" id="errCblPtIns" rendered="{!if(errCblPtInsFlag,'true','false')}">
+              {!errCblPtIns}
+              </apex:outputPanel></apex:outputPanel> 
+              </apex:pageBlockSectionItem>
+              
+              <apex:inputField value="{!account.Mobile_phone__c}"/>
+              
+            
+              <!--<apex:inputField value="{!cableUnit.Potential_Installations__c}" required="true" /> -->
+              <apex:pageBlockSectionItem >
+              <apex:outputLabel value="{!$Label.YS_Municipaly}"></apex:outputLabel>
+              <apex:outputPanel styleClass="requiredInput" layout="block">
+              <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+              <apex:inputField value="{!cableUnit.Municipaly__c}" required="false"/>
+              <br></br><apex:outputPanel styleClass="errorMsg" id="errCblMun" rendered="{!if(errCblMunFlag,'true','false')}">
+              {!errCblMun}
+              </apex:outputPanel></apex:outputPanel>
+              </apex:pageBlockSectionItem>
+              
+              <apex:inputField value="{!account.Company_Email__c}"/>
+              
+              
+              
+              <!--<apex:inputField value="{!cableUnit.Municipaly__c}" required="true"/> -->
+              <apex:pageBlockSectionItem >
+              <apex:outputLabel value="{!$Label.YS_PostalCode}"></apex:outputLabel>
+              <apex:outputPanel styleClass="requiredInput" layout="block">
+              <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+              <apex:inputField value="{!cableUnit.Cable_Unit_Post_Code__c}" required="false"/>
+              <br></br><apex:outputPanel styleClass="errorMsg" id="errCblPCode" rendered="{!if(errCblPCodeFlag,'true','false')}">
+              {!errCblPCode}
+              </apex:outputPanel></apex:outputPanel></apex:pageBlockSectionItem>
+              
+              <apex:inputField value="{!account.website}"/>              
+              
+              
+          <!--</apex:pageBlockSection>
+              <apex:inputField value="{!cableUnit.Cable_Unit_Post_Code__c}" required="true"/>-->
+              
+              <apex:inputField value="{!account.CVR_Number__c}"/>   
+              
+              <apex:pageblockSectionItem >
+              <apex:outputLabel value="{!$Label.Expected_Customer_Satisfaction}"></apex:outputLabel>
+              <apex:selectList id="cusSatisfactionLookupPicklist" value="{!account.Customer_Satisfaction_Lookup__c}" size="1" rendered="true">   
+              <apex:selectOptions value="{!CustomerSatisfactions}"/>   
+              </apex:selectList>
+              </apex:pageblockSectionItem>
+              
+              <apex:inputField value="{!account.EAN_nr__c}"/>    
+              <apex:inputField value="{!account.Declaration_of_Intent__c}"/> 
+              
+              <!-- <apex:pageblockSectionItem >
+              <apex:outputText id="emptySpace"/>
+              </apex:pageblockSectionItem>   --> 
+              <apex:inputField value="{!account.Date_of_Next_General_Meeting__c}"/>
+              <apex:inputField value="{!account.Foreningsweb__c}"/>
+              
+                            
+              <apex:inputField value="{!account.Annual_general_meeting__c}"/>
+              <apex:inputField value="{!account.partnership__c}"/>
+          </apex:pageBlockSection>  
+          <!-- <apex:pageBlockSection title="{!$Label.Additional_Information}" columns="2">
+              <!-- apex:inputField value="{!account.CA_Debit_Code__c}"/-->
+              <!-- <apex:inputField value="{!cableUnit.Cable_Unit_in_Casper__c}"/> -->
+              <!--apex:inputField value="{!account.CA_Arrears_Code__c}"/-->
+              <!-- <apex:inputField value="{!cableUnit.Service_Center_Customer_Agreement__c}"/> -->
+          <!--</apex:pageBlockSection> -->
+          <apex:pageBlockSection title="{!$Label.Address}" columns="2">
+              <apex:inputField value="{!account.Street_YK__c}"/>
+              <apex:inputField value="{!account.PO_Box_alt__c}"/>             
+          </apex:pageBlockSection>
+          
+          <apex:pageBlockSection title="{!$Label.Segments}" columns="2">              
+              
+              <apex:pageblockSectionItem >
+                <apex:outputLabel value="{!$Label.Customer_Segment}"></apex:outputLabel>
+                    <apex:outputPanel styleClass="requiredInput" layout="block">
+                    <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+                    <apex:selectList id="cusSegmentLookupPicklist" value="{!account.Customer_Segment_Lookup__c}" size="1" rendered="true">   
+                    <apex:selectOptions value="{!CustomerSegmentOptions}"/>   
+              </apex:selectList>
+              <apex:outputPanel styleClass="errorMsg" id="errAccSeg" rendered="{!if(errAccSegFlag,'true','false')}">
+              {!errAccSeg}
+              </apex:outputPanel>
+              </apex:outputPanel>
+              </apex:pageblockSectionItem> 
+              
+              <apex:inputField value="{!account.Memberships__c}"/>
+              
+              <apex:pageblockSectionItem >
+              <apex:outputLabel value="{!$Label.Housing_Type}"></apex:outputLabel>
+              <apex:outputPanel styleClass="requiredInput" layout="block">
+              <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+              <apex:selectList id="HousingTypeLookupPicklist" value="{!cableUnit.Housing_Type__c}" size="1" rendered="true">   
+                <apex:selectOptions value="{!HousingTypeOptions}"/>   
+              </apex:selectList>
+              <apex:outputPanel styleClass="errorMsg" layout="block" id="errCblHType" rendered="{!if(errCblHTypeFlag,'true','false')}">
+              {!errCblHType}
+              </apex:outputPanel>
+             </apex:outputPanel>
+              </apex:pageblockSectionItem>
+
+              <apex:pageblockSectionItem >
+              <apex:outputLabel value="{!$Label.Housing_Ownership}"></apex:outputLabel>
+              <apex:outputPanel styleClass="requiredInput" layout="block">
+              <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+              <apex:selectList id="HousingOwnerLookupPicklist" value="{!cableUnit.Housing_Ownership__c}" size="1" rendered="true">   
+                <apex:selectOptions value="{!HousingOwnerShipOptions}"/>   
+              </apex:selectList>
+              <apex:outputPanel styleClass="errorMsg" layout="block" id="errCblHOwn" rendered="{!if(errCblHOwnFlag,'true','false')}">
+              {!errCblHOwn}
+              </apex:outputPanel>
+              </apex:outputPanel>
+              </apex:pageblockSectionItem>
+
+              <apex:pageblockSectionItem >
+              <apex:outputLabel value="{!$Label.Building_Type}"></apex:outputLabel>
+              <apex:outputPanel styleClass="requiredInput" layout="block">
+              <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+              <apex:selectList id="buildingTypeLookupPicklist" value="{!cableUnit.Building_Type__c}" size="1" rendered="true" >   
+                <apex:selectOptions value="{!BuildingTypeOptions}"/>   
+              </apex:selectList>
+              <apex:outputPanel styleClass="errorMsg" id="errCblBType" layout="block" rendered="{!if(errCblBTypeFlag,'true','false')}">
+              {!errCblBType}
+              </apex:outputPanel>
+              </apex:outputPanel>
+              </apex:pageblockSectionItem>
+    
+          </apex:pageBlockSection>
+          <!-- apex:pageBlockSection title="{!$Label.Overview}" columns="2">
+              <apex:inputField value="{!cableUnit.CA_Sales_Concept__c}"/>
+              <apex:inputField value="{!cableUnit.CA_Installations__c}"/>
+          </apex:pageBlockSection-->
+          <!-- 
+          <apex:pageBlockSection title="{!$Label.Description}" columns="1">
+              <apex:inputField value="{!account.Description}" style="width:400px; height:100px;"/>
+          </apex:pageBlockSection> --> 
+         <!--  commented for creation part
+         <apex:pageBlockSection title="Cable Unit DKTV" columns="1" id="pbsDKTV1">
+                <apex:pageBlockSectionItem id="PBS1">
+                              <apex:outputLabel value="Cable_Unit_DKTV" for="Cable_Unit_DKTV" id="lblDKTV"/>
+                              <apex:inputField value="{!account.Cable_Unit_DKTV__c}" id="CUDCDKTV" onclick="makeItDisable('{!$Component.CUDCDKTV}')"></apex:inputField> 
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem id="PBS2">
+                              <apex:outputLabel value="DKTV_Foreningsmail" for="DKTV_Foreningsmail" id="lblDKTV_Foreningsmail" style="display:none"/>
+                              <apex:inputField value="{!account.DKTV_Foreningsmail__c}" id="chkDKTV_Foreningsmail" onclick="checkDKTVEmail('{!$Component.chkDKTV_Foreningsmail}')" style="display:none"></apex:inputField> 
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem Id="PBS3">
+                              <apex:outputLabel value="DKTV_mailadresse" for="DKTV_mailadresse" id="lblDKTV_mailadresse" style="display:none"/>
+                              <apex:inputField value="{!account.DKTV_mailadresse__c}" id="txtDKTV_mailadresse" style="display:none"></apex:inputField> 
+                </apex:pageBlockSectionItem>
+         </apex:pageBlockSection> -->
+         
+          
+      </apex:pageBlock>
+      
+  </apex:form>        
+  
+ <!--  <script>
+    function makeItDisable(selectObject){
+        var checkObj = document.getElementById(selectObject);
+        if(checkObj.checked){
+            document.getElementById("AccPage:frm:Pblock:pbsDKTV1:PBS2:lblDKTV_Foreningsmail").style.display ='block';
+            document.getElementById("AccPage:frm:Pblock:pbsDKTV1:PBS2:chkDKTV_Foreningsmail").style.display ='block';
+        }else{
+            document.getElementById("AccPage:frm:Pblock:pbsDKTV1:PBS2:lblDKTV_Foreningsmail").style.display ='none';
+            document.getElementById("AccPage:frm:Pblock:pbsDKTV1:PBS2:chkDKTV_Foreningsmail").style.display ='none';
+            document.getElementById("AccPage:frm:Pblock:pbsDKTV1:PBS2:chkDKTV_Foreningsmail").checked = false;
+            document.getElementById("AccPage:frm:Pblock:pbsDKTV1:PBS3:lblDKTV_mailadresse").style.display ='none';
+            document.getElementById("AccPage:frm:Pblock:pbsDKTV1:PBS3:txtDKTV_mailadresse").style.display ='none';
+        }
+    }
+    
+    function checkDKTVEmail(selectObject1){
+        var checkObj1 = document.getElementById(selectObject1);
+        //var dkmail = document.getElementById("AccPage:frm:Pblock:PBSdktv:PBDKTV:mailadd").value;
+        
+        if(checkObj1.checked){
+            document.getElementById("AccPage:frm:Pblock:pbsDKTV1:PBS3:lblDKTV_mailadresse").style.display ='block';
+            document.getElementById("AccPage:frm:Pblock:pbsDKTV1:PBS3:txtDKTV_mailadresse").style.display ='block';
+        }else{
+            document.getElementById("AccPage:frm:Pblock:pbsDKTV1:PBS3:lblDKTV_mailadresse").style.display ='none';
+            document.getElementById("AccPage:frm:Pblock:pbsDKTV1:PBS3:txtDKTV_mailadresse").style.display ='none';
+        }
+        
+    }
+  
+  </script>-->
+  <!-- End Default Content REMOVE THIS -->
+</apex:page>

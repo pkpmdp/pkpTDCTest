@@ -1,0 +1,46 @@
+<apex:page standardController="Account" extensions="clsBBForbrug">
+  <apex:pageMessages ></apex:pageMessages>
+  <apex:form >
+      <apex:sectionHeader title="{!$Label.BB_Title_BB_Forbrug}"/>
+      <apex:inputHidden value="{!Account.Customer_No__c}"/>
+      <apex:pageBlock >
+        <apex:pageBlockSection > 
+                  <apex:outputField value="{!Account.Customer_No__c}"/>
+                  <apex:pageblockSectionItem >
+                  <apex:outputLabel value="{!$Label.BB_Product}"/> <apex:outputText value="{!productName}"/>  <!-- value="{!customer.product}"/> -->
+                  </apex:pageblockSectionItem>
+                  <apex:pageblockSectionItem >
+                  <apex:outputLabel value="{!$Label.BB_Samlet_forbrug}"/> <apex:outputText value="{!usage} GB"/> <!-- value="{!currentMonthTotalFormatted} MB"/> -->
+                  </apex:pageblockSectionItem>
+        </apex:pageBlockSection>
+      </apex:pageBlock>
+      <!-- 
+       <apex:pageBlock >
+        <apex:pageBlockSection >                   
+          <apex:pageBlockTable value="{!dailyUsages}" var="dailyUsage" id="dailyUsageId" rules="rows">
+              <apex:column headerValue="macAdr" value="{!dailyUsage.macAdr}"/>
+              <apex:column headerValue="modemId" value="{!dailyUsage.modemId}"/>
+              <apex:column headerValue="dateOfRegistration" value="{!dailyUsage.dateOfRegistration}"/>
+              <apex:column headerValue="useOfDownloadInKB" value="{!dailyUsage.useOfDownloadInKB}"/>
+              <apex:column headerValue="useOfUploadInKB" value="{!dailyUsage.useOfUploadInKB}"/>
+              <apex:column headerValue="useOfTrafficTypemailKB" value="{!dailyUsage.useOfTrafficTypemailKB}"/>
+              <apex:column headerValue="useOfTypeBrowserInKB" value="{!dailyUsage.useOfTypeBrowserInKB}"/>
+              <apex:column headerValue="useOfTrafficTypeSkypeKB" value="{!dailyUsage.useOfTrafficTypeSkypeKB}"/>
+              <apex:column headerValue="useOfTrafficTypeMsnKB" value="{!dailyUsage.useOfTrafficTypeMsnKB}"/>
+              <apex:column headerValue="useOfTraffixOtherVoipKB" value="{!dailyUsage.useOfTraffixOtherVoipKB}"/>
+              <apex:column headerValue="useOfTrafficTypePtpKB" value="{!dailyUsage.useOfTrafficTypePtpKB}"/>
+              <apex:column headerValue="useOfYouSeePlayKB" value="{!dailyUsage.useOfYouSeePlayKB}"/>
+              <apex:column headerValue="useOfYouSeeWebTvKB" value="{!dailyUsage.useOfYouSeeWebTvKB}"/>
+              <apex:column headerValue="useOfYouSeeMailKB" value="{!dailyUsage.useOfYouSeeMailKB}"/>
+              <apex:column headerValue="useOfOtherStreamingKB" value="{!dailyUsage.useOfOtherStreamingKB}"/>
+              <apex:column headerValue="useOfGamingKB" value="{!dailyUsage.useOfGamingKB}"/>          
+          </apex:pageBlockTable>
+        </apex:pageBlockSection>
+        </apex:pageBlock>
+        -->
+        <apex:pageBlock >
+           <c:ColumnChart jsondata="{!dailyUsageGraph}"  width="800" height="300"  title="{!$Label.BB_Daily_Usage}" legend="none" vAxisTitle="{!$Label.BB_Forbrug_GB}"/>
+           <c:ColumnChart jsondata="{!previousThreeMonthsUsage}" height="300" title="{!$Label.BB_Previous_Three_Months_Usage}" legend="none" vAxisTitle="{!$Label.BB_Forbrug_GB}"/>
+        </apex:pageBlock>
+        </apex:form>
+</apex:page>

@@ -1,0 +1,27 @@
+<apex:page standardController="CB_Schedule_Template__c" extensions="clsCBSchedDefValsEditController" cache="true" standardStylesheets="true" tabStyle="CB_Schedule_Template__c" title="{!$Label.CB_Admin_page_title}">
+<apex:sectionHeader title="{!$Label.CB_Admin_Title}" subtitle="{!$Label.CB_Admin_Subtitle}"/>
+  <apex:form >
+  <apex:pageBlock >
+
+    <apex:detail subject="{!template.Id}" relatedList="false" title="false"/> 
+    <apex:pageBlockTable value="{!defVals}" var="defVal">
+        <apex:column width="16%" headerValue="{!$ObjectType.CB_Default_Schedule__c.fields.Time_from__c.label} - {!$ObjectType.CB_Default_Schedule__c.fields.Time_to__c.label}"> 
+          <apex:outputText value="{0, number, 00':00'}">
+            <apex:param value="{!defVal.item.Time_from__c}" />
+          </apex:outputText>
+          <apex:outputText > - </apex:outputText>
+          <apex:outputText value="{0, number, 00':00'}">
+            <apex:param value="{!defVal.item.Time_to__c}" />
+          </apex:outputText>
+        </apex:column>
+        <apex:column value="{!defVal.item.Monday__c}" width="12%" style="color:{!defVal.monStyle}"/> 
+        <apex:column value="{!defVal.item.Tuesday__c}" width="12%" style="color:{!defVal.tueStyle}"/> 
+        <apex:column value="{!defVal.item.Wednesday__c}" width="12%" style="color:{!defVal.wedStyle}"/> 
+        <apex:column value="{!defVal.item.Thursday__c}" width="12%" style="color:{!defVal.thuStyle}"/> 
+        <apex:column value="{!defVal.item.Friday__c}" width="12%" style="color:{!defVal.friStyle}"/> 
+        <apex:column value="{!defVal.item.Saturday__c}" width="12%" style="color:{!defVal.satStyle}"/> 
+        <apex:column value="{!defVal.item.Sunday__c}" width="12%" style="color:{!defVal.sunStyle}"/> 
+    </apex:pageBlockTable> 
+  </apex:pageBlock>
+  </apex:form>
+</apex:page>

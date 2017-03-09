@@ -1,0 +1,24 @@
+<apex:page standardController="Account" extensions="clsConsoleSaleTabController,clsOpenCaseInfoYKController,clsContactInfoWarningController"   showHeader="true" sidebar="false" cache="true">
+
+<apex:includeScript value="/soap/ajax/25.0/connection.js" />
+<apex:includeScript value="/support/console/25.0/integration.js" />
+<apex:pageBlock title="Alerts">
+<apex:pageBlockSection columns="1">
+    <apex:outputPanel >
+    <apex:outputText value="Åben Sag" />&nbsp;&nbsp;
+    <apex:outputText value="{!info}" />&nbsp;&nbsp;  
+    <apex:image url="{!URLFOR($Resource.calendar, 'excs.png')}" rendered="{!showWarning}"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <apex:image url="{!URLFOR($Resource.calendar, 'excs.png')}" rendered="{!contactInfoWarning !=null}" />&nbsp;&nbsp;
+    <apex:outputText value="{!contactInfoWarning}" />
+    </apex:outputPanel>
+</apex:pageBlockSection> 
+ </apex:pageBlock>
+ <apex:outputPanel >
+<c:ConsoleCustomerLogComponent kundeId="{!Account.id}" />
+ <apex:relatedList list="Customer_Logs__r" /> 
+<c:ConsolePermissionComponent acctId="{!Account.id}" />
+<c:ConsoleSogPaBetalerIDComponent />
+<c:ConsoleSmilOMeterComponent />
+</apex:outputPanel>
+
+</apex:page>

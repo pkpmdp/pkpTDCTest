@@ -1,0 +1,821 @@
+<apex:page sidebar="false" showHeader="false" id="idPage" controller="DealerProductPageController3" action="{!initializeText}" applyHtmlTag="false">
+<html class="cvi2015"><!--SPOC 2206-->
+    <head> 
+<!-- [if lt IE 8]>  
+< link rel='stylesheet' type='text/css' href='ie7.css'/>  
+<! [endif] -->
+<script type="text/javascript" src="https://yousee.dk/sitecore/content/data/export/export.aspx?itemguid={BD793F05-9B01-4210-BD63-F33431D1013A}&functions=true"></script>
+<!-- Added for DW 750 -->
+<c:TopMenuComponent ></c:TopMenuComponent>
+<script src="{!$Resource.jQuery}" type="text/javascript"></script>
+<script src="{!$Resource.JQuery_tmpl}" type="text/javascript"></script>
+<script type="text/javascript">printHeader();</script>
+<script type="text/javascript">printTopMenu();</script>
+<script type="text/javascript">printContentAreaBegin();</script>
+<script>
+    var isYouBioSelected = {!isYouBioSelected}; 
+    //Added for BS 
+    var freeChoiceFlag={!isFreeChoicePageFlag};   
+    var currentKundeNumber = '{!cCustInstAdd.customerNumber}';  
+</script>
+ <c:DealerComponent ></c:DealerComponent>    
+<style>
+    .leftContent2 {float:left;width:570px;overflow:auto;min-height:800px;}
+    .rightContent2 {float:left;width:350px;overflow:auto;min-height:800px;}
+    .leftContent3{float:left;width:560px;overflow:visible;min-height: 600px;height: auto !important;max-height:1100px;}
+    .rightContent3{float:left;width:375px;overflow:visible;min-height: 600px;height: auto !important;max-height:1100px;}    
+</style>
+<link class="user" href="{!$Resource.SalesFlowCSS}" rel="stylesheet" type="text/css" />
+    <script type="text/javascript">
+    //("value of secondPayee in dealer product selection page is : "+{!secondPayee});
+    var selectedProductsArr = {!productSelection};
+    var productDealerCanSell = {!productDealerCanSell};   
+    var  myJSONObject = {!jsonResponse};
+    var firstJSONResponse = {!firstJsonResponse};             
+    
+    var existingCustomerFlag = "false";           
+    var newCustFlag = '{!isNewCustomer}';        
+    if(newCustFlag == "true"){
+        existingCustomerFlag = "false"; 
+    }else if(newCustFlag == "false"){
+        existingCustomerFlag = "true";
+    } 
+        
+    var htmlRepresentation = '';
+    var customerNumber = '{!cCustInstAdd.customerNumber}';       
+    //var is_O_Cust_Present = false;
+    
+    var clearId = 'clearId';
+    var dtvEngId = 'dtvEngId';          //Yousee plus
+    var dtvPakkeId = 'dtvPakkeId';      //FreeChoice         
+    var broadbandId ='broadbandId';
+    var telephonyId = 'telephonyId';
+    var bbModemId = 'bbModemId';
+   // var youBioId = 'youBioId' // Commented for SUPPORT-4380 
+    //dw-861
+    var dtvtaId='dtvtaId';           // dtv-ta-valg
+    
+     //Headings used for displaying names 
+   // var clearHeading = 'YouSee Clear';
+   var clearHeading = "{!$Label.YouSee_Clear}";  
+  //  var dtvPakkeHeading = 'Ekstrakanaler';
+    var dtvPakkeHeading = "{!$Label.Ekstrakanaler}";
+    // var broabandHeading ='Bredbånd';
+    var broadbandHeading = "{!$Label.broadband}";
+   //   var telephonyHeading = 'Telefoni';
+   var telephonyHeading = "{!$Label.Telefoni}";
+  //  var dtvEngHeading = 'YouSee Plus'; 
+  var dtvEngHeading = "{!$Label.YouSee_Plus}"; 
+ //   var youBioHeading = 'YouBio';
+  //   var youBioHeading = "{!$Label.YouBio}"; // Commented for SUPPORT-4380
+  //  var dtvHeading = 'Digitalt kabel-tv'; // DW-861
+  var dtvHeading = "{!$Label.Bland_Selv_Product}"; // DW-861 // dw-869
+   // var dtvHeading1 = "{!$Label.YouSee_Clear}"; 
+    // related to 689 youbio 
+        function hasYouBioSubscription(aftaler){
+            var hasYBSubs = 'false';
+            try{
+                  $.each(aftaler, function(i,aftalerNode){ 
+                  //check for YouBio subscription in aftaler
+                      if(aftalerNode.kundeid != undefined && kundeid == aftalerNode.kundeid && aftalerNode.aftaletype=='youbio'){
+                         hasYBSubs='true';
+                      }
+                  });
+                  return hasYBSubs;
+             }
+             catch(err){         
+             }
+        }    
+     var subString = 'youbio-ga-valg';
+     var boxString = 'youbio-eng-valg';
+     var youbioSubs = new Array();
+     var youbioBox = new Array();
+     if(existingCustomerFlag == "true" && myJSONObject['kunde-data']['aftaler']!=undefined){
+        var hasYouBioSub=hasYouBioSubscription(myJSONObject['kunde-data']['aftaler']);
+        //If user has active/inactive subscription, show only box on page
+        //Add logic to check for inactive subscription
+        if(hasYouBioSub=='false'){
+            youbioSubs = createProductsData(subString,'kr. pr. md.', existingCustomerFlag);             
+        }
+     }
+       youbioBox = createProductsData(boxString,'kr. pr. md.', existingCustomerFlag);
+        // END - 689     
+      
+    //Support Text for products on Product Selection Page. 
+    var supportTextColor='white';
+    var clearCampaignColor='';
+    var subtextClear='';
+    var subtextYouseePlusColor='';
+    var subtextYouseePlus = '';
+    var subtextBroadbandColor = '';
+    var subtextBroadband = '';
+    var subtextTelefoni = '';
+    var subtextTelefoniColor= '';
+    var subtextEkstrakanaler = '';
+    var subtextEkstrakanalerColor='';
+    var subtextYouBio = '';
+    var subtextYouBioColor = '';
+    //dw-861
+    var subtextdtvtavalg = '';
+   var subtextdtvtaColor = '';
+    var supportTextArr ={!CampaignColorAndDescriptionJson}
+    var supportTextLength = supportTextArr.length;  
+$.each(supportTextArr,function(index,supportText)
+    {
+          if(supportText.SubGroup_Information__c=='YouSee Clear (kabel-tv)'){
+                 clearCampaignColor = supportText.CampaignColor__c;
+             subtextClear = supportText.Description__c;
+        }
+        else if(supportText.SubGroup_Information__c=='Digitalt kabel-tv'){
+      
+            subtextYouseePlus = supportText.Description__c;
+            subtextYouseePlusColor = supportText.CampaignColor__c;
+        }
+        else if(supportText.SubGroup_Information__c=='YouSee Telefoni'){
+     
+            subtextTelefoni = supportText.Description__c;
+            subtextTelefoniColor = supportText.CampaignColor__c;
+        }
+        else if(supportText.SubGroup_Information__c=='YouSee Bredbånd'){
+      
+            subtextBroadband = supportText.Description__c;
+            subtextBroadbandColor = supportText.CampaignColor__c;
+        }else if(supportText.SubGroup_Information__c=='YouSee Ekstrakanaler'){
+       
+            subtextEkstrakanaler = supportText.Description__c;
+            subtextEkstrakanalerColor = supportText.CampaignColor__c;
+        }
+        /*else if(supportText.SubGroup_Information__c=='YouBio'){// Commented for SUPPORT-4380
+     
+            subtextYouBio = supportText.Description__c;
+            subtextYouBioColor = supportText.CampaignColor__c;
+        } */else if(supportText.SubGroup_Information__c=='YouSee Tv –'){
+            subtextdtvtavalg = supportText.Description__c;
+            subtextdtvtaColor = supportText.CampaignColor__c;
+        }
+       
+    });
+    //var subtextClear = '(nysalg og opgradering)';
+    //var subtextYouseePlus = '(bokse, kort, Ekstrapakker/kanaler)';
+    //var subtextBroadband = '(nysalg og opgradering)';                                       
+    
+    var clearString = 'clear-ga-valg'; 
+    var pakkerString = 'dtv-ga-valg'; 
+    var bbString = 'bb-ga-valg';
+    var clString = 'bb-ta-valg';
+    var tlfString = 'tlf-ga-valg';
+    var youBioString = '';
+    var ucPlusString = 'dtv-ga-valg';            //'dtv-eng-valg'; 
+    //dw-861
+    var dtvstring='dtv-ta-valg';
+    
+    var fuldpakke = 'Fuldpakke';
+    var youSeePlusErrMsg = 'Kunden skal have YouSee Clear for YouSee Plus. Du kan bestille det hele her.';
+    var telbbErrMsg = 'Kunden skal have YouSee Clear for at få Bredbånd / Telefoni. Du kan bestille det hele her.';
+    var clearHighestPakkeErrMsg = 'Kunden har allerede størst mulig pakke. Tilbyd evt. YouSee Plus.';    
+    var ektrakanalErrMsg = 'Kunden skal have YouSee Clear for at kunne bestille Ekstrakanaler. Du kan bestille det hele her.';
+    var poorCreditRating = 'Kunden kan ikke købe produkter, Kunden er i restance og der må ikke sælges produkter til kunden.Der må ikke udfyldes manuelle blanketter.Ring venligst til Forhandlersupport på 70 13 37 00.';
+    
+    /* Following code check if the clear product is available or not/ though it is mandatory but for purchacing product we need to have subscription available
+    *  incase there is no subscription available then we are grey out the product section.
+    */
+    var isClearproductAvailableFlag = isProductAvailable('clear-ga-valg');
+   
+    // following method is use to validate whether products are available or not
+       
+    function isProductAvailable(prodString) {
+       var flag =false;  
+        if (myJSONObject[prodString]!=undefined){
+            $.each(myJSONObject[prodString].varer,function(i,varerNode){
+                if(varerNode.links != undefined){
+                    $.each(varerNode.links, function(j,linkNode){
+                        if(linkNode.rel == 'opret' || linkNode.rel == 'opdater'){
+                            flag = true;
+                            return flag;
+                        }                                        
+                    });               
+                }else if(myJSONObject['kunde-data'] != undefined && myJSONObject['kunde-data'].valgt != undefined){
+                 $.each(myJSONObject['kunde-data'].valgt,function (k,valgtNode){
+                  if(valgtNode.aftaletype != undefined && valgtNode.aftaletype == 'youbio' && (prodString =='youbio-eng-valg' || prodString =='youbio-ga-valg')){
+                    flag = true;
+                    return flag;
+                  }
+                 });
+                }     
+            /*    else if(myJSONObject[prodString] == 'dtv-ta-valg' && myJSONObject['clear-ga-valg'].varer !=undefined){
+                $.each(myJSONObject[prodString].varer,function(l,varerNode){
+                if(varer.aftaletype == 'clear'))
+                {
+                   $.each(varerNode.links, function(m,linkNode){
+                   if(linkNode.rel == 'pakkeindhold'){
+                   flag = true;
+                   return flag;
+                   }
+                   }
+                
+                }}       
+                }             */    
+            });                
+        }                
+        return flag;            
+    }
+                               
+    function validateHighestOrderClear(){
+        var errMsg = '';
+        var varenr = '';
+        $.each(myJSONObject['kunde-data'].aftaler, function(index,aftalerNode){
+            if(aftalerNode.kundeid == customerNumber && aftalerNode.aftaletype == 'clear'){
+                $.each(aftalerNode.abonnementer, function(x,abonnementerNode){
+                    if(abonnementerNode.varetype == "ga" && abonnementerNode.ophoer == undefined){
+                        varenr = abonnementerNode.varenr;
+                        return;
+                    }
+                });
+            }
+        });
+        var dataArray = new Array();
+        var clearProduct = '';
+        $.each(myJSONObject['clear-ga-valg'].varer,function(i,varerNode){
+            clearProduct={};
+            clearProduct.varenr = varerNode.varenr;
+            clearProduct.navn = varerNode.navn;
+            if(varerNode.sortering != undefined){
+                clearProduct.sortering = varerNode.sortering;
+                var tempSort = varerNode.sortering;
+                // formatting the sortering field
+                clearProduct.sortPrefix = trimNumber(tempSort.substring(tempSort.lastIndexOf("-")+1, tempSort.length)) ;
+                dataArray.push(clearProduct);
+                //system.debug('*clearProduct.sortPrefix'+clearProduct.sortPrefix);
+            }
+            
+
+        });
+        dataArray.sort(compareNos);
+        var errClearMessage = true;
+        if(myJSONObject['kunde-data'] != undefined && myJSONObject['kunde-data'].aftaler != undefined){
+         $.each(myJSONObject['kunde-data'].aftaler,function (k,aftalerNode){
+                $.each(aftalerNode.abonnementer, function(k,abonnementerNode){ 
+                if(abonnementerNode.status !='aktiv' && dataArray[dataArray.length -1].varenr == abonnementerNode.varenr){
+                    errClearMessage = false;
+                }
+            });
+          });
+        }
+        if(dataArray[dataArray.length -1].varenr == varenr && errClearMessage){
+            errMsg = clearHighestPakkeErrMsg;
+        }
+        return errMsg;
+    }
+            
+    function refreshFirstJSONResponse(firstJSONResponse,secondJSONResponse){            
+        try{                
+            for(var key in secondJSONResponse) {   
+                firstJSONResponse[key] = secondJSONResponse[key]; 
+            } 
+            return firstJSONResponse;
+        }
+        catch(err){
+            alert("Error: in refreshFirstJSONResponse method: "+err.description);
+        }
+    }      
+                
+    function trimNumber(s) {
+      while (s.substr(0,1) == '0' && s.length>1) { s = s.substr(1,9999); }
+      return s;
+    }
+    
+    function compareNos(a, b) {    
+      return a.sortPrefix - b.sortPrefix;
+    }
+    
+    var isYouBioSubscriptionAvailable = isProductAvailable('youbio-ga-valg');
+    var isYouBioBoxAvailable = isProductAvailable('youbio-eng-valg');
+    var youBioFlag = false;
+    
+    if(isYouBioBoxAvailable){
+        youBioString = 'youbio-eng-valg';
+        youBioFlag = true;
+    }
+    else if(isYouBioSubscriptionAvailable){
+        youBioString = 'youbio-ga-valg';
+        youBioFlag = true;
+    }else{
+        youBioString = '';
+        youBioFlag = false;
+    } 
+    // DW-871
+    var custFlag = false; 
+    var prefix=' kr. pr. md.';
+    var dtvcount = 0;
+    var newCustFlag = '{!isNewCustomer}';
+    if(newCustFlag == "true"){
+            custFlag  = "false"; 
+        }else if(newCustFlag == "false"){
+            custFlag  = "true";
+        } 
+    var prsntProd = {!prodArray};
+    var dtvProds =  createProductsData('dtv-ta-valg', prefix, custFlag); 
+    var j=0;
+              for(var i = 0; i < dtvProds.length; i++)
+              {
+                var ans = $.inArray(dtvProds[i].varenr, prsntProd);
+                if(ans != -1)
+                {
+                    dtvcount++;
+                }
+              }
+    // End DW-871
+    //alert('youBioFlag '+youBioFlag);       
+    function displayMainSubscriptions(myJSONObject){    
+   // t('displayMainSubscriptions ***************** ');                                 
+        htmlRepresentation = identifyProductsToDisable(clearString, htmlRepresentation,clearHeading, clearId,isClearproductAvailableFlag);
+        if((myJSONObject['kunde-data']['kundetype'] == 'I' && (myJSONObject['kunde-data']['topgruppe'] == '3' || myJSONObject['kunde-data']['topgruppe'] =='6' || myJSONObject['kunde-data']['topgruppe']=='7' || dtvcount == 0))){
+        htmlRepresentation = identifyProductsToDisable(dtvstring, htmlRepresentation, dtvHeading, dtvtaId,false);
+        }else{
+        htmlRepresentation = identifyProductsToDisable(dtvstring, htmlRepresentation, dtvHeading, dtvtaId,isProductAvailable('dtv-ta-valg'));
+        } 
+        //htmlRepresentation = identifyProductsToDisable(dtvstring, htmlRepresentation, dtvHeading, dtvtaId,isProductAvailable('dtv-ta-valg'));
+        htmlRepresentation = identifyProductsToDisable(ucPlusString, htmlRepresentation, dtvEngHeading, dtvEngId,true);            
+        htmlRepresentation = identifyProductsToDisable(pakkerString, htmlRepresentation, dtvPakkeHeading, dtvPakkeId,true);
+        htmlRepresentation = identifyProductsToDisable(bbString, htmlRepresentation, broadbandHeading, broadbandId,isProductAvailable('bb-ga-valg'));
+        htmlRepresentation = identifyProductsToDisable(tlfString, htmlRepresentation, telephonyHeading, telephonyId,isProductAvailable('tlf-ga-valg'));
+        //htmlRepresentation = identifyProductsToDisable(youBioString, htmlRepresentation, youBioHeading, youBioId,youBioFlag); // Commented for SUPPORT-4380
+        //htmlRepresentation = identifyProductsToDisable(dtvstring, htmlRepresentation, dtvHeading1, dtvtaId,isProductAvailable('dtv-ta-valg'));
+    }   
+            
+    //In case of new Customer Products that can't be sold needs to be disabled.
+    //In case of existing Customer Products that can't be sold and products that customer already have needs to be disabled.
+    //For Clear and Broadband all products should be shown as they can be upgraded
+    function identifyProductsToDisable(prodString, htmlRepresentation,prodHeading, prodHtmlId,showProductFlag){
+        var val = 0;
+        if(myJSONObject[prodString] != undefined){
+            val = myJSONObject[prodString].max;                     
+          }
+        if (!showProductFlag){
+            val=0;
+        }  
+        if($.inArray(prodHeading,productDealerCanSell) == -1){
+            val=0;
+        } 
+        htmlRepresentation = prepareHtmlString(htmlRepresentation, val, prodHeading, prodHtmlId);            
+        return htmlRepresentation;                                   
+    } 
+    
+    // Final html representation of the Products
+    function prepareHtmlString(htmlRepresentation, val, heading, elementId){
+        supportTextColor ='#DEFDB0';
+        if(heading == clearHeading){
+            heading = '<b>' + heading + '</b>' + ' ' + subtextClear;
+            if(clearCampaignColor != null){
+                supportTextColor = clearCampaignColor;
+            }
+        }else if(heading == dtvEngHeading){
+            heading = '<b>' + heading + '</b>' + ' ' + subtextYouseePlus;
+            if(subtextYouseePlusColor != null){
+             supportTextColor = subtextYouseePlusColor;
+            }
+        }else if(heading == broadbandHeading){
+            heading = '<b>' + heading + '</b>' + ' ' + subtextBroadband;
+            if(subtextBroadbandColor != null){
+                supportTextColor = subtextBroadbandColor;
+            }
+        }else if(heading == telephonyHeading){
+            heading = '<b>' + heading + '</b>'+ ' ' + subtextTelefoni;
+            if(subtextTelefoniColor != null){
+                supportTextColor = subtextTelefoniColor;
+            }
+        }else if(heading == dtvPakkeHeading){
+            heading = '<b>' + heading + '</b>'+ ' ' + subtextEkstrakanaler;
+            if(subtextEkstrakanalerColor != null){
+                supportTextColor = subtextEkstrakanalerColor;
+            }
+        }/*else if(heading == youBioHeading){
+            heading = '<b>' + heading + '</b>'+ ' ' + subtextYouBio;
+            if(subtextYouBioColor != null){
+                supportTextColor = subtextYouBioColor;
+            }
+        }*/ // Commented for SUPPORT-4380
+        //added for dtv-ta-valg products // dw-869
+       else if(heading == dtvHeading){
+      
+            heading = '<b>' + heading + '</b>' + ' ' + subtextdtvtavalg;
+            if(subtextdtvtaColor != null){
+             supportTextColor = subtextdtvtaColor;
+            }
+        }        
+        var checkedString = (jQuery.inArray(elementId,selectedProductsArr) != -1) ? 'checked':'';
+        htmlRepresentation += '<tr>'; 
+        
+       // if(val == 0 || (dtvcount == 0 && heading.indexOf(dtvHeading) > -1 )){  
+        if(val == 0){              
+            htmlRepresentation += '<td class="productsGray" width="5%"> <input type="checkbox" disabled="true"/></td>';
+            htmlRepresentation +='<td class="productsGray">' +heading+ '</td>';                                                                           
+        }
+        else { 
+            //htmlRepresentation += '<td class="productsGreen" width="5%"> <input id="'+elementId+'" type="checkbox" '+checkedString+' /> </td>';
+            //htmlRepresentation +='<td class="productsGreen">' +heading+ '</td>';
+            htmlRepresentation += '<td class="productColor" bgcolor="'+supportTextColor+'"+" width="5%"> <input id="'+elementId+'" type="checkbox" '+checkedString+' onclick="checkDisableCriteria()"/> </td>';                                                                           
+            htmlRepresentation += '<td class="productColor" bgcolor="'+supportTextColor+'">' +heading+ '</td>';
+        }
+      /*if(heading == youBioHeading && isYouClearProdsPrsnt = true)
+        {
+            htmlRepresentation += '<td class="productsGray" width="5%"> <input type="checkbox" disabled="true"/></td>';
+            htmlRepresentation +='<td class="productsGray">' +heading+ '</td>';
+        }*/
+        htmlRepresentation += '</tr>';          
+        return htmlRepresentation;
+    } 
+    
+   function getCheckedElements(){ 
+       try{
+            var prodIdString ='';
+            var errorMessage = '';
+            var checkedElements = $("#tableFormat input:checkbox:checked");
+            if(checkedElements.length > 0){
+                var isClearMandatory = isBasicSubscriptionMandatory(clearString,clearproduct);
+                var isBBMandatory = isBasicSubscriptionMandatory(bbString,broadband);
+                var isBBUdenClearPerm = isUdenClearPermCheck();
+                $.each(checkedElements,function(i,element){
+                    prodIdString = prodIdString+element.id+ '@';
+                });
+                // added by navneet for handling incase bb and tlf are selected
+               
+                if (prodIdString.search("broadbandId")!= -1 && prodIdString.search("telephonyId")!= -1){
+                   var productIdArray = new Array();
+                   productIdArray = prodIdString.split('@');
+                   prodIdString=''; 
+                   for (var i=0;i<=productIdArray.length;i++){
+                       if (productIdArray[i]!=undefined && productIdArray[i]!='telephonyId') {
+                             prodIdString=prodIdString+productIdArray[i]+'@';
+                       }
+                   }
+                }
+                // Ended
+                //The below code is commented as after Bland Selv we can switch between the BS and normal highest pakke.
+                /**            
+                if(prodIdString.indexOf(clearId) != -1 && clearproduct.length > 0){
+                    errorMessage =validateHighestOrderClear();   // validateForFuldPakke(fuldpakke,clearproduct);
+ 
+                }
+                */
+                // code modified for stoppin to sell products to a customer if he has no active clear products.   DW-SUPPORT-1023
+                //if(errorMessage == '' && isClearMandatory && prodIdString.indexOf(clearId) == -1 && isClearproductAvailableFlag){
+                if(errorMessage == '' && isClearMandatory && prodIdString.indexOf(clearId) == -1 && prodIdString.indexOf(dtvtaId) == -1){
+                    if((prodIdString.indexOf(broadbandId) != -1 || prodIdString.indexOf(telephonyId) != -1 ) && isBBUdenClearPerm){
+                        errorMessage = telbbErrMsg;
+                    }else if(prodIdString.indexOf(dtvEngId) != -1){
+                        errorMessage = youSeePlusErrMsg;
+                    }else if(prodIdString.indexOf(dtvPakkeId) != -1){
+                        errorMessage = ektrakanalErrMsg;
+                    }
+                }
+                if(errorMessage == '' && isBBMandatory && prodIdString.indexOf(broadbandId) == -1 
+                                                        && prodIdString.indexOf(telephonyId) != -1){
+                    errorMessage = 'Kunden skal have bredbånd for at få telefoni. Marker venligst både bredbånd og telefoni.';
+                }
+            }else{
+                errorMessage ='Vælg produkter du ønsker at sælge. Du skal vælge mindst et produkt.';
+            }
+                        
+            if(errorMessage == ''){
+                document.getElementById('errorBlock').style.display = 'none';
+                if((prodIdString.indexOf(dtvEngId) != -1 || prodIdString.indexOf(dtvPakkeId) != -1)
+                                     && hasCustomerYouSeeCard(customerNumber)){
+                    document.getElementById("{!$Component.idForm.HasCustomerYouSeeCard}").value ="true";
+                }
+                document.getElementById('selectedProdIds').value = prodIdString;
+                startSalesFlow();
+            }else{
+                $("#errorBlock").html(errorMessage);
+                document.getElementById('errorBlock').style.display = 'block';
+                return false;
+            }                    
+        }catch(err){
+                alert("Error: in getCheckedElements: "+err.description);
+        }   
+    } 
+    //end of getCheckedElements() method
+           
+    /**    function isBasicSubscriptionMandatory(productString,productArray){
+            var flag = false;
+            if(existingCustomerFlag == "true"){
+                if(myJSONObject[productString] != undefined &&
+                                myJSONObject[productString].max != undefined &&
+                                myJSONObject[productString].max != 0 && productArray.length == 0){
+                                flag = true;
+                }
+            }
+            else {
+                if(myJSONObject[productString] != undefined &&
+                        myJSONObject[productString].max != undefined && myJSONObject[productString].max != 0){
+                        flag = true;
+                }
+            }
+            return flag;
+        }*/
+            
+        function hasCustomerYouSeeCard(kundeId){   
+            var flag=false;     
+            try{
+                if(myJSONObject['kunde-data'] != undefined){
+                    var json = myJSONObject['kunde-data'].aftaler;
+                    if(json != undefined){
+                        $.each(json,function(i,aftalerNode){ 
+                                if(aftalerNode.kundeid==kundeId && aftalerNode.aftaletype == "dtv"){
+                                    $.each(aftalerNode.abonnementer,function(j,abonnementerNode){
+                                        if(abonnementerNode.varenr=='1201505'){                                                   
+                                             flag = true;                                                                                          
+                                        }                                               
+                                     });
+                                }
+                         });
+                    }
+                }                   
+                return flag;
+            }
+            catch(err){
+                 alert("Error: in hasCustomerDTVProduct method in component: "+err.description);
+            }
+        }
+            
+        function validateProducts(checkedFlag, prodArray){           
+             var retVal = 0;
+             if(checkedFlag == 0 && prodArray.length == 0){
+                retVal = 1;
+             }
+             return retVal;                       
+        }
+        /**   function validateForFuldPakke(fuldpakke,clearproduct){
+              var errMsg = '';
+              for(var j=0; j<clearproduct.length; j++){ 
+                 //alert('bala - '+fuldpakke+'   clearproduct[j]'+clearproduct[j]);                                         
+                  if(clearproduct[j].indexOf(fuldpakke) != -1){
+                      errMsg = clearFPErrMsg;
+                  }
+              }
+              return errMsg;           
+       }*/
+       
+        //alert(myJSONObject['errorcode']);
+         
+        if(myJSONObject == null || firstJSONResponse == null) {
+            alert('Calling kasia has encountered problem.');
+        }
+        else if(myJSONObject['errorcode'] != '404'){
+            myJSONObject=refreshFirstJSONResponse(firstJSONResponse,myJSONObject);
+            displayMainSubscriptions(myJSONObject); 
+                                     
+        }
+    </script>
+        
+    <style type="text/css">
+    .productColor{
+            border: 1px solid #98B954 !important;
+       font: 12px Verdana,Helvetica,sans-serif !important;
+       height: 31px !important;
+       padding-left: 1px !important;
+       vertical-align: middle !important;
+          }
+    </style>
+        
+    </head>   
+    <apex:form id="idForm" styleClass="fontVerdana">
+    <script>
+        var SFObjectArray = '';
+        <apex:repeat value="{!salesFlowObj.messages}" var="arrayItem">
+        SFObjectArray ='{!arrayItem}';
+        </apex:repeat>
+        $(document).ready(function(){
+        $("#innerTableData").html(SFObjectArray);
+        });             
+        </script>
+    <apex:outputPanel >
+        <table>
+             <!-- <tr>
+                <td style="font-family:verdana"><b> {!$Label.ProductSelectionPage_Top}</b></td>
+                <td></td>
+            </tr> -->
+            <tr>
+                  <td colspan="2" style="font-family:verdana">
+                  <b><span id="innerTableData"></span></b>
+                  </td>
+             </tr>
+        </table>               
+    </apex:outputPanel> 
+    
+    <apex:outputPanel rendered="{!badCreditRating}">
+        <apex:outputLabel value="{!$Label.BadPayeeAllowedToBuyYouBio}" style="font-weight:bold"></apex:outputLabel>
+    </apex:outputPanel> 
+        <body>
+        <input type = "hidden" id="selectedProdIds" name="selectedProdIds" value=""/>
+            <apex:inputHidden value="{!hasCustomerYouSeeCard}" id="HasCustomerYouSeeCard"/>
+            <input type = "hidden" id="selectedProds" name = "selectedProds" value=""/>
+            <input type = "hidden" name="perviousPage" value = "/apex/DealerCustomerSearch"/> 
+            
+            <div id="errorBlock" class="errorMessage"></div>
+            <apex:outputPanel id="messagePanel" layout="block">
+                <apex:messages globalOnly="true"  styleClass="mailError"/>
+            </apex:outputPanel> 
+            
+            <!-- <apex:panelGrid columns="2" columnClasses="columnA, columnB" width="100%" border="5">--> 
+            <apex:panelGrid columns="2" columnClasses="leftContent3,rightConent3" width="100%">
+            <apex:outputPanel styleClass="leftContent3">
+             <!-- <apex:panelGroup id="columnA"> -->    
+                <apex:pageBlock id="idBlock"> 
+                <!-- <apex:outputLabel id="idCheck1"/><br/> -->
+               
+                    <apex:pageBlockSection id="idSection" title="Vælg produkter" columns="1" collapsible="false">
+                        <center><div id="errorBlock" class="pbError"/></center>
+                        <table width="100%" id="tableFormat" border="0" cellpadding="0" cellspacing="5">
+                          <script>                      
+                                $("#tableFormat").html(htmlRepresentation);
+                          </script>
+                        </table>                 
+                    </apex:pageBlockSection>
+                    <apex:pageBlockButtons location="bottom">
+                                    <apex:commandButton action="{!cancel}" value="Annuller" style="margin-right:250px;"/>
+                                    <apex:commandButton action="{!back}" value="Tilbage"/>
+                                    <input type="button" id="videre" value="Videre" onclick="getCheckedElements();" class="videreBtnCls"/>
+                    </apex:pageBlockButtons>
+                </apex:pageBlock>
+               </apex:outputPanel>
+             <!-- </apex:panelGroup>-->
+          
+            <!-- <apex:panelGroup id="columnB"> -->
+           <apex:outputPanel styleClass="rightContent3" layout="block">
+             <c:CustomerAndProductComponent isNewKunde="{!isNewCustomer}" kundeNumber="{!cCustInstAdd.customerNumber}"
+                    kundeName="{!cCustInstAdd.firstName} {!cCustInstAdd.lastName}" Adresse="{!cCustInstAdd.addr1}"
+                    Postnummer="{!cCustInstAdd.addr2}">
+                </c:CustomerAndProductComponent>
+            </apex:outputPanel>   
+            <!--  </apex:panelGroup> 
+            </apex:pageBlock> --> 
+            </apex:panelGrid>
+          
+           <apex:actionFunction name="startSalesFlow" action="{!startSalesFlow}"/>      
+        </body>
+        <apex:actionFunction action="{!callToKasia}" name="callToKasia" reRender="jspanel,messagePanel" status="queryStatus">
+                <apex:param name="url" assignTo="{!url}" value=""/>
+                <apex:param name="etag" assignTo="{!etag}" value=""/>
+                <apex:param name="kundeData" assignTo="{!kundeData}" value=""/>
+                <apex:param name="arrayInit" assignTo="{!arrayInit}" value="" />
+        </apex:actionFunction>
+         <apex:outputPanel id="jspanel" >
+
+            <script type="text/javascript"> 
+                myJSONObject = {!jsonResponse};
+                if(myJSONObject['errorcode'] != '404'){
+                    myJSONObject=refreshFirstJSONResponse(firstJSONResponse,myJSONObject);
+                }
+                var serialNumber = {!dummySerialNo}; 
+                displayBasket();
+            </script>
+    </apex:outputPanel>         
+    </apex:form>
+    
+    <apex:actionStatus id="queryStatus"> 
+                <apex:facet name="start">
+                    <c:loadingComponent BackColor="#efefef" borderColor="#336699"
+                         borderSize="3" height="50px" width="120px" 
+                         ImageUrl="{!$Resource.Loading}" Message="Loading..." 
+                         messageStyle="color:darkred;font-size:11pt;font-weight:bold;"/>
+                </apex:facet>         
+         </apex:actionStatus>
+    <script>
+                if(myJSONObject['errorcode'] == '404'){
+                    document.getElementById('videre').disabled = true;  
+                    //document.getElementById('videre').style.visibility='hidden'; 
+                    $("#errorBlock").html('<B>Bestilling ikke mulig.</B>\n Der kan desværre ikke bestille produkter hos YouSee - vi beklager ulejligheden. \n Har du spørgsmål venligst ring til Forhandlersupport på 70 13 37 00.');
+                    document.getElementById('errorBlock').style.display = 'block';              
+                    //$("#errorBlock").html('{!$Label.YouBioForOffNet}');
+                }
+                var isOffnet = {!isOffnetAddress};
+                if(isOffnet == true){
+                    $("#errorBlock").html('{!$Label.YouBioForOffNet}');
+                    document.getElementById('errorBlock').style.display = 'block';
+                }                
+    </script> 
+   <script>
+        //this call is necessary when user returns by the backflow.--DealerWeb-689 
+        checkDisableCriteria();
+        // This method used to select either YouBio or Other Salesflow products but not Both.--DealerWeb-689 
+        function checkDisableCriteria(){
+             var checkedElements = $("#tableFormat input:checkbox:checked");
+             var myProductsArray=[];
+             prodIdString=''; 
+              $.each(checkedElements,function(i,element){
+                   myProductsArray[i] = element.id;
+                   
+                   prodIdString = element.id;
+               });
+             
+             
+              var alreadySelectedYouBioProduct = false;
+              var cannotSelectYouBioProduct = false;
+              if(myJSONObject['kunde-data'] != undefined && myJSONObject['kunde-data'].valgt != undefined){
+              
+                 $.each(myJSONObject['kunde-data'].valgt,function (k,valgtNode){
+                
+                  if(valgtNode.aftaletype != undefined && valgtNode.aftaletype == 'youbio'){
+                 
+                    alreadySelectedYouBioProduct = true;
+                  }else{
+                 
+                    cannotSelectYouBioProduct = true;
+                  }
+                 });
+                }
+                
+                 
+            if((checkedElements.length == 0)&&(cannotSelectYouBioProduct==false)&&(alreadySelectedYouBioProduct==false)){
+                enableProductsDealerCanCell();
+             }
+            else if(alreadySelectedYouBioProduct){
+                if(document.getElementById('youBioId') != undefined && document.getElementById('youBioId') != null){
+              
+                    document.getElementById('youBioId').disabled = false;
+                    document.getElementById('youBioId').checked = true;
+                }
+                disableProductsExceptYouBio();
+             }
+             else if(cannotSelectYouBioProduct){
+          
+                if(document.getElementById('youBioId') != undefined && document.getElementById('youBioId') != null){
+                    document.getElementById('youBioId').disabled = true;
+                }
+             }
+             else{
+           
+              if((checkedElements.length > 0) && ($.inArray(youBioId,myProductsArray) == -1)){
+              
+                if(document.getElementById('youBioId') != undefined && document.getElementById('youBioId') != null){
+                    document.getElementById('youBioId').disabled = true;
+                }
+               }else{
+               
+                  disableProductsExceptYouBio();
+                   if(document.getElementById('youBioId') != undefined && document.getElementById('youBioId') != null){
+                   
+                    document.getElementById('youBioId').disabled = false;
+                  }
+               }
+             }
+        }
+        //end of checkDisableCriteria method
+        
+        //Disable other products if youbio is selected.--DealerWeb-689
+        function disableProductsExceptYouBio(){
+            if(document.getElementById('clearId') != undefined && document.getElementById('clearId') != null){
+            
+                document.getElementById('clearId').disabled = true;
+            }
+            if(document.getElementById('dtvPakkeId') != undefined && document.getElementById('dtvPakkeId') != null){
+                document.getElementById('dtvPakkeId').disabled = true;
+            }
+           if(document.getElementById('dtvEngId') != undefined && document.getElementById('dtvEngId') != null){
+                document.getElementById('dtvEngId').disabled = true;
+            }
+           if(document.getElementById('broadbandId') != undefined && document.getElementById('broadbandId') != null){
+                document.getElementById('broadbandId').disabled = true;
+            }
+           if(document.getElementById('telephonyId') != undefined && document.getElementById('telephonyId') != null){
+                document.getElementById('telephonyId').disabled = true;
+            }
+            //dw-861
+            if(document.getElementById('dtvtaId') != undefined && document.getElementById('dtvtaId') != null){
+            
+            document.getElementById('dtvtaId').disabled = true;
+            } 
+        }
+        
+        //Enable products dealer can cell based on shopping cardtvtaIdt and checked products.--DealerWeb-689
+        function enableProductsDealerCanCell(){
+           if(document.getElementById('youBioId') != undefined && document.getElementById('youBioId') != null){
+                document.getElementById('youBioId').disabled = false;
+            }
+           if(document.getElementById('clearId') != undefined && document.getElementById('clearId') != null){
+                document.getElementById('clearId').disabled = false;
+            }
+           if(document.getElementById('dtvEngId') != undefined && document.getElementById('dtvEngId') != null){
+                document.getElementById('dtvEngId').disabled = false;
+            }
+           if(document.getElementById('dtvPakkeId') != undefined && document.getElementById('dtvPakkeId') != null){
+                document.getElementById('dtvPakkeId').disabled = false;
+            }
+            if(document.getElementById('broadbandId') != undefined && document.getElementById('broadbandId') != null){
+                document.getElementById('broadbandId').disabled = false;
+            }
+           if(document.getElementById('telephonyId') != undefined && document.getElementById('telephonyId') != null){
+                document.getElementById('telephonyId').disabled = false;
+            }
+            //dw-861
+         if(document.getElementById('dtvtaId') != undefined && document.getElementById('dtvtaId') != null){
+        
+            document.getElementById('dtvtaId').disabled = false;
+            } 
+        }
+    </script>
+    <script type="text/javascript">printContentAreaEnd();</script>
+    <script type="text/javascript">printFooter();</script>
+    </html>
+</apex:page>

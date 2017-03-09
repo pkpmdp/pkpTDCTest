@@ -1,0 +1,18 @@
+<apex:page showHeader="false" sidebar="false">
+    <script>
+        if(window.opener && !window.opener.closed && window.opener.storeTransactionId){
+            var params = location.search;
+            var transactId = '';
+            if(params.indexOf('transact') != -1){
+                var startIndex = params.indexOf('transact') + 9;
+                var temp = params.substring(startIndex);
+                transactId = temp.substring(0, temp.indexOf('&'));
+            }
+            window.opener.storeTransactionId(transactId, params);
+            //self.close();
+        }
+        else{
+            self.close();
+        }
+    </script>
+</apex:page>

@@ -1,0 +1,9 @@
+<apex:page controller="clsCasesTabController" tabStyle="Case" action="{!retrieveNextCase}">
+  <!-- The page used to retrieve the next case from the current logged in users queue for non console -->
+  <apex:form >
+    <apex:pageMessages />
+    <apex:pageBlock title="{!$Label.Choose_New_Queue}">
+      <apex:outputLink value="/500/o">{!$Label.Choose_Queue}</apex:outputLink>
+    </apex:pageBlock>
+  </apex:form>
+</apex:page>

@@ -1,0 +1,53 @@
+<apex:page standardController="Cable_Unit__c" extensions="CableUnitNoteTableController" showHeader="false" sidebar="false" cache="true">
+    <style>
+        .headerClass { text-align:right }    
+    </style>
+    
+     <style>
+         tr.dataRow {
+           background-color:white;
+         }
+         tr.dataRow:hover {
+           background-color: #e3f3ff;
+         };
+     </style>
+    <apex:pageMessages />
+    <apex:form id="form">
+        <apex:inputHidden value="{!Cable_Unit__c.Cable_Unit_No__c}"/>
+        <apex:actionFunction action="{!getCableUnitNotes}" name="load" rerender="notes" status="myStatus" /> 
+    </apex:form>
+    <apex:actionStatus startText="Requesting..." id="myStatus">
+      <apex:facet name="stop"> 
+        <apex:pageBlock id="notes">
+        <!--    <apex:pageBlockTable value="{!cableUnitNotes}" var="item" id="table">  
+                <apex:column headerValue="{!$Label.NOTES_Type}" value="{!item.type}"/>
+                <apex:column width="65px" headerValue="{!$Label.NOTES_Date}" value="{!item.Date1}"/>
+                <apex:column headerValue="{!$Label.NOTES_User}" value="{!item.user}"/>
+                <apex:column headerValue="{!$Label.NOTES_Note}" value="{!item.note}"/>
+            </apex:pageBlockTable>-->
+                   
+            <table class="list " border="0" cellpadding="0" cellspacing="0">
+               <tr class="headerRow">
+                  <th class="headerRow">{!$Label.NOTES_Type}</th>
+                  <th class="headerRow">{!$Label.NOTES_Date}</th>
+                  <th class="headerRow">{!$Label.NOTES_User}</th>
+                  <th class="headerRow">{!$Label.NOTES_Note}</th>
+               </tr>
+               
+               <apex:repeat var="item" value="{!cableUnitNotes}">
+                    <tr class="dataRow">        
+                        <td class="dataCell"><apex:outputText value="{!item.type}"/></td>        
+                        <td class="dataCell" width="65px"> <apex:outputText value="{!item.Date1}"/></td>        
+                        <td class="dataCell"> <apex:outputText value="{!item.user}"/></td>        
+                        <td class="dataCell"><apex:outputText value="{!item.note}" escape="false"/></td>        
+                    </tr>    
+               </apex:repeat>                
+            </table>
+        </apex:pageBlock>
+     </apex:facet> 
+   
+     </apex:actionStatus>
+    <script type="text/javascript">
+        window.setTimeout(getCableUnitNotes, 100);
+    </script>
+</apex:page>

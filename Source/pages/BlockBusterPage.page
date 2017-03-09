@@ -1,0 +1,45 @@
+<apex:page standardController="Account" extensions="BlockBusterCreateAriaAccts" showHeader="false" sidebar="false" > 
+<script>
+	var ariamsg;
+</script>
+<apex:form >
+        <apex:actionFunction action="{!createAriaAccts}" name="InsertRecord_JS" Rerender="statuses" status="Status1,Ariadate,msg" oncomplete="CallWebService_JS();"/>
+        <apex:actionFunction action="{!getfurtheritems}" name="CallWebService_JS" status="Status2" reRender="statuses, Ariadate,msg" oncomplete="CallFinalmethod();"/>
+        <apex:actionFunction action="{!getBBdatetime}" name="CallFinalmethod" status="Status2" reRender="statuses,msg" oncomplete="RefundDetails();"/>
+        <apex:actionFunction action="{!getRefundDetails}" name="RefundDetails" status="Status2" reRender="statuses,msg,Ariadate" oncomplete="calloutCheck(event,'{!Betalerid}');"/>
+        <apex:actionFunction name="showdate" reRender="Ariadate"/>
+        
+        <apex:outputPanel id="statuses">
+            <apex:actionStatus id="Status2" startText="Fetching ARIA details..." />
+        </apex:outputPanel>
+        <apex:outputPanel id="msg">
+            <apex:pageMessages />
+        </apex:outputPanel>
+        <apex:outputpanel id="Ariadate">
+         <apex:outputText value="{!ArialastModDate}" id="Ariamsg">
+         	<script>
+         		ariamsg = document.getElementById('{!$Component.Ariamsg}');
+         	</script>
+         </apex:outputText>
+        </apex:outputpanel>
+</apex:form>
+<script>
+    
+    var betaler = '{!Account.Betaler_ID__c}';
+    if(betaler == '')
+        InsertRecord_JS();
+    else
+        showdate();
+        
+    function calloutCheck(e,str){
+               
+       if(str != '')          
+       	window.top.location = '/{!Account.id}';
+       else if(str == ''){
+        ariamsg.value = 'No ARIA account associated';
+       	e.preventDefault();
+       }
+              	
+    }
+</script>
+</apex:page>

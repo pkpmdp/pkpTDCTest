@@ -1,0 +1,164 @@
+<apex:component >
+<style>
+.listAlign { margin: 0px 0px; display: block; } 
+.profileDisplay{display: none;}
+.topAlign {  margin:2px 0px 1px 2px; display: block;}
+.parenttopAlign {  margin:1px 0px 1px 2px; display: block;} 
+.list .headerRow TH{background-color:#676767;color:#ffffff;text-align:left;font-weight:bold;!important;}
+.list .headerStyleLeft TH{background-color:#676767;color:#ffffff;text-align:left;font-weight:bold;!important;}
+.list .headerStyleCenter TH{background-color:#676767;color:#ffffff;text-align:center;font-weight:bold;!important;}     
+.container{ overflow-x:hidden;overflow-y:auto; height:210px; width:133%; } 
+.container2{ overflow-x:hidden;overflow-y:auto; height:230px; width:133%; } 
+
+</style>
+<apex:stylesheet value="{!URLFOR($Resource.scStyleCss,'myStyle/myStyle.css')}"/>
+
+<apex:attribute name="CableUnitName" description="This is the value for the component." type="String" required="false"/>
+
+<apex:attribute name="PortalBrugerRole" description="This is the value of Bruger Role populating from custom setting in component." type="String" required="false"/>
+
+<script type="text/javascript"> 
+var cableunitnumber = '{!$CurrentPage.parameters.cableunitnumber}';
+var accountId = '{!$CurrentPage.parameters.accountId}';
+var dataSyncLogId = '{!$CurrentPage.parameters.dataSyncLogId}';
+var userProfile  = '{!$Profile.Name}';
+var contactRoleName = '{!$CurrentPage.parameters.loggedInUserRoleName}';
+var portalAdminUser = '{!$CurrentPage.parameters.portalAdminUser}';
+
+
+function checkProfile(){
+     alert('inside checkprofile');
+     var newURL;
+     newURL = window.location.protocol + "//" + (window.location.host).replace("//","/")+'{!$Site.Prefix}';
+     var exURL;
+     
+     setParentMenu();
+     //alert('role is :#'+contactRoleName+'#');
+     var profileList=document.getElementById('productnavigation').childNodes;
+     
+     for (var p=0; p < profileList.length; p++){
+        var listcount = 0;
+        if(profileList[p].nodeName=='UL'){
+                  var mUL=profileList[p].childNodes;
+                  for (var i=0; i < mUL.length; i++){
+                     if(mUL[i].nodeName == 'LI' ){
+                            mUL[i].className='listAlign';
+                            if(contactRoleName != null || contactRoleName != ''){
+                                   if(userProfile  != portalAdminUser && i == 1 && contactRoleName == portalBrugerRole) {
+                                     //  listcount = listcount + 1;
+                                      mUL[i].className+=' profileDisplay';
+                                   }
+                                   listcount = listcount + 1;
+                                   var mA = mUL[i].childNodes;
+                                   for(a=0; a< mA.length; a++){
+                                   var mB = mA[a].childNodes;
+                                      switch(listcount){
+                                       case 1 : 
+                                              exURL = newURL + '/apex/ViewCableUnitsHomePage';
+                                              mA[a].setAttribute('href',exURL);
+                                              break;
+                                       case 2 : 
+                                             exURL = newURL + '/apex/ManagePortalUsersPage';
+                                             mA[a].setAttribute('href',exURL);
+                                             break;
+                                        case 3 : 
+                                             exURL = newURL + '/apex/EditContactDispatcherPage?loggedInUserRoleName='+ contactRoleName;
+                                             mA[a].setAttribute('href',exURL);
+                                             break;
+                                        case 4 : 
+                                             exURL = newURL + '/secur/logout.jsp';
+                                             mA[a].setAttribute('href',exURL);
+                                            break;   
+                                   }
+       
+                                   }
+                             }
+                       }
+                   }
+          }
+   }
+    
+ }
+
+function setParentMenu(){
+   alert('#setParentMenu#');
+   var myParentlist=document.getElementById('inunion').childNodes;
+   alert('#setParentMenu myParentlist#'+myParentlist);
+   for (p=0; p<myParentlist.length; p++){
+         var mP=myParentlist[p].childNodes;
+         alert('#ChildNodes#'+mp);
+        for (j=0; j<mP.length; j++){
+            var mS=mP[j].childNodes;
+            if(mP[j].nodeName=="LI"){
+              mP[j].className='parenttopAlign ';
+              alert('#mP[j].className#'+mP[j].className);
+            }
+        }
+    }
+}
+
+function changeLink(){
+    alert('#changeLink#');
+    checkProfile();
+    setParentMenu();
+    var cableName ='{!CableUnitName}';
+    
+    
+    var theParent = document.getElementById('leftnavigation');
+    alert('#theParent#'+theParent);
+    if(theParent != null) {
+        var mylist=document.getElementById('leftnavigation').childNodes;
+        alert('#theParent my List#'+mylist);
+        var newURL = window.location.protocol + "//" + (window.location.host).replace("//","/")+'{!$Site.Prefix}';
+        //$("#leftnavigation").prepend('<div style="padding:8px;" ><b> Kundenavn</b> <br/><br/>'+cableName+'</div>');
+        
+        var divIdName = document.createElement("div");
+        divIdName.style.padding = "8px"; 
+        divIdName.setAttribute("align","left");
+        divIdName.innerHTML = '<br/><b>'+ 'Kundenavn'+ '</b> <br/><br/>' + cableName+'<br/>';
+      
+        // append divIdName to the end of theParent
+        theParent.appendChild(divIdName);
+        theParent.insertBefore(divIdName, theParent.firstChild);
+        alert('#theParent Latest#'+theParent);
+        
+        var listCount=0;
+        for (i=0; i<mylist.length; i++){
+            var mG=mylist[i].childNodes;
+             for (j=0; j<mG.length; j++){
+                    var mS=mG[j].childNodes;
+                     if(mG[j].nodeName=="LI"){
+                           listCount = listCount + 1;
+                           mG[j].className="listAlign";
+                           alert('#mG[j].className#'+mG[j].className);
+                     }
+                    for (k=0; k<mS.length; k++){
+                        var mA=mS[k].childNodes;
+                        for (a=0; a<mA.length; a++){
+                            switch(listCount)
+                             {
+                                case 1 :
+                                    mA[a].setAttribute('href',newURL + '/apex/ViewAddressesForInstallationsPage?cableunitnumber='+cableunitnumber + '&dataSyncLogId='+ dataSyncLogId +'&accountId='+ accountId +'&loggedInUserRoleName='+ contactRoleName);
+                                break;
+                                case 2 :
+                                   mA[a].setAttribute('href', newURL + '/apex/ViewInvoiceGeneral?cableunitnumber='+cableunitnumber + '&dataSyncLogId='+ dataSyncLogId +'&accountId='+ accountId +'&loggedInUserRoleName='+ contactRoleName);
+                                 break;
+                                case 3 :
+                                    mA[a].setAttribute('href', newURL + '/apex/ViewAgreementsPage?cableunitnumber='+cableunitnumber + '&dataSyncLogId='+ dataSyncLogId +'&accountId='+ accountId +'&loggedInUserRoleName='+ contactRoleName);
+                                break;
+                                case 4 :
+                                    mA[a].setAttribute('href', newURL + '/apex/ManageContactsPage?cableunitnumber='+cableunitnumber + '&dataSyncLogId='+ dataSyncLogId +'&accountId='+ accountId +'&loggedInUserRoleName='+ contactRoleName);
+                                break;
+                                case 5 :
+                                     mA[a].setAttribute('href', newURL + '/apex/viewYouseeContactPersonPage?cableunitnumber='+cableunitnumber+ '&dataSyncLogId='+ dataSyncLogId +'&accountId='+ accountId +'&loggedInUserRoleName='+ contactRoleName);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+       }        
+    }
+ document.onload = changeLink();
+</script>
+</apex:component>

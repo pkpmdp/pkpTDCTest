@@ -1,0 +1,8 @@
+<apex:page standardController="Account" extensions="clsAccountContactRoleController">
+<apex:outputPanel rendered="{!NOT(ISBLANK(contact))}">
+<apex:form >
+<apex:commandButton action="{!touchContact}" value="Sync" id="theButton"/>
+<apex:outputLabel value="Create ContactRole for {!contact.name} in newKISS"/>
+</apex:form>
+</apex:outputPanel>
+</apex:page>

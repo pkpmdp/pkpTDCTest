@@ -1,0 +1,269 @@
+<apex:page controller="WriteToYourConsultantController" showHeader="false" sidebar="false" id="pageId" applyHtmlTag="false">
+<html class="cvi2015">
+    <script type="text/javascript" src="{!siteCoreUrl}/sitecore/content/data/export/export.aspx?itemguid={6BB73624-FD1A-47A3-B2E5-C366F1D4A0B9}&functions=true"></script>
+<body id="servicepage">
+<style>
+input.black {
+            color: black;
+            -webkit-text-fill-color: black
+}
+.labelStyle
+            {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size:12px;
+            font-weight:bold;
+            text-align:center;
+            }
+.headerStyle {
+                   font-family: Arial, Helvetica, sans-serif;
+                   font-size:12px;
+                   font-weight:bold;
+            }       
+            
+.colstyle{ width:100%;}         
+</style>
+<script type="text/javascript">printHeader();</script>
+<script type="text/javascript">printTopMenu();</script>
+<script type="text/javascript">printContentAreaBegin();</script>
+<script>
+
+    function validationFunction(){
+        
+            var desc = document.getElementById("pageId:formId:pbId:pbsId:pbsItemId:mailDescId").value;
+            var mobileNumber = document.getElementById("pageId:formId:pageBlockId:pageBlockSectionId:mobileSectionId:mobilePhone").value;
+            var homePhoneNo = document.getElementById("pageId:formId:pageBlockId:pageBlockSectionId:homephoeSectionId:homePhone").value;
+            var phoneNo = document.getElementById("pageId:formId:pageBlockId:pageBlockSectionId:phoneSectionId:phone").value;
+            var lname = document.getElementById("pageId:formId:pageBlockId:pageBlockSectionId:lastnameSectionId:lastnameid").value;
+           
+            if(desc == null || desc.length < 1){
+                document.getElementById('mailDescMsg').style.display ='block';
+                return false;
+            }
+           
+            if(lname.length != 0){
+                if(mobileNumber.length == 0 && homePhoneNo.length == 0 && phoneNo.length == 0){
+                alert('put atleast 1 phone number');
+                        document.getElementById('phoneLengthMsg').style.display ='none';
+                        document.getElementById('phoneValidationMsg').style.display ='block';
+                        return false;
+                }else if(mobileNumber.length > 20 || homePhoneNo.length > 20 || phoneNo.length > 20){
+                        alert('phon no shl not b greater than 20');
+                        document.getElementById('phoneValidationMsg').style.display ='none';
+                        document.getElementById('phoneLengthMsg').style.display ='block';
+                        return false;
+                }
+          }
+                        return true;
+        }
+
+
+</script>
+<script type="text/javascript"> 
+    var portalBrugerRole = '{!portalBrugerRole}'; 
+    function openLookup(baseURL, width, modified, searchParam){
+          //    alert('baseURL: '+baseURL);
+          //    alert('width: '+width);
+          //    alert('modified: '+modified);
+          //    alert('searchParam: '+searchParam);
+            
+            var originalbaseURL = baseURL;
+            var originalwidth = width;
+            var originalmodified = modified;
+            var originalsearchParam = searchParam;
+         
+            var lookupType = baseURL.substr(baseURL.length-3, 3);
+           // alert('lookupType: '+lookupType);
+            if (modified == '1') 
+                baseURL = baseURL + searchParam;
+         
+            var isCustomLookup = false;
+         
+            // Following "001" is the lookup type for Account object so change this as per your standard or custom object
+           // if(lookupType == "001"){
+                var urlArr = baseURL.split("&");
+                var txtId = '';
+                if(urlArr.length > 2) {
+                    urlArr = urlArr[1].split('=');
+                    txtId = urlArr[1];
+                }
+                
+                //alert('txtId: '+txtId);
+                
+                // Following is the url of Custom Lookup page. You need to change that accordingly
+                baseURL = "{!$Site.Prefix}/apex/CustomAddressLookup?txt=" + txtId;
+         
+                // Following is the id of apex:form control "theform". You need to change that ac-cordingly
+                baseURL = baseURL + "&frm=" + escapeUTF("{!$Component.formId}");
+                if (modified == '1') {
+                    baseURL = baseURL + "&lksearch=" + searchParam;
+                  }
+         
+                  // Following is the ID of inputField that is the lookup to be customized as custom lookup
+                if(txtId.indexOf('streetI') > -1 ){
+                    isCustomLookup = true;
+                }
+           // }
+         
+         
+            if(isCustomLookup == true){
+              openPopup(baseURL, "lookup", 350, 480, "width="+800+",height=580,toolbar=no,status=no,directories=no,menubar=no,resizable=yes,scrollable=yes", true);
+            }
+            else {
+              if (modified == '1') 
+                originalbaseURL = originalbaseURL + originalsearchParam;
+              openPopup(originalbaseURL, "lookup", 350, 480, "width="+originalwidth+",height=480,toolbar=no,status=no,directories=no,menubar=no,resizable=yes,scrollable=yes", true);
+            } 
+        } 
+</script> 
+
+<apex:form id="formId">
+<c:SCLinksComponent CableUnitName="{!cableUnitName}" PortalBrugerRole="{!portalBrugerRole}"/>
+<script type="text/javascript">
+        window.onload = function(){
+            document.getElementById('shifttvpakkeID').setAttribute('class','none'); 
+            document.getElementById('contactPerson').setAttribute('class','selected');
+        }
+</script>
+    <apex:outputPanel > 
+        <div class="bullets">
+            <ul>
+                <li><apex:outputText value="Skriv til din konsulent, så bliver du kontaktet." /> </li>
+            </ul>
+        </div>
+    </apex:outputPanel>
+     <div id="mailDescMsg" style="display:none;height: 25px;padding-left: 50px;padding-top: 18px;border-color: red;color: grey;" class="mailError">
+        <apex:outputText id="Msg1" value="{!$Label.SC_InvalidMailDescription}"/>
+    </div>
+    <div id="phoneValidationMsg" style="display:none;height: 33px;padding-left: 50px;padding-top: 18px;border-color: red;color: grey;" class="mailError">
+        <apex:outputText id="Msg2" value="{!$Label.SC_PhoneValidation}"/>
+    </div>
+    <div id="phoneLengthMsg" style="display:none;height: 33px;padding-left: 50px;padding-top: 18px;border-color: red;color: grey;" class="mailError">
+        <apex:outputText id="Msg3" value="{!$Label.SC_PhoneLengthValidation}"/>
+    </div>
+    <!-- <apex:pagemessages /> -->
+    <!--<apex:messages styleClass="exceptionText" globalOnly="true"  styleClass="mailError"/>-->
+    <apex:pageMessage detail="{!$Label.CableUnitNotMatched}" rendered="{!!renderSection}" severity="error"></apex:pageMessage>
+    <apex:pageBlock id="pbId" rendered="{!renderSection}">
+    <apex:pageblockSection title="Besked" columns="1" collapsible="false" id="pbsId">
+         <apex:pageBlockSectionItem id="pbsItemId">
+            <apex:inputtextarea value="{!mailDescription}" cols="100" rows="6" id="mailDescId"/> 
+        </apex:pageBlockSectionItem>
+        <apex:outputPanel >
+            <apex:inputCheckbox value="{!sendCopy}"/>
+            <apex:outputLabel value="Send mig en kopi af denne e-mail"/>
+        </apex:outputPanel>
+     </apex:pageblockSection>
+     </apex:pageBlock>
+     
+     <apex:pageBlock id="pageBlockId" rendered="{!renderSection}">
+     <apex:pageblockSection title="Dine oplysninger" columns="2" collapsible="false" id="pageBlockSectionId">
+            <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Fornavn: " />
+            <apex:inputField value="{!contactDetail.FirstName}"/>
+            </apex:pageBlockSectionItem>
+            <apex:pageBlockSectionItem id="lastnameSectionId">
+                    <apex:outputLabel value="Efternavn: " />
+                    <apex:inputField value="{!contactDetail.LastName}" id="lastnameid"/>
+            </apex:pageBlockSectionItem>
+            <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="E-mail: " />
+                    <apex:inputText value="{!contactDetail.email}" disabled="true" styleClass="black"/>
+            </apex:pageBlockSectionItem>
+            <apex:pageBlockSectionItem id="phoneSectionId">
+                    <apex:outputLabel value="Arb.tlf.: " />
+                    <apex:inputField value="{!contactDetail.Phone}" id="phone"/>
+            </apex:pageBlockSectionItem>
+         
+            <apex:pageBlockSectionItem id="mobileSectionId">
+                    <apex:outputLabel value="Mobil.: " />
+                    <apex:inputField value="{!contactDetail.MobilePhone}" id="mobilePhone"/>
+            </apex:pageBlockSectionItem>
+         
+            <apex:pageBlockSectionItem id="homephoeSectionId">
+                    <apex:outputLabel value="Privat tlf.:"/>
+                    <apex:inputField value="{!contactDetail.HomePhone}" id="homePhone"/>
+            </apex:pageBlockSectionItem>
+         
+     </apex:pageblockSection>
+     </apex:pageBlock> 
+    
+        <apex:pageBlock id="addressDetailPB" rendered="{!renderSection}">   
+        <apex:PageBlockSection id="addressDetailsPBS" title="Adresse information" collapsible="false" columns="2">
+                <apex:pageBlockSectionItem labelStyleClass="labelStyle" id="addressDetailPBSI">
+                     <apex:outputLabel styleClass="headerStyle">Søg adresse</apex:outputLabel>
+                        <apex:actionRegion >  
+                            <apex:inputField value="{!contact.Street_P__c}" id="streetI" required="true" >
+                                <apex:actionSupport event="onchange" action="{!fetchAddressDetails}" rerender="addressDetails" status="refreshStatus"/>
+                            </apex:inputField>
+                             <apex:actionStatus id="refreshStatus" startText="Søgning..." >
+                                <apex:facet name="start" ><img src="{!URLFOR($Resource.Loading)}" border="0" height="18px" width="18px" style="color:red;"/> </apex:facet>
+                                <apex:facet name="stop" ></apex:facet>
+                            </apex:actionStatus>
+                        </apex:actionRegion> 
+                </apex:pageBlockSectionItem>                          
+        </apex:pageBlockSection>
+        <apex:outputPanel id="addressDetails">
+             <apex:pageBlockSection rendered="{!displayAddressInfo}" collapsible="false" columns="2" id="addressDetailsPBS1">
+                <apex:pageBlockSectionItem labelStyleClass="labelStyle" >
+                            <apex:outputLabel value="Gade" for="Gadenavn"/>
+                            <apex:outputField value="{!address.Street__c}"></apex:outputField>  
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem >
+                            <apex:outputLabel value="Husnr." for="Husnr"/>
+                            <apex:outputField value="{!address.HouseNumber__c}"></apex:outputField>  
+                    </apex:pageBlockSectionItem>
+                   <apex:pageBlockSectionItem >
+                            <apex:outputLabel value="Opgang" for="Opgang"/>
+                            <apex:outputField value="{!address.Entrance__c}"></apex:outputField>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem >
+                            <apex:outputLabel value="Side/dørnr" for="Dør"/>
+                            <apex:outputField value="{!address.Door_No__c}"></apex:outputField> 
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem >
+                              <apex:outputLabel value="Etage" for="Etage"/>
+                              <apex:outputField value="{!address.Floor__c}"></apex:outputField> 
+                    </apex:pageBlockSectionItem>
+                    <!-- <apex:pageBlockSectionItem >
+                              <apex:outputLabel value="Side" for="Side"/>
+                              <apex:outputField value="{!address.Side__c}"></apex:outputField>
+                    </apex:pageBlockSectionItem> -->
+                    <apex:pageBlockSectionItem >
+                              <apex:outputLabel value="Postnr" for="Postnr"/>
+                              <apex:outputField value="{!address.Postcode__c}"></apex:outputField>      
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem >
+                              <apex:outputLabel value="By" for="By"/>
+                              <apex:outputField value="{!address.Town__c}"></apex:outputField> 
+                    </apex:pageBlockSectionItem>
+               </apex:PageBlockSection>
+        </apex:outputPanel>     
+  </apex:pageBlock>
+  <apex:pageBlock rendered="{!renderSection}" >
+     <apex:pageblockSection title="Opdater persondata" columns="1" collapsible="false">
+        <apex:outputPanel >
+         <apex:inputCheckbox value="{!editProfile}"/>
+         <apex:outputLabel value="Ønsker du at opdatere dine persondata "/>
+        </apex:outputPanel>    
+     </apex:pageblockSection><br/>
+     <apex:outputPanel >
+        
+         <!-- <apex:commandButton action="{!sendMail}" value="{!$Label.SC_WriteToYourConsultant_Send}" onClick="return validationFunction();" styleClass="dialogbutton_orange"/>&nbsp;&nbsp;&nbsp; -->
+         <apex:commandButton action="{!sendMail}" value="{!$Label.SC_WriteToYourConsultant_Send}" onclick="return validationFunction();" styleClass="dialogbutton_orange"/>&nbsp;&nbsp;&nbsp;
+         <!-- <apex:commandButton action="{!Cancel}" value="{!$Label.SC_Back}"/> -->  
+         <apex:commandButton action="{!backToContactPersonPage}" value="{!$Label.SC_Cancel}" styleClass="dialogbutton_grey"/>
+     </apex:outputPanel>
+  </apex:pageBlock>
+<script>
+    document.getElementById('{!$Component.formId:addressDetailPB:addressDetailsPBS:addressDetailPBSI:streetI}').readOnly = true;
+    //document.getElementById('{!$Component.formId:addressDetailsPB1:addressDetailsPBS1:streetI}').readOnly = true;
+    
+</script>
+
+
+<script type="text/javascript">printContentAreaEnd();</script>
+<script type="text/javascript">printFooter();</script>
+</apex:form>
+</body>
+</html>
+</apex:page>

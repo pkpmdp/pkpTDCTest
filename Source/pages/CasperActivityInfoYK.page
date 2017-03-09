@@ -1,0 +1,52 @@
+<apex:page standardController="Address__c" extensions="clsCasperActivityInfoYKController" showHeader="false" sidebar="false"
+    cache="true" standardStylesheets="true"
+>
+  <apex:form >
+      <apex:pageBlock mode="maindetail">
+          <apex:pageBlockSection columns="1">
+              <apex:pageBlockSectionItem rendered="{!AND(ISBLANK(respError), NOT(ISBLANK(dateOpenS)))}">
+                  <apex:outputLabel value="{!$Label.CaspActivInfo_OpenS_Label}"/>
+                  <apex:outputText value="{!$Label.CaspActivInfo_OpenS_Printed}" style="background-color: #F5F5F5;">
+                      <apex:param value="{!dateOpenS}"/>
+                  </apex:outputText>
+              </apex:pageBlockSectionItem>
+              <apex:pageBlockSectionItem rendered="{!AND(ISBLANK(respError), ISBLANK(dateOpenS))}">
+                  <apex:outputLabel value="{!$Label.CaspActivInfo_OpenS_Label}"/>
+                  <apex:outputText value="{!respOpenS}" style="background-color: #F5F5F5;"/>
+              </apex:pageBlockSectionItem>
+              <apex:pageBlockSectionItem rendered="{!NOT(ISBLANK(respError))}">
+                  <apex:outputLabel value="{!$Label.CaspActivInfo_OpenS_Label}"/>
+                  <apex:outputText value="{!respError}" style="background-color: #F5F5F5;"/>
+              </apex:pageBlockSectionItem>
+          </apex:pageBlockSection>
+          <apex:pageBlockSection columns="1">
+              <apex:pageBlockSectionItem rendered="{!AND(ISBLANK(respError), NOT(ISBLANK(respFreeV)), isNewFreeV)}">
+                  <apex:outputLabel value="{!$Label.CaspActivInfo_FreeV_Label}"/>
+                  <apex:outputText value="{!$Label.CaspActivInfo_FreeV_ActivNew}" style="background-color: #F5F5F5;">
+                      <apex:param value="{!respFreeV}"/>
+                  </apex:outputText>
+              </apex:pageBlockSectionItem>
+              <apex:pageBlockSectionItem rendered="{!AND(ISBLANK(respError), NOT(ISBLANK(respFreeV)), NOT(isNewFreeV))}">
+                  <apex:outputLabel value="{!$Label.CaspActivInfo_FreeV_Label}"/>
+                  <apex:outputText value="{!$Label.CaspActivInfo_FreeV_ActivOld}" style="background-color: #F5F5F5;">
+                      <apex:param value="{!respFreeV}"/>
+                  </apex:outputText>
+              </apex:pageBlockSectionItem>
+              <apex:pageBlockSectionItem rendered="{!AND(ISBLANK(respError), ISBLANK(respFreeV), isNewFreeV)}">
+                  <apex:outputLabel value="{!$Label.CaspActivInfo_FreeV_Label}"/>
+                  <apex:outputText value="{!$Label.CaspActivInfo_FreeV_EmptyNew}" style="background-color: #F5F5F5;"/>
+              </apex:pageBlockSectionItem>
+              <apex:pageBlockSectionItem rendered="{!AND(ISBLANK(respError), ISBLANK(respFreeV), NOT(isNewFreeV))}">
+                  <apex:outputLabel value="{!$Label.CaspActivInfo_FreeV_Label}"/>
+                  <apex:outputText value="{!$Label.CaspActivInfo_FreeV_EmptyOld}" style="background-color: #F5F5F5;">
+                      <apex:param value="{!dateFreeV}"/>
+                  </apex:outputText>
+              </apex:pageBlockSectionItem>
+              <apex:pageBlockSectionItem rendered="{!NOT(ISBLANK(respError))}">
+                  <apex:outputLabel value="{!$Label.CaspActivInfo_FreeV_Label}"/>
+                  <apex:outputText value="{!respError}" style="background-color: #F5F5F5;"/>
+              </apex:pageBlockSectionItem>
+          </apex:pageBlockSection>
+      </apex:pageBlock>
+  </apex:form>
+</apex:page>

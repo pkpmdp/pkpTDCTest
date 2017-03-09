@@ -1,0 +1,48 @@
+<apex:page showHeader="true"  title="Page" standardController="Lead" tabStyle="Lead" extensions="clsConvertLeadYKController" cache="true">
+  <apex:pageMessages showDetail="false"/>
+  <apex:form >  
+    <apex:sectionHeader title="{!$Label.Convert_Lead}" subtitle="{!Lead.Name}" help="/help/doc/user_ed.jsp?loc=help&target=leads_convert.htm&section=Leads&showSplash=true"/>
+    <apex:pageBlock id="mainBlock">
+      <apex:pageBlockButtons >
+        <apex:commandButton value="{!$Label.Convert}" action="{!convertLead}"/>
+        <apex:commandButton value="{!$Label.Cancel}" action="{!cancel}"/>
+      </apex:pageBlockButtons>
+      <apex:pageBlockSection title="{!$Label.Convert_Lead}" columns="1" collapsible="false" id="convertLeadSection">
+        <apex:pageBlockSectionItem >        
+          <apex:outputLabel value="{!$Label.Record_Owner}" style="labelCol requiredInput" />          
+          <apex:inputField value="{!account.OwnerId}"/>
+        </apex:pageBlockSectionItem>
+        <apex:pageBlockSectionItem id="customerNameSectionItem">
+          <apex:outputLabel value="{!$Label.Customer_Name}" for="Customer Name"/>   
+          <apex:outputPanel styleClass="requiredInput" layout="block">        
+            <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+            <apex:selectList value="{!duplicateAccountId}" size="1" required="true" id="customerNameSelect">
+              <apex:selectOptions value="{!duplicateAccounts}"></apex:selectOptions>
+            </apex:selectList>&nbsp;
+            <apex:outputLink value="javascript:showAccount()" >{!$Label.View}</apex:outputLink>
+          </apex:outputPanel>
+        </apex:pageBlockSectionItem>
+        <!-- <apex:pageBlockSectionItem id="convertedLeadStatusSectionItem">
+          <apex:outputLabel value="Converted Status" for="Converted Lead Status"/>   
+          <apex:outputPanel styleClass="requiredInput" layout="block">        
+            <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+            <apex:selectList value="{!convertedLeadStatus}" size="1" required="true" id="convertedLeadStatusSelect">
+              <apex:selectOptions value="{!convertedLeadStatuses}"></apex:selectOptions>
+            </apex:selectList>
+          </apex:outputPanel>
+        </apex:pageBlockSectionItem> -->
+      </apex:pageBlockSection>
+    </apex:pageBlock>
+    <script>
+    function showAccount() {
+        var select = document.getElementById("{!$Component.mainBlock.convertLeadSection.customerNameSectionItem.customerNameSelect}");
+        var id = select.options(select.selectedIndex).value;
+        if (id.substr(0, 3) != '001') { 
+            alert('You can only view existing customers.');        
+        } else {
+            window.open('/' + id + '/p');
+        }
+    }
+    </script>
+  </apex:form>
+</apex:page>

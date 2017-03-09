@@ -1,0 +1,211 @@
+<apex:page sidebar="false" showHeader="false" standardStylesheets="false" controller="youbioIdeasController">
+<html>
+    <head>
+       <title><apex:insert name="PageTitle">Salesforce Ideas - Home</apex:insert></title>
+        <script src="{!URLFOR($Resource.youbioStyling, 'javascript/IWLJqueryLib.js')}"></script>
+        <script src="{!URLFOR($Resource.youbioStyling, 'javascript/IWLCommons.js')}"></script>
+        <script src="{!URLFOR($Resource.youbioStyling, 'javascript/IWLAvatarUpload.js')}"></script>
+        <script src="{!URLFOR($Resource.youbioStyling, 'javascript/IWLListview.js')}"></script>
+        <script src="{!URLFOR($Resource.youbioStyling, 'javascript/IWLSlideshow.js')}"></script>
+        <script src="{!URLFOR($Resource.youbioStyling, 'javascript/IWLPostIdea.js')}"></script>
+        <script src="{!URLFOR($Resource.youbioStyling, 'javascript/IWLDetailview.js')}"></script>
+        <script src="{!URLFOR($Resource.youbioStyling, 'javascript/momentmin.js')}"></script>
+    	<apex:includeScript value="{!UrlFor($Resource.jQuery181,'/jquery/jquery-1.8.js')}"/>
+        <!--<link rel="stylesheet" type="text/css" href="{!$Resource.youbioStyling}/styles/cssreset-context-min.css"/>
+        <link rel="stylesheet" type="text/css" href="{!$Resource.IdeaDemoPage}"/>-->
+        <!--link rel="stylesheet" type="text/css" href="{!$Resource.youbioCSS}" /-->
+
+<link rel="stylesheet" type="text/css" href="{!URLFOR($Resource.youbioStyling, 'styles/IWLSearchDefault.css')}"/>
+<link rel="stylesheet" type="text/css" href="{!URLFOR($Resource.youbioStyling, 'styles/IWLCommonsDefault.css')}"/>
+<link rel="stylesheet" type="text/css" href="{!URLFOR($Resource.youbioStyling, 'styles/IWLAvatarUploadDefault.css')}"/>
+<link rel="stylesheet" type="text/css" href="{!URLFOR($Resource.youbioStyling, 'styles/IWLListviewDefault.css')}"/>
+<link rel="stylesheet" type="text/css" href="{!URLFOR($Resource.youbioStyling, 'styles/IWLSlideshowDefault.css')}"/>
+<link rel="stylesheet" type="text/css" href="{!URLFOR($Resource.youbioStyling, 'styles/IWLPostIdeaDefault.css')}"/>
+<link rel="stylesheet" type="text/css" href="{!URLFOR($Resource.youbioStyling, 'styles/IWLDetailviewDefault.css')}"/>
+<link rel="stylesheet" type="text/css" href="{!URLFOR($Resource.youseebio, 'youseeBio/styles/IdeaDemoPage.css')}"/>
+    
+        
+        
+        
+        <link rel="stylesheet" type="text/css" href="{!URLFOR($Resource.youbioStyling, 'demoIWLLeaderboard.css')}"/>
+        <link rel="stylesheet" type="text/css" href="{!URLFOR($Resource.youbioStyling, 'demoIWLSlideShow.css')}"/>
+        <link rel="stylesheet" type="text/css" href="{!URLFOR($Resource.youbioStyling, 'demoIWLPostIdea.css')}"/>
+        <link rel="stylesheet" type="text/css" href="{!URLFOR($Resource.youbioStyling, 'demoIWLIdeas.css')}"/>
+        <script type="text/javascript" src="{!$Resource.IWLDemoScript}"></script>
+        
+        <!-- script type="text/javascript">
+            function categoriesTextToLinks() {
+                var categoriesCount = 0;
+                jQuery('.IWLListviewRelatedTopicsContainer, .IWLDetailViewRelatedTopicsContainer').each(function() {
+                    categoriesCount = jQuery(this).find('.IWLDetailViewRelatedTopic, .IWLListviewRelatedTopic').length;
+                    jQuery(this).find('.IWLDetailViewRelatedTopic, .IWLListviewRelatedTopic').each(function(index) {
+                        if (index < categoriesCount - 1) {
+                            jQuery(this).html('<a href="/apex/iwlIdeas?category=' + encodeURIComponent(jQuery(this).text()) + '" >' + jQuery(this).text() + '</a><div class="categoriesSeparator">|</div>');
+                            
+                        } else {
+                            jQuery(this).html('<a href="/apex/iwlIdeas?category=' + encodeURIComponent(jQuery(this).text()) + '" >' + jQuery(this).text() + '</a>');
+                        }
+                    });
+                });
+            }
+        
+            jQuery(document).ready( function() {
+                jQuery('.IWLPostIdeaWidgetViewPostIdeaHome .IWLPostIdeaNextButtonLabel').each(function(index) {
+                    jQuery(this).html('Post an {!$ObjectType.Idea.Label}').css({'width': '100px', 'margin-left': '5px'});
+                }); 
+                jQuery('.IWLPostIdeaWidgetViewPostToTheme .IWLPostIdeaNextButtonLabel').each(function(index) {
+                    jQuery(this).html('Post to Theme').css({'width': '118px', 'margin-left': '0px'});
+                }); 
+                categoriesTextToLinks();
+                
+            });
+        </script-->
+    </head>
+    <body>
+        <apex:outputPanel layout="none">
+            <div id="wrapper">
+                <div id="header">
+                    
+                    <div class="container_12">
+                        <div class="grid_3">
+                            <a href="https://yousee.test.cs7.force.com"><img src="{!$Resource.Bio_logo}" alt="YouBio Idetank" border="0"/></a>
+                        </div>
+
+                        <div class="grid_9">
+                            <ul class="breadcrumb">
+                                <li><a href="http://yousee.tv/youbio/">Youbio.dk</a></li>
+                                <li><a href="http://yousee.dk">Yousee.dk</a></li>
+                            </ul>
+                            <h1>Vær med til at præge YouBio, skriv dine ideer her...</h1>        
+                        </div>    
+                    </div>
+                </div>
+                <div id="body-wrap">
+                
+                    <div class="container_12">
+                        <div class="grid_3">
+                            <!--div class="facebook_box"--><apex:outputPanel layout="block" styleClass="facebook_box" rendered="{!authed != true}">
+                                <p>Hej, har du gode ideer eller lys til at kommentere skal du f&oslash;rst logge ind.</p>
+                                <span id="j_id0:j_id2:j_id8">                       
+                                    <a href="{!facebookLoginUrl}" class="btn"><span>f</span>Logind med Facebook</a>
+                                </span>
+                            <!--/div--></apex:outputPanel>
+                            
+                            <!--div class="facebook_box_user_data"--><apex:outputPanel layout="block" styleClass="facebook_box_user_data" rendered="{!authed == true}">
+                            <p>Du er logget ind som:</p>
+                            <div class="media">
+                                <img src="{!profilePicture}" class="img" />
+                                <div class="bd">
+                                    <span>{!me.name}</span>
+                                    <span>Oprettet {!UserCreatedDate}</span>
+                                    <a href="{!$Page.YoubioIdeaCategory}?mine=true">Min ide</a>
+                                    <a href="/secur/logout.jsp">Log af</a>
+                                </div>
+                            </div>    
+                            </apex:outputPanel>
+
+                            <ul class="navigation">
+                                <h3 class="dim">YouBio</h3>
+                                <li><a href="{!$Page.youbioIdeas}">Forside</a></li>
+                                <li><a href="{!$Page.YoubioIdeaCategory}?category=0">Klienter / platforme</a></li>
+                                <li><a href="{!$Page.YoubioIdeaCategory}?category=1">Indhold</a></li>
+                                <li><a href="{!$Page.YoubioIdeaCategory}?category=2">Design</a></li>
+                                <li><a href="{!$Page.YoubioIdeaCategory}?category=3">Seneste nyt fra YouBio</a></li>
+                            </ul>
+                            
+                            <apex:outputPanel layout="block" styleclass="cta_box ext" rendered="{!$CurrentPage.name != 'youbioIdeas'}">
+                                <h2>
+                                    <img src="{!$Resource.youbio_cta_top}" alt=""/>
+                                    Send os din ide og se den blive til virkelighed!
+                                </h2>
+                                <div class="text_object">
+                                    <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh</p>
+                                </div>
+                                <a href="/apex/youbioPostIdea" class="btn">Skriv din idé</a>
+                            </apex:outputPanel>
+
+                        </div>
+
+                        <div class="grid_9">
+                            <img src="{!$Resource.youbio_topbanner}" alt="" />                            
+                        	<apex:insert name="MainPanel"/>                         
+                        </div> 
+                            
+                </div>    
+
+            </div>
+        </div>  
+
+
+
+
+
+        </apex:outputPanel>
+        
+        <div id="bottomnavigation">
+            <div class="wrapper">
+                <div class="column">
+                    <h3>Produkter</h3>
+                    <ul>
+                        <li><a href="">Tv fra YouSee</a></li>
+                        <li><a href="">Bredbånd</a></li>
+                        <li><a href="">Mobilt Bredbånd</a></li>
+                        <li><a href="">Telefoni</a></li>
+                    </ul>
+                </div>
+                <div class="column">
+                    <h3>Mine tjenester</h3>
+                    <ul>
+                        <li><a href="">Log på Web-tv</a></li>
+                        <li><a href="">Læs om Web-tv</a></li>
+                        <li><a href="">Hastighedstest</a></li>
+                        <li><a href="">YouSee Musik</a></li>
+                    </ul>
+                </div>
+                <div class="column">
+                    <h3>Genveje</h3>
+                    <ul>
+                        <li><a href="">Mit YouSee</a></li>
+                        <li><a target="_blank" href="">Webmail</a></li>
+                        <li><a href="">YouSee Ready</a></li>
+                        <li><a href="">Nyhedsbreve</a></li>
+                    </ul>
+                </div>
+                <div class="column">
+                    <h3>Hjælp og support</h3>
+                    <ul>
+                        <li><a href="">Spørgsmål og svar</a></li>
+                        <li><a href="">Driftinformation</a></li>
+                        <li><a href="">Få hjælp i YouSee Forum</a></li>
+                        <li><a href="">Kontakt os</a></li>
+                    </ul>
+                </div>
+                <div class="column last">
+                    <h3>I fokus</h3>
+                    <ul>
+                        <li><a href="">Tv fra kun 209 kr./md.</a></li>
+                        <li><a href="">Køb 25 Mbit og få 50 Mbit</a></li>
+                        <li><a href="">YouSee Plus 0 kr. i 2 mdr.</a></li>
+                        <li><a href=""> YouBio 0,- måneden ud</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div id="footer">
+            <!--googleoff: index-->
+            <div class="wrapper">
+                <ul class="hnav dotted">
+                    <li><a href="">Cookies på yousee.dk</a></li>
+                    <li><a href="">Nyheder</a></li>
+                    <li><a href="">Om YouSee</a></li>
+                    <li><a href="">Find butik</a></li>
+                    <li class="last"><a href="">Kontakt os</a></li>
+                </ul>
+            </div>
+            <!--googleon: index-->
+            <div class="footerBG"></div>
+        </div>
+        
+    </body>
+</html>
+</apex:page>

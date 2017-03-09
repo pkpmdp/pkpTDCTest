@@ -1,0 +1,43 @@
+<apex:page standardController="Account" extensions="PersonCustomerEmailUpdateController" showHeader="false" sidebar="false">
+    <apex:includeScript value="/support/console/22.0/integration.js"/>
+    <script type="text/javascript">
+        function CancelEmail(){
+            //CancelValue();
+            window.open('/{!acc.Id}','_self');
+            if (sforce.console.isInConsole()) {
+              var prmytbId2 = sforce.console.getEnclosingPrimaryTabId(refreshtab);
+            }
+        }
+    </script>
+    <apex:form id="formId" target="_parent">
+         <apex:outputPanel id="panelId">
+             <script>
+                function afterEmailUpdate(){
+                    var msg = '{!errorMessage}';
+                    var validateFlag = '{!emailvalidateFlag}';
+                                //alert(msg);
+                    if(msg == ''){
+                        CancelEmail();
+                    }
+                    if (sforce.console.isInConsole()) {
+                        var prmytbId = sforce.console.getEnclosingPrimaryTabId(refreshtab);
+                    }
+                }
+                var refreshtab = function refreshtab(result) {
+                    var tabId = result.id;
+                    sforce.console.refreshPrimaryTabById(tabId,true,closeTab);
+                };
+                var closeTab= function closeTab(result) {
+                    var tabId2 = result.id; 
+                    sforce.console.closeTab(tabId2); 
+                }
+             </script>
+            <apex:outputField value="{!Account.PersonEmail}" rendered="{!NOT(emailFlag)}"/>
+            <apex:inputText value="{!email}" rendered="{!OR(emailFlag,Account.PersonEmail == '')}" id="emailId" style="padding: 0px 1px;" />  
+            <apex:commandButton value="Edit" action="{!editEmail}" rendered="{!AND(NOT(emailFlag),Account.PersonEmail != '')}" reRender="panelId" style="margin-left: 5px;padding: 2px 1px;" />
+            <apex:commandButton value="save" action="{!updateEmail}" rendered="{!OR(emailFlag,Account.PersonEmail == '')}" reRender="panelId" oncomplete="afterEmailUpdate();return false;" style="margin-left: 5px;padding: 2px 1px;"/>
+            <apex:commandButton value="Cancel" rendered="{!emailFlag}" onclick="CancelEmail();return false;" style="padding: 2px 1px;"/>
+             <br/><apex:outputText id="errorMessage" value="{!errorMessage}" rendered="{!errorFlag}" styleClass="errorMsg" style="font-size: 11px;"/>
+        </apex:outputPanel>  
+    </apex:form>
+</apex:page>

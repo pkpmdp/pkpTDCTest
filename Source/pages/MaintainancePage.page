@@ -1,0 +1,10 @@
+<apex:page cache="false" showHeader="false" sidebar="false" applyHtmlTag="false">
+<html class="cvi2015"><!--SPOC 2206 -->
+<apex:composition template="PermissionSiteTemplate">
+<apex:define name="body">
+<h1>Siden opdaters</h1>
+<p>Vi beklager ventetiden.</p><br/>
+<p>prøv venligst igen senere.</p>
+</apex:define></apex:composition>
+</html>
+</apex:page>

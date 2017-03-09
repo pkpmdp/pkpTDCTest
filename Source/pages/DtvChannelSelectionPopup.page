@@ -1,0 +1,58 @@
+<apex:page sidebar="false" showheader="false" controller="DtvChannelSelectionPopupController">
+
+      
+     <style type="text/css">
+       .green {
+    background: #DEFDB0 url(/resource/1302065562000/bg_green) repeat-x
+        !important;
+    height: 31px !important;
+    border: 1px solid #98b954 !important;
+    //border-bottom-width: 1px !important;
+    //border-bottom-color: white !important;
+    padding-left: 1px !important;
+    vertical-align: middle !important;
+   // font: bold 14px Arial, Helvetica, sans-serif !important;
+}
+</style>
+<script>
+  
+  //alert('{!popupSiteCoreId}');
+	 	 if('{!popupSiteCoreId}' !='')
+	 	 {
+	 	 	var purl = '{!popupSiteCoreId}';
+	 	  	var PopupURL = 'https://yousee.dk/sitecore/content/data/export/export.aspx?html=true&popup=true&itemguid='+purl;	 	 	 	
+  			window.open(PopupURL,'_self',replace="true",'menubar=no,width=680,height=692,toolbar=no,scrollbars=yes')
+  		}  		
+ 
+</script>
+<apex:form id="theform">
+  <body> 
+	 <!-- <apex:actionFunction name="ShowProducts" action="{!ShowAddProducts}" rerender="out1" /> --> 
+	 <apex:pageblock id="pbblk">
+	     <apex:pageMessages />  
+         
+   
+	<!-- 	<apex:inputHidden value="{!error}" id="thehidden" ></apex:inputHidden>     	          	          		
+			<table class="zebra">					        		
+        		<tr>	        		
+        		<B><apex:outputText value="{!ProductName}" id="theValue"  Style=" font: bold 15px Arial, Helvetica, sans-serif !important"/></B>
+					<br/><apex:outputText value="{!ProductDescription}" id="thedesc"  Style=" font:  12px Arial, Helvetica, sans-serif !important"/><br></br>
+					<hr></hr>					
+					<apex:repeat value="{!AddProdsList}" var="AddPrdInfoVar" id="theRepeat">
+					<tr>
+				 		<td class="green">
+        					<B><apex:outputText value="{!AddPrdInfoVar.Name}" id="theValue"  Style=" font: bold 13px Arial, Helvetica, sans-serif !important"/></B><br/>
+        						<apex:outputText value="{!AddPrdInfoVar.Description__c}" id="theValue1" style="width : 200Px,font: bold 10px Arial, Helvetica, sans-serif !important" /><br/>
+        				
+        						</td></tr> 
+        						 	
+    			</apex:repeat>
+    			</tr></table>				
+    	 -->
+    	 
+    	 		 
+    		 
+	 </apex:pageblock>  		
+  </body>
+</apex:form>
+</apex:page>

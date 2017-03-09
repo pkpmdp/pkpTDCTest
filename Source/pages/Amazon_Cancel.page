@@ -1,0 +1,8 @@
+<apex:page standardController="Cloud_File__c" extensions="Amazon_DocUpload_CT" action="{!cancel1}">
+    <apex:form >
+        <apex:outputPanel id="resultPanel">
+            <apex:actionStatus startText="upload canceled..." stopText="" id="myStatus" />
+        </apex:outputPanel>
+        <apex:actionFunction name="echo" action="{!cancel1}" reRender="resultPanel" status="myStatus"/>
+    </apex:form>
+</apex:page>

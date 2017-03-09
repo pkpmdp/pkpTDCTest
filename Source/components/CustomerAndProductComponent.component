@@ -1,0 +1,653 @@
+<apex:component >
+<apex:attribute name="isNewKunde" type="Boolean" description="Flag for new Customer check" required="true"></apex:attribute>
+<apex:attribute name="kundeNumber" type="String" description="Customer number" required="true"></apex:attribute>
+<apex:attribute name="kundeName" type="String" description="Name of the customer - firstName lastName" required="true"></apex:attribute>
+<apex:attribute name="Adresse" type="String" description="Address of customer" required="true"></apex:attribute>
+<apex:attribute name="Postnummer" type="String" description="Postnummer of customer Addr" required="true"></apex:attribute>
+<script src="{!$Resource.json}"></script>
+<style>
+.fontVerdana{ font-family:verdana; }   
+</style>
+
+<script type="text/javascript">
+
+
+var broadband = new Array();
+//DW-861
+var spbroadband= new Array();
+var digital = new Array();
+var clearproduct = new Array();
+var telephony = new Array();
+var youbio = new Array();
+var checkSerialNo = true;
+var newkundeFlag = {!isNewKunde};
+var htmlCustomerProds = '';
+var kundeid = '{!kundeNumber}';
+var OCustomerFlag = false;
+var oCustomerActiveProducts = false;
+var noActiveClearProducts = true;
+var BroadbandprodPrsnt = false; //DW-855
+var isSPselected = false; //DW-855
+var isCloudProdPrsnt = false;//DW-861
+var isdel = false;//DW-861
+var undelSP = false;//DW-861
+var undelCloud = false;
+var isTeleinBasket = false //DW-855
+var isYouBoxSelected = false;
+var isYouSeeProdPrsnt = false;
+//if(newkundeFlag == false){
+//setTimeout("displayCustomerProducts()", 200);
+    displayCustomerProducts();
+    
+//}
+
+function getPrise(abonnementerNodeVal,aftalerNode,productArray){
+    try{
+            var price;
+            var prefix;
+            if(aftalerNode.varenr!= undefined){
+                if (myJSONObject[aftalerNode.varenr]!=undefined){
+                    price= myJSONObject[aftalerNode.varenr].totalpris;
+                     if (myJSONObject[aftalerNode.varenr].betalingsperiode=="maaned"){
+                        prefix=' kr. pr. md.';
+                     } else {
+                        prefix=' kr.';
+                     }
+                     //productArray.push(myJSONObject[aftalerNode.varenr].pris);
+                }else{
+                    price = getAbonnementPrice(aftalerNode.varenr);
+                    prefix=' kr.';
+                }  
+             }
+             if (price==null || price=='' || abonnementerNodeVal.indexOf('Kunden har') >= 0){
+                //If condition added to hide the Bland Selv channels in Kunden Har
+                if(aftalerNode['digi-info'] != undefined && aftalerNode['digi-info']== "BS"){
+                }else{
+                    productArray.push(abonnementerNodeVal+' ');
+                }
+             }else{
+                //If condition added to hide the Bland Selv channels in Kunden Har
+                if(aftalerNode['digi-info'] != undefined && aftalerNode['digi-info']== "BS"){
+                }else{
+                    productArray.push(abonnementerNodeVal+'  '+price+' '+prefix);
+                }
+             }
+    }catch(err){
+            alert("Error: in getPrise method in getPrise: "+err.description);
+    }         
+}
+
+function getAbonnementPrice(productNumber){ 
+    var price = '';
+        if(myJSONObject['abonnement'] != undefined){ 
+            var abonnementList = myJSONObject['abonnement'];
+            $.each(abonnementList, function(i, node){
+             if(node.varenr != undefined){ 
+               if(productNumber == node.varenr){
+                 price = node['pris']!=undefined?node['pris']:'';              
+               }
+             }  
+            });
+         }
+    return price;
+}
+function displayCustomerProducts(){
+    try{
+           if(myJSONObject['kunde-data'] != undefined){
+                var json = myJSONObject['kunde-data'].aftaler;
+                if(json != undefined){                   
+                    $.each(json,function(i,aftalerNode){    
+                        if(aftalerNode.kundeid != undefined && kundeid == aftalerNode.kundeid){
+                          if(aftalerNode.abonnementer != undefined){
+                            $.each(aftalerNode.abonnementer,function(j,abonnementerNode){
+                                //Donot display the customer products when status is not active.
+                                if(abonnementerNode.status == 'aktiv' || abonnementerNode.status == 'kunsignal'){
+                                   if(aftalerNode.aftaletype != undefined && aftalerNode.aftaletype == "dtv") {
+                                        getPrise(abonnementerNode.navn,abonnementerNode,digital);
+                                    }
+                                    if(aftalerNode.aftaletype != undefined && aftalerNode.aftaletype == "bb") { 
+                                        BroadbandprodPrsnt = true;
+                                        if(abonnementerNode.varenr == '1302009')
+                                        {
+                                            isCloudProdPrsnt = true;
+                                        }
+                                        getPrise(abonnementerNode.navn,abonnementerNode,broadband);  
+                                    }
+                                    if(aftalerNode.aftaletype != undefined && aftalerNode.aftaletype == "clear" && aftalerNode.kundetype == 'I') {
+                                        isYouSeeProdPrsnt = true;
+                                        noActiveClearProducts= false;
+                                        var abNavn = abonnementerNode.navn;
+                                        if(abonnementerNode.ophoer != undefined){                                       
+                                            abNavn = abNavn + ' til '+abonnementerNode.ophoer.replace(/-/g, '.');
+                                        } 
+                                        getPrise(abNavn,abonnementerNode,clearproduct);
+                                    }
+                                    if(aftalerNode.aftaletype != undefined && aftalerNode.aftaletype == "tlf") { 
+                                        getPrise(abonnementerNode.navn,abonnementerNode,telephony); 
+                                    }
+                                    //Added for 689
+                                    if(aftalerNode.aftaletype != undefined && aftalerNode.aftaletype == "youbio") {
+                                        getPrise(abonnementerNode.navn,abonnementerNode,youbio); 
+                                        isExistingYoubioCustomer = 'true';
+                                    }
+                                 }
+                            }); 
+                          }       
+                        }
+                        if(aftalerNode.aftaletype != undefined && aftalerNode.aftaletype == "clear") {
+                          if(is_O_CustomerPresent() && aftalerNode.kundetype == 'O'){
+                            $.each(aftalerNode.abonnementer, function(j, abonnementerNode){
+                             if(abonnementerNode.status == 'aktiv'){
+                                var msg = 'Kunden har ' + abonnementerNode.kortnavn + ' over huslejen.';
+                                getPrise(msg, abonnementerNode, clearproduct);
+                             }
+                            });
+                          } 
+                        }
+                    });
+                  } 
+                }                
+         
+    }catch(err){    
+        alert("Error: in displayCustomerProducts method in CustomerAndProductComponent: "+err.description);
+    }                     
+}
+function isBasicSubscriptionMandatory(productString,productArray){
+        try{
+                var flag = false;
+                if(newkundeFlag){
+                    if(myJSONObject[productString] != undefined &&
+                            myJSONObject[productString].max != undefined && myJSONObject[productString].max != 0){
+                            flag = true;
+                    }
+                }else {
+                    if(myJSONObject[productString] != undefined &&
+                                    myJSONObject[productString].max != undefined &&
+                                    myJSONObject[productString].max != 0 && productArray.length == 0){
+                                    flag = true;
+                    }
+                }
+                //Stop selling any product if the customer is not heaving an active clear subscription
+                if(productString == "clear-ga-valg" && noActiveClearProducts){
+                     flag = true;
+                    if(is_O_CustomerPresent()){
+                        oCustomerActiveProducts = isRentedProductAvailable();
+                        if(oCustomerActiveProducts)
+                            flag = false;
+                    }
+                }
+                
+                return flag;
+        }catch(err){
+            alert("Error: in isBasicSubscriptionMandatory method in CustomerAndProductComponent: "+err.description);
+        }
+}
+
+ function isUdenClearPermCheck(){
+     try{
+         var flag = false;
+         if(myJSONObject['kunde-data'] != undefined){
+             if(myJSONObject['kunde-data']['bb-uden-clear-perm']!= undefined){
+                var json = myJSONObject['kunde-data']['bb-uden-clear-perm'];
+                if(json == true)
+                    flag = false;
+                else
+                    flag = true;
+                return flag;
+             } 
+          }
+         return flag;
+     }catch(err){
+         alert("Error: In isUdenClearPermCheck method in CustomerAndProductComponent: "+err.description);
+     }
+    
+  return flag;
+ } 
+ 
+// Donot allow a customer to buy any product if he is not heaving active clear subscription either rented or normal.
+function isRentedProductAvailable(){
+    if(myJSONObject['kunde-data'] != undefined){
+       var json = myJSONObject['kunde-data'].aftaler;
+       if(json != undefined){                   
+        $.each(json,function(i,aftalerNode){
+          if(aftalerNode.aftaletype != undefined && aftalerNode.aftaletype == "clear") {
+              $.each(aftalerNode.abonnementer, function(j, abonnementerNode){
+               if(abonnementerNode.status == 'aktiv'){
+              // alert('isRentedProductAvailable');
+                    oCustomerActiveProducts = true;
+                  }
+                 });
+             }
+        });
+    }
+  }
+  return oCustomerActiveProducts;
+ } 
+function is_O_CustomerPresent(){
+                var flag = false;
+                try{
+                        if(myJSONObject['kunde-data'] != undefined){
+                            var json = myJSONObject['kunde-data'].aftaler;
+                            if(json != undefined){                   
+                                $.each(json,function(i,aftalerNode){ 
+                                    if(aftalerNode.aftaletype == "clear" && aftalerNode.kundetype == 'O'){
+                                        //is_O_Cust_Present = true;
+                                        flag = true;
+                                        return;
+                                     }
+                                });
+                            }
+                       }
+                }
+                catch(err){
+                        alert("Error: in is_O_CustomerPresent method in is_O_CustomerPresent: "+err.description);
+                }
+                return flag; 
+}
+
+</script>
+<apex:pageBlock >
+                
+                <apex:pageBlockSection title="Kunde Information" columns="1"  collapsible="false">
+                   <!--  <apex:pageBlockSectionItem rendered="{!NOT(ISBLANK(dealerProdPojo.customerName))}">-->
+                   <apex:pageBlockSectionItem rendered="{! NOT(isNewKunde)}">                   
+                        <apex:outputLabel value="Kunde Nr:" styleClass="fontVerdana"/>
+                        <apex:outputLabel value="{!kundeNumber}" />
+                    </apex:pageBlockSectionItem>    
+                    <apex:pageBlockSectionItem rendered="{! NOT(isNewKunde)}">
+                        <apex:outputLabel value="Kunde Navn:" styleClass="fontVerdana"/>
+                        <apex:outputLabel value="{!kundeName}" />
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="Adresse:" styleClass="fontVerdana"/>
+                        <apex:outputLabel value="{!Adresse}" />
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="Postnummer:" styleClass="fontVerdana"/>
+                        <apex:outputLabel value="{!Postnummer}" />
+                    </apex:pageBlockSectionItem>
+                </apex:pageBlockSection>
+             
+                <apex:pageBlockSection title="Kunden har" columns="1" collapsible="false">
+                    <div id="NoProductInfo"></div>                  
+                </apex:pageBlockSection>
+                
+                <apex:pageBlockSection title="Indkøbskurv" columns="1" collapsible="false">
+                    <div id="basketProducts"></div>                  
+                </apex:pageBlockSection>             
+</apex:pageBlock>
+                
+<script>
+
+          var resetBBFlags = false;
+          var resetTlfFlags = false;  
+          var resetSPBBFlags =false; //DW-861 
+          
+          function sletProduct(url){
+            resetBroadBandTelephoniFlags(url);  
+            //alert(url);       
+            var kundeData = JSON.stringify(myJSONObject['kunde-data']); 
+           //alert(kundeData);      
+            var arrayInit = myJSONObject['array-init']; 
+            //alert(arrayInit);     
+            var etag = myJSONObject['ETag'];    
+            //alert(etag);      
+            //if(isYouBioSelected == true){
+                removeProductonSlet(url);
+            //} 
+            callToKasia(url, etag, kundeData, arrayInit); 
+          }
+          
+          function resetBroadBandTelephoniFlags(url){
+                var tempurl = url.split('~')[0];
+                var delProduct = url.split('~')[1];
+                if (delProduct.indexOf('Bredbånd')!=-1){
+                     resetBBFlags=true;
+                                    // alert('resetBroadBandTelephoniFlags-BB->'+resetBBFlags);
+                }//DW-861 start
+                if (delProduct.indexOf('Sikkerhedspakken')!=-1){
+                     resetSPBBFlags=true;
+                     undelSP = true;
+                     isSPselected = false;
+                                    // alert('resetBroadBandTelephoniFlags-SP->'+resetSPBBFlags);
+                }
+                if (delProduct.indexOf('YouSee Cloud Unlimited')!=-1){
+                     resetSPBBFlags=true;
+                     undelCloud = true;
+                                    // alert('resetBroadBandTelephoniFlags-SP->'+resetSPBBFlags);
+                }
+                if (delProduct.indexOf('')!=-1){
+                     resetSPBBFlags=true;
+                    // undelSP = true;
+                                    // alert('resetBroadBandTelephoniFlags-SP->'+resetSPBBFlags);
+                }
+                //DW-861 end
+                if (delProduct.indexOf('Telefoni')!=-1){
+                     resetTlfFlags=true;
+                                    // alert('resetBroadBandTelephoniFlags-TLF->'+resetTlfFlags);
+                }   
+          }
+         
+          function displayBasket(){
+            var aftalenumber = '';
+            if(myJSONObject['kunde-data'].valgt == undefined){
+                $("#basketProducts").html("<center>Ingen produkter.</center>");
+                //alert('inside the ingen prod basket');
+            }else{
+                var htmlBasketProds = '<table width=\"100%\">'; 
+                $.each(myJSONObject['kunde-data'].valgt , function(index, valgt){
+                    
+                    if(valgt.aftaletype == "clear"){
+                    //alert('inside clear');
+                        var flag = isBasicSubscriptionMandatory("clear-ga-valg", clearproduct);
+                        var clearProducts = getValgtNodeProduct(valgt.varer, "ga", !flag);
+                        /*var kydProducts =   getValgtNodeProduct(valgt.varer, "kyd", !flag);
+                        if(kydProducts.length > 0)
+                            clearProducts = clearProducts.concat(kydProducts);*/
+                                
+                        if(clearProducts.length > 0){
+                            htmlBasketProds = displayProducts(htmlBasketProds, '     Clear ',  clearProducts);
+                        }
+                    }else if(valgt.aftaletype == "bb"){
+                   // alert('inside bb');
+
+                        var flag = isBasicSubscriptionMandatory("bb-ga-valg",broadband);
+                        var broadbandProducts = new Array();
+                        var spbroadbandProducts = new Array();
+                        var clbroadbandProducts = new Array();
+                        var productArray1 = new Array();
+                         $.each(valgt.varer, function(i,varerNode){
+                         if(varerNode.varetype == "ga")
+                         {
+                         //alert('inside bb ga');
+                          broadbandProducts = getValgtNodeProduct(valgt.varer,"ga",!flag);
+                         }
+                         // DW-855
+                         // Removed sikkerpakke condition for DW-877
+                         if(varerNode.varetype == "ta")
+                         {   
+                         //alert('inside bb ta');
+                          spbroadbandProducts = getValgtNodeProduct(valgt.varer,"ta",true);
+                          //if(varerNode.varenr =="1302003")
+                          //  {
+                           //     isSPselected = true;
+                           //     undelSP = false;
+                                
+                           // }  
+                            if(varerNode.varenr == "1302009")
+                            {
+                                isCloudProdPrsnt = true;
+                                undelCloud = false;
+                            }
+                          /*if((document.getElementById("1302003").value)!= null)
+                          {
+                            alert('Add SP product***');
+                            document.getElementById("1302003").disabled = true;
+                          }*/
+                         }
+                        
+                         
+                        });
+                       
+                       // if(broadbandProducts.length > 0 && spbroadbandProducts.length > 0 && clbroadbandProducts>0)
+                         if(broadbandProducts.length > 0 && spbroadbandProducts.length > 0)
+                        {
+                            productArray1 = broadbandProducts.concat(spbroadbandProducts);
+                           // productArray1 = productArray1.concat(clbroadbandProducts);
+
+                             }
+                        else if(broadbandProducts.length > 0 && spbroadbandProducts.length <= 0) 
+                        {   
+                           // broadbandProducts = broadbandProducts.concat(clbroadbandProducts);
+                            productArray1 = broadbandProducts;
+
+                            }
+                        else if(broadbandProducts.length <= 0 && spbroadbandProducts.length > 0)   
+{
+                          //  spbroadbandProducts = spbroadbandProducts.concat(clbroadbandProducts);
+                            productArray1 = spbroadbandProducts;
+                                  
+                            }                             
+
+                        if(productArray1.length > 0){
+                            htmlBasketProds = displayProducts(htmlBasketProds, 'Bredbånd ',  productArray1);
+                        }
+                       
+                    }else if(valgt.aftaletype == "tlf"){
+                           isTeleinBasket = true;
+                        var telephonyProducts = getValgtNodeProduct(valgt.varer,"ga",true);
+                        if(telephonyProducts.length > 0){
+                            htmlBasketProds = displayProducts(htmlBasketProds, 'Telefoni ',  telephonyProducts);
+                        }
+                    }else if(valgt.aftaletype == "dtv"){
+                    
+                       var dtvProducts = new Array();
+                       var ydArray = new Array();
+                       var kydArray = new Array();
+                       $.each(valgt.varer, function(i,varerNode){
+                       //alert('***valgt.varer***'+valgt.varer+'*****varerNode.varetype***'+varerNode.varetype);
+                       //console.log('***valgt.varer***'+valgt.varer+'*****varerNode.varetype***'+varerNode.varetype);
+                         if(varerNode.varetype == "yd" && bsxxFlag=='false'){
+                         
+                           ydArray = getValgtNodeProduct(valgt.varer,"yd",true);
+                           
+                         }
+                         if(varerNode.varetype == "kyd" && bsxxFlag=='true'){
+                         
+                           kydArray = getValgtNodeProduct(valgt.varer,"kyd",true);
+                           
+                         }
+                         if(varerNode.varetype == "ta"){
+                          
+                            dtvProducts = getValgtNodeProduct(valgt.varer,"ta",true);
+                         }
+                        });
+                        if(ydArray.length > 0){
+                       
+                          dtvProducts = dtvProducts.concat(ydArray);
+                        }
+                        if(kydArray.length > 0){
+                            dtvProducts = dtvProducts.concat(kydArray);
+                        }
+                        if(dtvProducts.length > 0){
+                        
+                            dtvProducts = dtvProducts.concat(getValgtNodeProduct(valgt.varer,"ga",false));
+                        }else{
+                       
+                            dtvProducts = dtvProducts.concat(getValgtNodeProduct(valgt.varer,"ga",true));
+                        }
+                        //alert('dtvProducts***'+dtvProducts);
+                        //console.log('dtvProducts***'+dtvProducts);
+                        if(dtvProducts.length > 0){
+                       
+                            if(!(valgt.aftalenr.indexOf("dummy") >= 0)){
+                           
+                              var json = myJSONObject['kunde-data'].aftaler;
+                              //alert('json in customerand prod ******'+json);
+                              $.each(json, function(i, aftalerNode){ 
+                               //if(aftalerNode.kundeid==kundeId){
+                                  $.each(aftalerNode.abonnementer, function(j, abonnementerNode){
+                                     if(aftalerNode.aftaletype == "dtv" && abonnementerNode.varenr == '1201505') {
+                                        //aftalenumber = abonnementerNode.serienumre[0];
+                                     //code added for handling overwrite of selected YouSee cart.
+                                     if(myJSONObject.links != undefined && myJSONObject.links.length>0){
+                                         for(m=0; m<myJSONObject.links.length; m++){
+                                          if(myJSONObject.links[m].rel == "vaelg-aftale"){
+                                            if(myJSONObject.links[m].href.substr(myJSONObject.links[m].href.lastIndexOf('/')+1) != aftalerNode.aftalenr){
+                                                aftalenumber = abonnementerNode.serienumre[0];
+                                                checkSerialNo = false;  
+                                            }
+                                          }else{
+                                            if(checkSerialNo){
+                                            aftalenumber = abonnementerNode.serienumre[0];
+                                            }
+                                           }
+                                        }
+                                       }else{
+                                            aftalenumber = abonnementerNode.serienumre[0];
+                                       }
+                                     }
+                                   });
+                              });           
+                            }else{
+                            
+                               if(serialNumber != '0'){
+                              
+                                aftalenumber = serialNumber; //controllers variable
+                               }
+                            }                                                      
+                            
+                            htmlBasketProds = displayProducts(htmlBasketProds, 'YouSee Plus: '+aftalenumber, dtvProducts);
+                        }
+
+                    }
+                    //Added for 689
+                    else if(valgt.aftaletype == "youbio"){
+                        var youbioSubscription = new Array();
+                        var youbioBoks = new Array();
+                        var productArray = new Array();
+                        $.each(valgt.varer, function(i,varerNode){
+                            if(varerNode.varetype == "yd"){
+                                isYouBoxSelected = true;
+                                youbioBoks = getValgtNodeProduct(valgt.varer,"yd",true);
+                            }
+                            if(varerNode.varetype == "ga"){
+                                youbioSubscription = getValgtNodeProduct(valgt.varer,"ga",true);
+                            }
+                        });
+                        if(youbioSubscription.length > 0 && youbioBoks.length > 0)
+                            productArray = youbioSubscription.concat(youbioBoks);
+                        else if(youbioSubscription.length > 0 && youbioBoks.length <= 0)    
+                            productArray = youbioSubscription;
+                        else if(youbioSubscription.length <= 0 && youbioBoks.length > 0)    
+                            productArray = youbioBoks;  
+                        if(productArray.length > 0){
+                            htmlBasketProds = displayProducts(htmlBasketProds, 'Youbio ',  productArray);
+                        }
+                    }
+                });
+                htmlBasketProds = htmlBasketProds +'</table>';
+               // alert('**htmlBasketProds ***'+htmlBasketProds);
+                $("#basketProducts").html(htmlBasketProds);
+            }
+          }
+         
+         function getValgtNodeProduct(varer,varetype,sletProduct){
+            var hasBlandSelvInBasket  = false;
+            var hasKortOrBoxInExistingproducts = false;
+            if(myJSONObject['kunde-data'] != undefined){
+                hasBlandSelvInBasket = isBlandSelvInBasket(myJSONObject['kunde-data']);
+                if(myJSONObject['kunde-data'].aftaler != undefined){
+                    hasKortOrBoxInExistingproducts = isKortOrBoxInExistingproducts(myJSONObject['kunde-data'].aftaler); 
+                }
+            }
+            var productArr = new Array();
+            $.each(varer, function(i,varerNode){
+                var product = '', price = '', prefix = '';
+                var url = '';
+                
+                if(varerNode.varetype == varetype && varerNode.varenr !="1321002"){
+                   
+                    if (myJSONObject[varerNode.varenr]!=undefined){
+                        price= myJSONObject[varerNode.varenr].totalpris;
+                         if (myJSONObject[varerNode.varenr].betalingsperiode=="maaned"){
+                            prefix=' kr. pr. md.';
+                         } else {
+                            prefix=' kr.';
+                         }
+                    }
+                    
+                    /*Addded the condidtion for DEALERWEB-844 - In case of Tvilling Kort, one time charges gets
+                        added in the basket. The slet link should be available only for Tvilling Kort.
+                    */
+                    if(varerNode.varenr == '1250034'){
+                        sletProduct = false;
+                        //alert('It is an Ekstrakort');
+                    }
+                    product = varerNode.navn + ' ' + price + prefix;
+                    $.each(varerNode.links,function(j,linkNode){
+                        if(linkNode.rel == 'slet'){
+                            url = linkNode.href;
+                            return;
+                        }
+                    });
+                }
+                if(product != '' && url != '' ){
+                    url = url + '~' + product;
+
+                    var tempVar = ''
+                    if(hasKortOrBoxInExistingproducts){
+                        hasBlandSelvInBasket = false;
+                    }
+                    if(hasBlandSelvInBasket && (varerNode.kortnavn == 'YouSee Kort' || varerNode.kortnavn =='YouSee Plus')){
+                        tempVar = (sletProduct) ? '<a href=\"#\" onclick=\"sletProduct(\''+url+'\')\" style=\"font-style:italic;color:red;\"></a>' : '';
+                    }else{
+                        tempVar = (sletProduct) ? '<a href=\"#\" onclick=\"sletProduct(\''+url+'\')\" style=\"font-style:italic;color:red;\">slet\<input type = "hidden" id="resetBBFlags" name="resetBBFlags" value=""/></a>' : '';
+                        
+                        
+                    }
+                    tempVar = '<span style=\"white-space:nowrap;\">'+product+'&nbsp;'+tempVar+'</span>';
+                    productArr.push(tempVar);
+                    
+                }
+            });
+            return productArr;
+         }
+                  
+          function displayProducts(htmlCustomerProds , heading, dataArray){    
+              var arrayLength = dataArray.length;   
+              htmlCustomerProds += '<tr><td><b>'+heading+'<b></td></tr><tr><td><ul>';
+              for(var i=0; i< arrayLength; i++){
+                  htmlCustomerProds  += '<li>';                     
+                  htmlCustomerProds  += '<b>&#187; </b>'+dataArray[i];
+                  htmlCustomerProds  += '</li>';               
+              }
+                htmlCustomerProds += '</ul></td></tr>';                             
+                return htmlCustomerProds;
+          }            
+
+          // Customer products not shown in case of new customer
+          /*if(newkundeFlag){ 
+              var noProductsString = '<center><b>Ingen produkter.</b></center>';
+              $("#NoProductInfo").html(noProductsString);     
+          }else if(!newkundeFlag){*/
+              htmlCustomerProds = '<table width=\"100%\">';
+              
+              if(clearproduct.length > 0){
+                htmlCustomerProds = displayProducts(htmlCustomerProds, 'YouSee Clear :',  clearproduct);
+          //      alert('YouSee Clear'+htmlCustomerProds);
+              }              
+              if(digital.length > 0){
+                htmlCustomerProds = displayProducts(htmlCustomerProds, 'YouSee Plus :',  digital);
+              //alert('htmlCustomerProds*1'+htmlCustomerProds);
+              }
+              if(broadband.length > 0){
+               
+                htmlCustomerProds = displayProducts(htmlCustomerProds, 'Bredbånd :',  broadband);
+               
+              }
+                           
+              if(telephony.length > 0){
+                htmlCustomerProds = displayProducts(htmlCustomerProds, 'Telefoni :',  telephony);
+              }
+              //Added for 689
+              if(youbio.length > 0){
+                htmlCustomerProds = displayProducts(htmlCustomerProds, 'YouBio :',  youbio);
+              } 
+              htmlCustomerProds += '</table>';  
+              if(clearproduct.length==0  && digital.length==0 && broadband.length==0  && telephony.length==0 && youbio.length == 0){
+                 var noProductsString = '<center>Ingen produkter.</center>';
+               //  alert('noProductsString'+noProductsString);
+                 // tilgÆngelig
+                 $("#NoProductInfo").html(noProductsString);
+              }else{
+                 $("#NoProductInfo").html(htmlCustomerProds);
+                // alert('htmlCustomerProds'+htmlCustomerProds);
+              }     
+                                                
+          //}
+                                               
+</script>
+
+
+</apex:component>

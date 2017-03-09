@@ -1,0 +1,479 @@
+<apex:page Controller="DealerProductPageController31" sidebar="false" showHeader="false" applyHtmlTag="false">
+ <html class="cvi2015"> <!--spoc 2206-->
+   
+<head> 
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+</head>
+    <script src="{!$Resource.JQuery}" type="text/javascript"></script>
+     <style>
+             .bold { font-weight:bold; font-family: Verdana; }
+             .receiptText {
+                            font-family: Verdana;
+                            font-size: 7pt; 
+              }
+              .subTitle {
+                            font-weight:bold;
+                            font-family: Verdana;
+                            font-size: 8pt; 
+              }
+             .errorMessage {color: red; font-weight: bold;}
+             .mailError{
+                color: red; 
+                border-bottom: #000000 1px solid; 
+                border-left: #000000 1px solid; 
+                padding-bottom: 1px; 
+                background-color: #f1f1f1; 
+                padding-left: 4px; 
+                padding-right: 4px; 
+                font-family: Verdana; 
+                font-size: 9pt; border-top: #000000 1px solid; 
+                border-right: #000000 1px solid; 
+                padding-top: 1px; 
+            }
+            .gray {
+                background-color: #c0c0c0 !important;
+                border: 1px solid #c0c0c0 !important;
+                font: bold 14px Verdana, Helvetica, sans-serif !important;
+            }
+            @media print {
+                input#btnPrint {
+                display: none;
+                                }
+                input#btnClose {
+                display: none;
+                                }
+                         }
+        </style>
+   <body>      
+            <apex:pageBlock id="approvalPageBlock"> 
+                <apex:pageBlockSection columns="1" collapsible="false">
+                    <apex:outputPanel rendered="{!clearFlag}">                    
+                        <div id="ApprovalInfoForClear1"/>
+                        <input value="{!ApprovalInfoForClear1}" id="ApprovalInfoClear1" type="hidden"/>                     
+                        <script>$("#ApprovalInfoForClear1").html(document.getElementById('ApprovalInfoClear1').value);</script>
+                    </apex:outputPanel>
+                </apex:pageBlockSection>
+                <apex:pageBlockSection title="Kundeinformation" columns="1" collapsible="false">
+                        <apex:pageBlockSectionItem rendered="{!AND(NOT(ISNULL(cCustInstAdd.customerNumber)),LEN(cCustInstAdd.customerNumber)>0)}">
+                            <apex:outputLabel value="Kundenummer:"/>
+                            <apex:outputLabel value="{!cCustInstAdd.customerNumber}"/> 
+                        </apex:pageBlockSectionItem>
+                        <apex:pageBlockSectionItem >
+                            <apex:outputLabel value="Fornavn/Efternavn:"/>
+                            <apex:outputLabel value="{!cCustInstAdd.firstName + ' ' +cCustInstAdd.lastName}"/> 
+                        </apex:pageBlockSectionItem>                                        
+                        <apex:pageBlockSectionItem >
+                            <apex:outputLabel value="Gade/Nr./Etage/Side/Dør:"/>
+                            <apex:outputLabel value="{!cCustInstAdd.addr1}" /> 
+                        </apex:pageBlockSectionItem>
+                        <apex:pageBlockSectionItem >
+                            <apex:outputLabel value="Postnr./By:"/>
+                            <apex:outputLabel value="{!cCustInstAdd.addr2}" /> 
+                        </apex:pageBlockSectionItem>
+                        <apex:pageBlockSectionItem rendered="{!NOT(ISNULL(cCustInstAdd.contactNumber))}">
+                            <apex:outputLabel value="Kontakt telefonnr:"/>
+                            <apex:outputLabel value="{!cCustInstAdd.contactNumber}"/> 
+                        </apex:pageBlockSectionItem>
+                        <apex:pageBlockSectionItem rendered="{!AND(NOT(ISNULL(emailIdForNumberporting)),LEN(emailIdForNumberporting)>0)}">
+                            <apex:outputLabel value="E-mail -adresse:"/>
+                            <apex:outputLabel value="{!emailIdForNumberporting}"/> 
+                        </apex:pageBlockSectionItem>
+                 </apex:pageBlockSection>
+                
+                
+                <apex:pageBlockSection title="Oplysninger om betaler" columns="1" collapsible="false" rendered="{!secondPayee}">
+                        <apex:pageBlockSectionItem rendered="{!NOT(ISNULL(payeeCustInstAdd.customerNumber))}">
+                            <apex:outputLabel value="Kundenummer:"/>
+                            <apex:outputLabel value="{!payeeCustInstAdd.customerNumber}"/> 
+                        </apex:pageBlockSectionItem>
+                        <apex:pageBlockSectionItem >
+                            <apex:outputLabel value="Fornavn/Efternavn:"/>
+                            <apex:outputLabel value="{!payeeCustInstAdd.firstName  + ' ' +payeeCustInstAdd.lastName}"/> 
+                        </apex:pageBlockSectionItem>
+                       <!-- <apex:pageBlockSectionItem >
+                            <apex:outputLabel value="Efternavn:"/>
+                            <apex:outputLabel value="{!payeeCustInstAdd.lastName}"/>
+                        </apex:pageBlockSectionItem> -->
+                        <apex:pageBlockSectionItem >
+                            <apex:outputLabel value="Gade/Nr./Etage/Side/Dør:"/>
+                            <apex:outputLabel value="{!payeeCustInstAdd.addr1}" /> 
+                        </apex:pageBlockSectionItem>
+                        
+                        <apex:pageBlockSectionItem >
+                            <apex:outputLabel value="Postnr./By:"/>
+                            <apex:outputLabel value="{!payeeCustInstAdd.addr2}" /> 
+                        </apex:pageBlockSectionItem>
+                        <!--  <apex:pageBlockSectionItem >
+                            <apex:outputLabel value=""/>
+                            <apex:outputLabel value="" /> 
+                        </apex:pageBlockSectionItem> -->
+                        <apex:pageBlockSectionItem rendered="{!OR(NOT(ISNULL(payeeCustInstAdd.contactNumber)),LEN(payeeCustInstAdd.contactNumber)>0)}">
+                            <apex:outputLabel value="Kontakttlf."/>
+                            <apex:outputLabel value="{!payeeCustInstAdd.contactNumber}"/> 
+                        </apex:pageBlockSectionItem>
+                 </apex:pageBlockSection>
+                 
+              <apex:PageBlockSection title="Kundens valg"  collapsible="false" columns="1">
+                    <div id="pakkeForSlagDiv" style="display:none;">                        
+                        <p style="color:blue;" id="pakkeforslag"></p>       
+                    </div>
+                    <apex:PageBlockSection title="Abonnementer" collapsible="false" columns="3" rendered="{!isYouBioAbnSelected}">
+                         <apex:repeat value="{!abonnementerProducts}" var="abnPro">
+                         <apex:outputText value="{!abnPro.ProductCategory}" />
+                         <apex:outputText value="{!abnPro.ProductName}" /><apex:outputText value=""/>
+                         <apex:outputText value="" rendered="{!abnPro.productSummary !=null}"/> <apex:outputText value="{!abnPro.productSummary}" rendered="{!abnPro.productSummary !=null}" style="font-size:11px;"/><apex:outputText value="" rendered="{!abnPro.productSummary !=null}"/>
+                       </apex:repeat> 
+                    </apex:PageBlockSection>
+                    <apex:pageBlockSection title="Installation" columns="3" collapsible="false" rendered="{!isYouBioBoxSelected}">  
+                         <apex:repeat value="{!installationProductsAndTlfInfo}" var="abnInst">
+                           <apex:outputText value="{!abnInst.ProductCategory}" /> <apex:outputText value="{!abnInst.ProductName}" /><apex:outputText value=""/>
+                           <apex:outputText value="" rendered="{!abnInst.productSummary !=null}"/> <apex:outputText value="{!abnInst.productSummary}" rendered="{!abnInst.productSummary !=null}" style="font-size:11px;"/><apex:outputText value="" rendered="{!abnInst.productSummary !=null}"/>
+                       </apex:repeat>
+                    </apex:pageBlockSection>
+                    
+                     <apex:outputPanel styleclass="receiptText" rendered="{!OR(telefoniFlag,broadbandTelephonyCommonFlag)}">
+                        <span>Kunden modtager en e-mail fra YouSee, som skal returneres som accept af, YouSee må overføre telefonnummeret til YouSee. Først herefter kan nummerporteringen sættes i gang. Kunden modtager en ordrebekræftelse med posten og en e-mail, når nummerporteringen er gennemført og YouSee Telefoni kan bruges.</span>
+                     </apex:outputPanel>
+                    <!-- Following section is added for broadband and need to check get modem check box  -->
+                        <apex:PageBlockSection title="Udlevering af modem" collapsible="false" columns="1" rendered="{!AND(checkBBFlag, onlyBroadbandFlag)}">
+                        <apex:outputPanel >
+                            <table>
+                                <tr>                                
+                                    <!-- <td><p>Der skal udleveres modem til kunden</p></td>-->
+                                    <apex:outputPanel rendered="{!AND(onlyBroadbandFlag,AND(NOT(isNewCustomer),bbSunscriptionIsPresent))}">
+                                        <td> <p>Der skal <b>ikke</b> udleveres modem til kunden</p></td>
+                                   </apex:outputPanel>
+                                   
+                                   <apex:outputPanel rendered="{!AND(onlyBroadbandFlag,OR(isNewCustomer,NOT(bbSunscriptionIsPresent)))}">
+                                     <td> <p>Der skal udleveres modem til kunden</p></td>
+                                   </apex:outputPanel>
+                                   
+                                </tr>
+                            </table>                    
+                        </apex:outputPanel>
+                   </apex:PageBlockSection>
+                    <!-- End of broadband modem section -->
+                    <!--Following section will be visible only when telephony product is selected  -->
+                    <apex:PageBlockSection title="Udlevering af modem" collapsible="false" columns="1" rendered="{!AND(checkTLFFlag, OR(telefoniFlag,broadbandTelephonyCommonFlag))}">
+                        <apex:outputPanel >
+                            <table>
+                                <tr>                                
+                                   <apex:outputPanel rendered="{!AND(OR(telefoniFlag,broadbandTelephonyCommonFlag),AND(NOT(isNewCustomer),bbSunscriptionIsPresent))}">
+                                        <td> <p>Der skal <b>ikke</b> udleveres modem til kunden</p></td>
+                                   </apex:outputPanel>
+                                   
+                                   <apex:outputPanel rendered="{!AND(OR(telefoniFlag,broadbandTelephonyCommonFlag),OR(isNewCustomer,NOT(bbSunscriptionIsPresent)))}">
+                                      <td> <p>Der skal udleveres modem til kunden</p></td>
+                                   </apex:outputPanel>
+                                    
+                                </tr>
+                            </table>                    
+                        </apex:outputPanel>
+                   </apex:PageBlockSection>
+                   
+                   <!--  <apex:outputPanel rendered="{!AND(bbSunscriptionIsPresent,broadbandTelephonyCommonFlag)}"> --> 
+                   <apex:outputPanel rendered="{!AND(OR(telefoniFlag,broadbandTelephonyCommonFlag), AND(NOT(isNewCustomer), NOT(bbSunscriptionIsPresent)))}">
+                    <p> Aktiveringskoderne fra det gamle modem skal bruges til det nye udleverede modem. Har kunden ikke disse mere, kan de fås via YouSee Kundeservice.</p>
+                </apex:outputPanel>
+                   
+                   <apex:PageBlockSection title="Vilkår" collapsible="false" columns="1" rendered="{!OR(telefoniFlag,broadbandTelephonyCommonFlag)}">
+                        <apex:outputPanel >
+                            <table>
+                                <tr>                                
+                                    <td><p>Jeg har oplyst kunden, at med tilmelding til Telefoni fra YouSee, siger kunden også ja til elektronisk kommunikation: </p>
+<p> <strong>Elektronisk kommunikation </strong> betyder, at du modtager  regninger, ordrebekræftelser, informationer og besked
+om eventuelle væsentlige prisstigninger elektronisk.
+YouSee sender besked via e-mail eller sms, når der er ny elektronisk post: </p>
+ <p> -Den elektroniske telefonregningen kan du se på Mit YouSee under ”Telefoni”, ”Regning og betaling”.</p>
+ <p> -Alle e-mails sendes også til din personlige elektroniske postkasse på YouSee’s hjemmeside på Mit YouSee under ”Indbakke”. </p>
+<br></br>
+<p> Din tilmelding til elektronisk kommunikation gælder for alle produkter fra YouSee. YouSee kan dog frit vælge at sende brevene som almindeligt brev, og indtil videre kan YouSee ikke sikre, at alle breve sendes elektronisk.</p>
+                                 </td>   
+                                </tr> 
+                            </table>                    
+                        </apex:outputPanel>
+                   </apex:PageBlockSection> 
+                      
+                    <!-- Ended for only telephony product section -->
+                    
+                    <apex:PageBlockSection title="Aktiveringskoder til Bredbånd" collapsible="false" columns="2" rendered="{!AND(broadbandTelephonyCommonFlag,NOT(bbSunscriptionIsPresent))}">
+                        
+                            <apex:pageBlockSectionItem >
+                                <!-- <apex:outputLabel value="YouSee sender aktiveringskoder til:" /> -->
+                                <span>YouSee sender aktiveringskoder til:</span>
+                            </apex:pageBlockSectionItem>
+                            <apex:pageBlockSectionItem rendered="{!AND(NOT(ISNULL(tlfNumberForNumberPorting)),LEN(tlfNumberForNumberPorting)>0,NOT(ISNULL(emailIdForNumberporting)),LEN(emailIdForNumberporting)>0)}">
+                              <apex:outputpanel rendered="{!AND(NOT(ISNULL(tlfNumberForNumberPorting)),LEN(tlfNumberForNumberPorting)>0,NOT(ISNULL(emailIdForNumberporting)),LEN(emailIdForNumberporting)>0)}"> 
+                                <!-- <apex:outputLabel value="{!tlfNumberForNumberPorting} og {!emailIdForNumberporting}" /> -->
+                              <span>{!tlfNumberForNumberPorting} og {!emailIdForNumberporting}</span>
+                              </apex:outputpanel>
+                            </apex:pageBlockSectionItem>
+                            
+                            <apex:pageBlockSectionItem rendered="{!AND(OR(NOT(ISNULL(tlfNumberForNumberPorting)),LEN(tlfNumberForNumberPorting)>0),OR(ISNULL(emailIdForNumberporting),LEN(emailIdForNumberporting)==0))}">
+                              <apex:outputpanel rendered="{!AND(OR(NOT(ISNULL(tlfNumberForNumberPorting)),LEN(tlfNumberForNumberPorting)>0),OR(ISNULL(emailIdForNumberporting),LEN(emailIdForNumberporting)==0))}">
+                               <!-- <apex:outputLabel value="{!tlfNumberForNumberPorting}"/> -->
+                               <span>{!tlfNumberForNumberPorting}</span> 
+                              </apex:outputpanel>
+                            </apex:pageBlockSectionItem>
+                            
+                            <apex:pageBlockSectionItem rendered="{!AND(OR(ISNULL(tlfNumberForNumberPorting),LEN(tlfNumberForNumberPorting)==0),OR(NOT(ISNULL(emailIdForNumberporting)),LEN(emailIdForNumberporting)>0))}">
+                              <apex:outputpanel rendered="{!AND(OR(ISNULL(tlfNumberForNumberPorting),LEN(tlfNumberForNumberPorting)==0),OR(NOT(ISNULL(emailIdForNumberporting)),LEN(emailIdForNumberporting)>0))}">
+                               <!-- <apex:outputLabel value="{!emailIdForNumberporting}"/> --> 
+                              <span>{!emailIdForNumberporting}</span>
+                              </apex:outputpanel>
+                            </apex:pageBlockSectionItem>
+                            
+                    </apex:PageBlockSection>
+                    
+                  
+                  <apex:outputPanel rendered="{!AND(onlyBroadbandFlag, AND(NOT(isNewCustomer), NOT(bbSunscriptionIsPresent)))}">
+                    <p> Aktiveringskoderne fra det gamle modem skal bruges til det nye udleverede modem. Har kunden ikke disse mere, kan de fås via YouSee Kundeservice.</p>
+                </apex:outputPanel>
+                
+                <apex:PageBlockSection title="YouSee sender aktiveringskoder til:" collapsible="false" columns="2" rendered="{!AND(onlyBroadbandFlag,NOT(bbSunscriptionIsPresent))}">
+                        
+                            <apex:pageBlockSectionItem rendered="{!AND(NOT(ISNULL(tlfNumberForNumberPorting)),LEN(tlfNumberForNumberPorting)>0)}">
+                                <!-- <apex:outputLabel value="Mobiltelefonnummer:" /> -->
+                                <span>Mobiltelefonnummer:</span>
+                            </apex:pageBlockSectionItem>
+                            
+                            <apex:pageBlockSectionItem rendered="{!AND(NOT(ISNULL(tlfNumberForNumberPorting)),LEN(tlfNumberForNumberPorting)>0)}">
+                               <!-- <apex:outputLabel value="{!tlfNumberForNumberPorting}" /> --> 
+                                <span>{!tlfNumberForNumberPorting}</span>
+                            </apex:pageBlockSectionItem>
+                            
+                            <apex:pageBlockSectionItem rendered="{!AND(NOT(ISNULL(emailIdForNumberporting)),LEN(emailIdForNumberporting)>0)}">
+                                <!-- <apex:outputLabel value="E-mail-adresse:"/> -->
+                                <span>E-mail-adresse:</span>
+                            </apex:pageBlockSectionItem>
+                            <apex:pageBlockSectionItem rendered="{!AND(NOT(ISNULL(emailIdForNumberporting)),LEN(emailIdForNumberporting)>0)}">
+                               <!--  <apex:outputLabel value="{!emailIdForNumberporting}"/> -->
+                                <span>{!emailIdForNumberporting}</span>
+                            </apex:pageBlockSectionItem> 
+                    </apex:PageBlockSection>
+                </apex:PageBlockSection> 
+            
+                <apex:PageBlockSection title="Beløb" collapsible="false" columns="3"/><tr></tr>
+                <apex:pageBlockSection columns="3" rendered="{!isYouBioBoxSelected}">                 
+                    <apex:outputLabel value="Oprettelse" styleclass="subTitle"/><apex:outputText ></apex:outputText><apex:outputText ></apex:outputText>
+                    <apex:repeat value="{!installationProducts}" var="abnInst">
+                           <apex:outputText value="{!abnInst.ProductCategory}" /> <apex:outputText value="{!abnInst.ProductName}" /><apex:outputText value="{!abnInst.totalpris} Kr." />
+                       </apex:repeat>
+                        <apex:outputText value=" I alt(engangsbelob)" styleclass="bold"/><apex:outputText value=""/><apex:outputText value="{!totalInsPriceValue} Kr." styleclass="bold"/>
+                    </apex:pageBlockSection>
+                    <apex:pageBlockSection columns="3"></apex:pageBlockSection>
+                    
+                 <apex:pageBlockSection columns="4" rendered="{!isYouBioAbnSelected}">
+                  
+                    <apex:outputLabel value="Faste månedsydelser" styleclass="subTitle"/>
+                   
+                    <apex:outputText ></apex:outputText> <apex:outputText ></apex:outputText> <apex:outputText ></apex:outputText>
+                    
+                        <apex:repeat value="{!abonnementerProducts}" var="abnPro">
+                          <apex:outputText value="{!abnPro.ProductCategory}" />
+                          <apex:outputText value="{!abnPro.ProductName}" /> 
+                        <apex:outputText ></apex:outputText> 
+                        <apex:outputText value="{!abnPro.totalpris} Kr. /md" /> 
+                       </apex:repeat>
+                   
+                      <apex:outputText value=" I alt (faste månedsydelser)" styleclass="subTitle"/>
+                      <apex:outputText value=""/> 
+                       <apex:outputText > </apex:outputText> 
+                       <apex:outputText value="{!totalAbnPriceValue} Kr. /md" styleclass="subTitle"/> 
+                </apex:pageBlockSection>
+              
+                  <apex:pageBlockSection rendered="{!abonnementerProducts.size>0}" columns="1">
+                      <apex:outputText value="{!approvalInfoIalt}" style=""/>
+                 </apex:pageBlockSection>
+                <apex:outputpanel rendered="{!AND(OR(plusFlag,ekstrakanalerFlag,instProdSrlNumbers.size>0),hardwareSelection!='existingDTVCard')}">
+                  <apex:pageBlockSection title="Udleveret hardware" collapsible="false" columns="2" >
+                   <apex:repeat value="{!instProdSrlNumbers}" var="proJsnArrSerialNo">
+                      <apex:outputText value="{!proJsnArrSerialNo.Product}" />
+                      <apex:outputText value="{!proJsnArrSerialNo.SerieNr}" rendered="{!!isYouBioSelected}"/>
+                   </apex:repeat>
+                 </apex:pageBlockSection>
+                </apex:outputpanel> 
+                
+                <apex:PageBlockSection title="Kvittering for modtagelse af engangsbeløb" collapsible="false" columns="1" rendered="{!OR(broadbandTelephonyCommonFlag,onlyBroadbandFlag,telefoniFlag,plusFlag,ekstrakanalerFlag)}">  
+                    <apex:outputPanel >
+                        <table>
+                            <tr>                                
+                                <td>
+                                    <apex:outputPanel styleClass="requiredInput" layout="block">
+                                        <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+<!--                                            <input type="checkbox" id="hasDealerAcceptedMoney"></input>-->
+                                        </apex:outputPanel> 
+                                </td>
+                                <td>Engangsbeløb modtaget fra kunden,</td>
+                                <td>&nbsp;Kr.&nbsp;</td>
+                                <td><apex:outputText value="{!oneTimePriceForBBnTFValue}"/></td>
+                            </tr>
+                        </table>                    
+                    </apex:outputPanel>
+                </apex:PageBlockSection>  
+                
+                <div id="newsletterdivId">
+                <apex:PageBlockSection id="wantNewsLetterId" title="Tilmeld kunden til YouSee nyhedsbrev (Permission)" collapsible="false" columns="1" rendered="{!IF(wantNewsLetter || newsLetterUser,true,false)}">
+                    <apex:outputPanel >
+                        <table>
+                            <tr>
+                                <td>
+                                 <div id="wantNewsLetter">
+                                    <apex:outputText value="{!wantNewsLetter}"></apex:outputText><!-- NewsLetter value -->
+                                 </div>
+                                </td>
+                                <td>                       
+                                    <div id="ApprovalInfo2"/>
+                                    <input value="{!ApprovalInfo2}" id="Info2" type="hidden"/>                      
+                                    <script>$("#ApprovalInfo2").html(document.getElementById('Info2').value);</script>
+                                </td>  
+                            </tr>
+                        </table>
+                        <table>
+                            <tr>
+                                <td>
+                                    <div id="newsletterLabel" style="display:none; font-family:verdana; font-weight: bold;">E-mail adresse:&nbsp;&nbsp;</div>
+                                </td>
+                                <td>
+                                     <apex:outputPanel styleClass="requiredInput" layout="block">                   
+                                      <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+                                       <div id="newsletterEmail" style="display:none;"> 
+                                        <apex:outputText value="{!emailIdForNumberporting}" id="emailText" rendered="{!NOT(receiptPage)}"/>
+                                       </div>
+                                      </apex:outputPanel> 
+                                      <apex:outputText value="{!emailIdForNumberporting}" rendered="{!receiptPage}"/>
+                                </td>
+                            </tr>
+                        </table>                    
+                    </apex:outputPanel>
+                </apex:PageBlockSection>
+                </div>  
+                
+                <div id="eKommdivId">
+                <apex:PageBlockSection id="registerEkomId" title="Tilmeld kunden e-kommunikation" collapsible="false" columns="1" rendered="{!IF(registerEkom || ekomUser,true,false)}">
+                    <apex:outputPanel >
+                        <table>
+                            <tr>
+                                <td>
+                                 <div id="registerEkom">
+                                    <apex:outputText value="{!registerEkom}"></apex:outputText><!-- Ekommunikation value -->
+                                 </div>
+                                </td>
+                                <td>                       
+                                    <div id="ApprovalInfo15"/>
+                                    <input value="{!ApprovalInfo15}" id="Info2" type="hidden"/>                      
+                                    <script>$("#ApprovalInfo15").html(document.getElementById('Info15').value);</script>
+                                </td>  
+                            </tr>
+                        </table>
+                        <table>
+                            <tr>
+                                <td>
+                                    <div id="registerEkomLabel" style="display:none; font-family:verdana; font-weight: bold;">E-mail adresse:&nbsp;&nbsp;</div>
+                                </td>
+                                <td>
+                                     <apex:outputPanel styleClass="requiredInput" layout="block">                   
+                                      <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+                                       <div id="registerEkomEmail" style="display:none;">
+                                        <apex:outputText value="{!emailIdForNumberporting}" id="emailText1" rendered="{!NOT(receiptPage)}"/>
+                                       </div>
+                                      </apex:outputPanel>
+                                      <apex:outputText value="{!emailIdForNumberporting}" rendered="{!receiptPage}"/>
+                                </td>
+                            </tr>
+                        </table>                    
+                    </apex:outputPanel>
+                </apex:PageBlockSection>
+                </div>  
+                
+                <div id="nyhedsbrevDivId">
+                <apex:PageBlockSection title="Nyhedsbrev" collapsible="false" columns="1" rendered="{!NOT(subscriptionFlag)}">
+                    <apex:outputPanel >
+                        Vi beklager men det lykkedes ikke at tilmelde dig til nyhedsbrevet.Pr�v igen lidt senere p� yousee.dk
+                    </apex:outputPanel>
+                </apex:PageBlockSection>
+                </div>
+                <apex:PageBlockSection id="forHandlerInofId" title="Forhandler information" collapsible="false" columns="2">                  
+                    <apex:outputLabel value="Bestillingsdato"/>
+                    <apex:outputText value=": {0,date,dd.MM.yyyy}" style="font-weight:bold;">
+                        <apex:param value="{!NOW()}" />
+                    </apex:outputText>
+                    <apex:outputLabel value="Forhandlernummer"/>
+                    <apex:outputLabel value=": {!obj.dealerNumber}"/> 
+                    <apex:outputLabel value="Navn"/>
+                    <apex:outputLabel value=": {!obj.userContact.LastName}"/> 
+                    <apex:outputLabel value="Adresse"/>
+                    <apex:outputLabel value=": {!obj.streetName}"/>  
+                    <apex:outputLabel value="Postnr./By"/>
+                    <apex:outputLabel value=": {!obj.postCode + ' / ' +obj.town}"/>
+                    <apex:outputLabel value="Sælgernummer" rendered="{!NOT(receiptPage)}"/> 
+                    <apex:outputText value="{!salesAgentNumber}" id="salesNumber1" rendered="{!NOT(receiptPage)}"/>
+                    <apex:outputLabel value="Sælgernummer" rendered="{!LEN(salesAgentNumber)>0}"/>
+                    <apex:outputText value=":{!salesAgentNumber}" id="salesNumber2" style="font-weight:bold;" rendered="{!AND(receiptPage,LEN(salesAgentNumber)>0)}"/>
+                
+                    <!-- need to assign it to an object in Salesforce 
+                    <apex:inputField value="{!salesAgent.salegernummer__c}"/>-->
+                </apex:PageBlockSection>
+                <br></br>
+                <apex:outputText value="Bemærk venligst" styleClass="bold" />                       
+                <apex:outputPanel rendered="{!clearFlag}" >  
+                        <br></br>                  
+                        <div id="ApprovalInfo3" style="font-family:verdana;"/>
+                        <input value="{!ApprovalInfoForClearFlow2}" id="Info3" type="hidden" />                      
+                        <script>$("#ApprovalInfo3").html(document.getElementById('Info3').value);</script>
+                </apex:outputPanel>            
+                <apex:outputPanel rendered="{!AND(OR(plusFlag,ekstrakanalerFlag), NOT(dtvtaflag))}"> 
+                         <br></br>                 
+                        <div id="YouSeePlusOrFreechoiceInfo" style="font-family:verdana;"/>
+                        <input value="{!ApprovalInfoForYouSeePlusOrFreechoice}" id="dtvInfo" type="hidden"/>                        
+                        <script>$("#YouSeePlusOrFreechoiceInfo").html(document.getElementById('dtvInfo').value);</script> 
+                </apex:outputPanel>
+                <!-- <apex:outputPanel rendered="{!OR(onlyBroadbandFlag,telefoniFlag,broadbandTelephonyCommonFlag)}">    
+                         <br></br>                 
+                        <div id="divBBnTFInfo" style="font-family:verdana;"/>
+                        <input value="{!ApprovalInfoForBBorTF}" id="BBnTFInfo" type="hidden"/>
+                        <script>$("#divBBnTFInfo").html(document.getElementById('BBnTFInfo').value);</script>
+                </apex:outputPanel> -->
+                <apex:outputPanel rendered="{!onlyBroadbandFlag}">    
+                         <br></br>                 
+                        <div id="divBBInfo" style="font-family:verdana;"/>
+                        <input value="{!ApprovalInfoForBB}" id="BBInfo" type="hidden"/>
+                        <script>$("#divBBInfo").html(document.getElementById('BBInfo').value);</script>
+                </apex:outputPanel>
+                <apex:outputPanel rendered="{!telefoniFlag}">    
+                         <br></br>                 
+                        <div id="divTFInfo" style="font-family:verdana;"/>
+                        <input value="{!ApprovalInfoForTelefoni}" id="TlfInfo" type="hidden"/>
+                        <script>$("#divTFInfo").html(document.getElementById('TlfInfo').value);</script>
+                </apex:outputPanel>
+                <apex:outputPanel rendered="{!broadbandTelephonyCommonFlag}">    
+                         <br></br>                 
+                        <div id="divBBnTFInfo" style="font-family:verdana;"/>
+                        <input value="{!ApprovalInfoForBBorTF}" id="BBnTFInfo" type="hidden"/>
+                        <script>$("#divBBnTFInfo").html(document.getElementById('BBnTFInfo').value);</script>
+                </apex:outputPanel>
+                 <apex:outputPanel rendered="{!isYouBioSelected}">    
+                         <br></br> 
+                         <br></br>                 
+                        <div id="divYouBioInfo" style="font-family:verdana;"/>
+                        <input value="{!ApprovalInfoForYouBio}" id="YouBioInfo" type="hidden"/>
+                        <script>$("#divYouBioInfo").html(document.getElementById('YouBioInfo').value);</script>
+                </apex:outputPanel>
+                <apex:outputPanel rendered="{!dtvtaflag}">    
+                         <br></br>                 
+                        <div id="divBSXXInfo" style="font-family:verdana;"/>
+                        <input value="{!ApprovalInfoForBSXX}" id="BSXXInfo" type="hidden"/>
+                        <script>$("#divBSXXInfo").html(document.getElementById('BSXXInfo').value);</script>
+                </apex:outputPanel>
+                <br/><br/>
+                <div style="font-family:verdana; border-top:thin solid #7EAC6D;font-size:13px;">
+                    Kunden skal ved efterfølgende spørgsmål kontakte YouSee Kundeservice.<br></br>
+                    Hovedkontor: YouSee – Teglholmsgade 1 – 0900 København C<br></br>
+                    Telefon 70 70 40 40 – Fax 70 70 40 41 <br></br>
+                    YouSee A/S, CVR-nr. 25 76 75 78 - København
+                </div>
+            </apex:pageBlock>  
+     </body>
+    <!-- <script>window.print();</script>-->
+</html>
+</apex:page>

@@ -1,0 +1,18 @@
+<apex:component layout="none">
+	<apex:attribute name="StatusMessagesWrap" type="StatusMessagesWrapper" required="true" description="The list of status messages"/>
+	
+	<apex:outputPanel rendered="{!StatusMessagesWrap.size > 0}" layout="block" styleClass="IWLSatusMessagesContainer">
+		<apex:repeat value="{!StatusMessagesWrap.StatusGroups}" var="Group">
+	
+				<apex:repeat value="{!StatusMessagesWrap.statusMessages[Group]}" var="statusMessage">
+					<apex:outputPanel layout="block" styleClass="IWLStatusMessage {!statusMessage.CSSClass}">
+						<apex:outputPanel layout="block" styleClass="IWLStatusMessageImage" />
+						<apex:outputPanel layout="block" styleClass="IWLStatusMessageTitle">{!statusMessage.status}</apex:outputPanel>
+						<apex:outputPanel layout="block" styleClass="IWLStatusMessageText">{!statusMessage.message}</apex:outputPanel>
+					</apex:outputPanel>
+				</apex:repeat>
+			
+		</apex:repeat>
+	</apex:outputPanel>
+	
+</apex:component>

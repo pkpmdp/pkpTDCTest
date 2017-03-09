@@ -1,0 +1,896 @@
+<apex:page controller="DealerProductPageController31" sidebar="false" showHeader="false"  id="page1" action="{!initializeText}" applyHtmlTag="false">
+    <html class="cvi2015"> <!--spoc 2206-->
+
+    <!--<script type="text/javascript" src="https://yousee.dk/sitecore/content/data/export/export.aspx?itemguid={9F945BC8-CCE7-43FF-8EF3-F2C81EFF66C8}&amp;functions=true" > </script>
+    -->
+    <script type="text/javascript" src="https://yousee.dk/sitecore/content/data/export/export.aspx?itemguid={BD793F05-9B01-4210-BD63-F33431D1013A}&functions=true" > </script>
+    <c:TopMenuComponent1 ></c:TopMenuComponent1>
+    <script type="text/javascript">printHeader();</script>
+    <script type="text/javascript">printTopMenu();</script>
+    <script type="text/javascript">printContentAreaBegin();</script>
+    <c:DealerComponent1 ></c:DealerComponent1>
+    <script src="{!$Resource.jQueryTableSorter}"></script>
+    <script src="{!$Resource.json}"></script>
+    <link class="user" href="{!$Resource.SalesFlowCSS}" rel="stylesheet" type="text/css" />
+    <style type="text/css">
+     .mailError{
+        color: red; 
+        border-bottom: #000000 1px solid; 
+        border-left: #000000 1px solid; 
+        padding-bottom: 1px; 
+        background-color: #f1f1f1; 
+        padding-left: 4px; 
+        padding-right: 4px; 
+        font-family: Verdana; 
+        font-size: 9pt; border-top: #000000 1px solid; 
+        border-right: #000000 1px solid; 
+        padding-top: 1px; 
+     }
+     a.class1:link{         
+        color: blue;                
+        text-decoration:underline;
+     }
+     a.class1:visited{ 
+        color: red;                         
+        text-decoration:none;
+        border-bottom: 2px dashed red;  
+     } 
+     a.class1:hover{
+        color: purple; 
+        font-size: 15px;
+        font-family: serif;
+        text-transform: uppercase;
+        letter-spacing: 3px;
+        word-spacing: 6px;
+        font-weight: normal;
+        text-decoration:none;
+        border-bottom: 2px dashed purple;               
+     } 
+     a.class1:focus{
+        color:red
+     }
+     .OrderFlow .column66 {
+        width: 100%;
+        !
+        important
+     }
+    
+     .columnA {
+        width: 60%;
+     }
+    
+     .columnB {
+        width: 40%;
+     }
+     .leftContent1 {
+                float:left;
+                overflow:visible;
+                width:540px;
+                height:800px;
+                min-height:2200px; 
+    }
+    .rightContent1 {
+                float:left;
+                overflow:visible;
+                width:385px;
+                height:800px;
+                min-height:2200px;
+    }
+        .leftContent2 {float:left;width:570px;overflow:auto;min-height:2200px;}
+        .rightContent2 {float:left;width:350px;overflow:auto;min-height:2200px;}
+        
+    </style>
+    <script type="text/javascript"> 
+        //var selectFourChannels = 'Der skal min. vælges 4 Ekstrakanaler.'; 
+        var slagMessageForFP = '  Det anbefales at kunden vælger en Fuldpakke i stedet for de valgte Ekstrakanaler. <br/> VIGTIG: Venligst vurder, om det prismæssigt kan svare sig, at opgradere til større tv-pakke frem for valgte Ekstrakanaler.';
+        var slagMessageForMP = '  Det anbefales at kunden vælger en Mellepakke i stedet for de valgte Ekstrakanaler. <br/> VIGTIG: Venligst vurder, om det prismæssigt kan svare sig, at opgradere til større tv-pakke frem for valgte Ekstrakanaler.';
+        var slagMessageForTP = '  Det anbefales at kunden vælger en Tillægspakke i stedet for de valgte Ekstrakanaler. <br/> VIGTIG: Venligst vurder, om det prismæssigt kan svare sig, at opgradere til større tv-pakke frem for valgte Ekstrakanaler.';
+        var slagMessageForLT = '  Det anbefales at kunden vælger en Lille Tillægspakke i stedet for de valgte Ekstrakanaler. <br/> VIGTIG: Venligst vurder, om det prismæssigt kan svare sig, at opgradere til større tv-pakke frem for valgte Ekstrakanaler.';
+        var slagMessageForST = '  Det anbefales at kunden vælger en Stor Tillægspakke i stedet for de valgte Ekstrakanaler. <br/> VIGTIG: Venligst vurder, om det prismæssigt kan svare sig, at opgradere til større tv-pakke frem for valgte Ekstrakanaler.';
+        var twoClearOphoerMessage = 'Der ligger en aktivitet på skift af clear produktet. <br/>Det er derfor ikke muligt at ændre kundens clear abonnement';  
+        var myJSONObject={!jsonResponse};
+        var bsxxFlag = '{!dtvtaflag}'; 
+        var firstJSONResponse = {!firstJsonResponse};
+        myJSONObject = refreshFirstJSONResponse(firstJSONResponse, myJSONObject);
+        var kundeId = '{!cCustInstAdd.customerNumber}';
+        var shoppingProducts = new Array();
+        var freeChoiceAllprods = new Array();  
+        var freeChoiceProds = new Array();
+        var productsUnderClear = new Array();
+        var existingProds = new Array();
+        var selectedClearProduct = '', freeChoiceString = 'dtv-ta-valg';
+        var freeChoiceProdsData='', warningMessage = '',removeConflictLink = '', existingKortNavn = '';
+        var kortNo = '', pakkeForSlagMessage = '', existingClearSortingNo = '', clearKundeType = '';
+        var ophoerFlag = false;
+        var conflictCount = 0;
+        if({!smartCardNumber} != null){
+            kortNo = {!smartCardNumber};
+        }
+        
+        var kundeData = JSON.stringify(myJSONObject['kunde-data']);
+        var arrayInit = myJSONObject['array-init'];
+        var etag = myJSONObject['ETag'];
+        $("#pakkeforslag").html('');
+        //Added for BS
+        var freeChoiceFlag={!isFreeChoicePageFlag};
+        var currentKundeNumber = '{!cCustInstAdd.customerNumber}';
+        
+        function populateClearProducts(){
+            var custFlag = false; 
+            var clearString = 'clear-ga-valg';
+            var clearprods = new Array();
+            var newCustFlag = {!isNewCustomer}; 
+            if(!ophoerFlag){
+              if(myJSONObject['clear-ga-valg'] != undefined){
+                var basicHeader = [" ","Vælg den Kabel-tv-pakke, kunden ønsker"," "," "];
+                clearprods = createProductsData(clearString, '', newCustFlag); 
+                $("#clearBody").replaceWith('<tbody id=\"clearBody\"></tbody>');
+                $("#fcClearProductTemplate").tmpl(clearprods).appendTo("#clearBody");
+              }
+              if($('#productTable tbody tr').size() < 1) {
+                document.getElementById('productTable').style.display = 'none';
+                document.getElementById('clearCartDiv').style.display = 'block';
+              }
+            }else{
+                document.getElementById('productTable').style.display = 'none';
+                document.getElementById('ophoerDiv').style.display = 'block';                
+            }
+        }
+        
+        function PopupCenter(pageURL, title,w,h) {                          
+            var left = (screen.width/2)-(w/2);
+            var top = (screen.height/2)-(h/2);
+            var targetWin = window.open (pageURL, title, 'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width='+w+', height='+h+', top='+top+', left='+left);
+        }
+        
+        function populateProducts(){
+         try{
+              var count = 0, existingCount = 0, freeCount = 0, aftalenumber = 0;
+              freeChoiceProds = new Array();
+              productsUnderClear = new Array();
+              existingProds = new Array();
+              
+             var aftalerResp= myJSONObject['kunde-data'].aftaler;
+             if(aftalerResp != null){
+             $.each(aftalerResp,function(i,aftalerNode){
+              if(aftalerNode.kundeid != undefined && kundeid == aftalerNode.kundeid){
+                 if(aftalerNode.abonnementer != undefined){
+                    $.each(aftalerNode.abonnementer,function(j,abonnementerNode){
+                      if(aftalerNode.aftaletype != undefined && aftalerNode.aftaletype == "dtv" && abonnementerNode.varenr == '1201505' ) {
+                         //  alert('inside');
+                           aftalenumber = abonnementerNode.serienumre[0];
+                           //alert(aftalenumber);
+                      }
+                    });
+                 }
+              }
+             });
+             }
+              
+           //freeChoiceAllprods = freeChoiceProducts(freeChoiceString, 'kr.', 'false', selectedClearProduct, kortNo, kundeId);
+              
+             freeChoiceAllprods = freeChoiceProducts(freeChoiceString, 'kr.', 'false', selectedClearProduct, aftalenumber, kundeId);
+             $.each(freeChoiceAllprods, function(i, product){
+                if(product != null){
+                //alert('product is not null');
+                //alert(product.sorteringsgruppe + ' hello ' + '{!$Label.Sorteringsgruppenavn}');
+                    if(product.sorteringsgruppe == '02-0090' && product.sorteringsgruppenavn == '{!$Label.Sorteringsgruppenavn}'){
+                      product.package = getPackage(product);
+                      if(myJSONObject['kunde-data'].opsagt != null) {
+                        $.each(myJSONObject['kunde-data'].opsagt, function(a, opsagtNode){
+                          if(opsagtNode.abonnementer != undefined) {
+                            $.each(opsagtNode.abonnementer, function(b, abonnementerNode){
+                                if(abonnementerNode.varenr == product.varenr){
+                                    product.checked = '';
+                                }      
+                            });
+                          }
+                        });
+                      }     
+                      if(product.modSorting == '<tr class=\"freeCache\">'){
+                          freeChoiceProds[freeCount] = product;
+                          freeCount = freeCount + 1;
+                      }else if(product.modSorting == '<tr class=\"cache\">'){
+                          existingProds[existingCount] = product;
+                          existingCount = existingCount + 1;
+                      }else{
+                          productsUnderClear[count] = product;
+                          count = count + 1;
+                      }
+                      //This code block is used to add the configured Bland Selv channels in the existing channels.
+                      if(product.siteServiceNavn != undefined){
+                        if(configuredBlandSelvChannels.length > 0){
+                            if(jQuery.inArray(product.siteServiceNavn,configuredBlandSelvChannels) !=-1){
+                                product.package = '';
+                                productsUnderClear[count] = product;
+                                count = count + 1;
+                            }
+                        }
+                      }
+                      //Bland Selv code Block ends.
+                    }  
+                 }
+              });
+
+              $("#existingProductBody").replaceWith('<tbody id=\"existingProductBody\"></tbody>');
+              //Changed for DW-780 - Changed lenght > 1 to lenght > 0
+              if(existingProds.length > 0){
+                  document.getElementById('existingProductsTable').style.display = 'block';
+                  document.getElementById('existingDiv').style.display = 'none';
+                  $("#freeChoiceProductTemplate").tmpl(existingProds).appendTo("#existingProductBody");
+                  $("#existingProductsTable").trigger("update");
+                  $("#existingProductsTable").trigger("appendcache"); 
+              }else{
+                  document.getElementById('existingProductsTable').style.display = 'none';
+                  document.getElementById('existingDiv').style.display = 'block';
+              } 
+              
+              $("#productBody").replaceWith('<tbody id=\"productBody\"></tbody>');
+              if(freeChoiceProds.length > 1){
+                  document.getElementById('bbAddlTable').style.display = 'block';
+                  document.getElementById('freeChoiceDiv').style.display = 'none';
+                  $("#freeChoiceProductTemplate").tmpl(freeChoiceProds).appendTo("#productBody");
+                  $("#bbAddlTable").trigger("update");
+                  $("#bbAddlTable").trigger("appendcache"); 
+              }else{
+                  document.getElementById('bbAddlTable').style.display = 'none';
+                  document.getElementById('freeChoiceDiv').style.display = 'block';
+              }
+             
+              $("#clearProductBody").replaceWith('<tbody id=\"clearProductBody\"></tbody>');
+              if(productsUnderClear.length > 1){
+                  document.getElementById('productsUnderClearTable').style.display = 'block';
+                  document.getElementById('clearDiv').style.display = 'none';
+                  $("#freeChoiceProductTemplate").tmpl(productsUnderClear).appendTo("#clearProductBody");
+                  $("#productsUnderClearTable").trigger("update");
+                  $("#productsUnderClearTable").trigger("appendcache"); 
+              }else{
+                  document.getElementById('productsUnderClearTable').style.display = 'none';
+                  document.getElementById('clearDiv').style.display = 'block';
+              }
+             }catch(err){
+                //alert("Error: in populateProducts: "+err.description);
+            }
+        }
+    
+    
+    function getWarningMessage(warning) {
+        try{
+            var warningLinks = warning.links;
+            var responseNode = myJSONObject['dtv-ta-valg'].varer;
+            warningMessage='';
+            $.each(warning, function(j, node){
+                if(j == 'CLEAR1ST'){
+                    if(warningMessage != '')
+                        warningMessage += ',  ';
+                    warningMessage += displayProductName(warning.CLEAR1ST, responseNode);
+                    warningMessage += ' er inkluderet i FP'
+                }else if(j == 'CLEAR1LT'){
+                    if(warningMessage != '')
+                        warningMessage += ',  ';
+                    warningMessage += displayProductName(warning.CLEAR1LT, responseNode);
+                    warningMessage += ' er inkluderet i MP';
+                }else if(j == 'CLEAR1GP'){
+                    if(warningMessage != '')
+                        warningMessage += ',  ';
+                    warningMessage += displayProductName(warning.CLEAR1GP, responseNode);
+                    warningMessage += ' er inkluderet i GP';
+                }else{
+                   if(j != 'links'){
+                     if(warningMessage != '')
+                        warningMessage += ',  ';
+                     warningMessage += displayProductName(node, responseNode);
+                     warningMessage += ' er inkluderet i ';
+                     $.each(responseNode, function(i, varerNode){
+                       if(varerNode.varenr != undefined && varerNode.varenr == j){
+                                warningMessage += varerNode.navn;                       
+                       }
+                     });
+                   }    
+                }
+            });
+            $.each(warningLinks,function(i,linksNode){
+                if(linksNode.rel == 'fjern-advarsler'){                  
+                    removeConflictLink = '<input type=\"button\"  onclick=\"callKasia(\''+linksNode.href+'\', \'conflict\')\" value=\"Fjern Konflikt\" style=\"background-color:lightblue\" />';   
+                }
+            }); 
+        }catch(err){
+            //alert("Error: in getWarningMessage method: "+err.description);
+        }
+    }
+
+    function displayProductName(productNumberNode, productNameNode){
+        var productNames = '';
+        try{
+            $.each(productNumberNode, function(j, clearNode){
+                $.each(productNameNode, function(i, varerNode){
+                    if(varerNode.varenr != undefined){
+                         if (varerNode.varenr == clearNode) {
+                            if (productNames == null || productNames == '')
+                                productNames = varerNode.navn + ' ';
+                            else 
+                                productNames += ',' + ' ' + varerNode.navn;
+                         }
+                     }
+                 });
+            });     
+        }catch(err){
+            //alert("Error: in displayProductName method: "+err.description);
+        }
+        return productNames;
+    }
+        
+     function callKasia(vareNumber, cssClass){
+          var url = '';
+          document.getElementById("errorBlock").innerHTML = '';
+          if(cssClass == 'class=freeCache'){
+              if($('#'+vareNumber).is(':checked')) {
+                url = $('#'+vareNumber).attr('value');
+              }else{
+                 $.each(myJSONObject['kunde-data'].valgt,function(i, valgtNode){       
+                   $.each(valgtNode.varer, function(j, varerNode){
+                     if(varerNode.varenr == vareNumber){
+                        $.each(varerNode.links,function(k,linksNode){
+                          if(linksNode.rel == 'slet')
+                            url = linksNode.href;
+                        }); 
+                     }
+                   });
+                 });
+              }
+          }else if(cssClass == 'class=cache'){
+              if($('#'+vareNumber).is(':checked')) {
+                $.each(myJSONObject['kunde-data'].opsagt, function(i, opsagtNode){
+                  $.each(opsagtNode.abonnementer, function(j, abonnementerNode){
+                   if(abonnementerNode.varenr == vareNumber){
+                    $.each(abonnementerNode.links, function(k, linksNode){
+                        if(linksNode.rel == 'slet')
+                            url = linksNode.href;                             
+                    });
+                   }     
+                  });
+                });
+              }else{
+                 $.each(myJSONObject['kunde-data'].aftaler, function(i, aftalerNode){
+                   var abonne = aftalerNode.abonnementer;       
+                   $.each(abonne, function(j, abonnementerNode){
+                    if(abonnementerNode.serienumre != undefined && abonnementerNode.serienumre[0] == kortNo){
+                      $.each(abonne, function(k, abonnementerNode){
+                       if(abonnementerNode.varenr == vareNumber){
+                        $.each(abonnementerNode.links, function(l, linksNode){
+                            if(linksNode.rel == 'opsig'){
+                                url = linksNode.href;
+                            }                
+                        }); 
+                       }
+                      });  
+                    } 
+                   });
+                 });
+              } 
+          }else if(cssClass == 'clearProduct'){
+            $.each(myJSONObject['clear-ga-valg'].varer, function(i, varerNode){
+                if(varerNode.varenr == vareNumber){
+                    selectedClearProduct = varerNode.kortnavn;
+                    $.each(varerNode.links, function(k, linksNode){ 
+                        if(linksNode.rel == 'opdater' || linksNode.rel == 'opret'){
+                           url = linksNode.href;
+                        }
+                    });
+                }
+            });
+            
+          }else if(cssClass == 'conflict'){
+            url = vareNumber;
+          }
+          kundeData = JSON.stringify(myJSONObject['kunde-data']);
+          arrayInit = myJSONObject['array-init'];
+          etag = myJSONObject['ETag'];
+          freeChoiceAllprods = new Array();  
+          freeChoiceProds = new Array();
+          if(url != '')
+            callToKasia(url, etag, kundeData, arrayInit);
+        }
+        
+        function populateShoppingCartProducts(){
+             shoppingProducts = new Array();
+             var opsagt = myJSONObject['kunde-data'].opsagt;
+             if(opsagt != null) {
+                $.each(opsagt, function(i, opsagtNode){
+                    if(opsagtNode.abonnementer != undefined) {
+                        $.each(opsagtNode.abonnementer, function(j,abonnementerNode){
+                            var product = new Object();
+                            product.varenr = abonnementerNode.varenr;
+                            product.aftalenr = opsagtNode.aftalenr;
+                            product.navn = abonnementerNode.navn;
+                            if(myJSONObject[abonnementerNode.varenr] != undefined && myJSONObject[abonnementerNode.varenr].totalpris != undefined){
+                                product.pris = myJSONObject[abonnementerNode.varenr].totalpris;
+                            }else{
+                                product.pris = '';
+                            }
+                            if(myJSONObject[abonnementerNode.varenr] != undefined && myJSONObject[abonnementerNode.varenr].betalingsperiode!= undefined){
+                                if(myJSONObject[abonnementerNode.varenr].betalingsperiode=='maaned'){
+                                    product.priceSuffix = "kr. pr. md.";
+                                }else if(myJSONObject[abonnementerNode.varenr] != undefined && myJSONObject[abonnementerNode.varenr].betalingsperiode=='enkelt') {
+                                    product.priceSuffix = "kr.";
+                                }
+                            } 
+                            shoppingProducts.splice(shoppingProducts.length,0,product);
+                        });
+                    }
+                });     
+            }
+             if(shoppingProducts.length >= 1){ 
+                document.getElementById('shoppingDiv').style.display='block';
+                document.getElementById('shoppingCartDiv').style.display='none';
+                $("#shoppingBody").replaceWith('<tbody id=\"shoppingBody\"></tbody>');
+                $("#shoppingCardTemplate").tmpl(shoppingProducts).appendTo("#shoppingBody"); 
+                $("#shoppingcartTable").trigger("update");
+             }else{
+                document.getElementById('shoppingDiv').style.display='none';
+                document.getElementById('shoppingCartDiv').style.display='block';
+             }      
+        }
+        
+        function getPackage(product) {
+           var package = '';
+           if(myJSONObject['GP'] != undefined && myJSONObject['GP'].programmer != undefined){ 
+                var packageList = myJSONObject['GP'].programmer;
+                $.each(packageList, function(i, programmerNode){
+                    if(programmerNode['site-service-navn'] != undefined && programmerNode.varenr != undefined){ 
+                        if(product.siteServiceNavn == programmerNode['site-service-navn'] || product.varenr == programmerNode.varenr){
+                            package = 'GP';
+                        }
+                    }    
+                });
+           }
+           
+           if(myJSONObject['MP'] != undefined && myJSONObject['MP'].programmer != undefined){ 
+                packageList = myJSONObject['MP'].programmer;
+                $.each(packageList, function(i, programmerNode){
+                    if(programmerNode['site-service-navn'] != undefined && programmerNode.varenr != undefined){
+                        if(product.siteServiceNavn == programmerNode['site-service-navn'] || product.varenr == programmerNode.varenr){
+                            if(package == ''){
+                                package = 'MP';
+                            }else{
+                                package += ', MP';
+                            }
+                        }
+                    }  
+                 });
+            }
+            
+            if(myJSONObject['FP'] != undefined && myJSONObject['FP'].programmer != undefined){ 
+                packageList = myJSONObject['FP'].programmer;
+                $.each(packageList, function(i, programmerNode){
+                    if(programmerNode['site-service-navn'] != undefined && programmerNode.varenr != undefined){ 
+                        if(product.siteServiceNavn == programmerNode['site-service-navn'] || product.varenr == programmerNode.varenr){
+                            if(package == ''){
+                                package = 'FP';
+                            }else{
+                                package += ', FP';
+                            }
+                        }
+                    } 
+                });
+            } 
+           return package;
+        }
+        var dtvFlag={!plusFlag};
+        var fcFlag={!ekstrakanalerFlag};
+            
+        function bringNextPage(){
+            var values = $('input:checkbox:checked').map(function () {
+                return this.value;
+            }).get();
+            
+            try{
+                // DW 780 - earlier the validation was for minimum 4 channels, which is now removed. It can be
+                // any number of channels now, so commenting out all the validation code
+               /*if(!{!isNewCustomer}){
+                    if(checkForDowngrade()){
+                      if(values.length < 4){
+                        $("#errorBlock").html(selectFourChannels);
+                        window.scrollTo(0,0);
+                        return false;       
+                      }
+                    }
+                }*/
+                if( (dtvFlag==true && fcFlag==false) || (dtvFlag==true && fcFlag==true) ){ 
+                    /*if(values.length >= 1 && values.length < 4){                              
+                       $("#errorBlock").html(selectFourChannels);
+                       window.scrollTo(0,0);
+                       return false;        
+                    }*/
+                    if(myJSONObject['kunde-data']['valgt']!=undefined){
+                        bringCustomerInfoPage();
+                    }else{
+                        var errMsg = 'Indkøbskurv er tom.';        
+                       $("#errorBlock").html(errMsg);
+                       window.scrollTo(0,0);
+                       return false;        
+                    }
+                }else{
+                    /*if(values.length >= 1 && values.length < 4){
+                        $("#errorBlock").html(selectFourChannels);
+                        window.scrollTo(0,0);
+                        return false;       
+                    }*/
+                    bringDTVChanelSelectionPage();
+                }
+            }catch(err){
+                //alert("Error: in bringNextPage: "+err.description);
+            }
+        }
+        
+        function checkForDowngrade(){
+        try{
+            var clearNr = '', sortering = '', clearSortering = '';
+            if(myJSONObject['kunde-data'].valgt != undefined) {  
+               $.each(myJSONObject['kunde-data'].valgt, function(i, valgtNode){
+                 if(valgtNode.aftaletype == 'clear'){ 
+                   $.each(valgtNode.varer, function(j, varerNode){
+                      clearNr = varerNode.varenr;
+                   });
+                 }
+               });
+            }
+            if(myJSONObject['clear-ga-valg'] != undefined){
+              $.each(myJSONObject['clear-ga-valg'].varer, function(i, clearNode){
+                 if(clearNode.varenr == clearNr){
+                    sortering = clearNode.sortering;
+                 }     
+              });
+            }
+            
+            $.each(myJSONObject['kunde-data'].aftaler, function(i, aftalerNode){
+              if(aftalerNode.aftaletype == 'clear' && aftalerNode.kundetype == 'I'){
+                if(aftalerNode.abonnementer != undefined){
+                   $.each(aftalerNode.abonnementer, function(j, abonnementerNode){
+                      clearSortering = abonnementerNode.sortering;  
+                   });
+                }
+              }
+            });
+            var s = sortering.substring(sortering.lastIndexOf('-')+1, sortering.length);
+            var c =  clearSortering.substring(clearSortering.lastIndexOf('-')+1, clearSortering.length);
+            if(parseFloat(c) > parseFloat(s)){
+               return true;
+            }
+            return false;
+          }catch(err){
+                //alert("Error: in checkForDowngrade: "+err.description);
+          }
+        }
+        
+        function getExistingClearPackage(){
+          var totalCount = parseInt(0);          
+          if(myJSONObject['kunde-data'] != undefined && myJSONObject['kunde-data'].aftaler != undefined) {
+            $.each(myJSONObject['kunde-data'].aftaler, function(i, aftalerNode){
+              if(aftalerNode.aftaletype == 'clear'){
+                totalCount = parseInt(totalCount) + 1;
+              }
+            });
+          
+            $.each(myJSONObject['kunde-data'].aftaler, function(i, aftalerNode){
+              if(aftalerNode.aftaletype == 'clear'){
+                if(aftalerNode.abonnementer != undefined){
+                 $.each(aftalerNode.abonnementer, function(j, abonnementerNode){
+                  if(abonnementerNode.ophoer != undefined){
+                     ophoerFlag = true;
+                  }
+                  if(parseInt(totalCount) == 3){
+                     if(aftalerNode.kundetype == 'I' && abonnementerNode.ophoer != undefined){
+                        existingKortNavn = abonnementerNode.kortnavn; 
+                        clearKundeType = aftalerNode.kundetype;
+                     }
+                  }else if(parseInt(totalCount) == 2){
+                     if(aftalerNode.kundetype == 'I'){
+                        existingKortNavn = abonnementerNode.kortnavn; 
+                        clearKundeType = aftalerNode.kundetype;
+                     }                  
+                     if(aftalerNode.kundetype == 'I' && abonnementerNode.ophoer != undefined){
+                        existingKortNavn = abonnementerNode.kortnavn; 
+                        clearKundeType = aftalerNode.kundetype;
+                     }
+                  }else if(parseInt(totalCount) == 1){
+                      existingKortNavn = abonnementerNode.kortnavn; 
+                      clearKundeType = aftalerNode.kundetype;
+                  }                   
+                 });
+                }
+              }
+            });
+           }
+        }
+        
+        function getPakkeForSlagMessage(){
+          var slagMessage = '';
+          $.each(myJSONObject['pakkeforslag'], function(j, node){           
+             if(j == 'CLEAR1ST'){
+              if(existingKortNavn == 'LT' && clearKundeType == 'I'){
+                slagMessage = slagMessageForTP;
+              }else if(existingKortNavn == 'MP' && clearKundeType == 'I'){
+                slagMessage = slagMessageForFP;
+              }else if(existingKortNavn == 'MP' && clearKundeType == 'O'){
+                slagMessage = slagMessageForST;
+              }else if(existingKortNavn == 'GP' && clearKundeType == 'O'){
+                slagMessage = slagMessageForTP;
+              }else if(existingKortNavn == 'GP' && clearKundeType == 'I'){
+                slagMessage = slagMessageForFP;
+              }
+             }else if(j == 'CLEAR1LT'){
+              if(existingKortNavn == 'GP' && clearKundeType == 'I'){
+                slagMessage = slagMessageForMP;
+              }else if(existingKortNavn == 'GP' && clearKundeType == 'O'){
+                slagMessage = slagMessageForLT;   
+              }else if(existingKortNavn == 'MP' && clearKundeType == 'O'){
+                slagMessage = slagMessageForST;
+              }
+            }
+          });   
+          return slagMessage;
+        }                
+    </script>
+    <script id="fcClearProductTemplate" type="text/x-jQuery-tmpl"> 
+        {{if disabled != "disabled"}} 
+        <tr>
+            <td style="vertical-align:middle;"><input type="radio" name="selectOneProduct" value="${href}" ${cssClass} id="${varenr}" class="prodCheckbox" ${disabled} ${checked} onclick="callKasia('${varenr}', 'clearProduct')"/> </td>
+            <td>${navn}</td>
+            <td>${price} ${priceSuffix}</td>
+        </tr>
+        {{/if}}
+    </script>
+    
+    
+    <apex:form styleclass="fontVerdana">
+        <apex:outputPanel >
+            <table>
+             <!--  <tr>
+                  <td colspan="2" style="font-family:verdana">
+                    <b> {!$Label.freeChoicePage_Top}
+                   </b></td>
+             </tr>-->             
+            </table>
+        </apex:outputPanel>
+        <script>
+        var SFObjectArray = '';
+        <apex:repeat value="{!salesFlowObj.messages}" var="arrayItem">
+        SFObjectArray ='{!arrayItem}';
+        </apex:repeat>
+        $(document).ready(function(){
+        $("#innerTableData").html(SFObjectArray);
+        });             
+        </script>
+        <br/>
+        <b><span id="innerTableData"></span></b>
+        <div id="warningBox" style="display:none;">
+          <apex:image url="{!$Resource.warningIcon}" width="30" style="float:left;" />
+            <p id="warningMessage" style="color:blue; font-weight:bold"></p>
+            <p id="conflictLink"></p>
+        </div>
+        <div><apex:messages globalOnly="true"  styleClass="mailError"/></div>
+        <center><div id="errorBlock" style="color:red; text-align:left; display:block;" class="errorMessage"></div></center>
+        <div id="pakkeForSlagDiv" style="display:none;">
+           <apex:image url="{!$Resource.informationIcon}" width="25" height="25" style="float:left;" />
+           <p style="color:blue;" id="pakkeforslag"></p>        
+        </div> 
+        <br/>
+        <div>
+            <apex:commandButton action="{!cancel}" value="Annuller" style="margin-right:200px;"/>
+            <apex:commandButton action="{!backFlow}" value="Tilbage"/>
+            <input type="button" value="Videre" onclick="bringNextPage();" class="videreBtnCls"/>
+            
+        </div>
+        <br/>
+        <apex:panelGrid columns="2" width="100%" columnClasses="leftContent1,rightContent1">
+          <!-- <apex:panelGroup id="columnA"> -->
+             <apex:outputPanel styleClass="leftContent1" >
+            <apex:pageBlock >
+               <apex:pageBlockSection title="Kundens eksisterende Ekstrakanaler" collapsible="false" columns="1">
+                 <table id="existingProductsTable" border="0" width="100%">
+                  <thead>
+                    <tr style="background-color:#DDD;">
+                      <th style="font-weight:bold" width="5%"></th>
+                      <th style="font-weight:bold; text-align:left;" width="40%">Vælg kanaler</th>
+                      <th style="font-weight:bold" width="5%">Pris</th>
+                      <th style="font-weight:bold" width="20%">&nbsp;&nbsp;&nbsp;&nbsp;pr. md.</th>
+                      <th style="font-weight:bold">Er i tv-pakken</th>
+                    </tr>
+                   </thead>
+                   <tbody id="existingProductBody"></tbody>
+                 </table>
+                 <div id="existingDiv" style="display:none; text-align:center;">Ingen eksisterende produkter</div>
+               </apex:pageBlockSection>
+               <apex:pageBlockSection title="Vælg nye kanaler" collapsible="false" columns="1">
+                <table id="bbAddlTable" class="tablesorter" border="0" width="100%">
+                  <thead>
+                    <tr style="background-color:#DDD;">
+                      <th style="font-weight:bold" width="5%"></th>
+                      <th style="font-weight:bold; text-align:left;" width="40%">Vælg kanaler</th>
+                      <th style="font-weight:bold" width="5%">Pris</th>
+                      <th style="font-weight:bold" width="20%">&nbsp;&nbsp;&nbsp;&nbsp;pr. md.</th>
+                      <th style="font-weight:bold">Er i tv-pakken</th>
+                    </tr>
+                   </thead>
+                   <tbody id="productBody"></tbody>
+                 </table>
+                 <div id="freeChoiceDiv" style="display:none; text-align:center;">Ingen produkter</div>
+               </apex:pageBlockSection>
+               <apex:pageBlockSection title="Kanaler indeholdt i valgt tv-pakke" collapsible="false" columns="1">
+                <table id="productsUnderClearTable" class="tablesorter" border="0" width="100%">
+                  <thead>
+                    <tr style="background-color:#DDD;">
+                      <th style="font-weight:bold" width="5%"></th>
+                      <th style="font-weight:bold; text-align:left;" width="40%">Vælg kanaler</th>
+                      <th style="font-weight:bold" width="5%">Pris</th>
+                      <th style="font-weight:bold" width="20%">&nbsp;&nbsp;&nbsp;&nbsp;pr. md.</th>
+                      <th style="font-weight:bold">Er i tv-pakken</th>
+                    </tr>
+                   </thead>
+                   <tbody id="clearProductBody"></tbody>
+                 </table>
+                 <div id="clearDiv" style="display:none; text-align:center;">Ingen produkter</div>
+               </apex:pageBlockSection>
+               <br/>
+               <apex:pageBlockButtons location="bottom">
+                    <apex:commandButton action="{!cancel}" value="Annuller" style="margin-right:200px;"/>
+                    <apex:commandButton action="{!backFlow}" value="Tilbage"/>
+                    <input type="button" value="Videre" onclick="bringNextPage();" class="videreBtnCls"/>
+               </apex:pageBlockButtons>
+            </apex:pageBlock>
+            </apex:outputPanel>
+           <!-- </apex:panelGroup>
+           <apex:panelGroup id="columnB"> -->
+           <apex:outputPanel styleClass="rightContent1">
+            <c:CustomerAndProductComponent isNewKunde="{!isNewCustomer}" kundeNumber="{!cCustInstAdd.customerNumber}"
+                    kundeName="{!cCustInstAdd.firstName} {!cCustInstAdd.lastName}" Adresse="{!cCustInstAdd.addr1}"
+                    Postnummer="{!cCustInstAdd.addr2}"></c:CustomerAndProductComponent>
+         
+           <apex:pageBlock >
+               <apex:pageBlockSection title="Opsagte produkter" collapsible="false" columns="1">
+                <div id="shoppingDiv"  style="display:none;"> 
+                 <table id="shoppingcartTable" border="0" cellspacing="2" width="100%">
+                   <thead>
+                    <tr>
+                        <th width="60%" style="font-weight:bold">Navn</th>
+                        <th style="font-weight:bold">Pris</th>
+                        <th></th>
+                    </tr>
+                   </thead>
+                   <tbody id="shoppingBody">
+                   </tbody>
+                 </table>
+               </div>
+               <div id="shoppingCartDiv" style="text-align:center;">Ingen eksisterende produkter fravalgt</div>
+             </apex:pageBlockSection>
+             <div id="clearProductsSection">  
+              <apex:pageBlockSection title="Kabel-tv pakker" collapsible="false" columns="1">
+                <table id="productTable" border="1">
+                  <thead>
+                    <tr align="left">
+                      <th colspan="4" style="align:left; font-weight:bold; font-size:12px">Vælg den Kabel-tv pakke, kunden måtte ønske at skifte til:</th>
+                    </tr>  
+                  </thead> 
+                  <tbody id="clearBody"></tbody>
+                </table>
+                <div id="clearCartDiv" style="display:none; text-align:center;">Ingen produkter</div>
+                <div id="ophoerDiv" style="display:none; text-align:left; color:blue;">
+                    <span style="width:15px"><img src="{!$Resource.informationIcon}" width="25" height="25"  /></span>
+                    Der ligger en aktivitet på skift af clear produktet. <br/>Det er derfor ikke muligt at ændre kundens clear abonnement
+                </div>
+              </apex:pageBlockSection>
+             </div>  
+           </apex:pageBlock>
+             </apex:outputPanel>
+          <!-- </apex:panelGroup> -->
+        </apex:panelGrid>
+        <apex:actionFunction name="bringCustomerInfoPage" action="{!RedirectToCustomerInfoPage}"></apex:actionFunction>
+        <apex:actionFunction name="bringDTVChanelSelectionPage" action="{!RedirectToDTVChannelSelection}"></apex:actionFunction>
+        <apex:actionFunction action="{!callToKasia}" name="callToKasia" reRender="jspanel" status="queryStatus">
+                    <apex:param name="url" assignTo="{!url}" value=""/>
+                    <apex:param name="etag" assignTo="{!etag}" value=""/>
+                    <apex:param name="kundeData" assignTo="{!kundeData}" value=""/>
+                    <apex:param name="arrayInit" assignTo="{!arrayInit}" value="" />
+        </apex:actionFunction>
+        
+    <apex:outputPanel id="jspanel" >
+      <script type="text/javascript">
+            removeConflictLink = '';
+            selectedClearProduct = '';
+            freeChoiceAllprods = new Array();
+            freeChoiceProds = new Array();
+            myJSONObject = {!jsonResponse};
+            var serialNumber = {!dummySerialNo};
+            document.getElementById('warningBox').style.display='none';
+            document.getElementById('pakkeForSlagDiv').style.display='none';
+            $("#pakkeforslag").html('');
+            if(myJSONObject['advarsler'] != undefined) {
+               getWarningMessage(myJSONObject['advarsler']);
+               $("#warningMessage").html(warningMessage);
+               $("#conflictLink").html(removeConflictLink);
+               document.getElementById('warningBox').style.display='block';
+               window.scrollTo(0,0);
+            }else{
+               document.getElementById('warningBox').style.display ='none';
+            }
+            getExistingClearPackage();
+            if(myJSONObject['pakkeforslag'] != undefined) {
+                //if(existingKortNavn == ''){
+                  if(myJSONObject['kunde-data'] != undefined && myJSONObject['kunde-data'].valgt != undefined){  
+                    $.each(myJSONObject['kunde-data'].valgt, function(i, valgtNode){ 
+                     if(valgtNode.aftaletype == 'clear'){
+                       $.each(valgtNode.varer, function(j, varerNode){
+                        if(varerNode.links != undefined){
+                            existingKortNavn = varerNode.kortnavn;
+                            clearKundeType = 'I';
+                        }   
+                       }); 
+                     }
+                    });
+                  }
+                //}
+                pakkeForSlagMessage = getPakkeForSlagMessage();   
+                if(pakkeForSlagMessage != ''){
+                   document.getElementById('pakkeForSlagDiv').style.display='block';
+                   window.scrollTo(0,0);
+                }   
+            }
+            $("#pakkeforslag").html(pakkeForSlagMessage); 
+            firstJSONResponse = {!firstJsonResponse};
+            myJSONObject = refreshFirstJSONResponse(firstJSONResponse, myJSONObject);
+            kundeData = JSON.stringify(myJSONObject['kunde-data']);
+            arrayInit = myJSONObject['array-init'];
+            etag = myJSONObject['ETag'];
+            if(myJSONObject['kunde-data'] != undefined && myJSONObject['kunde-data'].opsagt != undefined){
+                populateShoppingCartProducts();
+            }else{
+                $("#shoppingBody").replaceWith('<tbody id=\"shoppingBody\"></tbody>');
+                $("#shoppingcartTable").trigger("update");  
+                document.getElementById('shoppingDiv').style.display='none';
+                document.getElementById('shoppingCartDiv').style.display='block';
+            }
+            selectedClearProduct = existingKortNavn;              
+            
+            if(myJSONObject['kunde-data'].valgt != undefined){  
+               $.each(myJSONObject['kunde-data'].valgt, function(i,valgtNode){ 
+                   if(valgtNode.aftaletype == 'clear'){
+                       $.each(valgtNode.varer, function(j, varerNode){
+                        if(varerNode.links != undefined){
+                            selectedClearProduct = varerNode.kortnavn;
+                        }   
+                       }); 
+                   }
+                });
+            }
+            populateProducts();
+            displayBasket();
+            populateClearProducts();
+            if($('#bbAddlTable tbody tr').size() > 1) {
+                sorting = [[1,0]]; 
+                $("#bbAddlTable").trigger("sorton",[sorting]);
+            }
+      </script>
+    </apex:outputPanel> 
+    <script type="text/javascript">
+        $("#bbAddlTable").tablesorter({headers: {0: { sorter: false }}, sortList: [[1, 0]]});
+    </script>
+    <apex:actionStatus id="queryStatus"> 
+         <apex:facet name="start">
+          <c:loadingComponent BackColor="#efefef" borderColor="#336699"
+           borderSize="3" height="50px" width="120px" 
+           ImageUrl="{!$Resource.Loading}" Message="Loading..." 
+           messageStyle="color:darkred;font-size:11pt;font-weight:bold;"/>
+          </apex:facet>         
+    </apex:actionStatus>   
+    </apex:form>
+    <script type="text/javascript">printContentAreaEnd();</script>
+    <script type="text/javascript">printFooter();</script>
+    <!-- SCRIPT ADDED FOR LARGER DATA : START   -->
+        <script>
+            if(document.getElementById('mainarea') != null)
+                document.getElementById('mainarea').style.overflow = 'visible'; 
+        </script>
+    <!-- SCRIPT ADDED FOR LARGER DATA : END -->
+</html>
+</apex:page>

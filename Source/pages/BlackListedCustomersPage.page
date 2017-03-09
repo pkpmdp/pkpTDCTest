@@ -1,0 +1,41 @@
+<apex:page controller="DealerwebInformationController" sidebar="false" showHeader="false" applyHtmlTag="false">
+<html class="cvi2015"><!--spoc 2206-->
+    <head>
+    <apex:form rendered="{!$Label.DE_Login_Access}">
+    <center>
+    <apex:image url="{!$Resource.DW_Maintenance_Image_2}" width="400" height="400"/>
+        <br></br>
+    <apex:outputText style="color: #629E00;font-size: large;" value="{!$Label.DW_Maintenance_message}">
+        
+    </apex:outputText>
+    <br></br>
+    <a class="dialogbutton_orange Right" href="/secur/logout.jsp" style="position: relative; left: -15px;"><span>Back</span></a>
+    </center>
+</apex:form>
+        
+    </head>
+    <apex:form rendered="{! If($Label.DE_Login_Access =='False' ,true,false) }">
+    <script type="text/javascript"  src="https://yousee.dk/sitecore/content/data/export/export.aspx?itemguid={453F4AE1-FD6A-4D28-9AA5-6BF9012B765A}&functions=true"></script>
+        <!--Added for DW 750-->
+        <c:TopMenuComponent ></c:TopMenuComponent>
+        <script type="text/javascript">printHeader();</script>
+        <script type="text/javascript">printTopMenu();</script>
+        <style>
+         .fontVerdana{ font-family: 'Verdana'; }
+        </style> 
+        <body>
+            <script type="text/javascript">printContentAreaBegin();</script>
+            <apex:pageBlock >    
+             <apex:PageBlockSection title="{!pageHeaderValue}" collapsible="false" columns="1">
+               <apex:dataTable value="{!information}" var="info" cellspacing="5">
+                        <apex:column value="{!info.Description__c}" styleClass="fontVerdana" /> 
+                </apex:dataTable>
+             </apex:PageBlockSection>
+            </apex:pageBlock>
+            <script type="text/javascript">printContentAreaEnd();</script>
+            <script type="text/javascript">printFooter();</script>
+            <script type="text/javascript" src="js/click.js" charset="ISO-8859-1"></script>
+        </body>
+    </apex:form>
+    </html>
+</apex:page>

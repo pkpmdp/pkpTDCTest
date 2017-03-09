@@ -1,0 +1,10 @@
+<apex:component controller="SC_ChangePasswordController" access="global">
+<form>
+<apex:outputPanel >
+<apex:outputText value="Brugernavn:"/>&nbsp;
+<apex:outputText value="{!loggedInUser.username}"/><br/><br/>
+<apex:outputText value="Adgangskode:"/>&nbsp;
+<apex:outputLabel value="{!newpwd }"/>
+</apex:outputPanel>
+</form>
+</apex:component>

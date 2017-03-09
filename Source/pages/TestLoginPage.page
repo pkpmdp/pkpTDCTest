@@ -1,0 +1,202 @@
+<apex:page sidebar="false" showheader="false" controller="TestLoginController" applyHtmlTag="false">
+<html class="cvi2015">
+<head>
+    <style>
+        #topbanner{display: none;}
+        a{color: #3CB84D;}
+        .dialogbutton_grey, a.dialogbutton_grey{margin: 10px 0 10px 10px;border-radius: 3px;}
+    </style>
+<!-- <script type="text/javascript" src="https://yousee.dk/sitecore/content/data/export/export.aspx?itemguid={59DE8AFC-9FE8-40A1-8323-9DA9602F870A}&functions=true"></script> -->
+<script type="text/javascript" src="{!siteCoreUrl}/sitecore/content/data/export/export.aspx?itemguid={71B89937-4289-4BFE-A4EA-491ACB51F91A}&functions=true"></script>
+
+<script type="text/javascript">printHeader();</script>
+<script type="text/javascript">printTopMenu();</script>
+<script type="text/javascript">printContentAreaBegin();</script>
+<script type="text/javascript"> 
+    function autoIframe(frameId){
+        try{
+            frame = document.getElementById(frameId);
+            innerDoc = (frame.contentDocument) ? frame.contentDocument : frame.contentWindow.document;
+
+            /*if (innerDoc == null){
+                            // Google Chrome
+                frame.height = document.all[frameId].clientHeight + document.all[frameId].offsetHeight + document.all[frameId].offsetTop;
+            }else{*/ 
+                objToResize = (frame.style) ? frame.style : frame;
+                objToResize.height = 400;
+                objToResize.width = 700;
+            //}
+        }catch(err){
+            //alert('Err: ' + err.message);
+            window.status = err.message;
+        }
+    }
+</script>
+
+</head>
+<body>
+<!--<div id="toparea">
+
+    <div class="wrapper">
+
+        <div id="productnavigation" class="hnav">
+            <a name="productnavigation"></a><!--ProductNavigation.xslt start
+            <div class="right textAlignRight"></div>
+            <h1>Selvbetjening</h1><!--googleoff: index
+             <!-- <ul class="&#xD;&#xA;               hnav dotted">
+                <li class="last"><a href="http://yousee.dk/I_foreningen_og_virksomheden/Login/Overblik.aspx" class="selected" title="Overblik">Overblik</a></li>
+             </ul><!--googleon: index--><!--ProductNavigation.xslt end
+        </div>
+
+    </div>
+
+</div>-->
+<div id="mainarea">
+
+    <div class="wrapper Clear">
+
+        <!--[if IE]><div class="printbehavior"><![endif]-->
+         <div id="leftnavigation">
+            <!--googleoff: index--><ul class="vnav"></ul><!--googleon: index-->
+        </div>
+        <!--[if IE]></div><![endif]-->
+
+        <div id="content"> 
+
+          <div class="column50" >
+
+                <div class="box BoxArticle" >
+                    <a class="print-button" title="Print" href="javascript:PrintPage();">Print</a>
+                 <!--   <h1>Selvbetjening</h1>
+
+                    <p>Hvis jeres forening eller virksomhed har en løsning med tv-, bredbånd- eller telefoni fra os, kan I få adgang til vores selvbetjeningsløsning.</p>
+-->
+                    <h2><b>Få adgang til Selvbetjening døgnet rundt</b></h2>
+                    <p>Med YouSee Selvbetjening har du mulighed for at spare både tid og anvende forskellige online services – præcis, når du har brug for det.</p>
+                    <p>Med en tv-aftale hos os kan du kvit og frit udvide jeres aftale med Selvbetjening. Selvbetjening er et tillæg til jeres nuværende tv-aftale, og har ingen indvirkning på jeres nuværende tv-aftales vilkår eller bindingsperiode.</p>
+                    <p>Du har mulighed for at få lige så mange brugeradgange, som der er behov for i foreningen. På den måde kan flere personer i f.eks. bestyrelsen se kontoposteringer eller foretage skift af tv-pakker.</p>
+                    
+                    <h2><b>Desuden kan I</b></h2>
+                    <ul>
+                      
+                        
+                        
+                        
+                        <li style="font: normal 14px etica;">Se hvor der leveres hvilke tv-pakker</li>
+
+                        <li style="font: normal 14px etica;">Få nem adgang til tidligere fakturaer og jeres kontrakt</li>
+
+                        <li style="font: normal 14px etica;">Få overblik over jeres anlæg og antal husstande</li>
+
+                        <li style="font: normal 14px etica;">Udskrive adresselister over alle husstande i foreningen</li>
+
+                        <li style="font: normal 14px etica;">Skrive direkte til jeres lokale konsulent</li>
+
+                      <!--  <li>Se og opret kontaktpersoner<br /></li>-->
+
+                    </ul>
+
+                    <br/>
+
+                    <h2><b>Bestil adgang til YouSee Selvbetjening</b></h2>
+
+                    <p>Ønsker du at bestille adgang til Selvbetjening, skal du udfylde skemaet og indsend oprettelsesblanketten til os. Så sender vi brugernavn og adgangskode på dem i foreningen, som du har bestilt adgang til.</p> 
+
+                    <ul>
+
+                       <!-- <li>Ring til foreningsservice på 70 70 40 44</li>-->
+                        <li>
+                      <!-- Change for YOUSEEDK-3475
+                           <a href="https://yousee.dk/~/media/pdf/Foreninger og Erhverv/Oprettelse til Servicecenter.ashx" target="_blank">Hent oprettelsesblanket</a>&nbsp;</li> 
+                           <a href="{!sfUrl}{!$Label.Oprettelsesblanket_til_Selvbetjeningen_Form}" target="_blank" style="color: #3CB84D;font: normal 14px etica;">Hent oprettelsesblanket til Selvbetjening</a>&nbsp;</li> -->
+                           <a href="https://yousee.dk/~/media/pdf/Foreninger og Erhverv/Oprettelse til Selvbetjeningen.ashx" target="_blank">Hent oprettelsesblanket</a>&nbsp;</li>
+                    </ul>
+
+                    <!-- <h2>Få adgang til Selvbetjening</h2>
+
+                    <p>Hvis du er organiseret kunde hos YouSee, kan du få adgang til en række selvbetjenings-services. Ring til vores salgsafdeling på 70 70 40 00 og få brugernavn og adgangskode. Vi har åbent mandag-torsdag 8.30-16.00 og fredag 8.30-15.00</p> -->
+                  <!--  <p>Vil du høre mere om vores selvbetjeningsløsning, så kontakt vores salgsafdeling på 70 70 40 00. Vi har åbent mandag-torsdag 8.30-16.00 og fredag 8.30-15.00</p>-->
+                    <p>Har du spørgsmål til Selvbetjening, kan du ringe til YouSee Foreningsservice på 70 70 40 44. Vi har åbent mandag - torsdag kl. 08.30 -16.00 og fredag kl. 08.30-15.00.</p>
+                    
+                </div>
+
+              </div>
+
+              <div class="column25" >
+
+                <div class="spot">
+
+                   <div class="sectionheader">
+                       <h2>Log ind i Selvbetjening</h2>
+                   </div>
+                   <apex:form id="loginForm" forceSSL="true">
+        <apex:outputPanel layout="block" styleClass="sectioncontent Clear" >
+            <apex:pageMessages id="error" />
+ <!--           abcd<apex:outputLabel value="{!SiteLoginCS}"/> -->  
+            <apex:panelGrid columns="1" rendered="{!siteLoginEnabled}">
+             <p>    
+               <apex:outputText value="{!SiteLoginCS}"/>              
+             </p>
+            </apex:panelGrid>
+            <apex:panelGrid columns="1" rendered="{!AND(displayFlag,NOT(siteLoginEnabled))}" > 
+                
+                 <apex:outputLabel value="{!dispMessage}" rendered="{!displaySentMailMsg}" />              
+                <apex:outputLabel value="Brugernavn:" for="username" styleClass="Clear" />
+                <apex:inputText id="username" value="{!username}" styleClass="inputbox" />
+                <apex:outputLabel value="Adgangskode:" for="password" styleClass="Clear" />
+                <apex:inputSecret id="password" value="{!password}" styleClass="inputbox"  />
+                <div class="extraspaceTop">              
+                <!-- <apex:commandButton action="{!login}" value="Log ind" id="loginButton" styleClass="dialogbutton_grey" /> -->
+                <apex:commandLink action="{!login}" value="Log ind" id="loginButton" styleClass="dialogbutton_grey" style="padding: 5px 10px;"/>
+                </div>
+                <br/>
+<!---                <apex:panelGroup id="theLinks"> -->
+
+              <p class="standardlink">    
+               <apex:commandLink action="{!DisplayForgotPwd}" value="Har du glemt din adgangskode?" style="color: #3CB84D;"/>              
+              </p>
+                    <apex:outputText value=" | "        
+                        rendered="{!$Site.RegistrationEnabled}" />
+                    <apex:outputLink value="{!$Page.SiteRegister}"
+                        rendered="{!$Site.RegistrationEnabled}">
+                        {!$Label.site.new_user_q} 
+                    </apex:outputLink>                    
+ <!--               </apex:panelGroup> -->
+            </apex:panelGrid>
+            <apex:panelGrid columns="1" rendered="{!NOT(displayFlag)}">
+            <DIV style="width:100%;overflow:hidden;"> 
+             <apex:outputText value="Hvis du har glemt din adgangskode kan du bestille en ny og få den sendt via email." /> 
+<apex:outputText value="Indtast dit brugernavn i feltet herunder og klik på 'Send ny adgangskode'. Kort efter modtager du en email med den nye adgangskode."></apex:outputText>
+ </DIV>    <br/>
+
+                <apex:outputLabel value="Brugernavn(e-mail)" for="Forgotname" styleClass="Clear" />
+                <apex:inputText id="ForgotName" value="{!username}" styleClass="inputbox" />
+                <div class="extraspaceTop">              
+                <apex:commandLink action="{!forgotPassword}" value="Send ny adgangskode" id="SubmitButton" styleClass="dialogbutton_grey" />
+                </div>
+            
+            </apex:panelGrid>
+        </apex:outputPanel>
+    </apex:form>
+                    <div class="sectionbottom"></div>
+                     <apex:outputPanel rendered="{!issueFlag}">
+                    <h2><b>Bemærk</b></h2>
+                     <ul>
+                     <apex:repeat value="{!issueList}" var="issList">
+                     <li style="font: normal 14px etica;margin-left: 0.5em;background: url(https://yousee.dk/img/listIcons/greenbullet.png) no-repeat 0 5px;padding: 0 0 0 10px;">{!issList}</li>
+                     </apex:repeat>
+                     </ul>
+                     </apex:outputPanel>
+                 </div>
+               </div>
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+<script type="text/javascript">printContentAreaEnd();</script>
+<script type="text/javascript">printFooter();</script>
+</html>
+</apex:page>

@@ -1,0 +1,64 @@
+<apex:component controller="ConsoleKundeInfo_CT"><!-- SPOC-2294 -->
+    <apex:attribute name="currentId" description="This is the Account Id for displaying Acccount Details" type="Id" required="true" assignTo="{!currentId1}"/>
+    <!--<apex:includeScript value="{!URLFOR($Resource.jQuery160)}"/>-->
+<apex:includeScript value="/support/console/28.0/integration.js"/>
+    <style>
+     <!-- fieldset
+     {
+        border: 1px solid #ddd;
+        padding: 0 1.4em 1.4em 1.4em;
+        margin: 0 0 1.5em 0;
+        border-radius: 8px;
+        margin: 0 5px;
+        height: 100%; 
+        display:inline-block;
+        display:inline;
+     }-->
+    </style>
+    <script>
+        //setTimeout(function(){invoke()}, 50);
+    </script>
+
+           <fieldset id="kundeId"><!-- 87px -->
+            <legend style="color:#B8B8B8;font-family:Calibri,sans-serif;font-size:15px;">Kundeinfo</legend>
+            <apex:outputpanel id="tab">
+                <table id="kundeTable" style="border-collapse: separate;table-layout:fixed;width:100%;">
+            </table>
+            </apex:outputpanel>
+        </fieldset>
+     <script>        
+var intcol ='{!strColumnNoSitel}';  
+    var table = document.getElementById("kundeTable");  
+    var row;        
+    var intColumns = parseInt(intcol);
+    var widthInt = 100/intColumns; // to adjust column width based on columns provided
+    
+        <apex:variable value="{!0}" var="index"/>
+            
+      <apex:repeat value="{!acclistSitel}" var="f">    
+                
+            <apex:repeat value="{!$ObjectType.Account.fieldsets.Sitel_Console_Fieldsets}" var="fieldValue">             
+                
+                var intCounter = parseInt('{!index}');
+                 
+                if(intCounter % intColumns == 0) {   //after every columns defined in custom setting add a new row and change the row variable to point to it
+                    row = table.insertRow(-1);      
+                }
+                var cell = row.insertCell(-1);  //simply insert the row
+
+                var val = "{!(f[fieldValue])}";
+                if(val == '')
+                    val = '-';
+                var val1 = "JSENCODE(f[fieldValue])";                
+                
+                
+                //cell.innerHTML = '<b>'+'{!fieldValue.label}'+'</b>'+'<br/>'+ val;
+                cell.innerHTML = '<b>'+'<span style="white-space:nowrap;word-wrap: none;">'+'{!fieldValue.label}'+'</span>'+'</b>'+'&nbsp; &nbsp;'+'<span style="word-wrap:break-word;">'+val+'</span>';        
+                cell.setAttribute('valign','top');
+                cell.setAttribute('text-align','left');
+                
+                <apex:variable value="{!index + 1}" var="index" />
+            </apex:repeat>
+        </apex:repeat>
+                </script>
+</apex:component>

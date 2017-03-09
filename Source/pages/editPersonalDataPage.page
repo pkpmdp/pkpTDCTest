@@ -1,0 +1,352 @@
+<apex:page Controller="EditOwnContactDataController" showHeader="false" sidebar="false" id="page1" applyHtmlTag="false">
+<html class="cvi2015">
+<style>
+.listAlign {  margin:2px 0px 1px 2px; display: block;} 
+.profileDisplay{display: none;}
+.headerRow .headerStyle{background-color:#638658;color:#FFFFFF}
+.container{ overflow-x:hidden;overflow-y:auto; width:133%; } 
+.parenttopAlign {  margin:1px 0px 1px 2px; display: block;} 
+.headerStyle { font-family: Arial, Helvetica, sans-serif;font-size:12px; font-weight:bold; }
+.labelStyle { font-family: Arial, Helvetica, sans-serif; font-size:12px; font-weight:bold;text-align:center; }
+</style>
+
+<script type="text/javascript" src="{!siteCoreUrl}/sitecore/content/data/export/export.aspx?itemguid={C84C1046-F840-4324-A920-877C5F5545D9}&functions=true"></script>
+<script type="text/javascript"> 
+    function openLookup(baseURL, width, modified, searchParam){
+            var originalbaseURL = baseURL;
+            var originalwidth = width;
+            var originalmodified = modified;
+            var originalsearchParam = searchParam;
+         
+            var lookupType = baseURL.substr(baseURL.length-3, 3);
+            if (modified == '1') 
+                baseURL = baseURL + searchParam;
+         
+            var isCustomLookup = false;
+         
+            // Following "001" is the lookup type for Account object so change this as per your standard or custom object
+           // if(lookupType == "001"){
+                var urlArr = baseURL.split("&");
+                var txtId = '';
+                if(urlArr.length > 2) {
+                    urlArr = urlArr[1].split('=');
+                    txtId = urlArr[1];
+                }
+                // Following is the url of Custom Lookup page. You need to change that accordingly
+                baseURL = "{!$Site.Prefix}/apex/CustomAddressLookup?txt=" + txtId;
+         
+                // Following is the id of apex:form control "theform". You need to change that ac-cordingly
+                baseURL = baseURL + "&frm=" + escapeUTF("{!$Component.theform}");
+                if (modified == '1') {
+                    baseURL = baseURL + "&lksearch=" + searchParam;
+                  }
+         
+                  // Following is the ID of inputField that is the lookup to be customized as custom lookup
+                if(txtId.indexOf('streetI') > -1 ){
+                    isCustomLookup = true;
+                }
+           // }
+         
+         
+            if(isCustomLookup == true){
+              openPopup(baseURL, "lookup", 350, 480, "width="+800+",height=580,toolbar=no,status=no,directories=no,menubar=no,resizable=yes,scrollable=yes", true);
+            }
+            else {
+              if (modified == '1') 
+                originalbaseURL = originalbaseURL + originalsearchParam;
+              openPopup(originalbaseURL, "lookup", 350, 480, "width="+originalwidth+",height=480,toolbar=no,status=no,directories=no,menubar=no,resizable=yes,scrollable=yes", true);
+            } 
+        }
+var userProfile  = '{!$Profile.Name}';
+var portalAdminUser = '{!portalAdminUser}';
+var portalBrugerRole = '{!portalBrugerRole}';
+
+var contactRoleName = '{!$CurrentPage.parameters.loggedInUserRoleName}';
+
+var statusFlag = true;
+
+function chkStatus(){
+    var currentStatus = '{!contactStatus}';
+  //alert('currentStatus->'+currentStatus);
+    if(currentStatus != null){
+        if(currentStatus == 'Inaktiv'){
+            statusFlag = false;
+            //alert('You are not an Aktive User');
+            //document.location.href="https://c.cs2.visual.force.com/secur/logout.jsp";
+            document.location.href="/secur/logout.jsp";
+        }
+    }
+ }
+ 
+ function setParentMenu(){
+   var myParentlist=document.getElementById('inunion').childNodes;
+   
+       for (p=0; p < myParentlist.length; p++){
+         var mP=myParentlist[p].childNodes;
+         for (j=0; j < mP.length; j++){
+           var mS=mP[j].childNodes;
+           if(mP[j].nodeName=="LI"){
+               mP[j].className='parenttopAlign';
+           }
+        }
+      }
+      
+}
+
+function chkHierarchyDetail(){
+    var hierarchyStatus = '{!hierarchyStatus}';
+    //alert('hierarchyStatus'+hierarchyStatus);
+    if(hierarchyStatus == ''){
+        //alert('$Check$')
+        document.getElementById("hierarchyValidationMsg").style.display = "block";
+        //document.getElementById("jsErrorText").innerHTML = "Der er desværre sket en teknisk fejl på siden.Vi beklager naturligvis fejlen og arbejder på at få den rettet hurtigst muligt.";
+        //checkContactHierarchy1();
+        return false;
+    }
+ }
+
+  function checkProfile(){
+    // alert(window.location.host);
+    
+     var newURL;
+     newURL = window.location.protocol + "//" + (window.location.host).replace("//","/")+'{!$Site.Prefix}';
+     var exURL;
+   //  alert(newURL);
+     setParentMenu();
+     //alert('role is :#'+contactRoleName+'#');
+     var profileList=document.getElementById('productnavigation').childNodes;
+     
+     for (var p=0; p < profileList.length; p++){
+        var listcount = 0;
+        if(profileList[p].nodeName=='UL'){
+                  var mUL=profileList[p].childNodes;
+                  for (var i=0; i < mUL.length; i++){
+                     if(mUL[i].nodeName == 'LI' ){
+                            mUL[i].className='listAlign';
+                           if(portalAdminUser != undefined && portalBrugerRole != undefined && portalAdminUser != null && portalBrugerRole != null){ 
+                         
+                            if(contactRoleName != null || contactRoleName != ''){
+                                   if(userProfile  != portalAdminUser && i == 1 && contactRoleName == portalBrugerRole) {
+                                      mUL[i].className+=' profileDisplay';
+                                   }
+                                   listcount = listcount + 1;
+                                   var mA = mUL[i].childNodes;
+                                   for(a=0; a< mA.length; a++){
+                                   var mB = mA[a].childNodes;
+                                          switch(listcount){
+                                           case 1 : 
+                                                  exURL = newURL + '/apex/ViewCableUnitsHomePage';
+                                                  mA[a].setAttribute('href',exURL);
+                                                  if('{!hierarchyStatus}' == ''){
+                                                    mA[a].setAttribute('onClick','return chkHierarchyDetail();');
+                                                  }
+                                                  break;
+                                           case 2 : 
+                                                 exURL = newURL + '/apex/ManagePortalUsersPage';
+                                                 mA[a].setAttribute('href',exURL);
+                                                 if('{!hierarchyStatus}' == ''){
+                                                    mA[a].setAttribute('onClick','return chkHierarchyDetail();');
+                                                  }
+                                                 break;
+                                            case 3 : 
+                                                 exURL = newURL + '/apex/EditContactDispatcherPage';
+                                                 mA[a].setAttribute('href',exURL);
+                                                 if('{!hierarchyStatus}' == ''){
+                                                    mA[a].setAttribute('onClick','return chkHierarchyDetail();');
+                                                  }
+                                                 break;
+                                            case 4 : 
+                                                 exURL = newURL + '/secur/logout.jsp';
+                                                 mA[a].setAttribute('href',exURL);
+                                                 break;   
+                                         }
+                                   }
+                             }
+                       }
+                   }
+          }
+   }
+ }   
+ }
+     document.onload = checkProfile();
+</script>
+
+<apex:form id="theform">
+
+<body id="servicepage">
+<script type="text/javascript">printHeader();</script>
+<script type="text/javascript">printTopMenu();</script>
+<script type="text/javascript">printContentAreaBegin();</script>
+<script type="text/javascript">setParentMenu();</script> 
+<!-- <c:SCLinksComponent PortalBrugerRole="{!portalBrugerRole}" /> -->
+
+<apex:stylesheet value="{!URLFOR($Resource.scStyleCss,'myStyle/myStyle.css')}"/>
+
+<script type="text/javascript"> 
+
+
+//function for phone validation
+
+function validationFunction(){
+
+            var mobileNumber = document.getElementById("page1:theform:contactDetailsPB:contactDetailsPBS:mobileId").value;
+            var phoneNo = document.getElementById("page1:theform:contactDetailsPB:contactDetailsPBS:phoneId").value;
+            var homePhone = document.getElementById("page1:theform:contactDetailsPB:contactDetailsPBS:homePhone").value;
+            var email = document.getElementById("page1:theform:contactDetailsPB:contactDetailsPBS:email").value;
+            //Commented For SF-1599 remove validation for First name on contact
+            //var fname = document.getElementById("page1:theform:contactDetailsPB:contactDetailsPBS:fname").value;
+            var lname = document.getElementById("page1:theform:contactDetailsPB:contactDetailsPBS:lname").value;
+            var streetI = document.getElementById("page1:theform:addPB:addressDetailsPBS:addressSectionPBSI:streetI").value;
+            
+            //Commented For SF-1599 remove validation for First name on contact
+            //if(fname.length != 0 && lname.length != 0 && streetI.length != 0 && email.length != 0)
+            
+            if(lname.length != 0 && streetI.length != 0 && email.length != 0){
+            
+                if(mobileNumber.length == 0 && phoneNo.length == 0 && homePhone.length == 0){
+                
+                        document.getElementById('phoneLengthMsg').style.display ='none';
+                        document.getElementById('phoneValidationMsg').style.display ='block';
+                        return false;
+                }else if(mobileNumber.length > 20 || phoneNo.length > 20 || homePhone.length >20){
+                
+                        document.getElementById('phoneValidationMsg').style.display ='none';
+                        document.getElementById('phoneLengthMsg').style.display ='block';
+                        return false;
+                }
+          }
+           return true;
+           saveProfile();
+}
+
+</script>
+<!-- <script type="text/javascript">setParentMenu();</script> --> 
+<c:SCLinksComponent PortalBrugerRole="{!portalBrugerRole}"/>
+
+<!-- <h1>Rediger dine kontaktoplysninger</h1> -->
+
+
+    <div class="bullets">
+    <ul>
+        <li><apex:outputText value="Her kan du redigere og opdatere dine brugeroplysninger" />
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+        
+        <apex:outputLink value="{!$Page.SC_ChangePasswordPage}" target="_top" style="font-size:135%;">Skift adgangskode
+        <apex:param name="conId" value="{!contactId}" />
+        <apex:param name="loggedInUserRoleName" value="{!$CurrentPage.parameters.loggedInUserRoleName}" />
+        </apex:outputLink>
+        </li>
+    </ul>
+    </div>
+    
+    
+   <apex:messages globalOnly="true"  styleClass="successClass" rendered="{!successFlag== true}"/>
+   <apex:messages globalOnly="true"  styleClass="mailError" rendered="{!errorFlag== true}"/> 
+   <apex:messages globalOnly="true"  styleClass="warningError" rendered="{!warningFlag== true}"/> 
+   
+    <div id="phoneValidationMsg" style="display:none;height: 33px;padding-left: 50px;padding-top: 18px;border-color: red;color: grey;" class="mailError">
+        <apex:outputText id="Msg1" value="{!$Label.SC_PhoneValidation}"/>
+    </div>
+       
+    
+    <div id="phoneLengthMsg" style="display:none;height: 33px;padding-left: 50px;padding-top: 18px;border-color: red;color: grey;" class="mailError">
+        <apex:outputText id="Msg3" value="{!$Label.SC_PhoneLengthValidation}"/>
+    </div>
+    
+    <apex:pageBlock mode="edit" id="contactDetailsPB">
+        <apex:actionFunction name="saveProfile" action="{!save}"/>
+        <apex:PageBlockSection title="Kontakt information" collapsible="false" columns="2" id="contactDetailsPBS">
+             <!--  Commented For SF-1599
+             <apex:inputField value="{!contact.FirstName}" required="true" id="fname"></apex:inputField> -->
+             
+             <apex:inputField value="{!contact.FirstName}" id="fname"></apex:inputField>
+             <apex:inputField value="{!contact.LastName}" required="true" id="lname"></apex:inputField>
+             <apex:pageBlockSectionItem labelStyleClass="labelStyle">
+                <apex:outputLabel value="Email / Brugernavn"/>
+                <apex:inputField value="{!contact.email}" required="true" id="email"></apex:inputField> 
+             </apex:pageBlockSectionItem>
+             <!-- <apex:inputField value="{!contact.email}" required="true" id="email"></apex:inputField> -->
+             <apex:inputField value="{!contact.AlternateEmail__c}" id="alternateEmail"></apex:inputField>
+             <apex:inputField value="{!contact.Phone}" id="phoneId"></apex:inputField>
+             <apex:inputField value="{!contact.MobilePhone}" id="mobileId"></apex:inputField>
+             <apex:inputField value="{!contact.HomePhone}" id="homePhone"></apex:inputField>
+             <apex:pageBlockSectionItem labelStyleClass="labelStyle">
+                <apex:outputLabel value="{!$Label.SC_Permission}" styleClass="headerStyle" title="{!$Label.SC_ProductsPermission}"/>
+                <apex:inputCheckbox value="{!contact.Permission__c}" id="checkedone" />
+                    <!-- <apex:outputLabel value="{!$Label.SC_ProductsPermission}" styleClass="headerStyle"/> -->
+                
+             </apex:pageBlockSectionItem>
+        </apex:PageBlockSection>
+    </apex:pageBlock> 
+    <apex:pageBlock id="addPB"> 
+        <apex:PageBlockSection id="addressDetailsPBS" title="Adresse information" collapsible="false" columns="2">
+                     <apex:pageBlockSectionItem labelStyleClass="labelStyle" id="addressSectionPBSI">
+                             <apex:outputLabel styleClass="headerStyle">Søg adresse</apex:outputLabel>
+                             <apex:actionRegion > 
+                                    <apex:inputField value="{!contact.Street_P__c}" id="streetI" required="true" >
+                                        <apex:actionSupport event="onchange" action="{!fetchAddressDetails}" rerender="addressDetailsPBS1" status="refreshStatus"/>
+                                    </apex:inputField>
+                                    <apex:actionStatus id="refreshStatus" startText="Søgning..." >
+                                            <apex:facet name="start" ><img src="{!URLFOR($Resource.Loading)}" border="0" height="18px" width="18px" style="color:red;"/> </apex:facet>
+                                            <apex:facet name="stop" ></apex:facet>
+                                    </apex:actionStatus>    
+                            </apex:actionRegion>  
+                      </apex:pageBlockSectionItem> 
+        </apex:pageBlockSection> 
+               <apex:pageBlockSection rendered="{!displayAddressInfo}" collapsible="false" columns="2" id="addressDetailsPBS1">
+               
+                    <apex:pageBlockSectionItem labelStyleClass="labelStyle" >
+                              <apex:outputLabel value="Gade" for="Gadenavn"/>
+                              <apex:outputField value="{!address.Street__c}"></apex:outputField>  
+                      </apex:pageBlockSectionItem>
+                      <apex:pageBlockSectionItem >
+                              <apex:outputLabel value="Husnr." for="Husnr"/>
+                              <apex:outputField value="{!address.HouseNumber__c}"></apex:outputField>  
+                      </apex:pageBlockSectionItem>
+                     <apex:pageBlockSectionItem >
+                              <apex:outputLabel value="Opgang" for="Opgang"/>
+                              <apex:outputField value="{!address.Entrance__c}"></apex:outputField>
+                      </apex:pageBlockSectionItem>
+                      <apex:pageBlockSectionItem >
+                              <apex:outputLabel value="Side/dørnr" for="Dør"/>
+                              <apex:outputField value="{!address.Door_No__c}"></apex:outputField> 
+                      </apex:pageBlockSectionItem>
+                      <apex:pageBlockSectionItem >
+                              <apex:outputLabel value="Etage" for="Etage"/>
+                              <apex:outputField value="{!address.Floor__c}"></apex:outputField> 
+                      </apex:pageBlockSectionItem>
+                      <!-- <apex:pageBlockSectionItem >
+                              <apex:outputLabel value="Side" for="Side"/>
+                              <apex:outputField value="{!address.Side__c}"></apex:outputField>
+                      </apex:pageBlockSectionItem> -->
+                      <apex:pageBlockSectionItem >
+                              <apex:outputLabel value="Postnr" for="Postnr"/>
+                              <apex:outputField value="{!address.Postcode__c}"></apex:outputField>      
+                      </apex:pageBlockSectionItem>
+                      <apex:pageBlockSectionItem >
+                              <apex:outputLabel value="By" for="By"/>
+                              <apex:outputField value="{!address.Town__c}"></apex:outputField> 
+                      </apex:pageBlockSectionItem>
+                 </apex:PageBlockSection>
+    </apex:pageBlock> 
+    <apex:outputPanel layout="Centre">                            
+           <apex:commandButton action="{!save}" value="{!$Label.SC_EditPersonalDataPage_Save}" onClick="return validationFunction();" styleClass="dialogbutton_orange"></apex:commandButton>&nbsp;&nbsp; 
+           <apex:commandButton action="{!cancel}" value="{!$Label.SC_EditPersonalDataPage_Cancel}" immediate="true" styleClass="dialogbutton_grey"></apex:commandButton>             
+    </apex:outputPanel>
+    
+    <script>
+        document.getElementById('{!$Component.theform:addPB:addressDetailsPBS:addressSectionPBSI:streetI}').readOnly = true;
+    </script>
+      
+<script type="text/javascript">printContentAreaEnd();</script>
+<script type="text/javascript">printFooter();</script>
+</body>   
+</apex:form> 
+</html>  
+</apex:page>

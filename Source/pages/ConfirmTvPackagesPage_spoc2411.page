@@ -1,0 +1,96 @@
+<apex:page controller="ViewAddressesForInstallationsController2" showHeader="false" sidebar="false" applyHtmlTag="false">
+<html class="cvi2015">
+    <script type="text/javascript" src="{!siteCoreUrl}/sitecore/content/data/export/export.aspx?itemguid={59DE8AFC-9FE8-40A1-8323-9DA9602F870A}&functions=true"></script>
+<body id="servicepage">
+<apex:form > 
+<!-- Old site core gui id 59DE8AFC-9FE8-40A1-8323-9DA9602F870Av -->
+<style type="text/css">
+       .customPopup{
+          background-color: white;
+          border-style: solid;
+          border-width: 2px;
+          padding:10px;
+          position: absolute;
+          left: 65%;
+          width: 258px;
+          margin-left: -150px;
+          font-color:red;
+      }
+      .bgColumn{background-color:white}
+</style>
+<script type="text/javascript">printHeader();</script>
+<script type="text/javascript">printTopMenu();</script>
+<script type="text/javascript">printContentAreaBegin();</script>
+<script type="text/javascript"> var portalBrugerRole = '{!portalBrugerRole}'; </script>
+<c:SCLinksComponent CableUnitName="{!cableUnitName}" PortalBrugerRole="{!portalBrugerRole}"/>
+<script type="text/javascript">
+    var footer = null;
+    function popup(popupId,formattedAddress){    
+            var divTag = document.getElementById(popupId);
+            divTag.style.visibility='visible';
+            var divIdName = '<Table width="100%" >';
+            divIdName =divIdName+ '<tr>';
+            divIdName =divIdName+ '<td><center><b>Vores system har desværre midlertidige problemer med at vise mulige pakkevalg denne installation. Vi beklager. </b></center></td>';
+            divIdName=divIdName + '</tr>'; 
+            divIdName = divIdName + '</Table>';
+            document.getElementById(formattedAddress).innerHTML=divIdName;
+    } 
+    function hideObject(htmlObject){ 
+        document.getElementById(htmlObject).style.visibility = "hidden";  
+    } 
+
+    function callToCI(){
+       callToCI1();
+    }
+    
+</script>
+<apex:pageMessages rendered="true"/>
+     <apex:outputPanel >
+      <div class="bullets">
+        <ul>
+            <li>Du har ændret tv-pakke på en eller flere adresser. Er det ændrede korrekt skal du klikke på ’Godkend’.</li> 
+        </ul> 
+      </div>
+    </apex:outputPanel>      
+    
+    <apex:pageBlock >         
+        <apex:pageBlockTable width="100%" value="{!finalInstallations}" var="obj" rowClasses="even,odd" border="0" id="packageList1"> 
+           <apex:stylesheet value="{!URLFOR($Resource.scrowOddEvenStyle)}"/> 
+           <apex:column headervalue="Adresse" value="{!obj.formattedAddress}" />
+           <!-- TEMP CMMNTD OUT SC-61 -->
+           <apex:column headervalue="Nuv. tv-pakke" value="{!obj.CurrentProductName}" rendered="{!NOT(ISNULL(obj.CurrentProductName))}"/>  
+           <apex:column headervalue="Nuv. tv-pakke" value="{!obj.CurrentProductName}" rendered="{!ISNULL(obj.CurrentProductName)}"/>  
+           <apex:column headervalue="Ny beboer" rendered="{!validateNewResident}">
+               <apex:outputText value="{!obj.myBebeorTxt}" />
+           </apex:column>
+            <!-- SF-2905 START-->
+            <apex:column headerValue="Tv-pakke" width="15%" headerClass="headerStyle" value="{!obj.tvpackage}"/>
+           <apex:column headerValue="Ønsket ikrafttrædelsesdato" width="20%" headerClass="headerStyle" value="{!obj.packageChangedDate}"/>
+           <!-- SF-2905 END-->
+        </apex:pageBlockTable>
+        <br></br>
+    	<apex:actionStatus id="queryStatus"><!--SF_1757 START-->
+            <apex:facet name="start">
+                <c:SC_LoadingComponent BackColor="#efefef" borderColor="#336699" borderSize="3" height="50px" width="120px" 
+                ImageUrl="{!$Resource.Loading}" Message="Loading..." messageStyle="color:darkred;font-size:11pt;font-weight:bold;" />
+            
+               </apex:facet>
+        </apex:actionStatus><!--SF-1757 END-->
+        <apex:facet name="footer">
+          <br/><br/>
+          <apex:outputPanel id="buttonsID" >
+            <!-- <apex:commandButton action="{!placeOrderForPackageChange}" value="{!$Label.SC_Godkend}" oncomplete="callToCI()" styleClass="dialogbutton_orange"/>&nbsp;&nbsp;&nbsp;&nbsp; -->
+            <!--  Commented for Production pointed URl  -->
+				<apex:commandButton action="{!placeOrderForPackageChange}" onClick="this.disabled='disabled';" oncomplete="callToCI()" status="queryStatus" styleClass="dialogbutton_orange" value="{!$Label.SC_Godkend}"/>&nbsp;&nbsp;
+          <apex:commandButton action="{!backToChangeTvPackagesPage}" value="{!$Label.SC_Back}" styleClass="dialogbutton_grey" id="btnConBack"/>
+            
+          </apex:outputPanel>
+        </apex:facet>
+    </apex:pageblock>
+    <apex:actionFunction name="callToCI1" action="{!callToCastIron}"></apex:actionFunction>
+    <script type="text/javascript">printContentAreaEnd();</script>
+    <script type="text/javascript">printFooter();</script>
+</apex:form>
+</body>
+</html>
+</apex:page>

@@ -1,0 +1,8 @@
+<apex:component controller="commonClass">
+  {!IF(LEN(streetName)==0,"", streetName&" ")}
+  {!IF(LEN(streetNo)==0,"", streetNo)}  
+   <br/>
+  {!IF(LEN(postCode)==0,"", postCode&" ")}
+  {!IF(LEN(city)==0,"", city)} 
+   <br/>
+</apex:component>

@@ -1,0 +1,10 @@
+<apex:page controller="clsLookupTableListController"  showHeader="False" >
+  <apex:pageBlock title="Customer Segment Types" >
+       <apex:dataTable value="{!CustomerSegments}" var="aCustomerSegment" width="70%" >
+            <apex:column >
+            <apex:facet name="header"></apex:facet>
+              {!aCustomerSegment.Name}
+             </apex:column>
+       </apex:dataTable>
+  </apex:pageBlock>
+</apex:page>

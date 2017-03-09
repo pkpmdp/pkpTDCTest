@@ -1,0 +1,52 @@
+<apex:page standardController="NewsArticle__c" extensions="DisplayNewsFeedController" >
+	<apex:form >
+	    <apex:outputPanel id="feeds">
+	        <table border="0">
+	            <apex:repeat value="{!lstFeeds}" var="f" >
+	                <tr>
+	                    <td><apex:image width="25" url="{!userDetails[f.CreatedById].SmallPhotoUrl}"/></td>
+	                    <td><b>{!userDetails[f.CreatedById].Name}</b>
+	                        <apex:outputText value=" - {!f.Title}" rendered="{!f.Title != NULL}"/></td>
+	                </tr>
+	                <tr>
+	                    <td></td>
+	                    <td>
+	                        <apex:outputText value="{!f.Body}" escape="false" rendered="{!f.Body != NULL}"/>
+	                        <apex:outputLink value="{!f.LinkUrl}" target="_blank" rendered="{!f.LinkUrl != NULL}">
+	                            {!f.LinkUrl}
+	                        </apex:outputLink>
+	                    </td>
+	                </tr>
+	                <tr>
+	                    <td><br/></td>
+	                </tr>
+	                <tr>
+	                    <td></td>
+	                    <td >
+	                        <table border="0">
+	                            <apex:repeat value="{!f.FeedComments}" var="c">
+	                                <tr>
+	                                    <td><apex:image width="25" url="{!userDetails[c.CreatedById].SmallPhotoUrl}"/></td>
+	                                    <td><b>{!userDetails[c.CreatedById].Name}</b></td>
+	                                </tr>
+	                                <tr>
+	                                    <td></td>
+	                                    <td>
+	                                        <apex:outputText value="{!c.CommentBody}" escape="false" />
+	                                    </td>
+	                                </tr>
+	                                <tr>
+	                                    <td><br/></td>
+	                                </tr>
+	                            </apex:repeat>
+	                        </table>
+	                    </td>
+	                </tr>
+	            </apex:repeat>      
+	        </table>            
+	    </apex:outputPanel>
+	    <apex:outputPanel rendered="{!lstFeeds.size=0}">
+	        <apex:outputText value="Ingen relaterede snak feeds fundet." />
+	    </apex:outputPanel>
+    </apex:form>
+</apex:page>

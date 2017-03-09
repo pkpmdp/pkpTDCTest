@@ -1,0 +1,10 @@
+<apex:page controller="clsLookupTableListController"  showHeader="False" >
+  <apex:pageBlock title="Building Types" >
+       <apex:dataTable value="{!BuildingTypes}" var="aBuildingType" width="70%" >
+            <apex:column >
+            <apex:facet name="header"></apex:facet>
+              {!aBuildingType.Name}
+             </apex:column>
+       </apex:dataTable>
+  </apex:pageBlock>
+</apex:page>

@@ -1,0 +1,5 @@
+<apex:page controller="UrlEncodingController" showHeader="false">
+<script>
+    this.location = '{!link}';
+</script>  
+</apex:page>

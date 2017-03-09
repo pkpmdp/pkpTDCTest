@@ -1,0 +1,95 @@
+<apex:component controller="IWLUploadAvatarWidgetController" allowDml="true" layout="none">
+	<apex:attribute name="DeveloperName" type="String" required="true" description="The Id of the IWLWidget record that will be loaded by this widget" assignTo="{!widgetDeveloperName}" />
+	<apex:attribute name="Widget" type="IWLWidget__c" required="false" description="A Pre-loaded widget record to be used as the source of information for this widget" assignTo="{!widgetRecord}" />
+	<apex:attribute name="EditModeOn" type="Boolean" required="false" description="Whether or not show the 'Upload new Avatar' button" assignTo="{!editModeOn}" />
+	
+	<c:IWLStatusRenderer StatusMessagesWrap="{!statusMessagesWrap}" />
+	<apex:outputPanel layout="block" rendered="{!loadWidget}" styleClass="yui3-cssreset IWLUploadAvatarWidgetView IWLUploadAvatarWidgetView{!DeveloperName}" >
+	<!-- This panel shows when the widget loaded successfully -->
+				
+		<!-- BEGINS WIDGET STYLING -->
+			
+		<apex:outputPanel rendered="{!widgetRecord.CSSFileUrl__c != null}">
+			<!-- Custom CSS file -->
+			<link href="{!widgetRecord.CSSFileUrl__c}" rel="stylesheet" type="text/css" />
+		</apex:outputPanel>
+		<apex:outputPanel rendered="{!widgetRecord.overrideCSS__c}">
+			<!-- CSS rules override -->
+			<style type="text/css">
+				
+				.IWLUploadAvatarWidgetView{!DeveloperName} {
+                	width: {!widgetRecord.width__c}px;
+                    height: {!widgetRecord.height__c}px;
+                    background-color: #{!widgetRecord.backgroundColor__c};
+                    color: #{!widgetRecord.fontColor__c};
+                    font-family: {!widgetRecord.FontFamily__c};
+                }
+			
+               		
+			
+			</style>
+		</apex:outputPanel>
+		
+		<!-- End of widget styling -->
+		
+		 <!-- Script to load into a js variable the source of the loading image -->
+        <script type="text/javascript">
+        	var IWLDetailViewLoadingIconUrl{!JSENCODE(DeveloperName)} = '{!$Resource.IWLResources}/styles/images/ajax-loader.gif';
+        	jQuery(document).ready( function() {
+        		IWLAvatarUpload_onWidgetLoad('{!JSENCODE(DeveloperName)}');
+        	});
+        </script>
+		
+		
+		
+		<!-- This part is for showing the already existing avatar image -->
+		<apex:outputPanel id="IWLUploadAvatarUploadedAvatar" layout="block" styleClass="IWLUploadAvatarUploadedAvatar">
+				<apex:outputPanel layout="none" rendered="{! smallAvatarUrl != null && smallAvatarUrl != ''}">
+					<img class="IWLUploadAvatarUploadedAvatarImage" src="{!smallAvatarUrl}" />
+					<style>
+						.IWLUploadAvatarWidgetView{!HTMLENCODE(DeveloperName)} .IWLUploadAvatarUploadedAvatar {
+							background:none;
+						}
+					</style>
+				</apex:outputPanel>
+				<apex:outputPanel layout="block" rendered="{!allowUpload}" styleClass="IWLUploadAvatarUploadPanel">
+					<apex:outputPanel layout="block" styleClass="IWLUploadAvatarNewLink" rendered="{!!avatarExists}" onclick="IWLAvatarUpload_showUploadPanel('{!JSENCODE(DeveloperName)}');">{!$Label.IWL_NEW_USER_AVATAR_LABEL}</apex:outputPanel>
+					<apex:outputPanel layout="block" styleClass="IWLUploadAvatarUpdateLink" rendered="{!avatarExists}" onclick="IWLAvatarUpload_showUploadPanel('{!JSENCODE(DeveloperName)}');">{!$Label.IWL_UPDATE_USER_AVATAR_LABEL}</apex:outputPanel>
+					<apex:outputPanel layout="block" styleClass="IWLUploadAvatarUpdateSeparator" rendered="{!avatarExists}">|</apex:outputPanel>
+					<apex:outputPanel layout="block" styleClass="IWLUploadAvatarDeleteLink" rendered="{!avatarExists}" onclick="IWLAvatarUpload_deleteAvatar('{!JSENCODE(DeveloperName)}', IWLAvatarUpload_doDeleteAvatar{!JSENCODE(DeveloperName)}, '{!$Label.IWL_DELETE_USER_AVATAR_CONFIRM_MESSAGE}');">{!$Label.IWL_DELETE_USER_AVATAR_LABEL}</apex:outputPanel>
+					
+				</apex:outputPanel>
+				
+		</apex:outputPanel>
+		
+		<!-- Avatar image upload panel -->	
+		<apex:outputPanel id="IWLUploadAvatarUploadFrame" layout="block" styleClass="IWLUploadAvatarUploadFrame" style="display:none">
+			<apex:outputPanel layout="block" styleClass="IWLUploadAvatarUploadBox" >
+				<apex:outputPanel layout="block" styleClass="IWLUploadAvatarTitleContainer">
+					<apex:outputPanel layout="block" styleClass="IWLUploadAvatarTitle">{!widgetRecord.Title__c}</apex:outputPanel>
+					<apex:outputPanel layout="block" styleClass="IWLUploadavatarTitleClose" onclick="IWLAvatarUpload_cancelUpload('{!JSENCODE(DeveloperName)}');" ></apex:outputPanel>				
+				</apex:outputPanel>
+				<apex:form id="IWLAvatarUploaderForm" rendered="{!editModeOn}" styleClass="IWLAvatarUploaderForm">
+					<!-- Here is the form to upload a new avatar. This is only rendered if editMoedOn is set to "true" -->	
+					<div class="IWLUploadWidgetImageUploadContainer">
+						<apex:inputFile styleClass="IWLUploadAvatarImgField" value="{!avatarImageTempAttachment.body}"  filename="{!avatarImageTempAttachment.Name}" accept="image/*" fileSize="{!fileSize}" />
+						<apex:outputPanel layout="block" styleClass="IWLUploadAvatarFileLimits">{!$Label.IWL_USER_AVATAR_LIMITS}</apex:outputPanel>
+						<apex:outputPanel layout="block" styleClass="IWLUploadAvatarUploadButton IWLPrimaryButton" onclick="IWLAvatarUpload_onUploadButtonClicked('{!JSENCODE(DeveloperName)}', IWLAvatarUpload_UploadAvatar{!JSENCODE(DeveloperName)}, IWLDetailViewLoadingIconUrl{!JSENCODE(DeveloperName)});">{!$Label.IWL_UPLOAD_NEW_AVATAR_CONFIRM}</apex:outputPanel>
+						<apex:outputPanel layout="block" styleClass="IWLUploadAvatarCancelButton IWLSecondaryButton" onclick="IWLAvatarUpload_cancelUpload('{!JSENCODE(DeveloperName)}');">{!$Label.IWL_UPLOAD_AVATAR_CANCEL_LABEL}</apex:outputPanel>
+					</div>
+					<!-- Action functions for the uploader -->
+					<apex:outputPanel id="IWLImageUploaderPanel">
+						<apex:actionFunction name="IWLAvatarUpload_UploadAvatar{!JSENCODE(DeveloperName)}" action="{!UploadAvatarImage}" />
+						<apex:actionFunction name="IWLAvatarUpload_doDeleteAvatar{!JSENCODE(DeveloperName)}" action="{!deleteAvatarImage}" />                                  
+					</apex:outputPanel> 
+				</apex:form>
+			</apex:outputPanel>
+		</apex:outputPanel>
+		
+		
+	</apex:outputPanel> 
+	
+	<apex:outputPanel rendered="{!!loadWidget}" styleClass="IWLLoadErrorMessage IWLUploadAvatarLoadErrorMessage IWLUploadAvatarLoadErrorMessage{!DeveloperName}">
+		<c:IWLStatusRenderer StatusMessagesWrap="{!statusMessagesWrap}" />
+	</apex:outputPanel>
+</apex:component>

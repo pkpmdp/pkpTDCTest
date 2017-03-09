@@ -1,0 +1,200 @@
+<apex:page standardController="Account" extensions="clsProductsYOController" showHeader="false" sidebar="false" cache="true">
+  <style>
+    .activeTab {background-color: #1797C0; color:white; background-image:none;-webkit-border-radius:10px; -moz-border-radius:10px; padding:5px;}
+    .inactiveTab { background-color: #D6ECF3; color:black; background-image:none; -webkit-border-radius:10px; -moz-border-radius:10px; padding:5px;}
+    .headerClass { text-align:right }
+    .viewLink {font-size: 8pt; font-weight:bold}
+    .statusLink {cursor:pointer}
+    .updating,.updating .statusLink {cursor:wait}
+    .scrolling {height:180px;overflow-y:scroll}
+    .latestUsageGrid td {vertical-align:top}
+  </style>
+
+  <apex:includeScript value="{!URLFOR($Resource.hiOffOverwrite)}"/>
+
+  <apex:pageMessages />
+  <apex:form id="form">  
+    <apex:pageBlock id="productPageBlock">
+      <apex:inputHidden value="{!Account.Customer_No__c}"/>
+      <apex:inputHidden value="{!Account.Currency_Format__c}"/>
+      <apex:outputField value="{!Account.Street_YK__r.External_Id__c}" rendered="false"/>
+      <apex:tabPanel switchType="client" height="226px" value="{!currentTab}" tabClass="activeTab" inactiveTabClass="inactiveTab" id="focusTab">                                   
+        <apex:tab label="{!$Label.Existing_Products}" labelWidth="150px" id="existingProductsTab">
+          <div class="scrolling">
+          <apex:outputText rendered="{!isRenderErrextprod}" value="{!$Label.AccountHasNoProducts}"/>
+          <apex:commandButton value="Load Data" action="{!updateExistingProducts}" rendered="{!isDisplayButton}"/>
+          <apex:pageBlockTable rendered="{!displayErrMsg}"  value="{!existingProducts}" var="product" id="existingProductsTable">  
+            <apex:column headerValue="{!$Label.Street}" value="{!product.street}"/>
+            <apex:column headerValue="{!$Label.Business_Group}" value="{!product.businessGroup}"/>
+            <apex:column headerValue="{!$Label.Subscription}" value="{!product.subscription}"/>
+            <apex:column headerValue="{!$Label.Product_Variant}" value="{!product.productVariant}"/>
+            <apex:column headerValue="{!$Label.Payer}">
+                <apex:outputLink value="/{!product.payerCustomerID}" target="_parent" 
+                        style="{!product.payerCustomerStyle}">{!product.payerID}</apex:outputLink>
+            </apex:column>            
+            <apex:column headerValue="{!$Label.Active}" value="{!product.active}"/>
+            <apex:column headerValue="{!$Label.Billing_Start}" value="{!product.billingStart}"/>
+            <apex:column headerValue="{!$Label.Billing_End}" value="{!product.billingEnd}"/>
+            <apex:column headerValue="{!$Label.Price}" value="{!product.account.Currency_Format__c}" headerClass="headerClass" style="text-align:right"></apex:column>
+          </apex:pageBlockTable>
+          </div>
+        </apex:tab>
+        <apex:tab label="{!$Label.Product_Offers}" labelWidth="150px" id="offerProductsTab" status="offerProductsStatus">
+          <div class="scrolling">
+              <apex:panelGrid id="panelgr" columns="1" frame="none" border="0" cellspacing="0" cellpadding="0" width="100%">
+              <apex:outputText id="opmsg" rendered="{!isRenderErrOverrod}" value="{!$Label.AccountHasNoProducts}"/>
+              <apex:commandButton value="Load Data" action="{!updateOfferProducts}" rendered="{!isDisplayButtonOP}" id="btnData" reRender="panelgr"/>
+              <apex:pageBlockTable rendered="{!isRenderTableOP}" value="{!overnightProducts}" var="op" id="overnightProductsTable" columns="5" columnsWidth="16%,13%,62%,9%">
+                <apex:column headerValue="{!$Label.Name}" value="{!op.Campaign_Name__c}"/>
+                <apex:column headerValue="{!$Label.Street}" value="{!op.Street_Name__c}"/>
+                <apex:column headerValue="{!$Label.Description}" value="{!op.Description__c}"/>
+                <apex:column headerValue="{!$Label.Response}">
+                  <apex:repeat value="{!Items}" var="item">
+                    <apex:commandLink action="{!saveStatus}" value="{!item.Label}" rendered="{!AND(item.Value != StatusNone, item.Value != op.Customer_Response__c)}" style="display:block;" reRender="productPageBlock" styleClass="statusLink" onclick="window.document.body.className='updating';this.parentNode.className='updating'" oncomplete="window.document.body.className='';this.parentNode.className=''">
+                      <apex:param name="op_type" value="{!item.Value}"/>
+                      <apex:param name="op_id" value="{!op.ID}" />
+                    </apex:commandLink>
+                  </apex:repeat>                                                
+                </apex:column>  
+              </apex:pageBlockTable>
+              <apex:pageBlockTable rendered="{!DisplaySAS}" value="{!sasProducts}" var="sas" id="sasProductsTable" columns="6" columnsWidth="16%,11%,13%,51%,9%">
+                <apex:column headerValue="{!$Label.Name}" value="{!sas.offerName}"/>
+                <apex:column headerValue="{!$Label.Subscription}" value="{!sas.subscription}"/>
+                <apex:column headerValue="{!$Label.Street}" value="{!sas.Street}"/>
+                <apex:column headerValue="{!$Label.Description}" value="{!sas.description}"/>                  
+                <apex:column headerValue="{!$Label.Response}">
+                  <apex:repeat value="{!Items}" var="item">
+                      <apex:commandLink action="{!saveSASResponse}" value="{!item.Label}" rendered="{!AND(item.Value != StatusNone, item.Value != sas.response)}" style="display:block;" reRender="productPageBlock" styleClass="statusLink" onclick="window.document.body.className='updating';this.parentNode.className='updating'" oncomplete="window.document.body.className='';this.parentNode.className=''">
+                        <apex:param name="op_type" value="{!item.Value}"/>
+                        <apex:param name="op_id" value="{!sas.Index}" />
+                      </apex:commandLink>
+                    </apex:repeat>
+                </apex:column>
+              </apex:pageBlockTable>
+              </apex:panelGrid>
+          </div>
+        </apex:tab>
+        <apex:tab label="{!$Label.CampaignHistory}" labelWidth="150px" id="campaignHistoryTab" status="campaignHistoryStatus" ontabenter="checkUpdateCampaignHistory()">
+          <div class="scrolling">
+          <apex:outputText rendered="{!displayErrMsg}" value="{!errMsg}" />
+          <apex:actionStatus rendered="{!!displayErrMsg}" startText="Requesting..." id="campaignHistoryStatus">
+            <apex:facet name="stop">
+              <apex:pageBlockTable value="{!campaignHistory}" var="campaign" id="campaignHistoryTable">
+                <apex:column title="{!campaign.mouseOverText}" headerValue="{!$Label.Subject}" >
+                  <apex:outputLink rendered="{!IF(campaign.contentURL != '', true, false)}" value="{!campaign.contentURL}" target="_blank" id="scriptLink" styleClass="viewLink">{!campaign.subject}</apex:outputLink>
+                  <apex:outputText rendered="{!IF(campaign.contentURL == '', true, false)}" value="{!campaign.subject}" styleClass="viewLink" />
+                </apex:column>
+                <apex:column headerValue="{!$Label.Category}" value="{!campaign.category}"/>
+                <apex:column headerValue="{!$Label.Type}" value="{!campaign.type}"/>
+                <apex:column headerValue="{!$Label.Sender}" value="{!campaign.sender}"/>
+                <apex:column headerValue="{!$Label.Receiver}" value="{!campaign.receiver}"/>
+                <apex:column headerValue="{!$Label.Campaign_Time}" value="{!campaign.timeDate}"/>
+                <apex:column headerValue="{!$Label.Campaign_Status}" value="{!campaign.responseStatus}"/>
+              </apex:pageBlockTable>
+            </apex:facet>
+          </apex:actionStatus>
+          </div>
+        </apex:tab>
+        <apex:tab label="{!$Label.Reprovision_Tab}" labelWidth="150px" id="reprovisionTab" status="reprovisionStatus" ontabenter="checkUpdateReprovision()">
+          <div class="scrolling">
+          <apex:outputText rendered="{!displayErrMsg}" value="{!errMsg}" />
+          <apex:actionStatus rendered="{!!displayErrMsg}" startText="Requesting..." id="reprovisionStatus">
+            <apex:facet name="stop"> 
+              <apex:pageBlockTable value="{!reprovision}" var="rep" id="reprovisionTable">
+                 <apex:column headerValue="{!$Label.Reprovision_ProductGroup}" value="{!rep.productGroupName}"/>
+                 <apex:column headerValue="{!$Label.Reprovision_Date}" value="{!rep.dateOfReprovision}"/>
+                 <apex:column headerValue="{!$Label.Reprovision_User_Label}" value="{!rep.mid}"/>
+                 <apex:column headerValue="{!$Label.Reprovision_Status}" value="{!rep.status}"/>                       
+                 <apex:column headerValue="{!$Label.Reprovision_Hyperlink_Label}">
+                    <apex:commandLink action="{!doReprovision}" value="{!$Label.Reprovision_Link}" id="reprovisionLink" rerender="reprovisionTable">
+                        <apex:param name="productGroupId" value="{!rep.productGroupId}"/>
+                    </apex:commandLink>
+                 </apex:column>                      
+              </apex:pageBlockTable>  
+            </apex:facet>
+          </apex:actionStatus>
+          </div>
+        </apex:tab>
+                <!-- LatestProductUsage BEGIN -->
+        <apex:tab label="{!$Label.Latest_Product_Usage}" labelWidth="150px" id="latestProductUsageTab" status="latestProductUsageStatus" ontabenter="checkLatestProductUsage()">
+          <apex:outputText rendered="{!displayErrMsg}" value="{!errMsg}" />
+          <apex:actionStatus rendered="{!!displayErrMsg}" startText="{!$Label.Requesting_AsyncText}" id="latestProductUsageStatus">
+            <apex:facet name="stop">
+            <apex:panelGrid columns="2" id="idGrid" width="100%" styleClass="latestUsageGrid">
+            <!-- <span style="vertical-align:top"> -->
+              <apex:panelGrid columns="1" id="idGrid2" width="100%" cellpadding="0px" cellspacing="0px">
+                  <apex:pageBlockTable var="usage" value="{!productUsage}"  id="productUsageTable" rules="none">
+                    <apex:column headerValue="{!$Label.BB_Product}">
+                        <apex:outputLink rendered="{!IF(usage.forbrugUrl != '', true, false)}" value="{!usage.forbrugUrl}" target="_blank" id="scriptLink" styleClass="viewLink">{!usage.productName}</apex:outputLink>
+                        <apex:outputText rendered="{!IF(usage.forbrugUrl == '', true, false)}" styleClass="viewLink" value="{!usage.productName}" />
+                    </apex:column>               
+                    <apex:column headerValue="{!$Label.BB_Max_forbrug}" value="{!usage.maxLimit} "  />
+                    <apex:column headerValue="{!$Label.BB_Samlet_forbrug}" value="{!usage.usage} GB"  />
+                    <apex:column headerValue="{!$Label.BB_Forbrug_percent}" value="{!usage.percentUse} %" />
+                  </apex:pageBlockTable>
+                  <apex:pageBlockTable value="{!returnPathActivated}" var="rp" id="returnPathActivatedTable" rules="none">
+                    <apex:column headerValue="{!$Label.BB_Boxusefirstdate}" value="{!rp.boxUseFirstDate}"/>
+                    <apex:column headerValue="{!$Label.BB_Return_path_activated}" value="{!rp.returnPathDate}"/>
+                  </apex:pageBlockTable>
+              </apex:panelGrid>
+              <!-- </span> -->
+            <apex:pageBlockTable value="{!latestProductUsage}" var="latest" id="latestProductUsageTable" rules="none">
+                <apex:column headerValue="{!$Label.Column_Service}" value="{!latest.service}"/>
+                <apex:column headerValue="{!$Label.Column_Date}" value="{!latest.latestUsage}"/>
+              </apex:pageBlockTable>             
+            </apex:panelGrid>
+            </apex:facet>
+          </apex:actionStatus>
+        </apex:tab>
+        <!-- LatestProductUsage END -->
+    </apex:tabPanel>              
+    </apex:pageBlock>      
+    <apex:actionFunction name="updateCampaignHistory" action="{!updateCampaignHistory}" rerender="campaignHistoryTable" status="campaignHistoryStatus"/>
+    <apex:actionFunction name="updateOfferProducts" action="{!updateOfferProducts}" rerender="offerProductsStatus" status="offerProductsStatus" />
+    <apex:actionFunction name="updateExistingProducts" action="{!updateExistingProducts}" rerender="existingProductsTable" status="existingProductsStatus"/>     
+    <apex:actionFunction name="updateReprovision" action="{!updateReprovision}" rerender="reprovisionTable" status="reprovisionStatus"/>    
+    <apex:actionFunction name="updateLatestProductUsage" action="{!updateLatestProductUsage}" rerender="productUsageTable,latestProductUsageTable,returnPathActivatedTable" status="latestProductUsageStatus"/>
+    <script> 
+      campaignHistory = false;
+      offerProducts = false;
+      existingProducts = false;
+      reprovision = false;
+      latestProductUsage = false;
+      productUsage = false;
+
+      function checkUpdateReprovision() {
+        if ( ! reprovision ) {
+          updateReprovision();
+          reprovision = true;
+        }
+      }
+      
+      function checkUpdateCampaignHistory() {
+        if ( ! campaignHistory ) {
+          updateCampaignHistory();
+          campaignHistory = true;
+        }
+      }
+      function checkUpdateOfferProducts() {
+        if ( ! offerProducts ) {
+          updateOfferProducts();
+          offerProducts = true;
+        }
+      }
+      function checkUpdateExistingProducts() {
+        if ( ! existingProducts ) {
+          updateExistingProducts();
+          existingProducts = true;
+        }
+      }
+      function checkLatestProductUsage() {
+        if ( ! latestProductUsage ) {
+          updateLatestProductUsage();
+          latestProductUsage = true;
+          productUsage = true;
+          returnPathActivated = true;          
+        }
+      }    
+    </script>
+  </apex:form>
+</apex:page>

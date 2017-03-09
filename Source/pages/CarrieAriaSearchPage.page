@@ -1,0 +1,93 @@
+<apex:page action="{!SearchAria}" controller="CarrieAriaSearchController">
+<apex:includeScript value="/soap/ajax/25.0/connection.js" />
+<apex:includeScript value="/support/console/25.0/integration.js" />
+<br/><br/><br/>
+
+<script type="text/javascript">
+	
+function popitup(url) {
+    newwindow=window.open(url,'name','height=1000,width=1000,scrollbars=1');
+    if (window.focus) {newwindow.focus()}
+    return false;
+}
+
+function openPrimaryTab(customerNo,customerName){
+
+	var url = '/' + customerNo;
+	var myValues = new Array();
+	
+	if (sforce.console.isInConsole()){
+	
+		//sforce.console.getEnclosingTabId(function (success){
+            //sforce.console.getEnclosingPrimaryTabId(function (PrimaryId){                                                       
+                //sforce.console.focusPrimaryTabById(PrimaryId.id);
+                sforce.console.openPrimaryTab(null,url,true,customerName,function(opensuccess){
+                },customerName);                         
+           // });
+        //});  
+		
+		
+		sforce.console.getPrimaryTabIds(function(obj){
+        myValues = obj.ids;                                                     
+            for(var i = 0;i < myValues.length; i++){                                                                            
+                sforce.console.openPrimaryTab(obj.ids[i],url,true,customerName,function(opensuccess){
+              });                    
+            }                               
+        }); 
+		
+		sforce.console.getEnclosingTabId(function (success){
+	          sforce.console.getEnclosingPrimaryTabId(function (PrimaryId){                                                       
+	              sforce.console.refreshPrimaryTabById(PrimaryId.id,false);                           
+	          });
+      	});    
+	}
+}
+
+
+</script>
+
+<apex:pageMessages ></apex:pageMessages>
+<apex:pageBlock title="Aria Account">
+<apex:form >
+        <apex:pageBlockTable value="{!ariaSpoc}" var="item" rendered="{!(ariaSpoc.size >0)}">
+        <apex:column headerValue="Betaler ID"><apex:outputLink target="_parent"  onclick="return popitup('/apex/CarrieBillingBatchPage?id={!item.Id}')">{!item.Aria_Account_No__c}</apex:outputLink></apex:column>
+        
+        
+        <apex:column id="kundeConsole">  
+        <apex:facet name="header">Kundenavn</apex:facet>  
+			<a id="accountName" href="#" onclick="openPrimaryTab('{!item.Account__c}','{!item.Account__r.Name}');">{!item.Account__r.Name}</a>			
+        </apex:column>
+		
+       <apex:column value="{!item.Account__c}" headerValue="Kundenavn" onclick="openPrimaryTab('{!item.Account__c}','{!item.Account__r.Name}');" id="KundeNonConsole"/>
+      
+        <apex:column value="{!item.Aria_Plan_Name__c}" /> 
+        </apex:pageBlockTable>
+        <apex:outputLabel value="Ingen registreringer at vise" rendered="{!(ariaSpoc.size ==0)}" styleClass="noRowsHeader"></apex:outputLabel>
+</apex:form>
+	<script>
+		var bool = false;
+		var consoletd = document.getElementById('j_id0:j_id30:j_id31:j_id32:kundeConsoleheader');
+		var consolevalue= document.getElementById('j_id0:j_id30:j_id31:j_id32:0:kundeConsole');
+		var nonconsoletd = document.getElementById('j_id0:j_id30:j_id31:j_id32:KundeNonConsoleheader');
+		var nonconsolevalue= document.getElementById('j_id0:j_id30:j_id31:j_id32:0:KundeNonConsole');
+		
+		if (sforce.console.isInConsole()){
+			bool = true;
+			
+			consoletd.style.display = 'block';
+			consolevalue.style.display = 'block';
+			nonconsoletd.style.display = 'none';
+			nonconsolevalue.style.display = 'none';
+		}
+		else
+		{
+			
+			consoletd.style.display = 'none';
+			consolevalue.style.display = 'none';
+			nonconsoletd.style.display = 'block';
+			nonconsolevalue.style.display = 'block';
+			
+		}
+	</script>	
+</apex:pageBlock>
+</apex:page>

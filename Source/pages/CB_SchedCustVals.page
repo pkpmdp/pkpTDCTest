@@ -1,0 +1,45 @@
+<apex:page standardController="CB_Custom_Schedule__c" extensions="clsCBSchedCustValsController" cache="true" standardStylesheets="true" tabStyle="CB_Schedule_Template__c" title="{!$Label.CB_Admin_page_title}">
+<apex:sectionHeader title="{!$Label.CB_Admin_Title}" subtitle="{!$Label.CB_Admin_Subtitle}"/>
+  <apex:pageMessages />
+  <apex:form >
+    <apex:pageBlock mode="detail" id="idBlock" title="{!$Label.CB_Admin_Manual_settings}">
+    <apex:pageBlockButtons >
+        <apex:commandButton action="{!saveCustom}" value="{!$Label.CB_Admin_Save_Button}"/>
+        <apex:commandButton action="{!quicksaveCustom}" value="{!$Label.CB_Admin_Quicksave_Button}"/>
+        <apex:commandButton action="{!cancel}" value="{!$Label.CB_Admin_Cancel_Button}"/>    
+    </apex:pageBlockButtons>
+    
+    <apex:pageBlockSection columns="2" >
+        <apex:pageBlockSectionItem >
+            <apex:outputLabel value="{!$ObjectType.CB_Custom_Schedule__c.fields.CB_date__c.label}" for="dateId"/>
+            <apex:outputText value="{!formatedDay}" id="dateId"/>
+            <!--apex:outputText value="{0,date,dd-MM-yyyy}" id="dateId">
+                <apex:param value="{!day}" />
+            </apex:outputText-->
+        </apex:pageBlockSectionItem>
+        <apex:pageBlockSectionItem >
+            <apex:outputLabel value="{!$ObjectType.CB_Custom_Schedule__c.fields.CB_type__c.label}" for="cbTypeId"/>
+            <apex:outputText value="{!cbType}" id="cbTypeId"/>
+        </apex:pageBlockSectionItem>
+    </apex:pageBlockSection>
+
+    <apex:pageBlockTable value="{!defAndCustVals}" var="item">
+        <apex:column width="16%" headerValue="{!$ObjectType.CB_Custom_Schedule__c.fields.CB_time_from__c.label} - {!$ObjectType.CB_Custom_Schedule__c.fields.CB_time_to__c.label}"> 
+          <apex:outputText value="{0, number, 0}':00'">
+            <apex:param value="{!item.timeFrom}" />
+          </apex:outputText>
+          <apex:outputText > - </apex:outputText>
+          <apex:outputText value="{0, number, 0}':00'">
+            <apex:param value="{!item.timeTo}" />
+          </apex:outputText>
+        </apex:column>
+        <apex:column headerValue="{!$Label.CB_Admin_Manual_Value}"> 
+            <apex:inputText value="{!item.custVal}"/>
+        </apex:column>
+        <apex:column headerValue="{!$Label.CB_Admin_Default_Value}" value="{!item.defVal}"/>
+        <apex:column headerValue="{!$Label.CB_Admin_Used_Slots}" value="{!item.usedSlots}"/>  
+    </apex:pageBlockTable> 
+
+    </apex:pageBlock>
+  </apex:form>
+</apex:page>

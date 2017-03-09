@@ -1,0 +1,121 @@
+<apex:page controller="AnlaegNumberComponentSearchController" showheader="false" sideBar="false" id="pg">
+          <style>
+           #DIV_Container{padding: 0; margin: 0; background-color: #CBECF5;}
+
+          </style>
+          <div id="DIV_Container">
+          <apex:messages />
+          
+          <apex:form id="frm">
+          
+              Anlægnr: <apex:inputText id="AnlaegNumber" value="{!cunumber}" onkeypress="return enterSearch(event)" ></apex:inputText>
+              <br></br>
+             <!-- <apex:commandButton value="Søg"  onclick="search();">  </apex:commandButton> -->
+               <input type="button" id="searchb" value="Søg" onClick="search()" oncomplete="onControllerReturn()"  />
+              <apex:actionFunction name="callAction1" reRender="frm" action="{!showAccount}" oncomplete="onControllerReturn()"></apex:actionFunction>
+         
+          
+      
+      <p>Klik på "Søg" for at finde kunden med det indtastede anlægnr.</p>
+      
+          
+      <script type="text/javascript">
+          
+          function  enterSearch(event){
+              //alert('Inside enter search');
+              //alert(window.event.keyCode);
+              if(window.event && window.event.keyCode == 13 || event.which == 13){
+                  //alert('Inside if');
+                  search();
+                  //alert(document.getElemenById("searchb"));
+                  //var eleId = document.getElemenById("searchb");
+                  
+                  //eleId.click();
+                  return false;
+              }
+              else{
+                  //alert('Inside else');
+                  true;
+              }    
+          }
+           
+          function search(){
+          
+           //alert("in search");
+           var kundeno=document.getElementById("pg:frm:AnlaegNumber").value;
+           //var searchbutton = document.getElementById("searchb");
+           //alert ('succesfull');
+           //alert(kundeno);
+           //window.open(parent.window.document.location.href,'_self');
+           //var url = parent.window.document.location.href;
+           //var url=document.referrer;
+           //alert('url:'+url);
+           //var strurl =url.substring(0,27);
+           //strurl =strurl + '001M000000XFn43IAD';
+           //window.open(strurl,'_top');
+           //alert('befror call');
+           callAction1();
+           //alert('after call');
+          
+      
+          }
+          
+          function onControllerReturn(){
+              //alert('Inside oncontrollerreturn');
+              //alert('{!accountid}');
+              //alert ('{!result}');
+              var url1=document.referrer;
+              //alert(url1);
+              if('{!result}' == 'positive')
+               {
+                   //alert('inside positive');
+                   var index = url1.indexOf(".com");
+                   var strurl =url1.substring(0,index+5);
+                   strurl =strurl + '{!accountid}' ;
+                   //alert('URl' + strurl )
+                   window.open(strurl,'_top');
+               }
+               else{
+                   
+                   
+                   var index = url1.indexOf(".com");
+                   var strurl =url1.substring(0,index+5);
+                   //alert(strurl);
+                   strurl =strurl + 'apex/ErrorComponentpage?analegnum={!cunumber}'  ;
+                   window.open(strurl,'_top');
+               }
+         }
+          function addLoadEvent(func) { 
+          
+              var oldonload = window.onload; 
+              
+              if (typeof window.onload != 'function')
+               { 
+                   window.onload = func; 
+               } 
+              else 
+              { 
+                  window.onload = function() {
+                       if (oldonload) { oldonload(); } func();
+                   } 
+              }
+          }
+          
+          function init() 
+          { 
+              var elem_sbstr = document.getElementById("AnlaegNumber"); 
+              if (elem_sbstr) elem_sbstr.focus();
+          }
+          
+          addLoadEvent(init);
+          
+          /*function setFocusOnLoad() 
+          {
+          } */
+          
+      </script>
+     
+     </apex:form>
+     
+     </div>
+</apex:page>

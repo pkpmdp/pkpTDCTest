@@ -1,0 +1,16 @@
+<apex:page id="thepage" standardController="Case" extensions="clsCaseSearchCustomerByAnlaegnrCtrl" action="{!searchKissCableUnit}" showHeader="true" sidebar="true" cache="true">
+  <apex:sectionHeader title="{!$Label.Search_For_Address}" subtitle="{!$Label.Customers}"/>
+  <apex:form id="theForm" acceptcharset="ISO-8859-1">
+  
+  <apex:pageMessages />
+  
+  
+    <apex:pageBlock id="searchText" rendered="true">
+      <apex:pageBlockSection columns="2">  
+        <apex:inputText value="{!cse.Anlaegnr_Search_Term__c}"/>
+        <apex:commandButton action="{!searchKissCableUnit}" value="{!$Label.Search}" rerender="addressList"/>
+      </apex:pageBlockSection>
+    </apex:pageBlock>
+
+</apex:form>
+</apex:page>

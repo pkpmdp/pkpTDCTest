@@ -1,0 +1,293 @@
+<apex:page showHeader="false" sidebar="false" controller="ManagePortalUserController" applyHtmlTag="false" standardStylesheets="true">
+<html class="cvi2015">
+ 
+     <apex:includescript value="https://code.jquery.com/jquery-1.11.1.min.js" />
+    <apex:includescript value="https://cdn.datatables.net/1.10.4/js/jquery.dataTables.min.js" />
+    <apex:stylesheet value="https://cdn.datatables.net/1.10.4/css/jquery.dataTables.css" />
+    <script type="text/javascript">
+    j$ = jQuery.noConflict();  
+    //alert('test');
+    var tableId;
+    j$(document).ready(function() {
+   tableId = j$('[id$="tableId"]').DataTable({   
+        "columnDefs": [ {
+                "orderable": false,
+                "targets"  : [7] 
+    }],
+            "ordering":true,
+            "order": [[ 0, "asc" ]],
+            "paging":false,
+            "language":{
+                "info": "Vis _START_ til _END_ af _TOTAL_ poster",
+                 "infoEmpty": "Vis 0 til 0 af 0 poster",
+                 "search": "Søg",
+                 "infoFiltered":   "(filtreret fra _MAX_ poster)",
+                "loadingRecords": "Henter...",
+                "zeroRecords":    "Ingen poster fundet",
+                "emptyTable": "Ingen data fundet"
+                }    });
+});
+</script>
+    <style>
+        table tr {line-height: 10px;}
+        
+        table.dataTable thead th{
+        padding: 5px 14px;
+       }
+       .list tr.even td, .list tr.odd td {
+            border-bottom-width: 1px;
+        }
+       .bPageBlock .list .last>td{
+            border-bottom-width: 1px;
+        }
+       table.dataTable thead .sorting_asc {
+        background-color: #676767;
+       }
+       table.dataTable thead .sorting_desc{
+        background-color: #676767;
+       }
+        table.dataTable thead .sorting {
+        background-color: #676767;
+       }
+        table.dataTable tr{line-height: 20px;}
+    table.dataTable tr.odd { background-color: #CAE6C4;  border:1px lightgrey;}
+    table.dataTable tr.even{ background-color: white; border:1px lightgrey; }
+    table.dataTable tbody td {padding: 5px 10px;}
+        .no-footer{margin-top: -22px;}
+        input.btnDisabled{font-weight: normal;border-radius: 3px;font-size: 10px;font-family: 'Verdana','Geneva',sans-serif;}
+        html.cvi2015 .btn{min-height: 0px;min-width: 0px;}
+    </style>
+    <script type="text/javascript" src="{!siteCoreUrl}/sitecore/content/data/export/export.aspx?itemguid={934A91A8-0EDD-4035-8DA9-E386D8112557}&functions=true"></script>
+<script type="text/javascript">setParentMenu();</script>  
+<style>
+        .headerRow .headerStyle{background-color:#638658;color:#FFFFFF}
+        .headerRow .headerStyle1{background-color:#000000;color:#FFFFFF}
+        .container{ overflow-x:hidden;overflow-y:auto; width:133%; } 
+        .parenttopAlign {  margin:1px 0px 1px 2px; display: block;} 
+        .list .headerRow TH{background-color:#676767;color:#ffffff;text-align:left;font-weight:bold;!important;}
+        .list .headerStyleLeft TH{background-color:#676767;color:#ffffff;text-align:left;font-weight:bold;!important;}
+        .list .headerStyleCenter TH{background-color:#676767;color:#ffffff;text-align:center;font-weight:bold;!important;}   
+        .yourStyle{background-color:#000000;color:#FFFFFF}
+        .first {color:black;text-decoration:none;}
+        a:link {color:#E56717;font-weight: normal;text-decoration:none;}
+        a:visited { color:#E56717; font-weight: normal;text-decoration:none;}
+        a:active { color:#E56717;text-decoration:none;}
+        a:hover { color:black; font-weight: none;text-decoration:underline;}
+        .product__navigation a {color: #3cb84d;}
+  </style>
+
+ 
+<apex:form > 
+<body id="servicepage">
+  <!--  <apex:includescript value="http://code.jquery.com/jquery-migrate-1.3.0.min.js"/>-->
+<script type="text/javascripmt">printHeader();</script>
+<script type="text/javascript">printTopMenu();</script>
+<script type="text/javascript">printContentAreaBegin();</script>
+<apex:inputHidden id="hdnDeleteStatus" value="{!deleteFlag}"/>
+
+
+<script type="text/javascript">
+    
+var userProfile  = '{!$Profile.Name}';
+var portalAdminRole = '{!portalAdminRole}';
+var portalBrugerRole = '{!portalBrugerRole}';
+var portalAdminUser = '{!portalAdminUser}';
+var contactRoleName = '{!$CurrentPage.parameters.loggedInUserRoleName}';
+
+
+function setParentMenu(){
+    //alert('In setParentMenu');
+    //alert(document.getElementById('inunion'));
+   var myParentlist=document.getElementById('inunion');
+   if(myParentlist != null ){
+       var myChildlist = myParentlist.childNodes;
+       for (p=0; p<myChildlist.length; p++){
+             var mP=myChildlist[p].childNodes;
+            for (j=0; j<mP.length; j++){
+                var mS=mP[j].childNodes;
+                if(mP[j].nodeName=="LI"){
+                  mP[j].className='parenttopAlign ';
+                }
+            }
+        }
+        }
+}
+function checkProfile(){
+     var newURL;
+     newURL = window.location.protocol + "//" + (window.location.host).replace("//","/")+'{!$Site.Prefix}';
+     var exURL;
+     
+     setParentMenu();
+     //alert('role is :#'+contactRoleName+'#');
+     var profileList=document.getElementById('productnavigation').childNodes;
+     
+     for (var p=0; p < profileList.length; p++){
+        var listcount = 0;
+        // alert('profileList[p].nodeName '+profileList[p].nodeName);
+         var parentList = profileList[p].childNodes;
+         for(var q=0; q<parentList.length; q++)
+             {
+           //  alert('parentList[q].nodeName '+parentList[q].nodeName);
+             var childList = parentList[q].childNodes;
+           //  alert('childList '+childList[0].nodeName);
+            
+        if(childList[0].nodeName=='UL'){
+                  var mUL=childList[0].childNodes;
+                  for (var i=0; i < mUL.length; i++){
+                     // alert('mUL[i].nodeName '+mUL[i].nodeName);
+                     if(mUL[i].nodeName == 'LI' ){
+                           // mUL[i].className='listAlign';
+                            if(contactRoleName != null || contactRoleName != ''){
+                                   if(userProfile  != portalAdminUser && i == 1 && contactRoleName == changePortalBrugerRole) {
+                                     //  listcount = listcount + 1;
+                                      mUL[i].className+=' profileDisplay';
+                                   }
+                                   listcount = listcount + 1;
+                                   var mA = mUL[i].childNodes;
+                                   for(a=0; a< mA.length; a++){
+                                   var mB = mA[a].childNodes;
+                                      switch(listcount){
+                                       case 1 : 
+                                              exURL = newURL + '/apex/ViewCableUnitsHomePage';
+                                              mA[a].setAttribute('href',exURL);
+                                              break;
+                                       case 2 : 
+                                             exURL = newURL + '/apex/ManagePortalUsersPage';
+                                             mA[a].setAttribute('href',exURL);
+                                             break;
+                                        case 3 : 
+                                             exURL = newURL + '/apex/EditContactDispatcherPage?loggedInUserRoleName='+ contactRoleName;
+                                             mA[a].setAttribute('href',exURL);
+                                             break;
+                                        case 4 : 
+                                             exURL = newURL + '/secur/logout.jsp';
+                                            // exURL = {!$Site.Prefix} + '/secur/logout.jsp';
+                                             mA[a].setAttribute('href',exURL);
+                                            break;   
+                                   }
+       
+                                   }
+                             }
+                       }
+               }    }
+          }
+   }
+    
+ }
+     document.onload = checkProfile();
+
+function confirm_entry(roleName){
+    //after completion of task C4 ,need to modify the code for portal admin.
+   //alert('portalBrugerRole'+portalBrugerRole);
+     // alert('roleName'+roleName);
+  if(roleName == portalAdminRole){
+  //alert('roleName-->'+roleName);
+     var answer = confirm('Den pågældende portalbruger er også portaladministrator. Er du sikker på du vil slette?');
+     if (answer){
+         // Output when OK is clicked
+         document.getElementById('{!$Component.hdnDeleteStatus}').value = 'true';
+         return true;
+      }else{
+         return false;
+     }
+    }else if(roleName == portalBrugerRole){
+    //alert('roleName-->'+roleName);
+       var answer = confirm('Du er ved at slette en portalbruger. Hvis du fortsætter kan brugeren ikke længere logge ind på Selvbetjning.Er du sikker på du vil slette?');
+       if (answer){
+         // Output when OK is clicked
+         document.getElementById('{!$Component.hdnDeleteStatus}').value = 'true';
+         return true;
+       }else{
+          return false;
+       }
+     }
+     document.getElementById('confMsg').style.display ='block';
+     return true;
+     //contactDelete();
+ }
+
+</script>   
+<apex:stylesheet value="{!URLFOR($Resource.scrowOddEvenStyle)}"/>
+<!-- <apex:includeScript value="{!$Resource.sortScript}" /> -->
+<apex:messages globalOnly="true"  styleClass="successClass" rendered="{!successFlag == true}"/>   
+<apex:messages globalOnly="true"  styleClass="warningError" rendered="{!warningFlag == true}"/>
+<!-- <apex:messages globalOnly="true"  styleClass="warningError" rendered="{!errorFlag == true}"/> --> 
+<apex:stylesheet value="{!URLFOR($Resource.scStyleCss,'myStyle/myStyle.css')}"/>
+
+  <div class="bullets">
+    <ul>
+      <li><apex:outputText value="{!$Label.SC_AdministratorsPageHeader}" /></li>
+    </ul>
+  </div>
+        <div id="confMsg" style="display:none;">
+        </div>
+     <apex:pageblock >
+        <apex:outputPanel id="thePanel2">
+            <apex:pageBlockTable value="{!portalUserList}" var="c" rowClasses="even,odd" id="tableId" style="overflow:visible">
+                <apex:column value="{!c.contact1.FirstName}" width="20%" headerValue="Fornavn" headerClass="headerStyle"/>
+                <apex:column value="{!c.contact1.LastName}" width="20%" headerValue="Efternavn" headerClass="headerStyle"/>
+                <apex:column headerClass="headerStyle">
+                <apex:facet name="header">E-mail</apex:facet>
+                <apex:outputText value="{!c.contact1.Email}" styleClass="first"/>
+                </apex:column>
+                <!-- <apex:column value="{!c.contact1.Email}" width="19%" headerValue="E-Mail" headerClass="headerStyle"/></a> -->
+                <apex:column value="{!c.contact1.phone}" width="15%" headerValue="Arb. Tlf" headerClass="headerStyle"/>
+                <apex:column value="{!c.contact1.Mobilephone}" width="10%" headerValue="Mobil" headerClass="headerStyle"/>
+                <apex:column value="{!c.contact1.HomePhone}" width="10%" headerValue="Privat tlf." headerClass="headerStyle"/>
+                <apex:column value="{!c.roleName}" width="10%" headerValue="Brugertype" headerClass="headerStyle"/>
+                <apex:column headerValue="Handling" width="85%" headerClass="headerStyle"> 
+                <apex:outputlink value="{!$Site.Prefix}/apex/ViewPortalUserPage" styleclass="btnViewIcon" title="Vis portalbruger">
+                    <apex:param name="contactId" value="{!c.contact1.id}"/>
+                </apex:outputlink>
+                <apex:outputlink value="{!$Site.Prefix}/apex/EditPortalUserPage" styleclass="btneditIcon" title="Rediger portalbruger" id="editLink"> 
+                    <apex:param name="contactId" value="{!c.contact1.id}"/>
+                </apex:outputlink>
+                <apex:commandLink styleclass="btndeleteIcon" action="{!deleteContact}" title="Deaktiver portalbruger" id="deleteLink" onClick="return confirm_entry('{!c.userRolename}')"> 
+                    <apex:param name="contactId" value="{!c.contact1.id}"/>
+                </apex:commandLink>
+                </apex:column>
+            </apex:pageBlockTable>
+        <br/>
+        
+        </apex:outputPanel>
+        
+       <apex:facet name="footer">
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <apex:outputPanel layout="Centre">
+                    <apex:actionFunction name="deleteContact" action="{!deleteContact}" reRender="tableId">
+                        <apex:param assignTo="{!tempContactId}" name="tempContactId" value=""/>
+                    </apex:actionFunction>  
+                    <br/>
+                   <apex:commandButton action="{!addContact}" value="{!$Label.SC_ManagePortalUser_CreatePortalUser}" disabled="{!hierarchyFlag == false}" styleClass="dialogbutton_orange"/>&nbsp;&nbsp;
+                   <apex:commandButton action="{!exportExcel}" value="{!$Label.SC_UserExportToExcel}" disabled="{!(displayFlag == false)}" styleClass="dialogbutton_orange"/>
+                </apex:outputPanel>
+     </apex:facet>
+        <div align="right" style="position:relative;right:40px"><b>
+        <apex:outputPanel rendered="{!displayFlag}"><br/><br/>
+        <apex:outputLabel value="{!currentcountText1}" rendered="true" style="text-align:left"/><br/>
+        <apex:commandLink action="{!first}" rendered="{!NOT(pageNumber == 1)}">
+            <apex:commandButton title="Første" rendered="{!NOT(pageNumber == 1)}" value="Første" styleClass="dialogbutton_orange"/>&nbsp;
+        </apex:commandLink>    
+        <apex:commandButton title="Første" value="Første" disabled="true" rendered="{!(pageNumber == 1)}" styleClass="dialogbutton_orange"/>&nbsp;
+        <apex:commandLink action="{!previous}" rendered="{!hasPrevious}">
+            <apex:commandButton title="Forrige" rendered="{!hasPrevious}" value="Forrige" styleClass="dialogbutton_orange"/>&nbsp;
+        </apex:commandLink>
+        <apex:commandButton title="Forrige" rendered="{!NOT(hasPrevious)}" disabled="true" value="Forrige" styleClass="dialogbutton_orange"/>&nbsp;
+        <apex:commandLink action="{!next}" rendered="{!hasNext}">
+            <apex:commandButton title="Næste" value="Næste" rendered="{!hasNext}" styleClass="dialogbutton_orange"/>&nbsp;
+        </apex:commandLink>
+        <apex:commandButton title="Næste" value="Næste" rendered="{!NOT(hasNext)}" disabled="true" styleClass="dialogbutton_orange"/>&nbsp;
+        <apex:commandLink action="{!last}" rendered="{!(hasNext)}">
+            <apex:commandButton title="Sidste" rendered="{!(hasNext)}" value="Sidste" styleClass="dialogbutton_orange"/>
+        </apex:commandLink> 
+        <apex:commandButton title="Sidste" rendered="{!NOT(hasNext)}" disabled="true" value="Sidste" styleClass="dialogbutton_orange"/>
+        </apex:outputPanel>
+        <apex:outputPanel ></apex:outputPanel>
+        </b></div>
+        </apex:pageBlock>
+<script type="text/javascript">printContentAreaEnd();</script>
+<script type="text/javascript">printFooter();</script>
+</body>
+</apex:form>
+</html>
+</apex:page>

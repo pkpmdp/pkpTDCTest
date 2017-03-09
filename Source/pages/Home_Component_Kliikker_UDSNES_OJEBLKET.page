@@ -1,0 +1,158 @@
+<apex:page >
+    <font face="Verdana,Helvetica,Sans-Serif"> 
+        <div>
+            <font face=""> 
+                <p style="MARGIN: 0cm 0cm 0pt; mso-outline-level: 2" class="MsoNormal">
+                    <span style="COLOR: #333333; FONT-SIZE: 10pt">
+                        <font face="Verdana,Helvetica,Sans-Serif">
+                            <font color="#000000">
+                                Der bliver ikke udsendt Klikkelikker i øjeblikket, kontakt din lokale superbruger for nærmere info.
+                            </font>
+                        </font>
+                    </span>
+                </p> 
+                <p style="MARGIN: 0cm 0cm 0pt" class="MsoNormal">
+                    <span style="COLOR: #333333; FONT-SIZE: 10pt">
+                        <font face="Verdana,Helvetica,Sans-Serif">
+                            <font color="#000000">
+                                <!--?xml:namespace prefix = o ns = "urn:schemas-microsoft-com:office:office" /-->
+                            </font>
+                        </font>
+                    </span>
+                </p>
+                <p style="MARGIN: 0cm 0cm 0pt" class="MsoNormal">
+                    <span style="COLOR: #333333; FONT-SIZE: 10pt">
+                        <font face="Verdana,Helvetica,Sans-Serif"><font color="#000000"></font></font>
+                    </span>&nbsp;
+                </p> 
+                <p style="MARGIN: 0cm 0cm 0pt" class="MsoNormal">
+                    <span style="COLOR: #333333; FONT-SIZE: 10pt">
+                        <font face="Verdana,Helvetica,Sans-Serif">
+                            <font color="#000000">
+                                 Du kan dog stadigvæk&nbsp;åbne og&nbsp;se de 11 forskellige Klikkelikker nedenfor -&nbsp;
+                                 højreklik og vælg åbn i nyt vindue/fane, eller klik som du plejer, 
+                            </font>
+                        </font>
+                    </span>
+                </p> 
+                <p style="MARGIN: 0cm 0cm 0pt" class="MsoNormal">
+                    <span style="COLOR: #333333; FONT-SIZE: 10pt">
+                        <font face="Verdana,Helvetica,Sans-Serif">
+                            <font color="#000000">
+                                så skal du blot gå tilbage i din browser for at komme tilbage til din&nbsp;forside.
+                            </font>
+                        </font>
+                    </span>
+                </p> 
+                <p style="MARGIN: 0cm 0cm 0pt" class="MsoNormal">
+                    <span style="COLOR: #333333; FONT-SIZE: 10pt">
+                        <font face="Verdana,Helvetica,Sans-Serif"><font color="#000000">&nbsp;</font></font>
+                    </span>
+                </p> 
+                <p style="MARGIN: 0cm 0cm 0pt" class="MsoNormal">
+                    <u>
+                        <span style="COLOR: black; FONT-SIZE: 10pt">
+                            <a href="https://emea.salesforce.com/servlet/servlet.FileDownload?file=015200000013R01">
+                                <span style="COLOR: purple"><font color="#000000" face="Verdana,Helvetica,Sans-Serif">Web-TV</font></span>
+                            </a>
+                        </span>
+                    </u>
+                    <u>
+                        <span style="COLOR: purple; FONT-SIZE: 10pt"></span>
+                    </u>
+                </p> 
+                <p style="MARGIN: 0cm 0cm 0pt" class="MsoNormal">
+                    <span style="COLOR: black; FONT-SIZE: 10pt">
+                        <span style="FONT-FAMILY: Verdana; COLOR: black; FONT-SIZE: 10pt; mso-bidi-font-family: 'Times New Roman'; mso-fareast-font-family: 'Times New Roman'; mso-ansi-language: DA; mso-fareast-language: DA; mso-bidi-language: AR-SA">
+                            <a href="https://emea.salesforce.com/servlet/servlet.FileDownload?file=015200000013QzI">
+                                <span style="COLOR: black">
+                                    <font color="#000000" face="Verdana,Helvetica,Sans-Serif">Yousee Clear</font>
+                                </span>
+                            </a>
+                        </span>
+                    </span>
+                </p> 
+                <p style="MARGIN: 0cm 0cm 0pt" class="MsoNormal">
+                    <span style="COLOR: black; FONT-SIZE: 10pt">
+                        <span style="FONT-FAMILY: Verdana; COLOR: black; FONT-SIZE: 10pt; mso-bidi-font-family: 'Times New Roman'; mso-fareast-font-family: 'Times New Roman'; mso-ansi-language: DA; mso-fareast-language: DA; mso-bidi-language: AR-SA">
+                            <a href="https://emea.salesforce.com/servlet/servlet.FileDownload?file=015200000013Qzr">
+                                <span style="COLOR: black">
+                                    <font color="#000000" face="Verdana,Helvetica,Sans-Serif">Yousee Plus</font>
+                                </span>
+                            </a>
+                        </span>
+                    </span>
+                </p> 
+                <p style="MARGIN: 0cm 0cm 0pt" class="MsoNormal">
+                    <span style="COLOR: black; FONT-SIZE: 10pt">
+                        <span style="FONT-FAMILY: Verdana; COLOR: black; FONT-SIZE: 10pt; mso-bidi-font-family: 'Times New Roman'; mso-fareast-font-family: 'Times New Roman'; mso-ansi-language: DA; mso-fareast-language: DA; mso-bidi-language: AR-SA">
+                            <a href="https://emea.salesforce.com/servlet/servlet.FileDownload?file=015200000013Qzw">
+                                <span style="COLOR: black">
+                                    <font color="#000000" face="Verdana,Helvetica,Sans-Serif">Telefoni</font>
+                                </span>
+                            </a><br></br>
+                        </span>
+                    </span>
+                    <span style="COLOR: black; FONT-SIZE: 10pt">
+                        <span style="FONT-FAMILY: Verdana; COLOR: black; FONT-SIZE: 10pt; mso-bidi-font-family: 'Times New Roman'; mso-fareast-font-family: 'Times New Roman'; mso-ansi-language: DA; mso-fareast-language: DA; mso-bidi-language: AR-SA">
+                            <a href="https://emea.salesforce.com/servlet/servlet.FileDownload?file=015200000013Qzm">
+                                <span style="COLOR: purple">
+                                    <font color="#000000" face="Verdana,Helvetica,Sans-Serif">Play</font>
+                                </span>
+                            </a><br></br>
+                        </span>
+                    </span>
+                </p> 
+                <p style="MARGIN: 0cm 0cm 0pt" class="MsoNormal">
+                    <span style="COLOR: black; FONT-SIZE: 10pt">
+                        <a href="https://emea.salesforce.com/servlet/servlet.FileDownload?file=015200000013Qyy">
+                            <span style="COLOR: black">
+                                <font color="#000000" face="Verdana,Helvetica,Sans-Serif">Mobilt Bredbånd</font>
+                            </span>
+                        </a><br></br>
+                        <a href="https://emea.salesforce.com/servlet/servlet.FileDownload?file=015200000013Qvf">
+                            <span style="COLOR: black">
+                                <font color="#000000" face="Verdana,Helvetica,Sans-Serif">Frekvenser</font>
+                            </span>
+                        </a><br></br>
+                        <a href="https://emea.salesforce.com/servlet/servlet.FileDownload?file=015200000013QvL">
+                            <span style="COLOR: black">
+                                <font color="#000000" face="Verdana,Helvetica,Sans-Serif">Favorit</font>
+                            </span>
+                        </a><br></br>
+                        <a href="https://emea.salesforce.com/servlet/servlet.FileDownload?file=015200000013QvG">
+                            <span style="COLOR: black">
+                                <font color="#000000" face="Verdana,Helvetica,Sans-Serif">Bredbåndstjenester</font>
+                            </span>
+                        </a><br></br>
+                        <a href="https://emea.salesforce.com/servlet/servlet.FileDownload?file=015200000013QzD">
+                            <span style="COLOR: black">
+                                <font color="#000000" face="Verdana,Helvetica,Sans-Serif">Bredbånd</font>
+                            </span>
+                        </a><br></br>
+                        <a href="https://emea.salesforce.com/servlet/servlet.FileDownload?file=015200000013SJr">
+                            <span style="COLOR: black">
+                                <font color="#000000" face="Verdana,Helvetica,Sans-Serif">Betalingsservice</font>
+                            </span>
+                        </a>
+                    </span>
+                </p> 
+                <p style="MARGIN: 0cm 0cm 0pt" class="MsoNormal">
+                    <span style="COLOR: #333333; FONT-SIZE: 10pt">
+                        <font face="Verdana,Helvetica,Sans-Serif">
+                            <font color="#000000">&nbsp;</font>
+                        </font>
+                    </span>
+                </p> 
+            </font>
+            <p style="MARGIN: 0cm 0cm 0pt" class="MsoNormal">
+                <font face=""></font>
+                    <b><span style="COLOR: #333333; FONT-SIZE: 10pt">
+                        <font color="#000000" face="Verdana,Helvetica,Sans-Serif">God fornøjelse!</font>
+                        </span>
+                    </b>
+            </p>
+        </div>
+    </font>
+
+</apex:page>

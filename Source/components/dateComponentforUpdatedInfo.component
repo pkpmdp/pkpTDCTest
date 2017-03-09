@@ -1,0 +1,3 @@
+<apex:component controller="PortalUserMailService" access="global">
+ <apex:outputText value="{!dt1}"/> 
+</apex:component>

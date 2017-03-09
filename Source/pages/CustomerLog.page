@@ -1,0 +1,21 @@
+<apex:page controller="clsCustomerLogController" cache="false" showHeader="false" sidebar="false">
+<style>
+body  {
+   background-color: #cfeef8;
+}
+</style>
+
+<script>
+	function reloadCustomerLayout(){
+		window.top.location='/{!idParam}';
+ 	}
+</script>
+
+<apex:pageMessages /> 
+    <apex:form >
+        <apex:panelGrid width="100%" columns="1" style="text-align:right" >
+            <apex:inputtextarea value="{!customerLog.Text__c}" required="false" id="TextId" rows="5" cols="20" style="width:98%" disabled="{!ISBLANK(idAccount)}"/>
+            <apex:commandButton action="{!save}" value="{!$Label.Save}" disabled="{!ISBLANK(idAccount)}" onclick="reloadCustomerLayout()"/>    
+        </apex:panelGrid>
+  </apex:form>
+</apex:page>

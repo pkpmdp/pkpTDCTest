@@ -1,0 +1,15 @@
+<apex:page sidebar="false" showHeader="false" controller="KnowledgeHomeSidebar_CT">
+    <apex:pageBlock tabStyle="YO_OperationConsultant__c">
+      <apex:PageBlockSection title="YK Info" columns="1" collapsible="false">
+          <apex:outputPanel >
+              <apex:repeat value="{!listInfo}" var="YkInfo">
+                  <apex:outputText value="{!YkInfo.YK_Info__c}" escape="false"></apex:outputText>
+              </apex:repeat>
+          </apex:outputPanel>
+          <br/>       
+          <apex:outputPanel rendered="{!isAdmin ==True}">
+                  <apex:outputLink value="/{!operationConsultantKeyPrefix}/o" target="_blank"><b>Edit</b></apex:outputLink>
+          </apex:outputPanel>      
+       </apex:PageBlockSection>    
+    </apex:pageBlock>
+</apex:page>

@@ -1,0 +1,68 @@
+<apex:page standardController="Account" extensions="customerExtenstion" cache="true" contentType="application/vnd.ms-excel#ForhandlerCustomer.xls" showheader="false" standardStyleSheets="false">
+ <head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+</head>
+<style>
+.colAlign{
+ align:right;
+}
+</style>
+
+  <apex:pageBlock >
+
+    <apex:pageBlockTable value="{!ExcelList}" var="obj" columnClasses="colAlign" frame="box" rules="all" border="1"  >
+      <apex:column value="{!obj.excelAccount.Dealer_Number__c}" headerValue="Dealer No."  />
+     <apex:column value="{!obj.excelAccount.name}" headerValue="Dealer Name" />
+     <apex:column value="{!obj.excelAccount.Debitor_Number__c}" headerValue="Debitor No."  style="align:right"/>
+     <apex:column value="{!obj.excelAccount.Category__c}" headerValue="Kategori"/>
+     <apex:column value="{!obj.excelAccount.DealerGroup__c}" headerValue="Group" />
+     <apex:column value="{!obj.excelAccount.sales_consultant__c}" headerValue="Consultant"/>
+     <apex:column value="{!obj.excelAccount.Basis_value__c}" headerValue="YouSee Tv-signal i butik"/>
+     <apex:column value="{!obj.excelAccount.POS_value__c}" headerValue="Pos"/>
+     <apex:column value="{!obj.excelAccount.Afregnes__c}" headerValue="Afregnes"/>
+     <apex:column value="{!obj.excelAccount.selectedProduct__c}" headerValue="Products"/>
+     <apex:column value="{!obj.excelAccount.Street_YK__r.Name}" headerValue="Street"/>
+     <apex:column value="{!obj.excelAccount.address_value__c}" headerValue="Address"/>
+     <apex:column value="{!obj.excelAccount.Street_YK__r.Postcode__c}" headerValue="Post Code"/>
+     <apex:column value="{!obj.excelAccount.Street_YK__r.Town__c}" headerValue="Town"/>
+    
+     <apex:column value="{!obj.excelManager.Contact__r.Name}" headerValue="Manager Name"/>
+     <apex:column value="{!obj.excelManager.Contact__r.Email}" headerValue="Manager Email"/>
+     <apex:column value="{!obj.excelManager.Contact__r.Phone}" headerValue="Manager Phone"/>
+     <apex:column value="{!obj.excelManager.Contact__r.street_p__r.name}" headerValue="Street"/>
+     <apex:column value="{!obj.excelManager.Contact__r.house_address__c}" headerValue="House Number"/>
+     <apex:column value="{!obj.excelManager.Contact__r.Post_Code_P__c}" headerValue="Post Code"/>
+     <apex:column value="{!obj.excelManager.Contact__r.Town_P__c}" headerValue="Town"/>
+     
+     
+     <apex:column value="{!obj.excelAmbassador1.Contact__r.Name}" headerValue="Ambassador1 Name"/>
+     <apex:column value="{!obj.excelAmbassador1.Contact__r.Email}" headerValue="Ambassador1 Email"  />
+     <apex:column value="{!obj.excelAmbassador1.Contact__r.Phone}" headerValue="Ambassador1 Phone"/>
+     <apex:column value="{!obj.excelAmbassador1.Contact__r.street_p__r.name}" headerValue="Street"/>
+     <apex:column value="{!obj.excelAmbassador1.Contact__r.house_address__c}" headerValue="House Number"/>
+     <apex:column value="{!obj.excelAmbassador1.Contact__r.Post_Code_P__c}" headerValue="Post Code"/>
+     <apex:column value="{!obj.excelAmbassador1.Contact__r.Town_P__c}" headerValue="Town"/>
+      
+    <apex:column value="{!obj.excelAmbassador2.Contact__r.Name}" headerValue="Ambassador2 Name"/>
+    <apex:column value="{!obj.excelAmbassador2.Contact__r.Email}" headerValue="Ambassador2 Email"  />
+    <apex:column value="{!obj.excelAmbassador2.Contact__r.Phone}" headerValue="Ambassador2 Phone"/>
+    <apex:column value="{!obj.excelAmbassador2.Contact__r.street_p__r.name}" headerValue="Street"/>
+    <apex:column value="{!obj.excelAmbassador2.Contact__r.house_address__c}" headerValue="House Number"/>
+    <apex:column value="{!obj.excelAmbassador2.Contact__r.Post_Code_P__c}" headerValue="Post Code"/>
+    <apex:column value="{!obj.excelAmbassador2.Contact__r.Town_P__c}" headerValue="Town"/>
+      
+    <apex:column value="{!obj.excelAmbassador3.Contact__r.Name}" headerValue="Ambassador3 Name"/>
+     <apex:column value="{!obj.excelAmbassador3.Contact__r.Email}" headerValue="Ambassador3 Email"  />
+     <apex:column value="{!obj.excelAmbassador3.Contact__r.Phone}" headerValue="Ambassador3 Phone"/>
+     <apex:column value="{!obj.excelAmbassador3.Contact__r.street_p__r.name}" headerValue="Street"/>
+      <apex:column value="{!obj.excelAmbassador3.Contact__r.house_address__c}" headerValue="House Number"/>
+    <apex:column value="{!obj.excelAmbassador3.Contact__r.Post_Code_P__c}" headerValue="Post Code"/>
+      <apex:column value="{!obj.excelAmbassador3.Contact__r.Town_P__c}" headerValue="Town"/>
+      
+      
+     
+         </apex:pageBlockTable> 
+         </apex:pageBlock>
+
+ 
+</apex:page>

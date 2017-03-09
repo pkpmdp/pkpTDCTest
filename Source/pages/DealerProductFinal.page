@@ -1,0 +1,24 @@
+<apex:page standardController="Dealer_Product__c" extensions="DealerProductController" showHeader="false" sidebar="false" applyHtmlTag="false" >
+    <html class="cvi2015">
+    <apex:form >
+    <script type="text/javascript" src="https://yousee.dk/sitecore/content/data/export/export.aspx?itemguid={F011BAAA-EF0B-4751-B782-587C8D8AD11F}&functions=true"></script>
+    <!-- Added for DW 750 -->
+    <c:TopMenuComponent ></c:TopMenuComponent>
+    <script type="text/javascript">printHeader();</script>
+    <script type="text/javascript">printTopMenu();</script>
+    <body>
+        
+        <script type="text/javascript">printContentAreaBegin();</script>
+
+
+<apex:dataTable value="{!kvitteringInformation}" var="info">
+     <apex:column value="{!info.Description__c}"  />
+</apex:dataTable> 
+
+        <script type="text/javascript">printContentAreaEnd();</script>
+        <script type="text/javascript" src="../js/s_code.js"></script>
+        <script type="text/javascript">printFooter();</script>
+    </body> 
+    </apex:form>
+    </html>
+</apex:page>

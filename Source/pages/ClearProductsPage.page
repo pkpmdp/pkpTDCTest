@@ -1,0 +1,434 @@
+<apex:page controller="DealerProductPageController3" sidebar="false" showHeader="false"  id="page1" action="{!initializeText}" applyHtmlTag="false">
+    <html class="cvi2015"> <!--spoc 2206-->
+    <script type="text/javascript" src="https://yousee.dk/sitecore/content/data/export/export.aspx?itemguid={BD793F05-9B01-4210-BD63-F33431D1013A}&functions=true" > </script>
+    <!--Added for DW 750-->
+    <c:TopMenuComponent ></c:TopMenuComponent>
+        <script type="text/javascript">printHeader();</script>
+        <script type="text/javascript">printTopMenu();</script>
+    <link class="user" href="{!$Resource.SalesFlowCSS}" rel="stylesheet" type="text/css" />
+    <c:DealerComponent ></c:DealerComponent> 
+    <c:ProductOfferORcampaign ></c:ProductOfferORcampaign>
+    <script type="text/javascript">  
+        //var a='';
+        var myJSONObject={!jsonResponse};
+        var firstJSONResponse = {!firstJsonResponse}; 
+          
+        var clearString = 'clear-ga-valg';  
+        //DW-861
+        var dtvtaString = 'dtv-ta-valg';  
+        var kundeid = '{!cCustInstAdd.firstName}';
+        var custFlag = false; 
+        var newCustFlag = '{!isNewCustomer}'; 
+        var isBlandSelvProduct = {!isBlandSelvFlow};
+        //Added for BS 
+        var freeChoiceFlag={!isFreeChoicePageFlag};   
+        var currentKundeNumber = '{!cCustInstAdd.customerNumber}';           
+        if(newCustFlag == "true"){
+            custFlag  = "false"; 
+        }else if(newCustFlag == "false"){
+            custFlag  = "true";
+        }
+        getproductOffers();
+        function getData(){
+            try{
+                myJSONObject=refreshFirstJSONResponse(firstJSONResponse,myJSONObject);
+                var newCustFlag = '{!isNewCustomer}';                   
+                    if(newCustFlag == "true"){
+                        custFlag  = "false"; 
+                    }else if(newCustFlag == "false"){
+                        custFlag  = "true";
+                    }      
+                
+                clearprods = createProductsData(clearString,'kr. pr. md.', custFlag);  
+                clearprods = getOnlyUpgradableProducts(clearprods,kundeid,custFlag,clearString);
+                //alert(clearprods.length);             
+            }
+            catch(err){
+                //alert("Error: in test method: "+err.description);
+            }
+        }
+    
+        $(document).ready( function() {
+          $("table.zebra").find("tr:nth-child(even)").each(
+            function(i) {
+              if( 0 == $(this).find("th").length ) {
+                $(this).addClass("odd");
+              }
+            }
+          );
+        } );    
+        function afterClearProductSelection(){
+            //alert('inside afterclear called after click on videre');
+            var selectedProducts = '';          
+            try{
+                //alert('In afterClearProductSelection -- ');               
+                var selectedClearProducts = $("#productTable input:checked");
+                getClearProdLink(selectedClearProducts[0].value);
+                //alert('after  getClearProdLink '+selectedClearProducts[0].value);
+                if(selectedClearProducts.length > 0){
+                    var selectedProduct=selectedClearProducts[0].value;
+                   //alert('selectedProduct->'+selectedProduct[0].value);
+                    var isSelectedProductInValgNode='';
+                    //alert('myJSONObject[kunde-data][valgt] '+myJSONObject['kunde-data']['valgt']);
+                    if(myJSONObject['kunde-data']['valgt']!=undefined){
+                    
+                        isSelectedProductInValgNode=isProductInBasket(selectedProduct,myJSONObject['kunde-data']['valgt']);
+                    }  
+                    //alert('isSelectedProductInValgNode ***** '+isSelectedProductInValgNode);                 
+                    if(isSelectedProductInValgNode!='true'){
+                        setSelectedProducts(selectedClearProducts,clearprods,clearString);
+                        //DW-861
+                        setSelectedProducts(selectedClearProducts,clrdtv,dtvtaString);
+                        //alert('Before calling ClearProductSelection *****');
+                        var kundeData = JSON.stringify(myJSONObject['kunde-data']);
+                        var arrayInit = myJSONObject['array-init'];
+                        var etag = myJSONObject['ETag'];
+                        var mergedstring = kundeData +'@@@'+arrayInit+'@@@'+etag;
+                        document.getElementById("mergedstring").value = mergedstring;                       
+                        ClearProductSelection();
+                    }   
+                    else if(isSelectedProductInValgNode=='true'){ 
+                        //alert('In alse if of isSelectedProductInValgNode '+isSelectedProductInValgNode);
+                        if(myJSONObject['kunde-data'] != undefined)
+                        isBlandSelvProduct =  isBlandSelvInBasket(myJSONObject['kunde-data']);
+                        document.getElementById('isBlandSelvProduct').value = isBlandSelvProduct;
+                        bringClearKravet();
+                    //    alert('inside the else loop');
+                    }                                   
+                }
+                else{
+                    var errMsg = 'Vælg venligst et produkt.';        
+                    $("#errorBlock").html(errMsg);
+                   
+                }
+            }
+            catch(err){
+                 //alert("Error: in afterClearProductSelection method: "+err.description);
+            }
+        }
+        
+        function hasCustomerClearProduct(aftaler){
+                var returnValue='';
+                try{
+                     $.each(aftaler, function(i,aftalerNode){ 
+                         if(aftalerNode.kundeid != undefined && kundeid == aftalerNode.kundeid && aftalerNode.aftaletype=='clear'){
+                          $.each(aftalerNode.abonnementer,function(j,abonnementerNode){
+                                //Donot display the message if products status is not active.
+                                 if(abonnementerNode.status == 'aktiv') {
+                                    returnValue='true';
+                                }else{
+                                    returnValue='false';
+                                }
+                            });
+                         }
+                     });
+                     return returnValue;
+                }
+                catch(err){
+                    // alert("Error: in hasCustomerClearProduct method: "+err.description);
+                }
+            }
+        function getClearProdLink(selectedProd)
+        {
+            //alert('in getClearProdLink ');
+            if(myJSONObject['clear-ga-valg'] != undefined)
+                {
+                    //alert('clear-ga-valg ');
+                    var json = myJSONObject['clear-ga-valg'].varer; 
+                    if(json != undefined)
+                        {
+                            // alert('myJSONObject[type] ');
+                            $.each(json,function(i,varerNode){ 
+                                if(varerNode.varenr!='' && varerNode.varenr == selectedProd){
+                                    // alert('varerNode.varenr  '+varerNode.varenr);
+                                    $.each(varerNode.links,function(j,linksNode){
+                                         
+                                            if( linksNode.href.indexOf('opdater') != -1 || linksNode.href.indexOf('opret') != -1){
+                                                //alert('varerNode.varenr  '+varerNode.varenr);
+                                                //   alert('linksNode.href '+document.getElementById("tvBoksLink"));
+                                            document.getElementById("tvBoksLink").value = linksNode.href;
+                                            
+                                          }
+                                    });
+                                }
+                            });  
+        }
+        }
+        }
+    </script>   
+    <script id="clearProductTemplate" type="text/x-jQuery-tmpl">  
+        <tr>
+            <td width="5%"><input type="${selectType}" name="selectOneProduct" value="${varenr}" class="prodCheckbox" ${checked} ${disabled}/> </td>
+            <td width="30%" class="fontVerdana">${navn}</td>
+            <td  width="30%" align="right"> 
+                 {{if ProductOffer =="true"}}
+                    <img src="{!$Resource.ProductOffer}" >
+                 {{/if}}
+                
+                 {{if ProductCampaign =="true"}}
+                    <img src="{!$Resource.ProductCampaign}">
+                 {{/if}}
+
+            
+            </td>           
+            <td width="10%" class="fontVerdana">${price}</td>
+            <td width="25%" class="fontVerdana">${priceSuffix}</td>
+        </tr>
+       <tr><td></td><td style="text-align:left;font-size:11px;" COLSPAN="4">${productSummary}</td></tr>
+
+           </script>
+    <style type="text/css">
+         .errorMessage {
+            color: red; 
+            font-weight: bold;
+            font-family:verdana;
+         }
+         .mailError{
+            color: red; 
+            border-bottom: #000000 1px solid; f
+            border-left: #000000 1px solid; 
+            padding-bottom: 1px; 
+            background-color: #f1f1f1; 
+            padding-left: 4px; 
+            padding-right: 4px; 
+            font-family: Verdana; 
+            font-size: 9pt; border-top: #000000 1px solid; 
+            border-right: #000000 1px solid; 
+            padding-top: 1px; 
+        }
+        
+        .OrderFlow .column66 {
+            width: 100%;
+            !
+            important
+        }
+        .leftContent2 {
+            float:left;
+            display: inline-block;
+            width:560px;
+            overflow:visible;
+            height:510px;
+            max-height:700px;
+            
+        }
+        .rightContent2 {
+            float:left;
+            display: inline-block;
+            width:330px;
+            overflow:visible;
+            height:510px;
+            max-height:700px;
+            
+        }
+        .leftContent3{float:left;width:555px;overflow:visible;min-height: 520px;height: auto !important;max-height:1100px;}
+        .rightContent3{float:left;width:370px;overflow:visible;min-height: 500px;height: auto !important;max-height:1100px;}    
+    </style>
+    <body>
+        <script type="text/javascript">printContentAreaBegin();</script>
+        <apex:form id="theform">
+        <apex:outputPanel id="errorMessage" >
+           <apex:messages globalOnly="true"  styleClass="mailError"/> 
+           </apex:outputPanel>  
+           <div id="errorBlock" class="errorMessage" style="display:block;"></div>
+           <apex:outputPanel >
+           <table>
+               <!-- <tr>
+                    <td colspan="2" style="font-family:verdana">
+                    <b><apex:outputLabel value="{!$Label.Tilbud_nye_kunder_Clear}"/></b></td>
+                </tr>
+                <tr>
+                    <td colspan="2" style="font-family:verdana">
+                        <apex:outputLabel value="{!$Label.No_Offer_on_Upgrades}"/>
+                    </td>
+                </tr>-->
+                <tr>
+                    <td colspan="2" style="font-family:verdana">
+                    <b><apex:outputText value="{!salesFlowObj.messages[0]}" escape="false"/></b></td>
+                </tr>
+                <tr>
+                    <td colspan="2" style="font-family:verdana">
+                        <apex:outputText value="{!salesFlowObj.messages[1]}" escape="false"/>
+                    </td>
+                </tr>
+           </table>
+        </apex:outputPanel>
+           <!-- <apex:panelGrid columns="2" width="100%" style="vertical-align: top">
+           <apex:panelGroup id="columnA" style="width:60%; overflow:visible; vertical-align:top;" layout="inline">
+              <div style="vertical-align:top;"> -->
+              <apex:panelGrid columns="2" columnClasses="leftContent3,rightContent3" width="100%" >
+                <apex:outputPanel styleClass="leftContent3" layout="block">
+                    <apex:pageBlock id="pbClearProducts">
+                        <apex:pageBlockSection title="Vælg den Kabel-tv-pakke, kunden ønsker" collapsible="false" columns="1">
+                            <table id="productTable" class="zebra" width="100%" border="1" ></table>
+                        </apex:pageBlockSection>
+                   
+                    <apex:pageBlockButtons location="bottom">
+                        <apex:commandButton action="{!cancel}" value="Annuller" style="margin-right:200px;"/>
+                        <apex:commandButton action="{!backFlow}" value="Tilbage"/>
+                        <input type="button" value="Videre" onclick="afterClearProductSelection();" class="videreBtnCls"/>                  
+                       </apex:pageBlockButtons>
+                </apex:pageBlock>
+                </apex:outputPanel>
+          
+             <!--  </div>   
+           </apex:panelGroup>
+           <apex:panelGroup id="columnB" style="width:40%; overflow:visible; vertical-align:top;" layout="inline">-->
+            <apex:outputPanel styleclass="rightContent3" layout="block">
+                <c:CustomerAndProductComponent isNewKunde="{!isNewCustomer}" kundeNumber="{!cCustInstAdd.customerNumber}"
+                    kundeName="{!cCustInstAdd.firstName} {!cCustInstAdd.lastName}" Adresse="{!cCustInstAdd.addr1}"
+                    Postnummer="{!cCustInstAdd.addr2}">
+                </c:CustomerAndProductComponent>
+            </apex:outputPanel>
+           <!-- </apex:panelGroup> -->
+           <apex:actionFunction action="{!callToKasia}" name="callToKasia" reRender="jspanel,errorMessage" status="queryStatus">
+                <apex:param name="url" assignTo="{!url}" value="" />
+                <apex:param name="etag" assignTo="{!etag}" value="" />
+                <apex:param name="kundeData" assignTo="{!kundeData}" value="" />
+                <apex:param name="arrayInit" assignTo="{!arrayInit}" value="" />
+           </apex:actionFunction>
+           <apex:actionStatus id="queryStatus">
+                <apex:facet name="start">
+                    <c:loadingComponent BackColor="#efefef" borderColor="#336699"
+                        borderSize="3" height="50px" width="120px"
+                        ImageUrl="{!$Resource.Loading}" Message="Loading..."
+                        messageStyle="color:darkred;font-size:11pt;font-weight:bold;" />
+                </apex:facet>
+            </apex:actionStatus>
+         </apex:panelGrid>   
+         
+         <input type = "hidden" id="selectedProds" name = "selectedProds" value=""/> 
+         <input type = "hidden" id="tvBoksLink" name = "tvBoksLink" value=""/>
+          <input type="hidden" id="isBlandSelvProduct" name="isBlandSelvProduct" value="" />
+         <apex:actionFunction name="ClearProductSelection" action="{!afterClearProductSelection}"></apex:actionFunction>
+         <apex:actionFunction name="bringClearKravet" action="{!RedirectToClearKravetPage}"></apex:actionFunction> 
+         <input type = "hidden" id="mergedstring" name = "mergedstring" value=""/>    
+   
+    <apex:outputPanel id="jspanel">
+    <script type="text/javascript"> 
+    var clearprods = new Array(); 
+    //DW-861
+    var dvttaprods = new Array();
+    var dvttaprods3 = new Array();
+    myJSONObject={!jsonResponse};
+    firstJSONResponse = {!firstJsonResponse}; 
+    var serialNumber = '';
+    var isProductOffer='';
+    var isProductCampaign='';
+    var productoffervar ='';
+    var productSummary='';
+    myJSONObject=refreshFirstJSONResponse(firstJSONResponse,myJSONObject);
+    var basicHeader = ["","","",""];
+    //alert('Template called.'); 
+    var indexlilTilk = ''; //DW-880
+    var indexTilak = '';//DW-880
+    clearprods = createProductsData(clearString,'kr. pr. md.', custFlag);
+    //Code added to swap lilTilakpakke and Tilakpakke - DW-880
+    for(var i = 0; i < clearprods.length; i++)
+    {
+        if(clearprods[i].varenr == '1101002')
+            indexlilTilk = i;
+        if(clearprods[i].varenr == '1101004')
+            indexTilak = i;
+    }
+    if(indexlilTilk>indexTilak)
+    {
+        var temp = clearprods[indexlilTilk];
+        clearprods[indexlilTilk] = clearprods[indexTilak];
+        clearprods[indexTilak] = temp;
+    }
+    
+    clearprods = getOnlyUpgradableProducts(clearprods,kundeid,custFlag,clearString);
+    // DW-861
+    dvttaprods = createProductsData(dtvtaString,'kr. pr. md.',custFlag);    
+    dvttaprods = getOnlyUpgradableProducts(dvttaprods,kundeid,custFlag,dtvtaString);
+    /*
+    $.each(dvttaprods,function(i, product)
+    {
+        if(product != undefined && (product.varenr == '1206001' || product.varenr == '1206002' || product.varenr == '1206003'))
+        {
+            alert('PRODUCT ******* '+product.varenr+' ********* '+product.navn);
+            dvttaprods3[i] = product;
+            alert('dvttaprods3 Length In If ***** '+dvttaprods3.length);
+        }
+    });*///1101001
+ /*     var j=0;
+    for(var i = 0; i < dvttaprods.length; i++)
+    {
+        if(dvttaprods[i].varenr == '1206001' || dvttaprods[i].varenr == '1206002' || dvttaprods[i].varenr == '1206003')
+        {
+            dvttaprods3[j] = dvttaprods[i];
+        //  <input type="text" name="blandslev product" value="Norway"/>
+        
+            j++;
+        }
+        
+    }
+    */
+    var clrdtv = new Array();
+    var x=0;
+    for(var i=0;i<clearprods.length;i++)
+    {
+    //alert('clearprod varenr  '+clearprods[i].varenr);
+        if(clearprods[i].varenr == '1101001' )
+        {
+            clrdtv[x] = clearprods[i];
+            x++;
+            for(var j=0;j<dvttaprods3.length;j++)
+            {
+                clrdtv[x] = dvttaprods3[j];
+                x++;
+            }
+        }
+        else
+        {
+            clrdtv[x] = clearprods[i];
+            x++;
+        }
+    }
+    
+    $.each(clrdtv,function(i, product){
+        productSummary = '';
+        isProductOffer=''; //added for spoc 2395
+        isProductCampaign='';//added for spoc 2395
+        
+        productoffervar = getOfferFlag(product.varenr);                                                                                             
+        if(productoffervar != undefined){                                                               
+            isProductOffer = productoffervar.ProductOfferExists;
+            isProductCampaign = productoffervar.ProductCampaignExists;
+            productSummary = productoffervar.ProductSummary;
+        }
+        product.productSummary = productSummary;
+        product.ProductOffer='';                                                            
+        if(isProductOffer=='true'){
+            product.ProductOffer = isProductOffer;
+        }
+        product.ProductCampaign='';
+        if(isProductCampaign=='true'){
+            product.ProductCampaign=isProductCampaign;
+        }
+    });
+    
+   if(clrdtv.length > 0){
+     //alert('clearprods **** '+clearprods);
+     $("#productTable").replaceWith('<table id=\"productTable\" class=\"zebra\" width=\"100%\" border=\"1\" ></table>');
+     $("#clearProductTemplate").tmpl(clrdtv).appendTo(createHeaders(basicHeader,"#productTable"));    
+   }
+   displayBasket();
+    </script>
+    </apex:outputPanel>
+    <script type="text/javascript">
+        if(custFlag == "true" && myJSONObject['kunde-data']['aftaler']!=undefined){
+                    var hasCustomerClearProduct=hasCustomerClearProduct(myJSONObject['kunde-data']['aftaler']);
+                    //alert(hasCustomerClearProduct);
+                    if(hasCustomerClearProduct=='true'){
+                        var errMsg = 'Kunden har allerede YouSee Tv. Du kan ændre kundens tv-pakke her.';        
+                        $("#errorBlock").html(errMsg);
+                    }
+                }
+    </script>
+    </apex:form>
+    <script type="text/javascript">printContentAreaEnd();</script>
+    <!-- <script type="text/javascript">printFooter();</script> --> 
+     </body>
+    </html>
+    </apex:page>

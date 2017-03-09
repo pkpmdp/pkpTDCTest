@@ -1,0 +1,85 @@
+<apex:page standardController="CB_Schedule_Template__c" extensions="clsCBSchedDefValsEditController" cache="true" standardStylesheets="true" tabStyle="CB_Schedule_Template__c" action="{!redirectIfUsed}" title="{!$Label.CB_Admin_page_title}">
+<apex:sectionHeader title="{!$Label.CB_Admin_Title}" subtitle="{!$Label.CB_Admin_Subtitle}"/>
+  <apex:pageMessages id="pageMessagesId"/>
+  <apex:form >
+  
+  <apex:pageBlock mode="edit" id="idBlock">
+
+    <apex:pageBlockButtons >
+        <apex:commandButton action="{!saveAll}" value="{!$Label.CB_Admin_Save_Button}"/>
+        <apex:commandButton action="{!quicksaveAll}" value="{!$Label.CB_Admin_Quicksave_Button}" reRender="idTable,pageMessagesId"/>
+        <apex:commandButton action="{!newLine}" value="{!$Label.CB_Admin_Add_Interval_Button}" reRender="idTable,pageMessagesId" />  
+        <apex:commandButton action="{!populate}" value="{!$Label.CB_Admin_Populate_Button}" reRender="idTable,pageMessagesId" />  
+        <apex:commandButton action="{!cancel}" value="{!$Label.CB_Admin_Cancel_Button}"/>    
+    </apex:pageBlockButtons>
+    
+    <apex:pageBlockSection columns="2" >
+        <apex:inputField value="{!template.name}"/>
+        <apex:pageBlockSectionItem />
+        <apex:pageBlockSectionItem >
+            <apex:outputLabel value="{!$ObjectType.CB_Schedule_Template__c.fields.CB_type__c.label}" for="cbTypeId"/>
+            <apex:inputField value="{!caseFields.Type_Task__c}" id="typeField" required="true"/>
+        </apex:pageBlockSectionItem>
+        <apex:inputField value="{!template.Working_hours_from__c}" required="true"/>
+        <apex:inputField value="{!template.Period__c}" required="true"/>
+        <apex:inputField value="{!template.Working_hours_to__c}" required="true"/>
+        <apex:inputField value="{!template.Valid_from__c}" required="true"/>
+    </apex:pageBlockSection>
+         
+<apex:pageBlockSection columns="1">
+        
+</apex:pageBlockSection>
+
+    <apex:pageBlockSection columns="1" >
+     <apex:pageBlockTable value="{!defVals}" var="defVal" id="idTable" >
+         <apex:column width="2%">
+          <apex:commandLink value="{!$Label.CB_Admin_Delete_Action}" action="{!deleteLine}" reRender="idTable">
+            <apex:param name="rowId" value="{!defVal.rowId}"/>
+          </apex:commandLink>
+        </apex:column>
+        <apex:column width="14%" headerValue="{!$ObjectType.CB_Default_Schedule__c.fields.Time_from__c.label}"> 
+          <apex:inputField value="{!defVal.item.Time_from__c}" style="width:100%" required="true"/>
+        </apex:column>
+        <apex:column width="14%" headerValue="{!$ObjectType.CB_Default_Schedule__c.fields.Time_to__c.label}"> 
+            <apex:inputField value="{!defVal.item.Time_to__c}" style="width:100%" required="true"/>
+        </apex:column>
+        <apex:column headerValue="{!$ObjectType.CB_Default_Schedule__c.fields.Monday__c.label}" width="10%"> 
+            <apex:inputField value="{!defVal.item.Monday__c}" style="color:{!defVal.monStyle};width:100%" onchange="changeColor(this)" required="true"/>
+        </apex:column>
+        <apex:column headerValue="{!$ObjectType.CB_Default_Schedule__c.fields.Tuesday__c.label}" width="10%"> 
+            <apex:inputField value="{!defVal.item.Tuesday__c}" style="color:{!defVal.tueStyle};width:100%" onchange="changeColor(this)" required="true"/>
+        </apex:column>
+        <apex:column headerValue="{!$ObjectType.CB_Default_Schedule__c.fields.Wednesday__c.label}" width="10%"> 
+            <apex:inputField value="{!defVal.item.Wednesday__c}" style="color:{!defVal.wedStyle};width:100%" onchange="changeColor(this)" required="true"/>
+        </apex:column>
+        <apex:column headerValue="{!$ObjectType.CB_Default_Schedule__c.fields.Thursday__c.label}" width="10%"> 
+            <apex:inputField value="{!defVal.item.Thursday__c}" style="color:{!defVal.thuStyle};width:100%" onchange="changeColor(this)" required="true"/>
+        </apex:column>
+        <apex:column headerValue="{!$ObjectType.CB_Default_Schedule__c.fields.Friday__c.label}" width="10%"> 
+            <apex:inputField value="{!defVal.item.Friday__c}" style="color:{!defVal.friStyle};width:100%" onchange="changeColor(this)" required="true"/>
+        </apex:column>
+        <apex:column headerValue="{!$ObjectType.CB_Default_Schedule__c.fields.Saturday__c.label}" width="10%"> 
+            <apex:inputField value="{!defVal.item.Saturday__c}" style="color:{!defVal.satStyle};width:100%" onchange="changeColor(this)" required="true"/>
+        </apex:column>
+        <apex:column headerValue="{!$ObjectType.CB_Default_Schedule__c.fields.Sunday__c.label}" width="10%"> 
+            <apex:inputField value="{!defVal.item.Sunday__c}" style="color:{!defVal.sunStyle};width:100%" onchange="changeColor(this)" required="true"/>
+        </apex:column>
+    </apex:pageBlockTable>
+    </apex:pageBlockSection> 
+  </apex:pageBlock>
+  <!-- This grid hide dependent picklist. If invisible style is set directly on input field  it appear after Quick Save button is pressed.-->
+  <apex:panelGrid columns="1" id="theGrid" style="display:none">
+      <apex:inputField value="{!caseFields.Department__c}" id="departmentField"/>
+      <apex:inputField value="{!caseFields.Product_2__c}" id="productField"/>
+  </apex:panelGrid>
+    
+  </apex:form>
+  
+<script>
+      function changeColor(element) {
+          if (element.value==0) element.style.color='{!styleColorRed}';
+          else element.style.color='{!styleColorGreen}';
+      }
+</script>
+
+</apex:page>

@@ -1,0 +1,105 @@
+<apex:page standardController="Contact" extensions="AccountAssignmentContactController"  sidebar="false" showHeader="false">
+<apex:form >
+
+<script>
+function reloadContactLayout(){
+    var status = {!statusAssignment};
+    if(status){
+        window.top.location='/{!contact.id}';
+    }
+}
+ document.onload = reloadContactLayout();
+
+
+               function makeItDisabled(selectObject){
+                 
+                      var checkObj = document.getElementById(selectObject);
+                  //    alert(checkObj.checked);
+                     var  selectComponent;
+                        
+                          var selectobj = document.getElementsByTagName("select");
+                          for(var i =0;i<selectobj.length;i++ ){
+                          if((selectobj[i].id).toString().indexOf("UserProfileId")!=-1){
+                          selectComponent = selectobj[i];
+                          
+                          }
+                          }
+                       
+                        
+                        if(checkObj.checked){
+                       
+                        selectComponent.disabled=false;
+                        }else{
+                      
+                       selectComponent.disabled=true; 
+                        }                  
+                        }  
+                
+
+</script>
+
+<style>
+.listAlign {  margin:2px 0px 1px 2px; display: block;} 
+.profileDisplay{display: none;}
+.headerRow .headerStyle{background-color:#638658;color:#FFFFFF}
+.container{ overflow-x:hidden;overflow-y:auto; width:133%; } 
+.parenttopAlign {  margin:1px 0px 1px 2px; display: block;} 
+.disableByProfle{  background-color: #dcdcdc; cursor: default;}
+.exceptionText { 
+            font-style:italic;
+            font-weight:bold;
+            color :red;
+        }
+</style>
+<body id="articlepage">
+
+<apex:PageBlock >
+ <apex:messages styleClass="exceptionText" globalOnly="true"/>
+ <apex:pageBlockSection title="" columns="3">
+    
+            <!--   <apex:outputLabel value="Enable Customer PortalUser" />  -->
+              <apex:inputfield label="{!$Label.Enable_Customer_Portal_User}" value="{!contact.Enable_Customer_Portal_User__c}" id="account__name" onclick="makeItDisabled('{!$Component.account__name}')"/>
+			  <apex:commandButton id="portalLogin" value="{!$Label.SC_Login_As_Portal_User}" onclick="redirectToPortalLogin()" disabled="{!NOT(enableCustomerLoginButton)}"></apex:commandButton>
+            <!-- <apex:outputLabel value="User Profile" />   -->  
+              <apex:inputfield label="{!$Label.User_Profile}" value="{!contact.UserProfile__c}" id="UserProfileId"/>
+              <script> makeItDisabled('{!$Component.account__name}')</script>
+
+    </apex:pageBlockSection>
+</apex:PageBlock>
+<apex:inputHidden id="hdnCntProfile" value="{!contactProfile}"></apex:inputHidden>
+<!-- <apex:messages styleClass="exceptionText" globalOnly="true"/>  -->
+<apex:outputPanel layout="block" styleClass="mailError" rendered="{!checkInActive == 'true' }" >
+     <apex:outputText value="{!$Label.SC_P2}"  />
+</apex:outputPanel>
+<apex:outputPanel layout="block" styleClass="mailError" rendered="{!checkInActive == 'false' }" >
+     <apex:outputText value="{!$Label.SC_P4}"  />
+</apex:outputPanel>
+
+<br>
+<apex:outputText id="errorText" style="font-style:italic;color: red;font-weight:bold"/></br>
+
+<apex:PageBlock >
+   <apex:pageBlockButtons location="bottom" id="pblockId">
+        <apex:commandButton action="{!saveOne}" value="{!$Label.SC_EditContactPage_Save}" disabled="true" id="saveId"></apex:commandButton>
+    </apex:pageBlockButtons>
+   
+   <apex:pageBlockSection columns="1">
+   <apex:outputLabel value="{!$Label.SC_HierarchyAccount_Error_NoUser}" /> 
+   </apex:pageBlockSection>
+</apex:PageBlock>
+<script>
+		              function makeChkBoxDisabled(){
+              			var inputobj = document.getElementsByTagName("input");
+              		    for(var i =0;i<inputobj.length;i++ ){
+                          	if((inputobj[i].id).toString().indexOf("account__name")!=-1){
+                          		inputComponent = inputobj[i];
+                          
+                          	}
+                        }
+                        inputComponent.disabled = true;
+              }
+</script>	
+<script> makeChkBoxDisabled()</script>
+</body>
+</apex:form>
+</apex:page>

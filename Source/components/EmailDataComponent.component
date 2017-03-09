@@ -1,0 +1,26 @@
+<apex:component controller="WriteToYourConsultantController" access="global">
+<form>
+<apex:outputPanel >
+<br/>
+<apex:outputText value="Navn:"/>&nbsp;
+<apex:outputText value="{!contact.firstname}"/>&nbsp;
+<apex:outputText value="{!contact.lastname}"/><br/><br/>
+<apex:outputText value="Adresse:"/>&nbsp;
+<apex:outputText value="{!contact.Address_merge_field__c}"/><br/><br/>
+<apex:outputText value="E-mail:"/>&nbsp;
+<apex:outputText value="{!contact.email}"/><br/><br/>
+<apex:outputText value="Alternativ e-mail:"/>&nbsp;
+<apex:outputText value="{!contact.AlternateEmail__c}"/><br/><br/>
+<apex:outputText value="Telefon:"/>&nbsp;
+<apex:outputText value="{!contact.phone}"/><br/><br/>
+<apex:outputText value="Privat tlf.:"/>&nbsp;
+<apex:outputText value="{!contact.homephone}"/><br/><br/>
+<apex:outputText value="Mobil:"/>&nbsp;
+<apex:outputText value="{!contact.mobilephone}"/><br/><br/>
+<apex:outputText value="Kundenr.: "/>&nbsp;
+<apex:outputText value="{!acc.Cable_Unit_No__c}"/><br/><br/>
+<apex:outputText value="Kundenavn:"/>&nbsp;
+<apex:outputText value="{!acc.Cable_Unit_Name__c}"/><br/><br/>
+</apex:outputPanel>
+</form>
+</apex:component>

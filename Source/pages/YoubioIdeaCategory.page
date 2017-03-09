@@ -1,0 +1,100 @@
+<apex:page showHeader="false" sidebar="false" controller="youbioIdeasController" cache="false" standardStylesheets="false">
+  <!-- Begin Default Content REMOVE THIS -->
+     <!--a href="https://test.salesforce.com/services/auth/sso/00DM0000000ARWBMA4/FacebookSign?site=https%3A%2F%2Fyousee.test.cs7.force.com%2FyoubioHome">link to facebook</a-->
+  <!-- End Default Content REMOVE THIS -->
+    <apex:composition template="youbioIdeasTemplate">     
+    <apex:define name="MainPanel">
+                <!-- 
+                  Denne skal ligge inde i grid_9.
+                  Dertil, så har den Ide som er udarbejdet af yousee, fået en css classe som hedder "yousee" på "list_item"
+              -->
+             <apex:outputPanel layout="none" rendered="{!doLoad}">           
+            	<c:YoubioIdeaListByCategory DeveloperName="ListByCategory" Widget="{!listview}"></c:YoubioIdeaListByCategory> 
+             </apex:outputPanel>          
+              <!--div class="list_item">
+                            <div class="media">
+                                <img src="https://cs7.salesforce.com/resource/1366117969000/youbio_comment_image" class="img"/>
+                                <div class="bd">
+                                    <div class="table_object">
+                                        <div class="to_cell">
+                                            Af Mikkel Hansen Christensen <br />
+                                            20.04.2013 
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="repel_object">
+                                <div class="ro_left">
+                                    <div class="list_item_meta">
+                                        <h2>Hvornår i kommer med en app til Ps3 så man også har en mulighed der?</h2>
+                                        <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod 
+tincidunt ut laoreet dolore magna aliquam erat volutpat.....</p>
+                                    </div>
+                                </div>
+                                <div class="ro_right">
+                                    <div class="social_box">
+                                        <span>14<i class="icon icon_comment"></i></span>
+                                        <span>12.000<i class="icon icon_like"></i></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div-->
+                        <!--div class="list_item yousee">
+                            <div class="media">
+                                <img src="https://cs7.salesforce.com/resource/1366117969000/youbio_comment_image" class="img"/>
+                                <div class="bd">
+                                    <div class="table_object">
+                                        <div class="to_cell">
+                                            Af Mikkel Hansen Christensen <br />
+                                            20.04.2013 
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="repel_object">
+                                <div class="ro_left">
+                                    <div class="list_item_meta">
+                                        <h2>Hvornår i kommer med en app til Ps3 så man også har en mulighed der?</h2>
+                                        <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod 
+tincidunt ut laoreet dolore magna aliquam erat volutpat.....</p>
+                                    </div>
+                                </div>
+                                <div class="ro_right">
+                                    <div class="social_box">
+                                        <span>14<i class="icon icon_comment"></i></span>
+                                        <span>12.000<i class="icon icon_like"></i></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div-->
+                        <!--div class="list_item">
+                            <div class="media">
+                                <img src="https://cs7.salesforce.com/resource/1366117969000/youbio_comment_image" class="img"/>
+                                <div class="bd">
+                                    <div class="table_object">
+                                        <div class="to_cell">
+                                            Af Mikkel Hansen Christensen <br />
+                                            20.04.2013 
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="repel_object">
+                                <div class="ro_left">
+                                    <div class="list_item_meta">
+                                        <h2>Hvornår i kommer med en app til Ps3 så man også har en mulighed der?</h2>
+                                        <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod 
+tincidunt ut laoreet dolore magna aliquam erat volutpat.....</p>
+                                    </div>
+                                </div>
+                                <div class="ro_right">
+                                    <div class="social_box">
+                                        <span>14<i class="icon icon_comment"></i></span>
+                                        <span>12.000<i class="icon icon_like is-liked"></i></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div--> 
+    </apex:define>
+    </apex:composition> 
+</apex:page>

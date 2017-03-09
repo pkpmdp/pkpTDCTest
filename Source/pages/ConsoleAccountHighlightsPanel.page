@@ -1,0 +1,21 @@
+<apex:page standardController="account" tabStyle="Account">  
+        
+    <div style="width:100%;overflow:auto;">
+        <table>
+        <tr>
+        <td width="13%">
+            <c:ConsoleKundeLog currentId="{!Account.Id}"/>
+        </td>
+        <td width="14%">
+            <c:ConsoleAlertsComponent currentId2="{!Account.Id}"/>
+        </td>
+        <td width="16%"><!--Changed to 15% -->
+            <c:ConsoleKundeInfo currentId1="{!Account.Id}"/>
+        </td>
+        <td width="33%"><!--Previous to 35% -->
+            <c:ConsolePermissionComponentHighLtPanel acctId="{!Account.Id}"/>
+        </td>
+        </tr>
+        </table>
+    </div>
+</apex:page>

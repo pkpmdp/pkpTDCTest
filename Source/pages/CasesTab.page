@@ -1,0 +1,199 @@
+<apex:page controller="clsCasesTabController" tabStyle="Case" cache="true">
+  <apex:includeScript value="/soap/ajax/19.0/connection.js"/>
+  <apex:includeScript value="/support/console/22.0/integration.js"/>
+  <apex:sectionHeader title="{!$Label.Cases}" subtitle="{!$Label.Home}"/>
+  <apex:form id="frm"> 
+    <apex:pageMessages />
+    <apex:pageBlock title="{!$Label.Choose_a_Queue}" id="selectQueue">
+      <apex:pageBlockButtons location="top" >
+        <apex:commandButton value="{!$Label.Work_Queue}" action="{!retrieveNextCase}" onclick="return retrieveNextCaseJS();" disabled="{!OR(cases==null,cases.size==0)}" id="WorkButton"/>
+        <apex:commandButton value="{!$Label.View_Cases}" action="{!viewEnhancedList}"/>
+        <apex:commandButton value="{!$Label.Search}" action="{!updateQueueCount}" rerender="caseListSection, caseCountSection,WorkButton" status="retrieveStatus"/>
+<!-- NP buttons BEGIN -->
+        <apex:commandButton value="{!$Label.New_NP_In_port}" action="{!newNpInPort}" rendered="{!AND(NOT(BEGINS($Profile.Id,'00e20000001UQ6D')),NOT(BEGINS($Profile.Id,'00e20000001UR8G')), NOT(BEGINS($Profile.Id,'00eD00000015bhM')),NOT(BEGINS($Profile.Id,'00e20000000vz1m')),NOT(BEGINS($Profile.Id,'00e20000000vfam')),NOT(BEGINS($Profile.Id,'00e20000001UTjH')))}"/>
+        <apex:commandButton value="{!$Label.New_NP_Out_port}" action="{!newNpOutPort}" rendered="{!AND(NOT(BEGINS($Profile.Id,'00e20000001UQ6D')),NOT(BEGINS($Profile.Id,'00e20000001UR8G')),NOT(BEGINS($Profile.Id,'00eD00000015bhM')),NOT(BEGINS($Profile.Id,'00e20000000vz1m')),NOT(BEGINS($Profile.Id,'00e20000000vfam')),NOT(BEGINS($Profile.Id,'00e20000001UTjH')))}"/>
+        <apex:commandButton value="{!$Label.New_NP_Authorization}" action="{!newNpAuthorization}" rendered="{!AND(NOT(BEGINS($Profile.Id,'00e20000001UQ6D')),NOT(BEGINS($Profile.Id,'00e20000001UR8G')),NOT(BEGINS($Profile.Id,'00eD00000015bhM')),NOT(BEGINS($Profile.Id,'00e20000000vz1m')),NOT(BEGINS($Profile.Id,'00e20000000vfam')),NOT(BEGINS($Profile.Id,'00e20000001UTjH')))}"/>
+<!-- NP buttons END -->
+      </apex:pageBlockButtons>
+      <apex:actionStatus layout="block" startText="{!$Label.Retrieving_cases}..." id="retrieveStatus"/>
+      
+      <apex:pageBlockSection columns="3" id="picklistSection">
+        <apex:inputField value="{!caseFields.Department__c}" id="departmentField" style="width:200px" onchange="populateDependentPicklist('Case', '{!$Component.picklistSection.departmentField}', '{!$Component.picklistSection.productField}', 'Department__c', 'Product_2__c');populateDependentPicklist('Case', '{!$Component.picklistSection.productField}', '{!$Component.picklistSection.typeField}', 'Product_2__c', 'Type_Task__c')"/>
+        <apex:inputField value="{!caseFields.Product_2__c}" id="productField" style="width:200px" onchange="populateDependentPicklist('Case', '{!$Component.picklistSection.productField}', '{!$Component.picklistSection.typeField}', 'Product_2__c', 'Type_Task__c')"/>
+        <apex:inputField value="{!caseFields.Type_Task__c}" id="typeField" style="width:300px" />
+      </apex:pageBlockSection>
+      
+      <apex:pageBlockSection columns="3" id="caseCountSection">
+        <apex:outputLabel styleClass="labelCol" value="Total: {!recordCounter}" />
+      </apex:pageBlockSection> 
+    </apex:pageBlock> 
+    
+    <apex:pageBlock id="caseList" >
+      <apex:pageBlockSection columns="1" id="caseListSection">
+        <apex:pageBlockTable value="{!cases}" var="case" rules="rows">  
+          <apex:column rendered="{!NOT(BEGINS($Profile.Id,'00e20000001UQ6D'))}">
+            <apex:commandLink value="{!$Label.Work}" action="{!editCase}" onclick="return workOnSpecificCaseJS('{!case.Id}');">
+              <apex:param name="caseId" value="{!case.Id}"/>
+            </apex:commandLink>
+          </apex:column>
+          <apex:column headerValue="{!$ObjectType.Case.fields.CaseNumber.label}">
+            <apex:outputLink value="/{!case.Id}">{!case.CaseNumber}</apex:outputLink>
+          </apex:column>
+          <apex:column headerValue="{!$ObjectType.Case.fields.Subject.label}" value="{!case.Subject}"/>
+          <apex:column headerValue="{!$ObjectType.Account.fields.Name.label}">
+            <apex:outputLink value="/{!case.AccountId}">{!case.AccountName}</apex:outputLink>
+          </apex:column>
+          <apex:column headerValue="{!$ObjectType.Case.fields.Origin.label}" value="{!case.Origin}" rendered="{!showCbCasesStatus.showCaseCol}"/>
+          <apex:column headerValue="{!$ObjectType.Case.fields.Description.label}" value="{!case.Description}" rendered="{!showCbCasesStatus.showCbCaseCol}"/>
+          <apex:column headerValue="{!$ObjectType.Case.fields.CreatedDate.label}" value="{!case.CreatedDate}"/>
+          <!-- <apex:column headerValue="{!$ObjectType.Case.fields.Type_Task__c.label}" value="{!case.TypeTask}" rendered="{!IF((caseFields.Department__c == 'PY Kundekonsulent' || caseFields.Department__c == 'PY Mindrekunder' || caseFields.Department__c =='PYSK kommunikation' || caseFields.Department__c =='PYS Small Account'|| caseFields.Department__c =='PYF'),true,false)}"/> -->
+          <apex:column headerValue="{!$ObjectType.Case.fields.Type_Task__c.label}" value="{!case.TypeTask}" rendered="{!IF((caseFields.Department__c == 'PYF Salgsadministration' || caseFields.Department__c == 'PY Mindrekunder' || caseFields.Department__c =='PYSK kommunikation' || caseFields.Department__c =='PY Small Account'|| caseFields.Department__c =='YFF'),true,false)}"/>
+          <!-- <apex:column headerValue="{!$Label.PYS_Contact_Name}" rendered="{!IF((caseFields.Department__c == 'PY Kundekonsulent' || caseFields.Department__c == 'PY Mindrekunder' || caseFields.Department__c =='PYSK kommunikation' || caseFields.Department__c =='PYS Small Account'|| caseFields.Department__c =='PYF'),true,false)}">-->
+          <apex:column headerValue="{!$Label.PYS_Contact_Name}" rendered="{!IF((caseFields.Department__c == 'PYF Salgsadministration' || caseFields.Department__c == 'PY Mindrekunder' || caseFields.Department__c =='PYSK kommunikation' || caseFields.Department__c =='PY Small Account'|| caseFields.Department__c =='YFF'),true,false)}">
+            <apex:outputLink value="/{!case.ContactId}">{!case.ContactName}</apex:outputLink>
+          </apex:column>     
+          <apex:column headerValue="CreatedBy" rendered="{!IF((caseFields.Department__c == 'PYF Salgsadministration'),true,false)}">  
+            <apex:outputLink value="/{!case.CreatedBy}">{!case.CreatedByName}</apex:outputLink>
+          </apex:column>
+          <apex:column headerValue="{!$ObjectType.CaseMilestone.fields.TargetDate.label}" value="{!case.TargetDate}" rendered="{!AND(!(caseFields.Department__c == 'PYF Salgsadministration'),showCbCasesStatus.showCaseCol)}"/>
+          
+          <apex:column headerValue="{!$Label.Call_Back_Time}" value="{!case.CallBackTime}" rendered="{!showCbCasesStatus.showCbCaseCol}"/>
+      </apex:pageBlockTable>
+      </apex:pageBlockSection>      
+    </apex:pageBlock>
+    <apex:actionFunction name="retrieveNextCaseConsole" action="{!retrieveNextCaseId}" status="retrieveStatus" reRender="jspanel,caseList">
+    </apex:actionFunction>
+    <apex:actionFunction name="workOnSpecificCaseConsole" action="{!editCaseId}" status="retrieveStatus" reRender="jspanel,caseList">
+        <apex:param name="workOnCaseId" value="" assignTo="{!workOnCaseId}" />
+    </apex:actionFunction>
+  </apex:form>  
+  <script type="text/javascript">
+    sforce.connection.sessionId = "{!$Api.Session_ID}";
+    dsoResult = sforce.connection.describeSObject("Case");
+    
+    populateDependentPicklist('Case', '{!$Component.frm.selectQueue.picklistSection.departmentField}', '{!$Component.frm.selectQueue.picklistSection.productField}', 'Department__c', 'Product_2__c');
+    populateDependentPicklist('Case', '{!$Component.frm.selectQueue.picklistSection.productField}', '{!$Component.frm.selectQueue.picklistSection.typeField}', 'Product_2__c', 'Type_Task__c');
+    
+    function populateDependentPicklist(objectName, ctrlName, depName, ctrlfieldname, depfieldname) {
+      var fields = dsoResult.fields;
+      for (i = 0; i < fields.length; i++) {
+        var fieldFromDescribe = fields[i];
+        if (fieldFromDescribe.name == ctrlfieldname) {
+          ctrlfield = fieldFromDescribe;    
+        } else if (fieldFromDescribe.name == depfieldname) {
+          depfield = fieldFromDescribe;
+        }
+      }
+          
+      ctrlselect = document.getElementById(ctrlName);
+      depselect = document.getElementById(depName); 
+      var ctrlVal = ctrlselect.options[ctrlselect.selectedIndex].value;
+      var depVal = depselect.options[depselect.selectedIndex].value;
+      
+      //finding the controller field selected value index
+      var ctrlIdx;
+      for (var i = 0; i < ctrlfield.picklistValues.length; i++) {               
+        if (ctrlfield.picklistValues[i].value == ctrlVal) {
+          ctrlIdx = i;    
+        }
+      }
+      
+      var count = 0;
+      depselect.options.length = 0; 
+      depselect.options[count] = new Option("--None--", "--None--");
+      count++;  
+      if (ctrlIdx == undefined) {
+        depselect.disabled = true;
+        return;
+      }
+      for (var i = 0; i < depfield.picklistValues.length; i++) {
+        try {
+            
+          var ple = depfield.picklistValues[i];     
+          var val = ple.validFor;
+          
+          
+          if (val == null) continue;
+          
+          var vf = decode(val);
+          
+          var bits = vf.charCodeAt(ctrlIdx >> 3);
+          
+          
+          
+          if ((bits & (0x80 >> ctrlIdx % 8)) != 0) {
+            depselect.options[depselect.options.length] = new Option(depfield.picklistValues[i].label, depfield.picklistValues[i].value);
+            depselect.disabled = false;
+            if (depfield.picklistValues[i].value == depVal) {
+              depselect.selectedIndex = depselect.options.length - 1;
+            }
+            count++;
+          }
+        } catch (e) {alert(e.message);}
+      }
+      if (count == 1) depselect.disabled = true;
+    }
+
+    function decode(input) {
+      var keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+      var output = [];
+      var chr1, chr2, chr3 = "";
+      var enc1, enc2, enc3, enc4 = "";
+      var i = 0;
+      var base64test = /[^A-Za-z0-9\+\/\=]/g;
+      if (base64test.exec(input)) {
+        alert("There were invalid base64 characters in the input text.\n" + "Valid base64 characters are A-Z, a-z, 0-9, '+', '/', and '='\n" + "Expect errors in decoding.");
+      }
+      input = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
+      do {
+        enc1 = keyStr.indexOf(input.charAt(i++));
+        enc2 = keyStr.indexOf(input.charAt(i++));
+        enc3 = keyStr.indexOf(input.charAt(i++));
+        enc4 = keyStr.indexOf(input.charAt(i++));
+        chr1 = (enc1 << 2) | (enc2 >> 4);
+        chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
+        chr3 = ((enc3 & 3) << 6) | enc4;
+        output.push(String.fromCharCode(chr1));
+        if (enc3 != 64) {
+          output.push(String.fromCharCode(chr2));
+        }
+        if (enc4 != 64) {
+          output.push(String.fromCharCode(chr3));
+        }
+        chr1 = chr2 = chr3 = "";
+        enc1 = enc2 = enc3 = enc4 = "";
+      } while (i < input.length);
+      return output.join("");
+    }
+    
+    function retrieveNextCaseJS(){
+        if (sforce.console.isInConsole()) {
+            retrieveNextCaseConsole();
+            return false;
+        } else {
+            return true;
+        }
+    }
+    
+    function workOnSpecificCaseJS(selectedCaseId){
+        if (sforce.console.isInConsole()) {
+            workOnSpecificCaseConsole(selectedCaseId);
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+  </script>
+  
+  <apex:outputPanel id="jspanel">
+      <script type="text/javascript">
+          var workOnCaseIdResult = '{!workOnCaseIdResult}';
+          if (workOnCaseIdResult!=''){
+              sforce.console.openPrimaryTab(null, '/'+workOnCaseIdResult , true);
+          }
+          
+      </script>
+  </apex:outputPanel>
+
+</apex:page>

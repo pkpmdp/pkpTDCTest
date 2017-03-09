@@ -1,0 +1,144 @@
+<apex:page standardController="Aria_Account__c" extensions="CarrieCreditController" sidebar="False"  showHeader="False" id="thePage" tabStyle="Invoice_Usage__c"> 
+    <apex:includeScript value="{!URLFOR($Resource.DynaTree_JS,'jquery/jquery.js')}"/>
+    <script type="text/javascript">
+        function checkAmount(event,obj) {
+            var amountEntered= document.getElementById(''+obj).value;
+            document.getElementById('dispalyError').innerHTML ='';
+            document.getElementById('displayTax').style.display = "inline";
+            if(window.event){ // IE
+                var characterCode = event.keyCode;
+            } else if (event.which) { // Safari 4, Firefox 3.0.4
+                var characterCode = event.which
+            }
+            if(characterCode!=13 &&characterCode!=8 &&characterCode!=9 &&characterCode!=144 &&characterCode!=188&&(characterCode < 48 || characterCode > 57) && (characterCode < 96 || characterCode > 105)){
+                document.getElementById('dispalyError').innerHTML='Indtast gyldigt beløb';
+                document.getElementById(''+obj).value="";
+                document.getElementById('displayTax').style.display = "none";
+                return false;
+            }
+            var amount = amountEntered;
+            if(amountEntered.indexOf(",")!=-1){
+                amount = amountEntered.replace(",",".");                
+            }
+            if(Number(amount)>5000 || Number(amount)<=0 ){
+                if({!creditAllow}){
+                    if(Number(amount)<=0){
+                        document.getElementById('dispalyError').innerHTML='Det indtastet beløb skal være større end 0 kr';
+                        document.getElementById('displayTax').style.display = "none";
+                    return false;
+                    }
+                }else{
+                    document.getElementById('dispalyError').innerHTML='Det indtastet beløb skal være mellem DKK 1 – 5000';
+                    document.getElementById(''+obj).value="";
+                    document.getElementById('displayTax').style.display = "none";
+                    return false;
+                }
+            }
+            var tax = roundValue(Number(amount) * 0.2);
+            var credit = Number(amount) - tax;
+            var stringTax = new String(tax);
+            var stringCredit = new String(roundValue(credit));
+            document.getElementById('displayTax').innerHTML='&nbsp;&nbsp; Beløb eksl. Moms: '+stringCredit.replace(".",",")+'&nbsp;&nbsp; Moms: '+stringTax.replace(".",",");
+            document.getElementById('thePage:thePageBlock:myForm:theHiddenInputTax').value = document.getElementById('displayTax').innerText;
+            return true;
+        }
+        function roundValue(value){
+            var dec = 2;
+            var result = Math.round(value*Math.pow(10,dec))/Math.pow(10,dec);
+            return result;
+        }
+        function showAriaPaymentMethod(radioOption) {
+            var radioOption = document.getElementsByName(''+radioOption);
+            for(var i=0; i<radioOption.length; i++){
+                if(radioOption[i].checked && radioOption[i].value=='1'){
+                    document.getElementById('ariaPayMethod').innerHTML='Betalingsmetode : {!Aria_Account__c.Aria_Pay_Method__c}';
+                    // @jira issue CARRIE-704
+                    document.getElementById("thePage:thePageBlock:myForm:theSecondPageBlock:thePageBlockSec:thePageBlockSectionItemCredit:Credit_Reason").selectedIndex='1'; //CARRIE-1269
+                    return;
+                }else{
+                    document.getElementById('ariaPayMethod').innerHTML='';
+                    // @jira issue CARRIE-704
+                    document.getElementById("thePage:thePageBlock:myForm:theSecondPageBlock:thePageBlockSec:thePageBlockSectionItemCredit:Credit_Reason").selectedIndex='1'; //CARRIE-1269
+                }
+            }
+        }
+        
+        function workingButtons(){
+        	$('[id*="Btn"]').toggle();
+			$('[id*="workingbtn"]').toggle();
+        }
+    </script>
+    <apex:pageBlock id="thePageBlock">
+        <div></div><div></div> 
+        <div align="center"><h3 style="font-size:12pt"><i>Ny Kreditering</i></h3></div>
+        <br/>
+        <apex:form id="myForm">
+        <apex:inputHidden value="{!inputHiddenTax}" id="theHiddenInputTax"/>
+        <apex:inputHidden value="{!Aria_Account__c.Aria_Account_No__c}" id="theHiddenInput"/>
+            <apex:pageBlock id="theSecondPageBlock">
+                <apex:pageBlockButtons location="bottom">
+                    <apex:commandButton id="cancelBtn" action="{!redirectCustomerBillingPage}" value="Annuller"  immediate="true" onclick="workingButtons()"></apex:commandButton>
+                    <apex:commandButton id="saveBtn" action="{!save}" value="Gem" onclick="workingButtons()"></apex:commandButton>
+                    <apex:commandButton id="saveNewBtn" action="{!saveNew}" value="Gem og Ny" onclick="workingButtons()"></apex:commandButton>
+                    <apex:commandButton id="workingbtn1" value="Arbejder..." disabled="true" style="display:none" />
+       				<apex:commandButton id="workingbtn2" value="Arbejder..." disabled="true" style="display:none" />
+       				<apex:commandButton id="workingbtn3" value="Arbejder..." disabled="true" style="display:none" />
+                </apex:pageBlockButtons>
+                <div align="right"><apex:commandButton action="{!redirectCustomerBillingPage}" value="Tilbage til oversigt"  immediate="true"></apex:commandButton></div>
+                <apex:pageMessages />
+                <apex:outputPanel >
+                    <apex:pageBlockSection title="Kundeoplysninger" columns="2"  >
+                        <apex:outputText value="{!Aria_Account__c.Account__r.Name}"  label="Kundenavn"/>
+                        <apex:outputText value="{!Aria_Account__c.Account__r.Customer_No__c}"  label="Kundenummer"/>
+                    </apex:pageBlockSection>
+                </apex:outputPanel> 
+                <apex:pageBlockSection collapsible="false" id="thePageBlockSec" columns="2" title="Krediterings Information">
+                    <apex:pageBlocksectionItem id="thePageBlkSecItem">
+                        <apex:outputLabel value="Vælg type" for="radioOption"/>
+                        <apex:selectRadio id="radioOption"  value="{!creditType}" onClick="showAriaPaymentMethod('{!$Component.radioOption}')"  >
+                            <apex:outputPanel styleClass="requiredInput" />    
+                            <apex:selectOptions value="{!creditTypes}"  />
+                        </apex:selectRadio>
+                    </apex:pageBlocksectionItem>
+                    
+                    <div align="left" id="ariaPayMethod" style="color:black"></div>  
+                    <apex:pageBlocksectionItem >
+                        <apex:outputLabel value="Beløb" for="Amount"/>
+                        <apex:outputPanel styleClass="requiredInput" layout="block" >  
+                            <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+                            <apex:inputText id="Amount" value="{!amount}"   onKeyup="checkAmount(event,'{!$Component.Amount}')"/ >
+                            <div align="left" style="color:black;display:inline"></div> 
+                        </apex:outputPanel>
+                    </apex:pageBlocksectionItem>  
+                    <div align="left" id="displayTax" style="color:black;display:inline">{!inputHiddenTax}</div>
+                   
+                    <div align="left" id="dispalyError" style="color:#FF0000"></div>               
+                    <apex:pageBlocksectionItem id="thePageBlockSectionItemCredit">
+                        <apex:outputLabel value="Årsag" for="Credit_Reason"/>
+                        <apex:outputPanel styleClass="requiredInput" layout="block" >  
+                            <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+                            <apex:selectList id="Credit_Reason"  value="{!creditReason}" size="1"  >
+                                <apex:selectOptions value="{!CreditReasons}"  />
+                            </apex:selectList>
+                        </apex:outputPanel>
+                    </apex:pageBlocksectionItem><br/>
+                    <apex:pageBlocksectionItem >
+                        <apex:outputLabel value="Bemærkning" for="CommentsList"/>  
+                        <apex:outputPanel styleClass="requiredInput" layout="block" > 
+                        <apex:outputPanel styleClass="requiredBlock" layout="block"/>                         
+                        <apex:selectList id="CommentsList"  value="{!selectComments}" size="1"  >
+                            <apex:selectOption itemValue="Select" itemLabel="Vælge"/>
+                                <apex:selectOptions value="{!commentsList}"  />
+                            </apex:selectList>
+                         </apex:outputPanel>
+                    </apex:pageBlocksectionItem><br/>
+                </apex:pageBlockSection> 
+            </apex:pageBlock>
+        </apex:form>
+    </apex:pageBlock>     
+    <script>
+    
+       showAriaPaymentMethod("thePage:thePageBlock:myForm:theSecondPageBlock:thePageBlockSec:thePageBlkSecItem:radioOption");
+   
+    </script>
+</apex:page>

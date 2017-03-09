@@ -1,0 +1,186 @@
+<apex:component controller="ConsolePermissionComponent_CT" allowDML="true">
+<apex:attribute name="acctId" assignTo="{!AccStrId}" type="String" description="Account Id"/>
+<apex:includeScript value="{!URLFOR($Resource.jQuery160)}"/>
+<apex:includeScript value="/support/console/28.0/integration.js"/>
+<apex:form id="theform" >
+<!-- <apex:actionFunction action="{!invokePermission}" name="invokePermission" rerender="thepageblock" />-->
+<style>
+    
+     fieldset
+     {
+        border: 1px solid #ddd;
+        padding: 0 1.4em 1.4em 1.4em;
+        margin: 0 0 1.5em 0;
+        border-radius: 8px;
+        margin: 0 5px;
+        height: 100%; 
+        display:inline-block;
+        display:inline;
+     }
+</style>
+      
+<fieldset><!-- width="80%"  -->
+<!--<fieldSet  style="width: 480px; height: 95px;"> -->
+    <legend style="color:#B8B8B8;font-family:Calibri,sans-serif;font-size:15px;">Permissions</legend>
+        <table style="border-collapse: separate;"><!-- height="67" -->
+            <tr>
+                <td>
+                    <apex:outputLabel value="{!$ObjectType.Permission__c.fields.Marketing_Permission__c.label}" title="{!strToolTippermission}"/>  
+                </td>
+                <td>    
+                    <apex:image value="{!$Resource.Console_Help_Image}" alt="Help" title="{!$ObjectType.Permission__c.fields.Marketing_Permission__c.inlineHelpText}" width="13px" height="13px" />
+                </td>
+                <td>    
+                    <apex:inputField value="{!Permission.Marketing_Permission__c}"/>                        
+                </td>
+                <td >
+                    <apex:outputLabel value="{!$ObjectType.Permission__c.fields.Driftsinfo_pa_email__c.label}" title="{!strToolTipDriftsEmail}"/>
+                </td>
+                <td> 
+                    <apex:image value="{!$Resource.Console_Help_Image}" alt="Help" title="{!$ObjectType.Permission__c.fields.Driftsinfo_pa_email__c.inlineHelpText}" width="13px" height="13px"/>
+                </td>
+                <td> 
+                    <apex:inputField value="{!Permission.Driftsinfo_pa_email__c}" id="drift_email" />
+                </td>
+                <td>
+                    <apex:outputLabel value="{!$ObjectType.Permission__c.fields.Nej_til_markedsforing__c.label}" title="{!strToolTipmarkedsforing}"/>
+                </td>
+                <td>
+                    <apex:image value="{!$Resource.Console_Help_Image}" alt="Help" title="{!$ObjectType.Permission__c.fields.Nej_til_markedsforing__c.inlineHelpText}" width="13px" height="13px"/>                                
+                </td>
+                <td>
+                    <apex:inputField value="{!Permission.Nej_til_markedsforing__c}" />
+                </td>
+                
+            </tr>
+            <tr>
+                <td>
+                    <apex:outputLabel value="{!$ObjectType.Permission__c.fields.Driftsinfo_pa_SMS__c.label}" title="{!strToolTipDriftsSms}"/>
+                </td> 
+                <td>
+                    <apex:image value="{!$Resource.Console_Help_Image}" alt="Help" title="{!$ObjectType.Permission__c.fields.Driftsinfo_pa_SMS__c.inlineHelpText}" width="13px" height="13px"/>
+                </td>
+                <td>
+                    <apex:inputField value="{!Permission.Driftsinfo_pa_SMS__c}" id="drift_sms" />
+                </td>
+                <td>
+                    <apex:outputLabel value="{!$ObjectType.Permission__c.fields.Nej_til_Telefonopkald__c.label}" title="{!strToolTipTelefonopkald}"/>&nbsp;
+                </td>
+                <td>
+                    <apex:image value="{!$Resource.Console_Help_Image}" alt="Help" title="{!$ObjectType.Permission__c.fields.Nej_til_Telefonopkald__c.inlineHelpText}" width="13px" height="13px"/>                                
+                </td>
+                <td> 
+                    <apex:inputField value="{!Permission.Nej_til_Telefonopkald__c}" />
+                </td>
+                
+            </tr>
+            <tr>
+                             
+                <td>
+                    <apex:outputLabel value="Robinsonlisten" id="robText"/>
+                 </td>
+                <td>
+                    <apex:image value="{!$Resource.Console_Help_Image}" alt="Help" title="{!$ObjectType.Permission__c.fields.Robinsonlisten__c.inlineHelpText}" width="13px" height="13px"/>
+                </td>
+                <td>    
+                    <apex:outputField value="{!Permission.Robinsonlisten__c}" />
+                </td>
+                <td colspan="2">
+                    <apex:outputpanel id="errMessage">
+                        <apex:outputpanel rendered="{!ErrEcom}">
+                            <!--<apex:toolbar style="width:100%;background-color:Yellow;background-image:none;" contentStyle="word-wrap:break-word;"><font color="black" font-size="1px;">{!$Label.NoEmailForEcom}</font></apex:toolbar>-->
+                            <div style="padding:2px 5px 2px 5px;width:180px;word-wrap:break-word;font-size:12;color:red;">{!$Label.NoEmailForEcom}</div>
+                        </apex:outputpanel>
+
+                        <apex:outputpanel rendered="{!ErrSms}">
+                            <!--<apex:toolbar style="width:100%;background-color:Yellow;background-image:none;" contentStyle="word-wrap:break-word;"><font color="black" font-size="1px;">{!$Label.mobileRequiredForDriftsinfo}</font></apex:toolbar>-->
+                            <span style="width:120px;word-wrap:break-word;font-size:12;color:red;">{!$Label.mobileRequiredForDriftsinfo}</span>
+                        </apex:outputpanel>
+
+                        <apex:outputpanel rendered="{!ErrEmail}">
+                            <!--<apex:toolbar style="width:100%;background-color:Yellow;background-image:none;"><font color="black" font-size="1px;">{!$Label.emailNecessaryForDriftsinfo}</font></apex:toolbar>-->
+                            <div style="padding:2px 5px 2px 5px;width:180px;word-wrap:break-word;font-size:12;color:red;">{!$Label.emailNecessaryForDriftsinfo}</div>
+                        </apex:outputpanel>
+
+                        <apex:outputpanel rendered="{!ErrMarket}">
+                            <!--<apex:toolbar style="width:100%;background-color:Yellow;background-image:none;"><font color="black" font-size="1px;">{!$Label.Marketing_permission_validation}</font></apex:toolbar>-->
+                            <div style="padding:2px 5px 2px 5px;width:180px;word-wrap:break-word;font-size:12;color:red;">{!$Label.Marketing_permission_validation}</div>
+                        </apex:outputpanel>
+                        
+                        <apex:outputpanel rendered="{!ErrSave}">
+                            <!--<apex:toolbar style="width:100%;background-color:Yellow;background-image:none;"><font color="black" font-size="1px;">{!$Label.Console_Successful}</font></apex:toolbar>-->
+                            <div style="padding:2px 5px 2px 5px;width:180px;word-wrap:break-word;font-size:12;color:green;">{!$Label.Console_Successful}</div>
+                        </apex:outputpanel>
+
+                        <apex:outputpanel rendered="{!ErrException}">
+                            <!--<apex:toolbar style="width:100%;background-color:Yellow;background-image:none;"><font color="black" font-size="1px;">{!strException}</font></apex:toolbar>-->
+                            <div style="padding:2px 5px 2px 5px;width:180px;word-wrap:break-word;font-size:12;color:red;">{!strException}</div>
+                        </apex:outputpanel>
+                    </apex:outputpanel>
+                </td>
+               
+                <td >
+                    <div style="position:relative;bottom:8px;">
+                        <apex:commandButton action="{!save}" value="Gem" rerender="errMessage" oncomplete="refresh(event);" style="float:left;position:absolute;"/>
+                    </div>
+                </td>
+            </tr>
+       </table>
+</fieldset>
+       
+             
+                <!-- 
+                <apex:outputLabel value="{!$ObjectType.Address__c.fields.Robinson__c.label}  " style="padding-right:5px"/>
+                <apex:outputField value="{!Permission.Robinsonlisten__c}"/>
+
+            <div class="pbBottomButtons" style="margin-top: 0px;">
+                <table cellspacing="0" cellpadding="0" border="0">
+                    <tbody>
+                        <tr>
+                            <td></td>   
+                            <td class="pbTitle">&nbsp;</td>
+                            <td class="pbButtonb " id="j_id0:j_id1:j_id2:j_id37:bottom">
+                                <apex:commandButton action="{!save}" value="{!if(updateFlag,'Update','Save')}" />
+                            </td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>  
+        
+      </div>-->
+    </apex:form>
+    <script type="text/javascript">
+
+        var j$ = jQuery.noConflict();
+        
+        function refresh(event){
+            if (sforce.console.isInConsole()){
+                sforce.console.getEnclosingTabId(function (success){
+                        sforce.console.getEnclosingPrimaryTabId(function (PrimaryId){                                                       
+                            sforce.console.refreshPrimaryTabById(PrimaryId.id,false);                           
+                    });
+                })      
+            }
+        }
+        
+
+       //window.setTimeout(invokePermission,50);
+        function callCheckbox(){
+                var checkedValue = document.getElementById('drift').checked;
+                if(checkedValue){
+                    document.getElementById("{!$Component.theform.thepageblock.thepageblocksection.drift_email}").checked=true;
+                    document.getElementById("{!$Component.theform.thepageblock.thepageblocksection.drift_email}").disabled= true;
+                    document.getElementById("{!$Component.theform.thepageblock.thepageblocksection.drift_sms}").disabled= true;
+                    document.getElementById("{!$Component.theform.thepageblock.thepageblocksection.drift_sms}").checked=true;
+                }else{
+                    document.getElementById("{!$Component.theform.thepageblock.thepageblocksection.drift_email}").disabled= false;
+                    document.getElementById("{!$Component.theform.thepageblock.thepageblocksection.drift_sms}").disabled= false;
+            }
+        }
+        
+    </script>
+</apex:component>

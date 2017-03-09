@@ -1,0 +1,113 @@
+<apex:page standardcontroller="Aria_Account__c" extensions="CarrieTransactionController" sidebar="False" showHeader="False" tabStyle="Invoice_Usage__c" id="thePage">
+    <div id="toBottom" >
+        <img src="{!$Resource.CarrieBackToBottom}" title="til bund" width="15px" height="15px"/>
+    </div>
+    <apex:includeScript value="{!URLFOR($Resource.DynaTree_JS,'jquery/jquery.js')}"/>
+    <style type="text/css">
+               #toTop {
+            bottom: 40px;
+            color: #333333;
+            cursor: pointer;
+            display: none;
+            font-family: verdana;
+            font-size: 11px;
+            position: fixed;
+            right: 5px;
+            text-align: right;
+            width: 100px;
+        }
+        #toBottom {
+            top: 70px;
+            color: #333333;
+            cursor: pointer;
+            display: none;
+            font-family: verdana;
+            font-size: 11px;
+            position: fixed;
+            right: 5px;
+            text-align: right;
+            width: 100px;
+        }
+        .bPageBlock .pbHeader .pbButton {
+            display: none;
+        }
+    </style>
+    <apex:form id="theForm">
+       <div align="center"><h1 style="font-size:12pt"><i>Transaktioner</i></h1></div>
+       <apex:inputHidden value="{!Aria_Account__c.Aria_Account_No__c}" id="theHiddenInput"/>
+       <apex:actionFunction name="getTransactionDetails" action="{!getTransactionDetails}" rerender="displayDetails" status="myStatus"/>
+       <div align="right"><apex:commandButton action="{!redirectCustomerBillingPage}" value="Tilbage til oversigt"  immediate="true"></apex:commandButton></div>
+       <apex:pageMessages />
+       <apex:outputPanel id="myButtons">       
+        <apex:commandButton action="{!Beginning}" title="start" value="<<" disabled="{!disablePrevious}" reRender="displayDetails,myButtons" status="myStatus"/>
+        <apex:commandButton action="{!Previous}" title="forrig" value="<" disabled="{!disablePrevious}" reRender="displayDetails,myButtons" status="myStatus"/>
+        <apex:outputText value="forrig næste"/>        
+        <apex:commandButton action="{!Next}" title="næste" value=">" disabled="{!disableNext}" reRender="displayDetails,myButtons" status="myStatus"/>
+        <apex:commandButton action="{!End}" title="til slut" value=">>" disabled="{!disableNext}" reRender="displayDetails,myButtons" status="myStatus"/>      
+       </apex:outputPanel>        
+     </apex:form>
+           <apex:pageBlock id="thePageBlock">
+       <apex:outputPanel id="displayDetails" >      
+            <apex:pageBlockSection title="Kundeoplysninger" columns="2"  >
+                  <apex:outputText value="{!Aria_Account__c.Account__r.Name}"  label="Kundenavn"/>
+                  <apex:outputText value="{!Aria_Account__c.Account__r.Customer_No__c}"  label="Kundenummer"/>
+            </apex:pageBlockSection> 
+            <apex:actionStatus id="myStatus">
+            <apex:facet name="start">
+                  <c:CarrieHenterData BackColor="#efefef" borderColor="#336699" borderSize="3" height="50px" width="180px" ImageUrl="{!$Resource.CarrieLoading}" Message="Henter Data..." messageStyle="color:darkred;font-size:11pt;font-weight:bold;"/> 
+            </apex:facet>
+            <apex:facet name="stop">
+            <apex:outputPanel >   
+            <apex:pageBlockSection title="Transaktioner" columns="1" >                 
+                <apex:pageBlockTable value="{!transList}" var="item" width="100%">
+                    <apex:column value="{!item.Name}" /> 
+                    <apex:column value="{!item.Posting_Date__c}" /> 
+                    <apex:column value="{!item.Description__c}" />
+                    <apex:column value="{!item.Start_Balance__c}"  styleClass="dataCell  CurrencyElement" headerClass="CurrencyElement zen-deemphasize"/>
+                    <apex:column value="{!item.Charge_Amt__c}" styleClass="dataCell  CurrencyElement" headerClass="CurrencyElement zen-deemphasize"/>
+                    <apex:column value="{!item.Credit_Amt__c}" styleClass="dataCell  CurrencyElement" headerClass="CurrencyElement zen-deemphasize"/>
+                    <apex:column value="{!item.End_Balance__c}" styleClass="dataCell  CurrencyElement" headerClass="CurrencyElement zen-deemphasize"/>
+                    <apex:facet name="footer">Viser side {!pageNumber} af {!totalPages}</apex:facet>                     
+                </apex:pageBlockTable>          
+              </apex:pageBlockSection>
+              </apex:outputPanel>
+              </apex:facet>
+              </apex:actionStatus> 
+              <apex:pageBlockSection columns="2" > 
+                <apex:outputField value="{!Aria_Account__c.Start_Balance__c}" label="Start Balance:"/> 
+                    <apex:outputField value="{!Aria_Account__c.End_Balance__c}" label="Slut balance:"/>  
+              </apex:pageBlockSection>  
+       </apex:outputPanel>
+     </apex:pageBlock>
+     
+    <div id="toTop" >
+        <img src="{!$Resource.CarrieBackToTop}" title="til top" width="15px" height="15px"/>
+    </div>
+    <script type="text/javascript">    
+        var scrollBottom = $(document).height() - $(window).height() - $(window).scrollTop();
+        scroll();
+        function scroll(){
+            if($(window).scrollTop()==0){
+                $('#toBottom').fadeIn();
+            }
+            $(window).scroll(function() {
+                if($(this).scrollTop() == 0) {
+                    $('#toTop').fadeOut();
+                    $('#toBottom').fadeIn();
+                }else if($(this).scrollTop() == scrollBottom) {
+                    $('#toBottom').fadeOut(); 
+                    $('#toTop').fadeIn(); 
+                }
+            });
+            $('#toTop').click(function() {
+                $('body,html').animate({scrollTop:0},800);
+            });
+            $('#toBottom').click(function() {
+                scrollBottom = $(document).height() - $(window).height() - $(window).scrollTop();
+                $('body,html').animate({scrollTop:scrollBottom},800);
+            });
+        }
+    getTransactionDetails()
+    </script>  
+
+</apex:page>

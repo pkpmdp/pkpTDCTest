@@ -1,0 +1,51 @@
+<apex:page cache="true" standardStylesheets="false" contentType="application/vnd.ms-excel#Contacts.xls" controller="ManageContactsController" showheader="false">
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+</head>
+<apex:pageBlock >
+
+<table border="1">
+   	<thead>
+   		<tr>
+   		  <th style="text-align:left;">Fornavn</th>
+   		  <th style="text-align:left;">Efternavn</th>
+   		  <!-- <th style="text-align:left;">Navn</th> -->
+   		  <th style="text-align:left;">Email</th>
+   		  <th style="text-align:left;">Alternativ e-mail</th>
+   		  <th style="text-align:left;">Arb. tlf</th>
+   		  <th style="text-align:left;">Mobil</th>
+   		  <th style="text-align:left;">Privat tlf.</th>
+   		  
+   		  <th style="text-align:left;">Adresse</th>
+   		  <th style="text-align:left;">Kontaktroller</th>
+   		</tr>
+   	</thead>
+   	<tbody> 
+		<apex:repeat value="{!listExport}" var="cuList">
+             <tr>
+				<td style="text-align:left;">{!cuList.FName}</td>
+	            <td style="text-align:left;">{!cuList.LName}</td> 
+				<!-- <td style="text-align:left;">{!cuList.FName}&nbsp;{!cuList.LName}</td> -->
+                <td style="text-align:left;">{!cuList.acr.Email__c}</td>
+                <td style="text-align:left;">{!cuList.alternateEmail}</td> 
+                <td style="text-align:left;">{!cuList.phone}</td>
+                <td style="text-align:left;">{!cuList.mobilePhone}</td>
+                <td style="text-align:left;">{!cuList.homePhone}</td>
+                <td style="text-align:left;">{!if(cuList.address.Name!=null,cuList.address.Name+',','')}{!if(cuList.address.House_No__c!=null,cuList.address.House_No__c+',','')}{!if(cuList.address.Entrance__c!=null,cuList.address.Entrance__c+',','')}{!if(cuList.address.Floor__c!=null,cuList.address.Floor__c+',','')}{!if(cuList.address.Postcode__c!=null,cuList.address.Postcode__c+',','')}{!if(cuList.address.Town__c!=null,cuList.address.Town__c,'')}</td>
+				<!-- <td style="text-align:left;">{!if(cuList.address.Name!=null,cuList.address.Name+',','')}{!if(cuList.address.House_No__c!=null,cuList.address.House_No__c+',','')}{!if(cuList.address.Entrance__c!=null,cuList.address.Entrance__c+',','')}{!if(cuList.address.Floor__c!=null,cuList.address.Floor__c+',','')}{!if(cuList.address.Side__c!=null,cuList.address.Side__c+',','')}{!if(cuList.address.Postcode__c!=null,cuList.address.Postcode__c+',','')}{!if(cuList.address.Town__c!=null,cuList.address.Town__c,'')}</td> -->
+				<td style="text-align:left;width:250px">{!cuList.roleName}</td> 
+             </tr>	      
+      </apex:repeat>    		
+   	</tbody>
+   </table>
+
+
+
+
+
+
+
+
+
+</apex:pageBlock>
+</apex:page>

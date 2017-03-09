@@ -1,0 +1,9 @@
+<apex:page standardController="Account" extensions="clsAnlaegNumberYSController" showHeader="false" sidebar="false" cache="true" standardStylesheets="true">
+  <apex:form >
+    <apex:panelGrid id="panel" bgcolor="" width="100%" border="0" cellpadding="0" cellspacing="0">
+      <apex:actionPoller action="{!checkAnlaegNumber}" rerender="anlaegNo" interval="5" enabled="{!pollerEnabled}"/>
+      <apex:inputHidden value="{!account.Cable_Unit_No__c}"/>
+      <apex:outputText value="{!anlaegNo}" id="anlaegNo"/>
+    </apex:panelGrid>
+  </apex:form>
+</apex:page>

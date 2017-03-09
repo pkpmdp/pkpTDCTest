@@ -1,0 +1,99 @@
+<apex:page controller="ViewInvoiceGeneralController" showHeader="false" sidebar="false" applyHtmlTag="false">
+ <html class="cvi2015">
+    <script type="text/javascript" src="{!siteCoreUrl}/sitecore/content/data/export/export.aspx?itemguid={369D088D-67BD-4E5A-8B9F-798EBF71E38F}&functions=true"></script>
+<body id="servicepage">
+<apex:form >
+<script type="text/javascript">printHeader();</script>
+<script type="text/javascript">printTopMenu();</script>
+<script type="text/javascript">printContentAreaBegin();</script>
+<script type="text/javascript"> var portalBrugerRole = '{!portalBrugerRole}'; </script>
+<c:SCLinksComponent CableUnitName="{!cableUnitName}" PortalBrugerRole="{!portalBrugerRole}" />
+<style>
+   .headerRow .headerStyle{background-color:#FFFFFF;color:#FFFFFF;text-align:center}
+</style>
+                   <div class="bullets"> 
+                        <ul>
+                            <li>  <apex:outputText value="{!$Label.SC_InvoiceHeaderText}" /> </li>
+                            
+                        </ul>
+                    </div>
+      <apex:pageBlock rendered="{!renderSection}">                      
+    <apex:pageBlock >
+         <apex:PageBlockSection title="Kundedetaljer" collapsible="false"  columns="2">
+                     <apex:pageBlockSectionItem >
+                                    <apex:outputLabel value="Kundenavn: " />
+                                    <apex:outputLabel value="{!cableunitName}" />
+                     </apex:pageBlockSectionItem>
+        
+                     <apex:pageBlockSectionItem >
+                                    <apex:outputLabel value="Kundenr: " />
+                                    <apex:outputLabel value="{!$CurrentPage.parameters.cableunitnumber}" />
+                     </apex:pageBlockSectionItem>
+        <!-- Commented for Pt. No 27(tasksbeforeDreamforce.xls) 
+                     <apex:pageBlockSectionItem >
+                        <apex:outputLabel style="font-weight:normal" value="Debitor Number: " />
+                                    <apex:outputLabel style="font-weight:normal" value="{!legalAccNumber}" />
+                     </apex:pageBlockSectionItem> -->
+          </apex:PageBlockSection>
+      </apex:pageBlock>
+      
+      <apex:pageBlock > 
+      <!--<apex:actionStatus id="refreshstatus" startText=" " stopText=" " >
+                    <apex:facet name="start" >Fetching Data from Server,Please Wait...<img src="/apexpages/devmode/img/saveStatus.gif" /></apex:facet>
+                    <apex:facet name="stop"></apex:facet>
+      </apex:actionStatus>-->    
+      <apex:PageBlockSection id="kontoBlock" title="Vælg konto" collapsible="false" columns="2">
+           <apex:pageBlockSectionItem labelStyle="width:25%">
+                 <apex:outputLabel value="Juridisk kontonr:" />
+                 <apex:outputLink value="{!$Site.Prefix}/apex/ViewInvoices">{!legalAccNumber}
+                              <apex:param name="cableunitnumber" value="{!$CurrentPage.parameters.cableunitnumber}"/>
+                              <apex:param name="accountTypeId" value="{!legalAccId}"/> 
+                              <apex:param name="accountNumber" value="{!legalAccNumber}"/> 
+                              <apex:param name="accountId" value="{!$CurrentPage.parameters.accountId}"/>                              
+                              <apex:param name="dataSyncLogId" value="{!$CurrentPage.parameters.dataSyncLogId}"/>
+                              <apex:param name="loggedInUserRoleName" value="{!$CurrentPage.parameters.loggedInUserRoleName}" />
+                 </apex:outputLink>  
+             </apex:pageBlockSectionItem>
+             
+             <apex:pageBlockSectionItem labelStyle="width:20%">
+                   <apex:outputLabel value="Betaler kontonr:" />
+                   <apex:outputLink value="{!$Site.Prefix}/apex/ViewInvoices">{!paymentAccNumber}
+                                <apex:param name="cableunitnumber" value="{!$CurrentPage.parameters.cableunitnumber}"/>
+                                <apex:param name="accountTypeId" value="{!paymentAccId}"/>
+                                <apex:param name="accountNumber" value="{!paymentAccNumber}"/>  
+                                <apex:param name="accountId" value="{!$CurrentPage.parameters.accountId}"/>                          
+                                <apex:param name="dataSyncLogId" value="{!$CurrentPage.parameters.dataSyncLogId}"/>
+                                <apex:param name="loggedInUserRoleName" value="{!$CurrentPage.parameters.loggedInUserRoleName}" />
+                      </apex:outputLink>
+             </apex:pageBlockSectionItem>
+       </apex:PageBlockSection>
+       </apex:pageBlock>
+        </apex:pageBlock>
+  <apex:pageMessage detail="{!$Label.CableUnitNotMatched}" rendered="{!!renderSection}" severity="error"></apex:pageMessage>                               
+         <br></br>
+         <p></p>      
+         <p></p>
+         <apex:outputText value="{!$Label.SC_InvoiceSubHeader}" styleClass="headerStyleLeft"/>
+         <br></br>
+        <br></br>
+        
+         <table>
+                
+                <tr>
+                    <td>
+                    <div class="bullets"> 
+                        <ul>
+                            <li> {!$Label.SC_InvoiceList1} </li>
+                            
+                            <li> {!$Label.SC_InvoiceList2} </li>
+                        </ul>
+                    </div>
+                    </td>
+                </tr>
+          </table>
+<script type="text/javascript">printContentAreaEnd();</script>
+<script type="text/javascript">printFooter();</script>
+</apex:form>
+</body>
+</html>
+</apex:page>

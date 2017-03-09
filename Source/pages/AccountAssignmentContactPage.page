@@ -1,0 +1,572 @@
+<apex:page standardController="Contact" extensions="AccountAssignmentContactController"  sidebar="false" showHeader="false" id="pageId">
+<apex:form id="formId">
+<apex:includeScript value="{!URLFOR($Resource.DynaTree,'/DynaTree/jquery/jquery.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.DynaTree,'/DynaTree/jquery/jquery-ui.custom.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.DynaTree,'/DynaTree/jquery/jquery.cookie.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.DynaTree,'/DynaTree/src/jquery.dynatree.js')}"/>
+<apex:stylesheet value="{!URLFOR($Resource.DynaTree,'/DynaTree/src/skin/ui.dynatree.css')}"/>
+
+
+<style>
+  .listAlign {  margin:2px 0px 1px 2px; display: block;} 
+  .profileDisplay{display: none;}
+  .headerRow .headerStyle{background-color:#638658;color:#FFFFFF}
+  .container{ overflow-x:hidden;overflow-y:auto; width:133%; } 
+  .parenttopAlign {  margin:1px 0px 1px 2px; display: block;} 
+  .disableByProfle{  background-color: #dcdcdc; cursor: default;}
+  .exceptionText { 
+       font-style:italic;
+       font-weight:bold;
+       color :red;
+   }
+</style>
+<apex:outputPanel id="FullPage">
+<script>
+  function reloadContactLayout(){
+    var status = {!statusAssignment};
+    if(status){
+        window.top.location='/{!contact.id}';
+    }
+  }
+  document.onload = reloadContactLayout();
+
+  function redirectToPortalLogin(){
+    var organId = '{!orgId}';
+    var porId = '{!portalId}';
+    var userId = '{!contactUserId}';
+    var conId = '{!contactId}';
+    var loginString = '/servlet/servlet.su?oid=' + organId + '&suportaluserid='+userId+'&retURL=%2F'+conId+'&targetURL=%2Fhome%2Fhome.jsp&suportalid=' + porId;
+//  window.top.location= '/servlet/servlet.su?oid=00DM0000000ARWB&suportaluserid=005M0000003k1TE&retURL=%2F003M0000008M3Tf&targetURL=%2Fhome%2Fhome.jsp&suportalid=060M00000000Q7r';
+    window.top.location= loginString;
+  }
+</script>
+</apex:outputPanel>
+<script type="text/javascript">
+                   //  document.write('jsonresponse: '+JSON.stringify(rootTreeObj));
+
+
+  
+
+var selectedIds='';
+ var  gstr = '';
+ var rootNode;
+ var parentId='';
+ $j = jQuery.noConflict();
+ $j(document).ready(function(){
+ var jsonArr ={!objectStrListJson};
+                var objMap = {};
+                var rootTreeObj = {};
+                $j.each(jsonArr, function(index,jsn){
+                                if(jsn.pos.nodeType == "start"){
+                                                rootTreeObj.title = jsn.pos.account.Name;
+                                                rootTreeObj.children = new Array();
+                                                rootTreeObj.accountType = jsn.pos.account.Type;
+                                                rootTreeObj.icon = "star16.png";
+                                                if(jsn.selected == true)
+                                                rootTreeObj.select=true;
+                                                else
+                                                rootTreeObj.select=false;
+                                                rootTreeObj.id=jsn.pos.account.Id;
+                                                rootTreeObj.key=jsn.pos.account.Id;
+                                                objMap[jsn.pos.account.Id] = rootTreeObj;
+                                }else if(jsn.pos.account.Type == "Hierarki"){
+                                                var parentObj = objMap[jsn.pos.account.ParentId];
+                                                TreeObj = {};
+                                                TreeObj.title = jsn.pos.account.Name;
+                                                TreeObj.children = new Array();
+                                                TreeObj.accountType = jsn.pos.account.Type;
+                                                TreeObj.icon = "factory16.png";
+                                                if(jsn.selected == true)
+                                                TreeObj.select=true;
+                                                else
+                                                TreeObj.select=false;
+                                                TreeObj.id=jsn.pos.account.Id;
+                                                TreeObj.key=jsn.pos.account.Id;
+                                                parentObj.children.push(TreeObj);
+                                                objMap[jsn.pos.account.Id] = TreeObj;
+                                }else if(jsn.pos.account.Type == "Kunde"){
+                                                var parentObj = objMap[jsn.pos.account.ParentId];
+                                                TreeObj = {};
+                                                if(jsn.pos.account.Cable_Unit__c != 'undefined' && jsn.pos.account.Cable_Unit__c != null){
+                                                        TreeObj.title = jsn.pos.account.Cable_Unit__r.Name+' '+jsn.pos.account.Anlaeg_No__c;
+                                                }
+                                                //TreeObj.title = jsn.pos.account.Cable_Unit__r.Name+' '+jsn.pos.account.Anlaeg_No__c;// SUPPORT-1633
+                                                TreeObj.icon = "desk16.png";
+                                                if(jsn.selected == true)
+                                                TreeObj.select=true;
+                                                else
+                                                TreeObj.select=false;
+                                                TreeObj.id=jsn.pos.account.Id;
+                                                TreeObj.key=jsn.pos.account.Id;
+                                                parentObj.children.push(TreeObj);
+                                }
+                
+                });
+
+ $j.ui.dynatree.nodedatadefaults["icon"] = false;
+ $j("#tree1").dynatree({
+            checkbox: true,
+            autoCollapse: false,
+            selectMode: 3,
+            fx: { height: "toggle", duration: 400 },
+            keyPathSeparator: "/",
+            children:rootTreeObj,
+            strings: {
+        loading: "Loading…",
+        loadError: "Load error!"
+            },            
+            classNames: {
+        container: "dynatree-container",
+        expanded: "dynatree-expanded"},
+        onSelect: function(select, node) {
+        
+      /*   if(node.hasChildren()){     
+           if(node.isSelected()){
+            node.visit(function(node){
+             node.select(true); 
+             });
+           }else{        
+            node.visit(function(node){
+             node.select(false); 
+            });        
+          }
+        }*/
+        
+        
+        // Get a list of all selected nodes, and convert to a key array:
+        var selKeys = $j.map(node.tree.getSelectedNodes(), function(node){
+          return node.data.key;
+        });
+     selectedIds = selKeys;
+     $j('#selectedIdsDiv').html(''+selectedIds);
+
+       
+      }
+         });
+       
+        
+         $j("#tree1").dynatree("getRoot").visit(function(node){
+    node.expand(true); 
+ }); 
+ 
+ rootNode = $j("#tree1").dynatree("getRoot");
+ 
+ if(('{!contact.UserProfile__c}').indexOf("Admin")!=-1){
+     $j("#tree1").dynatree("disable");
+    }
+ 
+   var selectedNodesObj = $j("#tree1").dynatree("getSelectedNodes");
+ 
+    var   selKeys = $j.map(selectedNodesObj, function(node){
+          return node.data.key;
+        });
+
+  selectedIds = selKeys;
+  $j('#selectedIdsDiv').html(''+selectedIds);
+ //alert('Selected: '+selectedIds); 
+});
+
+
+
+
+function updateHierarchy(){
+                 
+            var tmpselectobj = document.getElementsByTagName("select");
+            var allChkBoxes = document.getElementsByTagName("input");
+            for(var i =0;i<tmpselectobj.length;i++ ){
+                if((tmpselectobj[i].id).toString().indexOf("UserProfileId")!=-1){
+                profilComponent = tmpselectobj[i];
+                
+                }
+            } 
+            var selectedVal = profilComponent.value;
+            if(profilComponent.selectedIndex == '1'){
+            
+            $j("#tree1").dynatree("getRoot").visit(function(node){
+              node.select(true);
+             }); 
+
+             $j("#tree1").dynatree("disable");
+              
+            }else{
+            
+            $j("#tree1").dynatree("getRoot").visit(function(node){
+              node.select(false);
+             });
+             
+             $j("#tree1").dynatree("enable")
+              
+            }
+        }
+
+ $j('ul.dynatree-container').css("background-color","#E6E6E6");
+ 
+ function makeItDisabled(selectObject){
+           var checkObj = document.getElementById(selectObject);
+           var  selectComponent;
+           var selectobj = document.getElementsByTagName("select");
+           for(var i =0;i<selectobj.length;i++ ){
+               if((selectobj[i].id).toString().indexOf("UserProfileId")!=-1){
+                  selectComponent = selectobj[i];
+               }
+           }
+           if(checkObj.checked){
+              selectComponent.disabled=false;
+           }else{
+              selectComponent.disabled=true; 
+           }  
+             updateHierarchy();                
+      } 
+
+ </script>
+
+
+<body id="articlepage">
+<!--  <apex:actionFunction name="saveAction" action="{!save}"/>  JK-->
+<apex:actionFunction name="saveAction" action="{!save}" reRender="FullPage,contactnoUserPanel,contactErrorPanel,errMsgPanel,buttonRefresh" status="queryStatus">
+  <apex:param name="selectedIds"  assignTo="{!selectNodeIds}" value="" />
+  
+ </apex:actionFunction>
+ <apex:actionFunction name="refreshAction" action="{!refresh}"/>
+ 
+ 
+<apex:outputPanel id="contactLayoutPanel" rendered="{!displayuserSection}">
+  <apex:PageBlock id="pageBlockId">
+  <apex:outputPanel id="errMsgPanel">
+  <apex:messages id="errormsg" styleClass="exceptionText" globalOnly="true"/>  
+    </apex:outputPanel>
+    <apex:pageBlockSection title="" columns="3" collapsible="false" id="pbsId">
+        <apex:pageBlockSectionItem id="pbsiId1">
+            <apex:panelGrid title="" columns="2" styleClass="exceptionText" cellspacing="5"> 
+              <apex:outputLabel value="{!$Label.Enable_Customer_Portal_User}" /> 
+              <apex:inputCheckbox value="{!contact.Enable_Customer_Portal_User__c}" id="account__name" onclick="makeItDisabled('{!$Component.account__name}')" disabled="{!NOT(displayPageComponent)}"/> 
+            </apex:panelGrid>
+        </apex:pageBlockSectionItem>
+        <apex:pageBlockSectionItem id="pbsiId2">
+           <!-- <apex:commandButton id="portalLogin" value="{!$Label.SC_Login_As_Portal_User}" onclick="redirectToPortalLogin()" disabled="{!NOT(enableCustomerLoginButton)}"></apex:commandButton> -->
+           <apex:commandButton id="portalLogin" value="{!$Label.SC_Login_As_Portal_User}" onclick="redirectToPortalLogin()" disabled="{!OR(NOT(enableCustomerLoginButton),NOT(displayPageComponent))}"></apex:commandButton>
+        </apex:pageBlockSectionItem>
+        <apex:pageBlockSectionItem id="pbsiId3">
+            <apex:panelGrid title="" columns="2" styleClass="exceptionText" cellspacing="5"> 
+              <apex:outputLabel value="{!$Label.User_Profile}" /> 
+              <apex:inputfield value="{!contact.UserProfile__c}" id="UserProfileId" onchange="updateHierarchy()" rendered="{!displayPageComponent}"/> 
+              <apex:outputPanel rendered="{!NOT(displayPageComponent)}">
+                   <select disabled="true">
+                    <option value="None">{!contact.UserProfile__c}</option>
+                    <option value="ServiceCenter Portal Administrator">ServiceCenter Portal Administrator</option>
+                </select>
+              </apex:outputPanel>
+            </apex:panelGrid>            
+         </apex:pageBlockSectionItem>
+    </apex:pageBlockSection>
+  </apex:PageBlock>
+<!--   <apex:inputHidden id="hdnCntProfile" value="{!contactProfile}"></apex:inputHidden> --> 
+  <apex:outputPanel layout="block" styleClass="mailError" rendered="{!checkInActive == 'true' }" >
+     <apex:outputText value="{!$Label.SC_P2}"  />
+  </apex:outputPanel>
+  <apex:outputPanel layout="block" styleClass="mailError" rendered="{!checkInActive == 'false' }" >
+     <apex:outputText value="{!$Label.SC_P4}"  />
+  </apex:outputPanel>
+  <br>
+  <apex:outputText id="errorText" style="font-style:italic;color: red;font-weight:bold"/>
+  </br>
+  <apex:PageBlock id="PBId1">
+     <apex:pageBlockButtons location="bottom" id="pblockId">
+     <apex:outPutPanel id="buttonRefresh">
+             <apex:commandButton value="{!$Label.SC_EditContactPage_Save}" id="saveId" onclick="this.disabled='disabled';return validateDeactivation();" disabled="{!OR(disableFlag,NOT(displayPageComponent))}"></apex:commandButton>  
+      </apex:outPutPanel>  
+     <!--  <apex:commandButton action="{!save}" value="{!$Label.SC_EditContactPage_Save}" id="saveId" onclick="return validateDeactivation('{!$Component.saveId}');" disabled="{!disableFlag}"></apex:commandButton> -->
+     </apex:pageBlockButtons>
+        <apex:PageBlockSection title="Tildel kunde" collapsible="false" columns="1" rendered="true" id="PBS1">
+            <div id="tree1"></div><br/>
+  
+         </apex:PageBlockSection>
+    </apex:PageBlock> 
+ <script type="text/javascript">
+ var enableUserchk = document.getElementById('pageId:formId:pageBlockId:pbsId:pbsiId1:account__name');
+         var selectobj = document.getElementsByTagName("select");
+         for(var i =0;i<selectobj.length;i++ ){
+              if((selectobj[i].id).toString().indexOf("UserProfileId")!=-1){
+                 selectComponent = selectobj[i];
+              }
+          }
+          if(enableUserchk.checked){
+              selectComponent.disabled=false;
+          }else{
+               selectComponent.selectedIndex = 0;
+               selectComponent.disabled=true;
+           }
+           
+                    
+/* new comment     function makeItDisabled(selectObject){
+           var checkObj = document.getElementById(selectObject);
+           var  selectComponent;
+           var selectobj = document.getElementsByTagName("select");
+           for(var i =0;i<selectobj.length;i++ ){
+               if((selectobj[i].id).toString().indexOf("UserProfileId")!=-1){
+                  selectComponent = selectobj[i];
+               }
+           }
+           if(checkObj.checked){
+              selectComponent.disabled=false;
+           }else{
+              selectComponent.disabled=true; 
+           }  
+             updateHierarchy();                
+      }  
+            
+      function validateDeactivation(){
+           var selected;
+           var boluserExist = {!userExist};
+           var boluserActive = {!userIsActive};
+           var userInput;
+           var inputElem = document.getElementsByTagName("input");
+           for(var i=0; i<inputElem.length; i++){
+               if((inputElem[i].id).toString().indexOf("account__name") != -1){
+                  if(inputElem[i].checked){
+                     selected = true;
+                  }else{
+                      selected = false;
+                  }
+               }
+           }
+           if(boluserExist == true && selected == false && boluserActive == true){
+               userInput=confirm('Du ved at deaktivere en portalbruger/portaladministrator. Deaktivering vil slette alle nuværende adgangsrettigheder i kundehierarkiet. Er du sikker?');
+               if(userInput == true){
+                    saveAction();
+                   return true;
+               }else{
+                    refreshAction()
+                   return false;
+               }
+           }
+           saveAction();
+      } */
+       function validateDeactivation(){
+ //              alert('Hello' + selectedIds);
+           var selected;
+           var boluserExist = {!userExist};
+           var boluserActive = {!userIsActive};
+           var userInput;
+           var inputElem = document.getElementsByTagName("input");
+           for(var i=0; i<inputElem.length; i++){
+               if((inputElem[i].id).toString().indexOf("account__name") != -1){
+                  if(inputElem[i].checked){
+                     selected = true;
+                  }else{
+                      selected = false;
+                  }
+               }
+           }
+           if(boluserExist == true && selected == false && boluserActive == true){
+               userInput=confirm('Du ved at deaktivere en portalbruger/portaladministrator. Deaktivering vil slette alle nuværende adgangsrettigheder i kundehierarkiet. Er du sikker?');
+               if(userInput == true){
+          //     alert(selectedIds);
+                    saveAction(''+selectedIds);
+                   return true;
+               }else{
+                    refreshAction()
+                   return false;
+               }
+           }
+   
+           saveAction(''+selectedIds);
+      }
+      /*
+       function validateDeactivation(savebutton){
+           var savebuttonId = document.getElementById(savebutton);
+           var selected;
+           var boluserExist = {!userExist};
+           var boluserActive = {!userIsActive};
+           var userInput;
+           var inputElem = document.getElementsByTagName("input");
+           savebuttonId.disabled = true;
+           for(var i=0; i<inputElem.length; i++){
+               if((inputElem[i].id).toString().indexOf("account__name") != -1){
+                  if(inputElem[i].checked){
+                     selected = true;
+                  }else{
+                      selected = false;
+                  }
+               }
+           }
+           if(boluserExist == true && selected == false && boluserActive == true){
+               userInput=confirm('Du ved at deaktivere en portalbruger/portaladministrator. Deaktivering vil slette alle nuværende adgangsrettigheder i kundehierarkiet. Er du sikker?');
+               if(userInput == true){
+                    saveAction();
+                   return true;
+               }else{
+                    refreshAction()
+                   return false;
+               }
+           }
+           saveAction();
+      } */
+        
+/* new comment      function updateHierarchy(){
+                 
+            var tmpselectobj = document.getElementsByTagName("select");
+            var allChkBoxes = document.getElementsByTagName("input");
+            for(var i =0;i<tmpselectobj.length;i++ ){
+                if((tmpselectobj[i].id).toString().indexOf("UserProfileId")!=-1){
+                profilComponent = tmpselectobj[i];
+                
+                }
+            } 
+            var selectedVal = profilComponent.value;
+            if(profilComponent.selectedIndex == '1'){
+               var chkAll = document.getElementById('pageId:formId:PBId1:PBS1:prId1:0:checkedone');
+               chkAll.checked = true;
+               checkAll(chkAll, 'start', 'true');
+               for(var i =0;i<allChkBoxes.length;i++ ){
+                 if(allChkBoxes[i].type == "checkbox"){
+                     if((allChkBoxes[i].id).toString().indexOf("account__name") != -1){
+                         continue;
+                     }else{
+                         allChkBoxes[i].disabled = true;
+                     }   
+                 }
+               }
+            }else{
+               var chkAll = document.getElementById('pageId:formId:PBId1:PBS1:prId1:0:checkedone');
+               chkAll.checked = false;
+               checkAll(chkAll, 'start', 'true');
+               for(var i =0;i<allChkBoxes.length;i++ ){
+                   if(allChkBoxes[i].type == "checkbox"){
+                       allChkBoxes[i].disabled = false;    
+                   }
+               }
+            }
+        } */
+</script>
+</apex:outputPanel>
+<apex:outputPanel id="contactnoUserPanel" rendered="{!displaynoUserSection}">
+    <apex:PageBlock id="pbIdnoUser">
+         <apex:messages id="errormsgnoUser" styleClass="exceptionText" globalOnly="true"/>
+         <apex:pageBlockSection title="" columns="3">
+             <apex:pageBlockSectionItem id="pbsnoUser">
+               <apex:panelGrid title="" columns="2" styleClass="exceptionText" cellspacing="5">     
+                 <apex:outputLabel value="{!$Label.Enable_Customer_Portal_User}"/> 
+                 <apex:inputfield value="{!contact.Enable_Customer_Portal_User__c}" id="account__namenoUser" />
+               </apex:panelGrid>  
+             </apex:pageBlockSectionItem>
+             <apex:pageBlockSectionItem >     
+                 <apex:commandButton id="portalLogin" value="{!$Label.SC_Login_As_Portal_User}" onclick="redirectToPortalLogin()" disabled="{!NOT(enableCustomerLoginButton)}"></apex:commandButton>
+            </apex:pageBlockSectionItem>     
+            <apex:pageBlockSectionItem >
+               <apex:panelGrid title="" columns="2" styleClass="exceptionText" cellspacing="5"> 
+                 <apex:outputLabel value="{!$Label.User_Profile}"/>  
+              <select disabled="true">
+                    <option value="None">None</option>
+                    <option value="ServiceCenter Portal Administrator">ServiceCenter Portal Administrator</option>
+                </select>  
+               </apex:panelGrid>  
+             </apex:pageBlockSectionItem>    
+ 
+         </apex:pageBlockSection>
+    </apex:PageBlock>
+<!--    <apex:inputHidden id="hdnCntProfilenoUser" value="{!contactProfile}"></apex:inputHidden> -->
+    
+    <apex:outputPanel layout="block" styleClass="mailError" rendered="{!checkInActive == 'true' }" >
+             <apex:outputText value="{!$Label.SC_P2}"  />
+    </apex:outputPanel>
+    <apex:outputPanel layout="block" styleClass="mailError" rendered="{!checkInActive == 'false' }" >
+             <apex:outputText value="{!$Label.SC_P4}"  />
+    </apex:outputPanel>
+        
+    <br>
+    <apex:outputText id="errorTextnoUser" style="font-style:italic;color: red;font-weight:bold"/></br>
+        
+    <apex:PageBlock >
+        <apex:pageBlockButtons location="bottom" id="pblockIdnoUser">
+           <apex:commandButton action="{!saveOne}" value="{!$Label.SC_EditContactPage_Save}" disabled="true" id="saveIdnoUser"></apex:commandButton>
+        </apex:pageBlockButtons>
+           
+        <apex:pageBlockSection columns="1">
+           <apex:outputLabel value="{!$Label.SC_HierarchyAccount_Error_NoUser}" /> 
+        </apex:pageBlockSection>
+    </apex:PageBlock>
+    <script>
+         function makeChkBoxDisabled(){
+            var inputobj = document.getElementsByTagName("input");
+            for(var i =0;i<inputobj.length;i++ ){
+                if((inputobj[i].id).toString().indexOf("account__namenoUser")!=-1){
+                    inputComponent = inputobj[i];
+                }
+             }
+          inputComponent.disabled = true;
+          }
+    </script>   
+    <script> makeChkBoxDisabled() </script>
+
+</apex:outputPanel>
+
+<apex:outputPanel id="contactErrorPanel" rendered="{!displayErrorSection}"> 
+    <script>
+         function makeItDisabledError(selectObject){
+             var checkObj = document.getElementById(selectObject);
+             var  selectComponent;
+             var selectobj = document.getElementsByTagName("select");
+             for(var i =0;i<selectobj.length;i++ ){
+                if((selectobj[i].id).toString().indexOf("UserProfileIdError")!=-1){
+                   selectComponent = selectobj[i];
+                }
+             }
+             if(checkObj.checked){
+                selectComponent.disabled=false;
+             }else{
+             selectComponent.disabled=true; 
+             }                  
+         } 
+    </script>
+    <apex:PageBlock id="pbIdError">
+       <apex:messages id="errorMsgErr"styleClass="exceptionText" globalOnly="true"/>
+       <apex:pageBlockSection title="" columns="3" collapsible="false">
+          <apex:pageBlockSectionItem >
+               <apex:panelGrid title="" columns="2" styleClass="exceptionText" cellspacing="5">     
+                  <apex:outputLabel value="{!$Label.Enable_Customer_Portal_User}"/>
+                  <apex:inputfield value="{!contact.Enable_Customer_Portal_User__c}" id="account__nameError" onclick="makeItDisabledError('{!$Component.account__nameError}')"/> 
+               </apex:panelGrid> 
+          </apex:pageBlockSectionItem>
+          <apex:pageBlockSectionItem >          
+                  <apex:commandButton id="portalLogin" value="{!$Label.SC_Login_As_Portal_User}" onclick="redirectToPortalLogin()" disabled="{!NOT(enableCustomerLoginButton)}"></apex:commandButton>
+          </apex:pageBlockSectionItem>
+          <apex:pageBlockSectionItem >
+               <apex:panelGrid title="" columns="2" styleClass="exceptionText" cellspacing="5"> 
+                  <apex:outputLabel value="{!$Label.User_Profile}"/> 
+                  <apex:inputfield value="{!contact.UserProfile__c}" id="UserProfileIdError"/> 
+               </apex:panelGrid>  
+          </apex:pageBlockSectionItem> 
+          <script> makeItDisabledError('{!$Component.account__nameError}')</script>
+       </apex:pageBlockSection>
+    </apex:PageBlock>
+<!--    <apex:inputHidden id="hdnCntProfileError" value="{!contactProfile}"></apex:inputHidden> -->
+    <apex:outputPanel layout="block" styleClass="mailError" rendered="{!checkInActive == 'true' }" >
+         <apex:outputText value="{!$Label.SC_P2}"  />
+    </apex:outputPanel>
+    <apex:outputPanel layout="block" styleClass="mailError" rendered="{!checkInActive == 'false' }" >
+         <apex:outputText value="{!$Label.SC_P4}"  />
+    </apex:outputPanel>
+    <br>
+    <apex:outputText id="errorTextError" style="font-style:italic;color: red;font-weight:bold"/></br>
+    <apex:PageBlock >
+       <apex:pageBlockButtons location="bottom" id="pblockIdError">
+            <apex:commandButton action="{!saveOne}" value="{!$Label.SC_EditContactPage_Save}" id="saveIdError"></apex:commandButton>
+        </apex:pageBlockButtons>
+       
+       <apex:pageBlockSection columns="1">
+            <apex:outputLabel value="{!$Label.SC_HierarchyAccount_Error}" rendered="{!userIsActive}"/> 
+            <apex:outputLabel value="{!$Label.SC_HierarchyAccount_Error_InactiveUser}" rendered="{!NOT(userIsActive)}"/> 
+       </apex:pageBlockSection>
+    </apex:PageBlock>
+
+</apex:outputPanel>  
+</body>
+<apex:actionStatus id="queryStatus">  
+                <apex:facet name="start">
+                     <c:CarrieHenterData BackColor="#efefef" borderColor="#336699" borderSize="3" height="50px" width="180px" ImageUrl="{!$Resource.CarrieLoading}" Message="Henter Data..." messageStyle="color:darkred;font-size:11pt;font-weight:bold;"/> 
+                </apex:facet>
+                </apex:actionStatus>
+
+</apex:form>
+</apex:page>

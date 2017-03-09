@@ -1,0 +1,100 @@
+<apex:page standardController="Account" extensions="OperativeTroubleshootingController" showHeader="false" sidebar="false" cache="true" >
+<style>
+body .individualPalette .bDetailBlock.bPageBlock {
+margin-bottom: 0px;
+}
+</style>
+
+<apex:includeScript value="{!URLFOR($Resource.hiOffOverwrite)}"/>
+
+<div id="biaod_frame">
+    <apex:pageMessages />
+    <apex:outputField rendered="false" value="{!Account.Street_YK__c}"/>
+    <apex:pageBlock mode="maindetail">
+        <apex:pageBlockSection columns="2">
+            <apex:pageBlockSectionItem rendered="{!ActiveErrorsCount > 0}">
+                <apex:outputText style="padding:1px 0 1px 25px; background:url('{!URLFOR($Resource.BierDots, 'img/exc.png')}') no-repeat 0 0" value="{!$Label.BIER_ActiveErrors_Label}" />
+                <apex:outputLink id="di_type_ae" value="{!ActiveErrorsUrl}" target="{!IF(ActiveErrorsCount == 1, '_blank', '_parent')}">{!ActiveErrorsCount}</apex:outputLink>
+            </apex:pageBlockSectionItem>
+            <apex:pageBlockSectionItem rendered="{!ActiveErrorsCount == 0}">
+                <apex:outputLabel value="{!$Label.BIER_ActiveErrors_Label}" for="di_type_ae"/>
+                <apex:outputText id="di_type_ae" value="0" />
+            </apex:pageBlockSectionItem>
+            <apex:pageBlockSectionItem rendered="{!ActiveActivitiesCount > 0 && ActiveActivitiesUrl!='#'}">
+                <apex:outputText style="padding:1px 0 1px 25px; background:url('{!URLFOR($Resource.BierDots, 'img/exc.png')}') no-repeat 0 0" value="{!$Label.BIER_ActiveActivities_Label}" />
+                <apex:outputLink id="di_type_aa" value="{!ActiveActivitiesUrl}" target="{!IF(ActiveActivitiesCount == 1, '_blank', '_parent')}">{!ActiveActivitiesCount}</apex:outputLink>
+            </apex:pageBlockSectionItem>
+            <apex:pageBlockSectionItem rendered="{!ActiveActivitiesCount > 0 && ActiveActivitiesUrl=='#'}">
+                <apex:outputText style="padding:1px 0 1px 25px; background:url('{!URLFOR($Resource.BierDots, 'img/exc.png')}') no-repeat 0 0" value="{!$Label.BIER_ActiveActivities_Label}" />
+                <span onclick="document.getElementById('warn').style.display='inline'" style="text-decoration:underline">{!ActiveActivitiesCount}</span>
+                <span id = "warn" style="color:red;display:None" >{!$Label.BIER_Activity_Not_in_Bier}</span>
+            </apex:pageBlockSectionItem>
+            <apex:pageBlockSectionItem rendered="{!ActiveActivitiesCount == 0}">
+                <apex:outputLabel value="{!$Label.BIER_ActiveActivities_Label}" for="di_type_aa"/>
+                <apex:outputText id="di_type_aa" value="0" />
+            </apex:pageBlockSectionItem>
+        </apex:pageBlockSection>
+    </apex:pageBlock>
+    <apex:pageBlock mode="maindetail">
+        <apex:panelGrid columns="1" id="theGrid" rendered="{!NumberOfRecords == 0}">
+            <apex:outputText value="{!$Label.BIER_OperativeInfo_Title}" style="font-weight:800"/>
+            <apex:outputText value="{!$Label.BIER_NoRecords}"/>
+        </apex:panelGrid>
+        <apex:outputText value="{!$Label.BIER_OperativeInfo_Current}" rendered="{!NumberOfRecords > 0}" style="font-weight:800"/>
+        <div style="{!IF(NumberOfRecords <= 4, '', 'height:200px;overflow-y:scroll;')}'">
+            <apex:pageBlockTable value="{!Current}" var="item" id="tblCurrent" rendered="{!NumberOfRecords > 0}" columns="9" columnsWidth="7%,1%,28%,4%,28%,8%,8%,8%,8%" width="100%">
+                <apex:column headerValue="{!$ObjectType.Operative_Troubleshooting__c.fields.DriftInfo_Id__c.label}">
+                    <apex:outputText value="{!MID(item.Type__c, 0, 1)}-{!TEXT(item.DriftInfo_Id__c)}"/>
+                </apex:column>
+                <apex:column >
+                    <apex:image rendered="{!IF(OR(ISBLANK(item.Updated_date__c), ISNULL(item.Updated_date__c)), false, ROUND((NOW()-item.Updated_date__c) * 24 * 60, 0) <= 60)}" alt="" url="{!URLFOR($Resource.BierDots, 'img/blue.gif')}" width="7" height="7" />
+                </apex:column>
+                <apex:column headerValue="{!$ObjectType.Operative_Troubleshooting__c.fields.Name.label}">
+                    <!--
+                    <apex:outputLink value="/apex/OperativeTroubleshootingDetailPage?id={!item.Id}" id="urlDetail" styleClass="urlOperativesDetail" target="_parent">{!item.Name}</apex:outputLink>
+                    -->
+                    <apex:outputLink value="https://biersys.dk/driftinfo/di_get.cgi?id={!TEXT(item.DriftInfo_Id__c)}" id="urlDetail" styleClass="urlOperativesDetail" target="BIER" onclick="newwindow=window.open('https://biersys.dk/driftinfo/di_get.cgi?id={!TEXT(item.DriftInfo_Id__c)}', 'BIER');if (window.focus) {newwindow.focus()};return false;">{!item.Name}</apex:outputLink>
+                </apex:column>
+                <apex:column headerValue="{!$ObjectType.Operative_Troubleshooting__c.fields.Status_Short__c.label}">
+                    <apex:outputText value="{!item.Status__c}" />
+                </apex:column>
+                <apex:column value="{!item.Area__c}"/>
+                <apex:column value="{!item.Category__c}"/>
+                <apex:column value="{!item.HF_number__c}"/>
+                <apex:column value="{!item.Network_number__c}"/>
+                <apex:column headerValue="{!$ObjectType.Operative_Troubleshooting__c.fields.BIER_number_url__c.label}">
+                    <apex:outputLink value="{!OperativesUrl & item.BIER_number__c}" id="urlBIER" target="BIER" rendered="{!IF(item.BIER_number__c == '', 'false', 'true')}" onclick="newwindow=window.open('{!OperativesUrl & item.BIER_number__c}', 'BIER');if (window.focus) {newwindow.focus()};return false;">{!item.BIER_number__c}</apex:outputLink>
+                </apex:column>
+            </apex:pageBlockTable>
+        </div>
+        <br />
+        <apex:outputText value="{!$Label.BIER_OperativeInfo_Coming}" rendered="{!NumberOfRecords > 0}" style="font-weight:800"/>
+        <div style="{!IF(NumberOfRecords <= 4, '', 'height:150px;overflow-y:scroll;')}'">
+            <apex:pageBlockTable value="{!Coming}" var="item" id="tblComing" rendered="{!NumberOfRecords > 0}" columns="9" columnsWidth="7%,1%,28%,4%,28%,8%,8%,8%,8%" width="100%">
+                <apex:column headerValue="{!$ObjectType.Operative_Troubleshooting__c.fields.DriftInfo_Id__c.label}">
+                    <apex:outputText value="{!MID(item.Type__c, 0, 1)}-{!TEXT(item.DriftInfo_Id__c)}"/>
+                </apex:column>
+                <apex:column >
+                    <apex:image rendered="{!IF(OR(ISBLANK(item.Updated_date__c), ISNULL(item.Updated_date__c)), false, ROUND((NOW()-item.Updated_date__c) * 24 * 60, 0) <= 60)}" alt="" url="{!URLFOR($Resource.BierDots, 'img/blue.gif')}" width="7" height="7" />
+                </apex:column>
+                <apex:column headerValue="{!$ObjectType.Operative_Troubleshooting__c.fields.Name.label}">
+                    <!--
+                    <apex:outputLink value="/apex/OperativeTroubleshootingDetailPage?id={!item.Id}" id="urlDetail" styleClass="urlOperativesDetail" target="_parent">{!item.Name}</apex:outputLink>
+                    -->
+                    <apex:outputLink value="https://biersys.dk/driftinfo/di_get.cgi?id={!TEXT(item.DriftInfo_Id__c)}" id="urlDetail" styleClass="urlOperativesDetail" target="BIER" onclick="newwindow=window.open('https://biersys.dk/driftinfo/di_get.cgi?id={!TEXT(item.DriftInfo_Id__c)}', 'BIER');if (window.focus) {newwindow.focus()};return false;">{!item.Name}</apex:outputLink>
+                </apex:column>
+                <apex:column headerValue="{!$ObjectType.Operative_Troubleshooting__c.fields.Status_Short__c.label}">
+                    <apex:outputText value="{!item.Status__c}" />
+                </apex:column>
+                <apex:column value="{!item.Area__c}"/>
+                <apex:column value="{!item.Category__c}"/>
+                <apex:column value="{!item.HF_number__c}"/>
+                <apex:column value="{!item.Network_number__c}"/>
+                <apex:column headerValue="{!$ObjectType.Operative_Troubleshooting__c.fields.BIER_number_url__c.label}">
+                    <apex:outputLink value="{!OperativesUrl & item.BIER_number__c}" id="urlBIER" target="BIER" rendered="{!IF(item.BIER_number__c == '', 'false', 'true')}" onclick="newwindow=window.open('{!OperativesUrl & item.BIER_number__c}', 'BIER');if (window.focus) {newwindow.focus()};return false;">{!item.BIER_number__c}</apex:outputLink>
+                </apex:column>
+            </apex:pageBlockTable>
+        </div>
+    </apex:pageBlock>
+</div>
+</apex:page>

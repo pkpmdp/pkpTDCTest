@@ -1,0 +1,31 @@
+<apex:page standardController="Gift_Code_Send__c" extensions="BBGiftCodeResultController" action="{!init}">
+	<apex:includeScript value="{!URLFOR($Resource.jQuery160)}"/>
+	<apex:includeScript value="/support/console/26.0/integration.js"/>
+	
+	<apex:sectionHeader title="{!title}"> </apex:sectionHeader> 
+	<apex:form >
+		<apex:pageBlock >
+		<apex:pageMessages />
+			<apex:pageBlockButtons >
+				<apex:commandButton action="{!cancel}" value="{!$Label.GIFT_Exit}" />				
+			</apex:pageBlockButtons>
+			<apex:pageBlockSection title="{!customerText}" columns="1"  >
+				<apex:pageBlockSection rendered="{!wasSent}" columns="1"  >
+					<!-- <apex:outputText rendered="{!WasSentSms}" value="{!countSmsText}"/> -->
+					<apex:outputText rendered="{!WasSentEmail}" value="{!countEmailText}"/>
+					<apex:dataList value="{!codes}" var="gift" id="theList">
+						<apex:outputText escape="false" 
+							value="{!gift.string}"/>							     						
+					</apex:dataList>
+				</apex:pageBlockSection>   
+				<apex:pageBlockSection title="{!$Label.GIFT_Read_To_Customer}" rendered="{!GiftSend.Readed__c}" columns="1"  >
+					<!--  <apex:outputText value="{!$Label.GIFT_Read_To_Customer}"/> -->
+					<apex:dataList value="{!codes}" var="gift" id="theList">
+						<apex:outputText escape="false" 
+							value="{!gift.string}"/>							     						
+					</apex:dataList>
+				</apex:pageBlockSection>
+			</apex:pageBlockSection>           	
+		</apex:pageBlock>
+	</apex:form>
+</apex:page>

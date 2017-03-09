@@ -1,0 +1,193 @@
+<apex:page showHeader="false" sidebar="false" controller="Oasis_CUSearch_CT" 
+		standardstylesheets="false" doctype="HTML-5.0">
+   <apex:composition template="Oasis_SiteTemplate"/>
+     <apex:define name="body">          
+         <div class="container-fluid">         	 
+         	 <apex:outputPanel rendered="{!createdCase != null}"> 
+	         	 <div class="alert alert-success">
+	             	 <a class="close" data-dismiss="alert" href="#">×</a>
+	               	<span id = "alertSpan">Case#{!createdCase.CaseNumber} blevet oprettet.</span>
+	           	 </div>
+	         </apex:outputPanel>
+	           	   
+             <apex:form styleclass="form-horizontal" id="theForm" > 
+                    <legend>Anlæg søgning</legend>
+                    <div class="row-fluid">
+                    	<div class="span12">
+                        	<div class="control-group">
+                        		<label class="control-label" for="cuId">Anlægs ID&nbsp;<span class = "errorStar">*</span></label> 
+                        		<div class="controls">
+                             		<apex:inputText styleclass="input-large requ" label="Anlægs ID" value="{!cable_unit_No}" onblur="fixCUNo(this);" id="cuId"/>  
+                        		</div>
+                    		</div>
+                        </div>    
+                 	</div>
+                     <div class="row-fluid">
+                            <div class="control-group">
+                                <div class="controls">
+                                    <apex:commandButton value="Søg" action="{!searchCUWrapper}"                             					
+                                                        styleClass="btn" />                                                        
+                                    <!--<apex:commandButton value="Søg Addresse" 
+                                                        onclick="openWindow(urlInstallationSearch);return false;"
+                                                        styleClass="btn visible-phone"/>-->
+                                    <input type = "button" value = "Ryd" class = "btn" onClick = "openWindow(urlCUSearch)" />
+                                    <br/>                            
+                                </div>
+                    		</div>      
+                      </div>                 	
+                 	 
+             </apex:form>
+             <apex:form styleclass="form-horizontal" id="searchResults">                                 
+                 <apex:outputPanel rendered="{!listCU != null}">
+                 	<legend>Anlægs Oplysninger</legend> 
+                 	<apex:outputPanel rendered="{!listCU.size == 0}"> 
+			                 	Ingen søgeresultater fundet
+				     </apex:outputPanel>
+	                 <apex:outputPanel rendered="{!listCU.size > 0}">         
+	                                <div class="control-group">
+	                                    <label class="control-label" id = "cuNo"><strong>Anlægs ID</strong></label>                         	
+	                                    <div class="controls readOnly">                            	
+	                                        <apex:outputText id="cuNo" styleClass="input-large" value="{!cable_unit_No}"/>
+	                                    </div>    
+	                                </div>    
+	                                
+	                                <div class="control-group">
+	                                    <label class="control-label"><strong>Navn</strong></label>                         	
+	                                    <div class="controls readOnly">                            	
+	                                        <apex:outputText id="cuName" styleClass="input-large" value="{!cableUnit.Name}"/>
+	                                    </div>
+	                                 </div>    
+	                                
+	                                 <div class="control-group">	
+	                                    <label class="control-label"><strong>HF nr.</strong></label>                             	
+	                                    <div class="controls readOnly">                            	
+	                                        <apex:outputText styleClass="input-large" value="{!cableUnit.HF_no__c }"/>
+	                                    </div> 
+	                                 </div>
+	                                
+	                                 <div class="control-group">    
+	                                    <label class="control-label"><strong>Nøgleboks</strong></label>                          	
+	                                    <div class="controls readOnly">                            	
+	                                        <apex:outputText styleClass="input-large" value="{!cableUnit.Key_Box__c}"/>
+	                                    </div>  
+	                                 </div>    
+	                                
+	                                 <div class="control-group">    
+	                                    <label class="control-label"><strong>Salgskoncept</strong></label>                          	
+	                                    <div class="controls readOnly">                            	
+	                                        <apex:outputText styleClass="input-large" value="{!cableUnit.current_kiss_case__r.Sales_Concept__c}"/>
+	                                    </div>   
+	                                 </div>    
+	                                
+	                                 <div class="control-group">    
+	                                    <label class="control-label"><strong>Ejer</strong></label>                          	
+	                                    <div class="controls readOnly">                            	
+	                                        <apex:outputText styleClass="input-large" value="{!cableUnit.CA_Ownership__c}"/>
+	                                    </div>  
+	                                 </div>
+	                                
+	                                 <div class="control-group">    
+	                                    <label class="control-label"><strong>Idriftsdato</strong></label>                          	
+	                                    <div class="controls readOnly">                            	
+	                                        <apex:outputText styleClass="input-large" value="{0,date, MMM dd',' yyyy}">
+	                                            <apex:param value="{!cableUnit.Operation_Date__c}"/>       
+	                                        </apex:outputText>    
+	                                    </div>  
+	                                 </div>    
+	        
+	                                 <div class="control-group">     
+	                                    <label class="control-label"><strong>Anlægsform</strong></label>                          	
+	                                    <div class="controls readOnly">                            	
+	                                        <apex:outputText styleClass="input-large" value="{!cableUnit.Subtype__c}"/>
+	                                    </div>   
+	                                 </div> 
+	                                  <div class="control-group">
+					                     <label class="control-label"><strong>Kontrol dato</strong></label>                         	
+					                     <div class="controls readOnly">                            	
+					                         <apex:outputText styleClass="input-large" 
+					                                value="{0, date, MMM dd',' yyyy}">
+					                                    <apex:param value="{!cableUnit.Control_Date__c}"/>      
+					                         </apex:outputText>           
+					                     </div>    
+					                 </div>
+	                                 <div class="control-group">     
+	                                    <label class="control-label"><strong>Registrering</strong></label>                          	
+	                                    <div class="controls">                            	
+	                                        <apex:selectList value="{!regCode}" size="1" label="Registrering" id="regCode" disabled="{!lockedCableUnit}">
+	                                                <apex:selectOption itemvalue="Vælg" itemLabel="Vælg"/>
+	                                                <apex:selectOptions value="{!listCURegCodes}"/>
+	                                        </apex:selectList>
+	                                    </div>   
+	                                 </div> 
+	                                 <div class="control-group">     
+	                                    <label class="control-label"><strong>Kommentarer</strong></label>                          	
+	                                    <div class="controls">                            	
+	                                        <apex:inputTextarea label="Kommentarer" value="{!comments}" 
+	                                        					rows="4" cols="50" id="comments" disabled="{!lockedCableUnit}"/> 
+	                                    </div>   
+	                                 </div>
+	                                
+	                                <div class="control-group">
+	                                    <div class="controls">
+	                                        <input type = "hidden" id = "CUNo" value = "{!cableUnit.cable_unit_no__c}"/>                               
+	                                        <apex:commandButton value="Gem Registrering" 
+	                                        					action="{!registerCase}" 
+	                                        					styleClass="btn"
+	                                        					disabled="{!lockedCableUnit}"/>
+	                                    </div>
+	                                </div>                    
+	                  </apex:outputPanel> 
+                 </apex:outputPanel>
+                  
+             </apex:form>
+            
+        </div>       
+     </apex:define> 
+    	 <script language = "javascript">
+            //$j defined in Oasis_SiteTemplate
+            // enable jquery validation at document ready
+            
+         	$j(document).ready(function() {            
+                 // define validation styles at the form level               
+               	 enableFormValidation($j('[id$=theForm]'));
+                 enableFormValidation($j("[id$=searchResults]"));
+               	 
+               	 // mark the cuId text field as required
+               	 $j("[id$=cuId]").attr("required",true);
+                 
+                 //  Register the method in the validator
+                 $j.validator.addMethod("regCodeSelect",validateRegistrering,"Vælg en kode.");
+                 
+                 // validation definition at the field level
+                 $j('[id$=cuId]').rules("add", {required: true, messages: {required: "Anlægs ID er påkrævet."}});
+                 $j('[id$=cuId]').rules("add", {number: true, messages: {number: "Anlægs ID skal være et tal"}});
+                 if($j('[id$=regCode]').length > 0)
+                 	$j('[id$=regCode]').rules("add",{regCodeSelect: true, messages: {regCodeSelect: "Registrering er påkrævet."}});
+                 if($j('[id$=regCode]').length > 0)	
+                 	$j('[id$=comments]').rules("add",{required:true, messages:{required: "Kommentarer er påkrævet."}});
+                
+                // check cable unit status
+                checkCableunitLock();
+         });         
+        
+            
+        function searchCU()
+        {
+          //if('{!cableUnit}' != '' ) //&& '{!cable_unit_No}' != ''
+          //{
+          	$j('[id$=theForm]').validate().cancelSubmit = true;
+          //	return false;
+          //}        
+          //return true;
+        } // end-function
+        
+        // function to disable case registeration if cable unit is locked 
+        function checkCableunitLock(){
+        	var lock = {!lockedCableUnit};
+        	if(lock == true){
+        		$j("[id$=registerCase]").attr("disabled",true);
+  			}
+        }
+         
+        </script> 
+</apex:page>

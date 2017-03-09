@@ -1,0 +1,299 @@
+<apex:page controller="ViewPortalUserController" showHeader="false" sidebar="false" applyHtmlTag="false">
+<html class="cvi2015">
+<apex:includeScript value="{!URLFOR($Resource.DynaTree,'/DynaTree/jquery/jquery.js')}"/>
+<script>var $j15 = jQuery.noConflict(true);</script>
+<apex:includeScript value="{!URLFOR($Resource.DynaTree,'/DynaTree/jquery/jquery-ui.custom.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.DynaTree,'/DynaTree/jquery/jquery.cookie.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.DynaTree,'/DynaTree/src/jquery.dynatree.js')}"/>
+<apex:stylesheet value="{!URLFOR($Resource.DynaTree,'/DynaTree/src/skin/ui.dynatree.css')}"/>
+<apex:stylesheet value="{!URLFOR($Resource.scStyleCss,'myStyle/myStyle.css')}"/> 
+<script type="text/javascript" src="{!siteCoreUrl}/sitecore/content/data/export/export.aspx?itemguid={934A91A8-0EDD-4035-8DA9-E386D8112557}&functions=true"></script>
+<body id="servicepage">
+<style>
+.listAlign {  margin:2px 0px 1px 2px; display: block;} 
+.profileDisplay{display: none;}
+.headerRow .headerStyle{background-color:#638658;color:#FFFFFF}
+.container{ overflow-x:hidden;overflow-y:auto; width:133%; } 
+.parenttopAlign {  margin:1px 0px 1px 2px; display: block;} 
+.ui-dynatree-disabled ul.dynatree-container {opacity: 1;}
+</style>
+<script type="text/javascript">printHeader();</script>
+<script type="text/javascript">printTopMenu();</script>
+<script type="text/javascript">printContentAreaBegin();</script>
+<script type="text/javascript"> 
+var userProfile  = '{!$Profile.Name}';
+var portalUserProfile = '{!portalUserProfile}';
+var portalAdminUserProfile = '{!portalAdminUser}';
+var portalBrugerRole = '{!portalBrugerRole}';
+ /*
+ function setParentMenu(){
+   var myParentlist=document.getElementById('inunion').childNodes;
+   for (p=0; p < myParentlist.length; p++){
+      var mP=myParentlist[p].childNodes;
+      for (j=0; j < mP.length; j++){
+          var mS=mP[j].childNodes;
+          if(mP[j].nodeName=="LI"){
+            mP[j].className='parenttopAlign';
+      }
+    }
+  }
+}
+
+function checkProfile(){
+    setParentMenu();
+    var profileList=document.getElementById('productnavigation').childNodes;
+    for (var p=0; p < profileList.length; p++){
+        if(profileList[p].nodeName=='UL'){
+             var mUL=profileList[p].childNodes;
+             for (var i=0; i < mUL.length; i++){
+                if(mUL[i].nodeName == 'LI' ){
+                   mUL[i].className='listAlign';
+                   if(userProfile  != portalAdminUserProfile && i == 1){
+                      mUL[i].className+=' profileDisplay';
+                   }
+               }
+            }
+     }
+   }
+   
+}
+ document.onload = checkProfile();*/
+ </script>
+ <script type="text/javascript">
+        //  document.write('jsonresponse: '+JSON.stringify(rootTreeObj));
+        var selectedIds='';
+         var  gstr = '';
+         var rootNode;
+         var parentId='';
+        
+         $j15(document).ready(function(){
+         var jsonArr ={!objectStrListJson};
+                        var objMap = {};
+                        var rootTreeObj = {};
+                        $j15.each(jsonArr, function(index,jsn){
+                                        if(jsn.pos.nodeType == "start"){
+                                                        rootTreeObj.title = jsn.pos.account.Name;
+                                                        rootTreeObj.children = new Array();
+                                                        rootTreeObj.accountType = jsn.pos.account.Type;
+                                                        rootTreeObj.icon = "star16.png";
+                                                        if(jsn.selected == true)
+                                                        rootTreeObj.select=true;
+                                                        else
+                                                        rootTreeObj.select=false;
+                                                        rootTreeObj.id=jsn.pos.account.Id;
+                                                        rootTreeObj.key=jsn.pos.account.Id;
+                                                        objMap[jsn.pos.account.Id] = rootTreeObj;
+                                        }else if(jsn.pos.account.Type == "Hierarki"){
+                                                        var parentObj = objMap[jsn.pos.account.ParentId];
+                                                        TreeObj = {};
+                                                        TreeObj.title = jsn.pos.account.Name;
+                                                        TreeObj.children = new Array();
+                                                        TreeObj.accountType = jsn.pos.account.Type;
+                                                        TreeObj.icon = "factory16.png";
+                                                        if(jsn.selected == true)
+                                                        TreeObj.select=true;
+                                                        else
+                                                        TreeObj.select=false;
+                                                        TreeObj.id=jsn.pos.account.Id;
+                                                        TreeObj.key=jsn.pos.account.Id;
+                                                        parentObj.children.push(TreeObj);
+                                                        objMap[jsn.pos.account.Id] = TreeObj;
+                                        }else if(jsn.pos.account.Type == "Kunde"){
+                                                        var parentObj = objMap[jsn.pos.account.ParentId];
+                                                        TreeObj = {};
+                                                        TreeObj.title = jsn.pos.account.Cable_Unit__r.Name+' '+jsn.pos.account.Anlaeg_No__c;
+                                                        TreeObj.icon = "desk16.png";
+                                                        if(jsn.selected == true)
+                                                        TreeObj.select=true;
+                                                        else
+                                                        TreeObj.select=false;
+                                                        TreeObj.id=jsn.pos.account.Id;
+                                                        TreeObj.key=jsn.pos.account.Id;
+                                                        parentObj.children.push(TreeObj);
+                                        }
+                        
+                        });
+        // $j = jQuery.noConflict();
+         //$j.ui.dynatree.nodedatadefaults["icon"] = false;
+         $j15("#tree1").dynatree({
+                    checkbox: true,
+                    autoCollapse: false,
+                    selectMode: 3,
+                    fx: { height: "toggle", duration: 400 },
+                    keyPathSeparator: "/",
+                    children:rootTreeObj,
+                    strings: {
+                loading: "Loading…",
+                loadError: "Load error!"
+                    },            
+                    classNames: {
+                container: "dynatree-container",
+                expanded: "dynatree-expanded"},
+                onSelect: function(select, node) {
+                
+            /*    if(node.hasChildren()){     
+                   if(node.isSelected()){
+                    node.visit(function(node){
+                     node.select(true); 
+                     });
+                   }else{        
+                    node.visit(function(node){
+                     node.select(false); 
+                    });        
+                  }
+                 }*/
+                // Get a list of all selected nodes, and convert to a key array:
+                var selKeys = $j15.map(node.tree.getSelectedNodes(), function(node){
+                  return node.data.key;
+                });
+             selectedIds = selKeys;
+             $j15('#selectedIds').html(''+selectedIds);
+            }
+            });
+               
+                
+                 $j15("#tree1").dynatree("getRoot").visit(function(node){
+            node.expand(true); 
+         }); 
+        
+         rootNode = $j15("#tree1").dynatree("getRoot");
+         
+    /*   if(('{!contact.UserProfile__c}').indexOf("Admin")!=-1){
+             $j15("#tree1").dynatree("disable");
+            }  */
+            $j15("#tree1").dynatree("disable");
+         
+           var selectedNodesObj = $j15("#tree1").dynatree("getSelectedNodes");
+         
+            var   selKeys = $j15.map(selectedNodesObj, function(node){
+                  return node.data.key;
+                });
+        
+          selectedIds = selKeys;
+          $j15('#selectedIds').html(''+selectedIds);
+         //alert('Selected: '+selectedIds); 
+        });
+</script>
+<c:SCParentLinkComponent PortalBrugerRole="{!portalBrugerRole}" />
+<apex:messages id="errormsg" styleClass="exceptionText" globalOnly="true" rendered="{!errorFlag == true}"/>
+
+<div class ="bullets">
+ <ul><li>Her kan du se kontakt- og adresse information og de kunde brugeren har adgang til.</li></ul></div>
+  <apex:form >
+  <!-- commented for extra alignments to line 251 
+  <apex:outputPanel layout="block" styleclass="container"> -->
+        <apex:PageBlock >
+            <!--<apex:pageBlockButtons > 
+                <apex:commandLink action="{!cancel}" styleClass="button orange1" >Go Back</apex:commandLink>
+            </apex:pageBlockButtons> 
+            --><apex:PageBlockSection Title="Kontakt information" collapsible="false" columns="2"  >
+                      <apex:pageBlockSectionItem >
+                              <apex:outputLabel value="Fornavn" for="firstName"/>
+                              <apex:outputField id="firstName" value="{!contact.FirstName}"/>  
+                      </apex:pageBlockSectionItem>
+                      <apex:pageBlockSectionItem >
+                              <apex:outputLabel value="Efternavn" for="lastname"/>
+                              <apex:outputField id="lastName" value="{!contact.LastName}"/>  
+                      </apex:pageBlockSectionItem>
+                      <apex:pageBlockSectionItem >
+                              <apex:outputLabel value="E-mail" for="email"/>
+                              <apex:outputField id="email" value="{!contact.Email}"/>  
+                      </apex:pageBlockSectionItem>
+                      <apex:pageBlockSectionItem >
+                              <apex:outputLabel value="Arb.tlf." for="phone"/>
+                              <apex:outputField id="Phone" value="{!contact.Phone}"/>  
+                      </apex:pageBlockSectionItem>
+                      <apex:pageBlockSectionItem >
+                              <apex:outputLabel value="Mobil" for="mobilePhone"/>
+                              <apex:outputField id="mobilePhone" value="{!contact.MobilePhone}"/>  
+                      </apex:pageBlockSectionItem>
+                      <apex:pageBlockSectionItem >
+                              <apex:outputLabel value="Privat tlf." for="homePhone"/>
+                              <apex:outputField id="homePhone" value="{!contact.HomePhone}"/>  
+                      </apex:pageBlockSectionItem>
+             </apex:PageBlockSection>
+       </apex:pageBlock>
+       
+       <apex:pageBlock >      
+             <apex:PageBlockSection id="addressDetailsPBS" title="Adresse information" collapsible="false" columns="2">
+                <apex:pageBlockSectionItem >
+                  <apex:outputLabel value="Gadenavn" for="Gadenavn"/>
+                  <apex:outputField id="Gade" value="{!address.Street__c}"/>  
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                  <apex:outputLabel value="Husnr." for="Husnr"/>
+                  <apex:outputField id="Husnr" value="{!address.HouseNumber__c}"/>  
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                  <apex:outputLabel value="Opgang" for="Opgang"/>
+                  <apex:outputField id="Opgang" value="{!address.Entrance__c}"/>  
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                  <apex:outputLabel value="Side/dørnr" for="door"/>
+                  <apex:outputField id="door" value="{!address.Door_No__c}"/>  
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                  <apex:outputLabel value="Etage" for="Etage"/>
+                  <apex:outputField id="Etage" value="{!address.Floor__c}"/>  
+                </apex:pageBlockSectionItem>
+                <!-- <apex:pageBlockSectionItem >
+                  <apex:outputLabel value="Side" for="Side"/>
+                  <apex:outputField id="Side" value="{!address.Side__c}"/>  
+                </apex:pageBlockSectionItem> -->
+                <apex:pageBlockSectionItem >
+                  <apex:outputLabel value="Postnr" for="Postnr"/>
+                  <apex:outputField id="Postnr" value="{!address.Postcode__c}"/>  
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                  <apex:outputLabel value="By" for="By"/>
+                  <apex:outputField id="By" value="{!address.Town__c}"/>  
+                </apex:pageBlockSectionItem>
+             </apex:PageBlockSection>
+             
+        </apex:pageBlock>            
+             <apex:pageblock >
+             <apex:PageBlockSection title="Tildelte Kunde" collapsible="false" columns="1">
+                <div id="tree1" style="width: 850px;"></div><br/>   
+            </apex:PageBlockSection>
+    
+        <apex:pageBlockButtons location="bottom">
+            <apex:commandButton action="{!backToManagePortalUserPage}" value="{!$Label.SC_Back}" styleClass="dialogbutton_grey"/>
+        </apex:pageBlockButtons>
+    
+    <!-- 
+    <div align="center">
+    <apex:outputPanel >
+        <apex:commandButton action="{!backToManagePortalUserPage}" value="{!$Label.SC_Back}"/>
+    </apex:outputPanel>
+    </div> -->
+  </apex:PageBlock>
+<!-- <div align="center">
+    <apex:outputPanel >
+      <apex:commandButton action="{!backToManagePortalUserPage}" value="{!$Label.SC_Back}"/>
+    </apex:outputPanel>
+</div> -->
+<script>
+    function changeImage(s, i) {
+        imageURL = document.getElementById(s).src;
+         if (i == 1) {
+             if (imageURL.indexOf("/img/tree/minusStart.gif") != -1) imageURL = "/img/tree/plusStart.gif";
+             else  imageURL = "/img/tree/minusStart.gif";
+         } else if (i == 2) {
+             if (imageURL.indexOf("/img/tree/minus.gif") != -1) imageURL = "/img/tree/plus.gif";
+             else  imageURL = "/img/tree/minus.gif";
+         } else if (i == 3) {
+             if (imageURL.indexOf("/img/tree/minusEnd.gif") != -1) imageURL = "/img/tree/plusEnd.gif";
+             else imageURL = "/img/tree/minusEnd.gif";
+         } else {
+            return;
+         }
+         document.getElementById(s).src=imageURL;
+    }   
+</script>
+</apex:form>
+
+<script type="text/javascript">printContentAreaEnd();</script>
+<script type="text/javascript">printFooter();</script>
+</body>
+</html>
+</apex:page>

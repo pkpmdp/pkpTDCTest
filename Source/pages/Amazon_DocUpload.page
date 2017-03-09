@@ -1,0 +1,77 @@
+<apex:page standardController="Cloud_File__c" extensions="Amazon_DocUpload_CT" action="{!constructor}">
+    <apex:pageMessages />
+    <apex:form >
+        <apex:inputHidden value="{!serverURL}" id="hiddenServerURL" />
+        <script  type="text/javascript">
+            document.getElementById('{!$Component.hiddenServerURL}').value = '{!$Api.Enterprise_Server_URL_140}';           
+        </script>       
+                
+        <apex:pageBlock title="{!$Label.Doc_New_Document}" mode="edit">
+            <apex:pageBlockButtons >
+                <apex:commandButton action="{!save1}" value="{!$Label.Doc_Continue}" >
+                    <!-- <apex:param name="urlParam" value="{!$Api.Enterprise_Server_URL_140}" />  -->
+                </apex:commandButton>
+                <apex:commandButton action="{!cancel}" value="{!$Label.Doc_Cancel}" ></apex:commandButton>
+            </apex:pageBlockButtons>
+            <apex:pageBlockSection columns="1">
+                <!--<apex:inputField value="{!Cloud_File__c.Name}" id="objName" required="true" onblur="popType(this);" />
+                <br />-->
+                
+                
+               <!-- <apex:inputField value="{!Cloud_File__c.Cloud_File_Centa_Doc_Type__c}" required="true"/>
+                <apex:inputField value="{!Cloud_File__c.Centa_Document_Name__c}" required="true"/>-->
+                 
+                 
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel for="category" value="{!$ObjectType.Cloud_File__c.fields.Cloud_File_Category__c.label}" />
+                    <apex:actionRegion >
+                   	    <div class="requiredInput">
+	                    	<div class="requiredBlock"></div>
+	                        <apex:selectList value="{!categoryVar}" title="category" size="1" id="category" required="true">
+	                            <apex:selectOptions value="{!categories}" />
+	                            <apex:actionSupport event="onchange" rerender="docType" status="status"/>
+	                        </apex:selectList>
+                       </div>
+                        <apex:actionstatus id="status">
+			            <apex:facet name="start">
+			                <div class="waitingSearchDiv" id="el_loading" style="background-color: #fbfbfb;
+			                       height: 100%;opacity:0.65;width:100%;"> 
+			                    <div class="waitingHolder" style="top: 74.2px; width: 91px;">
+			                        <img class="waitingImage" src="/img/loading.gif" title="Please Wait..." />
+			                        <span class="waitingDescription">Loading...</span>
+			                    </div>
+			                </div>
+			            </apex:facet>
+			        </apex:actionstatus>
+                    </apex:actionRegion>
+                </apex:pageBlockSectionItem> 
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel for="docType" value="{!$ObjectType.Cloud_File__c.fields.Cloud_File_Document_Type__c.label}" />
+                    <apex:actionRegion >
+                    	<div class="requiredInput">
+                    		<div class="requiredBlock"></div>
+		                        <apex:selectList value="{!docTypeVar}" title="Document Type" size="1" id="docType" required="true" disabled="{!!isCategorySelected}">
+		                            <apex:selectOptions value="{!docTypes}" />
+		                        </apex:selectList>
+		                </div>
+                    </apex:actionRegion>
+				</apex:pageBlockSectionItem>
+                
+                <apex:inputField value="{!Cloud_File__c.Cloud_file_Status__c}"/>               
+                <apex:inputTextarea value="{!Cloud_File__c.Cloud_File_Description__c}" cols="100" rows="4" onkeypress="limitfieldvalue('{!$Component.fieldId}');" id="fieldId"
+                                    onkeydown="limitfieldvalue('{!$Component.fieldId}');" onkeyup="limitfieldvalue('{!$Component.fieldId}');"/>
+                
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+    </apex:form>
+    
+    <script language="javascript">
+        function limitfieldvalue(field){
+            if(document.getElementById(field).value.length > 254){
+                document.getElementById(field).value  = document.getElementById(field).value.substring(0, 254);
+            }
+        }
+        
+        
+    </script>
+</apex:page>

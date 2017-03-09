@@ -1,0 +1,25 @@
+<apex:page standardController="ActiveActivities__c" extensions="ActiveActivitiesController" title="Active Activities" tabStyle="Account">
+ <apex:sectionHeader title="{!$Label.BIER_ActiveActivities_Section_Title}" subtitle="{!$Label.BIER_ActiveActivities_Section_Subtitle}"/>
+ <apex:pageBlock title="{!$Label.BIER_ActiveActivities_Block_Title}">
+  <apex:pageBlockTable value="{!Items}" var="item" width="100%">
+   <apex:column width="7">
+    <apex:image rendered="{!AND(item.Dot__c != 0, NOT(ISBLANK(item.Dot__c)))}" alt="" url="{!URLFOR($Resource.BierDots, IF(item.Dot__c == 1, 'img/yellow.gif', 'img/red.gif'))}" width="7" height="7" />
+   </apex:column>
+   <apex:column headerValue="{!$ObjectType.ActiveActivities__c.fields.name.label}">
+    <apex:outputLink rendered="{!item.Transferred_to_Bier__c}" value="{!BierUrl & TEXT(item.ActiveActivityID__c)}" target="BIER" onclick="newwindow=window.open('{!BierUrl & TEXT(item.ActiveActivityID__c)}', 'BIER');if (window.focus) {newwindow.focus()};return false;">{!TEXT(item.ActiveActivityID__c)}</apex:outputLink>
+    <apex:outputLink rendered="{!!item.Transferred_to_Bier__c}" value="" onclick="alert('Activity is not in Bier yet')" >{!TEXT(item.ActiveActivityID__c)}</apex:outputLink>
+   </apex:column>
+   <apex:column value="{!item.Res_type__c}"/>   
+   <apex:column value="{!item.Customer_no__c}"/>
+   <apex:column value="{!item.Address__c}"/>
+   <apex:column value="{!item.PostCode__c}"/>
+   <apex:column value="{!item.Recieved__c}"/>
+   <apex:column value="{!item.Planned__c}"/>
+   <apex:column value="{!item.Product__c}"/>
+   <apex:column value="{!item.Worktype__c}"/>
+   <apex:column value="{!item.Info__c}"/>
+   <apex:column value="{!item.Note__c}"/>
+   <apex:column value="{!item.Cabletype__c}"/>
+  </apex:pageBlockTable>
+ </apex:pageBlock> 
+</apex:page>

@@ -1,0 +1,81 @@
+<apex:page standardController="Faktura__c" extensions="CarriePaymentInvoiceController"  id="page1" sidebar="False"  showHeader="False" tabStyle="Invoice_Usage__c">
+   <style type="text/css" >
+        .actionColumn  {display:none;}
+    </style>
+    <script type="text/javascript">   
+        function displayTilbage() {
+        	if(document.referrer.indexOf('CarrieBillingBatchPage') != -1 ){ 
+                document.getElementById('tilbage').style.display = "none";
+            }else if(document.referrer.length==0 ){
+                document.getElementById('tilbage').style.display = "none";  
+            }    
+        } 
+        function goBack(){
+            window.history.go(-1);
+        }
+    </script>
+    <apex:pageBlock id="block1">
+        <div></div><div></div>
+        <div align="center"><h1 style="font-size:12pt"><i> Faktura Oplysninger </i></h1></div>
+        <apex:outputPanel > 
+            <apex:pageMessages />
+        </apex:outputPanel>
+        <br/>
+        <apex:pageBlock id="block2" >
+            <apex:form id="form1">
+                <div align="right">
+                    <input id="tilbage" type="button" value="Tilbage" onClick="goBack()" class="btn" />
+<!--                     <apex:commandButton value="Tilbage til oversigt" action="{!redirectHomePage}" id="goBack"/> -->
+                </div>
+                <script>
+                    displayTilbage();
+                </script>
+            </apex:form>
+            <apex:pageBlockSection title="Faktura detaljer" >
+                <apex:outputField value="{!Faktura__c.Customer__c}" label="Kundenavn"/>
+                <apex:outputField value="{!Faktura__c.Customer__r.Customer_No__c}" label="Kundenummer" />
+                <apex:outputField value="{!Faktura__c.Name}" label="Fakturanummer"/>
+                <apex:outputField value="{!Faktura__c.Service_Address__c}" />
+                <apex:outputField value="{!Faktura__c.Datoforudskrift__c}" />
+                <apex:outputField value="{!Faktura__c.Betalingsfrist__c}" />
+                <apex:outputField value="{!Faktura__c.Momspligtigt_bel_b__c}"/>
+                <apex:outputField value="{!Faktura__c.Heraf_moms_25__c}"/>
+                <apex:outputField value="{!Faktura__c.Fakturasaldo__c}" />
+                <apex:outputField value="{!Faktura__c.Attachment_faktura__c}"/>
+            </apex:pageBlockSection>
+        </apex:pageBlock>   
+        <apex:form >
+        <apex:inputHidden value="{!Faktura__c.Aria_Account__c}" id="theHiddenInput"/>
+        </apex:form>
+        <apex:outputText value="{!Faktura__c.Name} {!Faktura__c.Customer__r.Id} " rendered="false"/>
+        <!-- <apex:relatedList list="Invoice_Subscriptions__r"  /> -->
+        <apex:pageBlock title="Faktura linier"> 
+            <apex:pageBlockTable value="{!invLineList}" var="item" rendered="{!(invLineList.size >0)}"> 
+                <apex:column value="{!item.Name}"/> 
+                <apex:column value="{!item.Service_Name__c}"/>
+                <apex:column value="{!item.Units__c}" styleClass="dataCell  CurrencyElement" headerClass="CurrencyElement zen-deemphasize"/>
+                <apex:column value="{!item.Pris_pr_md__c}" styleClass="dataCell  CurrencyElement" headerClass="CurrencyElement zen-deemphasize"/>
+                <apex:column value="{!item.Periode__c}"/>
+                <apex:column value="{!item.Amount__c}"  styleClass="dataCell  CurrencyElement" headerClass="CurrencyElement zen-deemphasize"/>
+            </apex:pageBlockTable>
+            <apex:outputLabel value="Ingen registreringer at vise" rendered="{!(invLineList.size ==0)}" styleClass="noRowsHeader"></apex:outputLabel>
+        </apex:pageBlock>
+        <!-- CARRIE-937 <apex:relatedList list="Invoice_Usages__r" />
+                -->
+          <apex:pageBlock title="Forbrug"> 
+            <apex:pageBlockTable value="{!invUsageList}" var="item" rendered="{!(invUsageList.size >0)}">
+                <apex:column value="{!item.Name}"/> 
+                <apex:column value="{!item.Plan_Name__c}"/>
+                <apex:column value="{!item.Service_Name__c}"/>
+                <apex:column value="{!item.Periode__c}"/>
+                <apex:column value="{!item.Price_Per_Unit__c}" styleClass="dataCell  CurrencyElement" headerClass="CurrencyElement zen-deemphasize"/>
+                <apex:column value="{!item.Amount__c}"  styleClass="dataCell  CurrencyElement" headerClass="CurrencyElement zen-deemphasize"/>
+            </apex:pageBlockTable>
+            <apex:outputLabel value="Ingen registreringer at vise" rendered="{!(invUsageList.size ==0)}" styleClass="noRowsHeader"></apex:outputLabel>
+        </apex:pageBlock>
+        <apex:relatedList list="Service_Credits__r" />
+        <apex:outputpanel rendered="{!amtflag}">
+        <apex:relatedList list="Payment_Invoices__r" title="Indbetalinger" />
+    </apex:outputpanel>
+    </apex:pageBlock> 
+ </apex:page>

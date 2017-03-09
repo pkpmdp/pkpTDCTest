@@ -1,0 +1,34 @@
+<apex:page sidebar="false" showHeader="false" controller="KnowledgeHomeSidebar_CT">
+<apex:pageBlock tabStyle="YO_OperationConsultant__c">
+    <apex:PageBlockSection title="YK Booking" columns="1" collapsible="false">
+        <apex:OutputPanel >
+<!--             <apex:repeat value="{!listInfo}" var="bi">-->
+<!--                  <apex:outputText value="{!bi.Information__c}" escape="false"></apex:outputText>-->
+<!--            </apex:repeat>-->
+                <table>
+                    <tr>
+                        <td>Auto:</td>
+                        <td>{!bookingAuto}</td>
+                    </tr>
+                    <tr>
+                        <td>Stik:</td>
+                        <td>{!bookingStik}</td>
+                    </tr>
+                    <tr>
+                        <td>Fiber:</td>
+                        <td>{!bookingFiber}</td>
+                    </tr>
+                </table>
+            <br/>
+            
+            <apex:repeat value="{!listInfo}" var="bi">
+                <apex:outputText value="{!bi.Information__c}" escape="false"></apex:outputText>
+            </apex:repeat>
+            <br/><br/>
+            <apex:outputPanel rendered="{!isAdmin ==True}">
+                 <apex:outputLink value="/{!operationConsultantKeyPrefix}/o" target="_blank"><b>Edit</b></apex:outputLink>
+            </apex:outputPanel>
+        </apex:OutputPanel>
+    </apex:PageBlockSection>
+</apex:pageBlock>    
+</apex:page>

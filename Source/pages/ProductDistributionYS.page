@@ -1,0 +1,35 @@
+<apex:page standardController="Account" extensions="clsProductDistributionYSController" showHeader="false" sidebar="false" title="Product Distribution Summary" standardStylesheets="true" tabStyle="Account">
+  <apex:pageBlock >
+    <apex:pageBlockSection >
+      <apex:outputField value="{!account.Customer_No__c}"/>
+    </apex:pageBlockSection>
+    <apex:pageBlockSection >
+      <apex:outputField value="{!account.Name}"/>
+    </apex:pageBlockSection>    
+  </apex:pageBlock>
+  <apex:pageBlock >
+    <apex:pageBlockSection columns="1">
+      <apex:outputText value="Aggregeret overblik over solgte produkter på de underliggende kunder/anlæg" styleClass="labelCol"/>
+    </apex:pageBlockSection>
+  </apex:pageBlock>  
+  <apex:pageBlock >
+    <apex:pageBlockTable value="{!productDistributionSummaries}" var="pd" rules="rows">
+      <apex:column headervalue="{!$ObjectType.Product_Distribution__c.fields.Business__c.label}" value="{!pd.summaryRecord.Business__c}"/>
+      <apex:column headervalue="{!$ObjectType.Product_Distribution__c.fields.Product__c.label}" value="{!pd.summaryRecord.Product__c}"/>
+      <apex:column headervalue="{!$ObjectType.Product_Distribution__c.fields.Amount__c.label}" value="{!pd.summaryRecord.Amount__c}"/>
+    </apex:pageBlockTable>
+  </apex:pageBlock>
+  <apex:pageBlock >
+    <apex:pageBlockTable value="{!customerAccounts}" var="ca" rules="rows">
+      <apex:column headervalue="{!$ObjectType.Account.fields.Name.label}" value="{!ca.Name}"/>
+      <apex:column headervalue="{!$ObjectType.Account.fields.Cable_Unit_Name__c.label}" value="{!ca.Cable_Unit_Name__c}"/>
+      <apex:column headervalue="{!$ObjectType.Account.fields.Cable_Unit_No__c.label}" value="{!ca.Cable_Unit_No__c}"/>
+      <apex:column headervalue="{!$ObjectType.Account.fields.Existing_Phase__c.label}" value="{!ca.Existing_Phase__c}"/>
+      <apex:column headervalue="{!$ObjectType.Account.fields.Existing_Sales_Concept__c.label}" value="{!ca.Existing_Sales_Concept__c}"/>
+      <apex:column headervalue="{!$ObjectType.Account.fields.Existing_Sales_Type__c.label}" value="{!ca.Existing_Sales_Type__c}"/>
+      <apex:column headervalue="{!$ObjectType.Account.fields.Latest_Phase__c.label}" value="{!ca.Latest_Phase__c}"/>
+      <apex:column headervalue="{!$ObjectType.Account.fields.Latest_Sales_Concept__c.label}" value="{!ca.Latest_Sales_Concept__c}"/>
+      <apex:column headervalue="{!$ObjectType.Account.fields.Latest_Sales_Type__c.label}" value="{!ca.Latest_Sales_Type__c}"/>                  
+    </apex:pageBlockTable>
+  </apex:pageBlock>
+</apex:page>

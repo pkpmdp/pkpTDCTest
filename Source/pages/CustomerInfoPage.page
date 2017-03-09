@@ -1,0 +1,592 @@
+<apex:page controller="DealerProductPageController3" sidebar="false" showHeader="false" id="pageId" action="{!initializeText}" applyHtmlTag="false">
+<html class="cvi2015"> <!--spoc 2206-->
+    <script type="text/javascript" src="https://yousee.dk/sitecore/content/data/export/export.aspx?itemguid={BD793F05-9B01-4210-BD63-F33431D1013A}&functions=true"></script>
+    <!--Added for DW 750-->
+    <c:TopMenuComponent ></c:TopMenuComponent>
+    <script type="text/javascript">printHeader();</script>
+    <script type="text/javascript">printTopMenu();</script>
+    <link class="user" href="{!$Resource.SalesFlowCSS}" rel="stylesheet" type="text/css" />  
+    <script>
+        var isYouBioSelected = {!isYouBioSelected};
+         var bsxxFlag = '{!dtvtaflag}';
+    </script>  
+    <c:DealerComponent ></c:DealerComponent>
+    <style>
+        .nextBtnCls {
+        
+            background-color:orangeRed;
+            color:#FFFFFF;
+            font-weight:bold;
+            height:26px;
+        }
+        body button, body .x-btn, body .btn, body .btnDisabled, body .btnCancel, body .menuButton .menuButtonButton {
+            background-color:#585858;
+            color:#FFFFFF;
+            background:#585858;
+            font-weight:bold;
+            height:26px;
+        }   
+        .verticalSpacingCls {
+            margin-right:300px;
+        }
+        .bPageBlock .pbTitle {
+            color: #222;
+            font-size: 0%;
+            width:0%;
+        } 
+        .leftContent2 {
+                float:left;
+                width:575px;
+                overflow:visible;
+                min-height:900px;
+                height:auto !important;
+                height:1000px;
+                max-height:2200px; 
+        }
+        
+        .rightContent2 {
+            float:left;
+            width:350px;
+            overflow:visible;
+            min-height:900px;
+            height:auto !important;
+            height:1000px;
+            max-height:2200px;
+            }
+                        
+    </style>
+    <script>
+        function noenter(ev){
+            var keycode;
+            if(ev.keyCode) //For IE
+                keycode = ev.keyCode;
+            else if(ev.Which)
+                keycode = ev.Which; // For FireFox
+            else
+                keycode = ev.charCode;
+            if ((keycode > 31 && (keycode < 48 || keycode > 57)) || keycode == 46 ){
+                return false;
+            }
+            return true;     
+        }
+    </script> 
+    <script>
+        var isExistingYoubioCustomer = 'false';
+        var mandatoryFieldErrorMsg = '';
+        var InvalidErrMsg ='';
+        var errorMsgForBB = '';
+        var emailMismatchError = '';
+        var errorMsgForTelephonyEmailValidation='';
+        var InvalidEmailAddressMsg ='';
+        var tlfMandatoryMsg = ''; 
+        var telephoneNumberValidationMsg='';
+        var broadbandMandatoryErrorMsg='';
+        var EmailAddValForBB='';
+        var EmailAddressValidationForTlfAndBB='';
+        var verifiedEmailVal='';
+        var tlfEmailVal='';
+        var verifiedTlfEmailVal='';
+        var newCustomer = '{!isNewCustomer}';  
+        var clearFlag = '{!clearForNewCustomerFlag}';  
+        var mobileNumberForBroadbandActivation='';
+        var mobileNumberForBroadbandActivation1='';
+        var bbSunscriptionIsPresent='{!bbSunscriptionIsPresent}';
+        var isThereBestilLink='';
+        var secondPayee = '';
+        var validationMsgs = '';
+        
+        // Start - ADDED for 689 youBio Flow - DIBS Integration
+        var newwin = null;
+        var youbioTotalPrice = 0;
+        var youbioEmail = '';
+        var youbioEmailConfirm = '';
+        //Added for BS
+        var freeChoiceFlag={!isFreeChoicePageFlag};
+        var currentKundeNumber = '{!cCustInstAdd.customerNumber}';
+        // this loads the DIBS Flexwin Window
+        function LoadDibsFlexWin() {
+            var height = screen.height;
+            var width = screen.width;
+            newwin = window.open('/apex/DealerWebDIBSFlexwin?price=' + youbioTotalPrice, 'paywin', 'scrollbars,status,width=' + width + ',height=' + height);
+            newwin.focus();
+            return true;
+        }
+        
+        function closeDibsOnTilbage(){
+            if(newwin == null || newwin.closed){
+                // DO NOTHING
+            }
+            else{
+                newwin.close();
+            }
+        }
+        
+        // this fetches the transaction id from DIBS and redirects user to ApprovalPage
+        function storeTransactionId(transactionId, allParams){
+            newwin.close();
+            if(transactionId.length > 0){
+                document.getElementById('dibsTransactionId').value = transactionId;
+                finalApproval();
+            }
+            else{
+                window.open('/apex/DealerwebDIBSError', '_self');
+            }
+        }
+        
+        // this calculates the youbio billing amount which is then sent to DIBS
+        function fetchYouBioTotalAmount(refreshedResponse){
+            if(isExistingYoubioCustomer == 'true'){
+                finalApproval();
+            }
+            else{
+                youbioTotalPrice = 0;
+                if(refreshedResponse['kunde-data']['valgt']== undefined){
+                    $("#errorBlock").html('Vælg produkt');
+                        return false;
+                }
+                else if(refreshedResponse['kunde-data']['valgt']!= undefined){
+                    $.each(refreshedResponse['kunde-data']['valgt'], function(i,valgtNode){
+                        if(valgtNode.aftaletype=='youbio'){
+                            $.each(valgtNode.varer, function(j,varerNode){
+                                if(refreshedResponse[varerNode.varenr] != undefined){
+                                    youbioTotalPrice += parseFloat(refreshedResponse[varerNode.varenr].totalpris);
+                                }
+                            });
+                        }
+                    });
+                    LoadDibsFlexWin();
+                }
+            } 
+        }
+        // END - ADDED for 689 youBio Flow - DIBS Integration
+        
+        function salesFlowProductsValidation(){
+        
+            // setting data for all the variables defined globally
+            setupInitData();
+            // check whether link node is present in to json response or not
+            // DW-861 - Removed this condition for this issue
+            //var isBestilPresent = bestilLinkValidation();
+            //alert('isBestilPresent ********** '+isBestilPresent);
+           // if(isBestilPresent==false){
+           //   alert('isBestilPresent ********** '+isBestilPresent);
+           //     return false;
+           // }            
+            // folowing method is used to check if data entered by user is valid or not
+            validateInputs();
+            if(validationMsgs != ''){
+                 $("#errorBlock").html(validationMsgs);
+            }
+            else{
+                 if(isYouBioSelected == true && isExistingYoubioCustomer == 'false'){
+                    fetchYouBioTotalAmount(myJSONObject);
+                }else{
+                    if(newCustomer == 'false' && myJSONObject['kunde-data']['valgt']==undefined && validationMsgs == ''){
+                        finalApproval();
+                    }else if(myJSONObject['kunde-data']['valgt'] !=undefined && validationMsgs == ''){
+                        if(secondPayee==true)
+                            document.getElementById('hdnSecondPayee').value=true;
+                        finalApproval();
+                    }
+                }            
+            }
+        }
+        
+        function setupInitData(){
+            // warning messages 
+            mandatoryFieldErrorMsg = 'Felt markeret med rødt er krævet, det skal derfor udfyldes';
+            InvalidErrMsg ='Email adresse skal være gyldigt';
+            errorMsgForBB = 'Du skal angive enten mobil nummer eller email adresse, hvortil aktiveringskoden skal sendes til';//Angiv Mobil nummer, da dette er kr�vet
+            emailMismatchError = 'E-mail adresser er ikke ens. Genindtast E-mail';
+            errorMsgForTelephonyEmailValidation ='E-mail er krævet. Venligst indtast kundens e-mail.';
+            InvalidEmailAddressMsg='Indtast venligst gyldig e-mail-adresse.';
+            broadbandMandatoryErrorMsg ='Du skal angive telefonnummeret';
+            if (document.getElementById('chkSecondPayee')!=null){
+                secondPayee=document.getElementById('chkSecondPayee').checked;
+            } else  {
+                if({!secondPayee}){
+                     document.getElementById('hdnSecondPayee').value=true;
+                }
+                secondPayee = false;
+            }
+            // flags 
+            EmailAddValForBB='';
+            EmailAddressValidationForTlfAndBB='';
+            verifiedEmailVal='';
+            tlfEmailVal='';
+            verifiedTlfEmailVal='';
+            mobileNumberForBroadbandActivation='';
+            mobileNumberForBroadbandActivation1='';
+            isThereBestilLink='';
+            telephoneNumberValidationMsg='';
+            youbioEmail = '';
+            youbioEmailConfirm = '';
+        }
+        
+        function bestilLinkValidation(){
+            if(myJSONObject['links']!=undefined){
+                $.each(myJSONObject['links'], function(i,linksNode){
+                    if(linksNode.rel=='bestil'||linkNode.rel=='opret'){
+                        isThereBestilLink='Yes';
+                        return false;
+                    }
+                    if(linkNode.rel=='priser')
+                    
+                    {
+                    return true; 
+                    }
+                });
+            }else{
+                if(isThereBestilLink != 'Yes'){
+                    $("#errorBlock").html('Det er ikke muligt at bestille på denne kunde. Kontakt venligst Forhandlersupport');
+                    return false;
+                }
+            }   
+            return true;
+        }
+        
+        function validateInputs(){
+            var flag = false;
+            validationMsgs = '';
+            var email = $('[id$=customerEmailId]').val();
+            var emailConfirm = $('[id$=confirmEmail]').val();
+            if((email == null || email == '' || email == undefined)&&(emailConfirm == null || emailConfirm == '' || emailConfirm == undefined)){
+                validationMsgs += 'Indtast venligst gyldig e-mail-adresse i begge felter' + '<br/>';
+                flag = true;
+            }               
+            else {
+                if (email == null || email == '' || email == undefined)
+                    validationMsgs += InvalidEmailAddressMsg + '<br/>';
+                if(emailConfirm == null || emailConfirm == '' || emailConfirm == undefined) 
+                    validationMsgs += InvalidEmailAddressMsg + '<br/>';
+                flag = true;    
+            }
+            if (email != '' && emailConfirm != ''){
+                if (!validateEmailAddress(email) || !validateEmailAddress(emailConfirm)){
+                    validationMsgs += InvalidErrMsg + '<br/>';
+                    flag = true;
+                } 
+                if(email != emailConfirm){
+                    validationMsgs += emailMismatchError + '<br/>';
+                    flag = true;
+                }
+            }     
+           var landline = $('[id$=landlineNumberId]').val();
+            var mobile = $('[id$=mobileNumberId]').val();
+            if((landline == '' && mobile == '') || (landline == null && mobile == null) || (landline == undefined && mobile == undefined)){
+                validationMsgs += 'Indtast enten fastnet eller mobil nummer' + '<br/>';
+                flag = true;
+            }
+            else{
+                if(landline != ''){
+                    if(!validateTelephoneNumber(landline)){
+                        validationMsgs += 'Indtast et gyldigt fastnet nummer'+ '<br/>';
+                        flag = true;
+                    }           
+                }   
+                if(mobile != ''){
+                    if(!validateTelephoneNumber(mobile)){
+                        validationMsgs += 'Indtast et gyldigt mobil nummer'+ '<br/>';
+                        flag = true;
+                        
+                    }           
+                }   
+            } 
+            //if(!flag){
+            if(newCustomer=='true')
+                validateNewCustomermandatoryFieldsInfo();   
+            //}
+        }
+        
+        function validateTelephoneNumber(tlfNumber){
+            if(isNaN(tlfNumber))
+                 return false; 
+            else if (tlfNumber.length < 8)
+                 return false;
+            else
+                return true;
+        } 
+        
+        function validateEmailAddress(email) {
+            // var reg = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9][a-zA-Z0-9-]+[\.]{1}[a-zA-Z]{2,4}$/;
+            // var reg = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/;
+            var reg = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+            if(reg.test(email) == false) {
+                return false;
+            } else {
+                return true;          
+            } 
+        }
+            
+        function validateNewCustomermandatoryFieldsInfo(){
+             var firstName='';
+             var lastName='';
+             var telNumber='';
+           
+             if (document.getElementById('pageId:theform:pageBlockId:newCustomerPbSection:newCustomerPbSectionItem:firstName')!=null){
+                firstName = document.getElementById('pageId:theform:pageBlockId:newCustomerPbSection:newCustomerPbSectionItem:firstName').value;
+             }
+             if (document.getElementById('pageId:theform:pageBlockId:newCustomerPbSection:newCustomerLastNameId:lastName')!=null){
+                lastName = document.getElementById('pageId:theform:pageBlockId:newCustomerPbSection:newCustomerLastNameId:lastName').value;
+             }
+             if (firstName == '' || lastName==''){
+                InvalidErrMsg='';
+                emailMismatchError='';
+                errorMsgForBB='';
+                validationMsgs += mandatoryFieldErrorMsg + '<br/>';
+             }
+        }
+           
+        function backFlowValidation(){
+            if (resetTlfFlags==true){
+            } else { 
+                backFlow();
+            }
+        }
+                        
+        function acceptNumerics(event,selectedId){
+            var keyValue = window.event.keyCode || event.keyCode;
+            if ((keyValue >= 48 && keyValue <= 57)|| (keyValue >= 97 && keyValue <= 105) ||(keyValue==13||keyValue==96 || keyValue==40||keyValue==8 || keyValue==46 || keyValue==40||keyValue==41||keyValue==45 || keyValue==37 || keyValue==38||keyValue==39)) {
+                return false;
+            }   
+            else{
+                document.getElementById(selectedId).value=''; 
+                return true;
+            }
+        }
+        
+        var myJSONObject={!jsonResponse};
+        var firstJSONResponse = {!firstJsonResponse}; 
+        myJSONObject=refreshFirstJSONResponse(firstJSONResponse,myJSONObject); 
+        function setSecondPayee(){
+            if(document.getElementById('chkSecondPayee').checked==true)
+                document.getElementById('hdnSecondPayee').value=true;
+            else
+                document.getElementById('hdnSecondPayee').value=false;
+        }
+       
+        // related to 689 youbio SLET
+        function hasYouBioSubscription(aftaler){
+            var hasYBSubs = 'false';
+            try{
+                  $.each(aftaler, function(i,aftalerNode){ 
+                    //check for YouBio subscription in aftaler
+                      if(aftalerNode.kundeid != undefined && kundeid == aftalerNode.kundeid && aftalerNode.aftaletype=='youbio'){
+                         hasYBSubs='true';
+                      }
+                  });
+                  return hasYBSubs;
+             }
+             catch(err){         
+             }
+        } 
+        var subString = 'youbio-ga-valg';
+        var boxString = 'youbio-eng-valg';
+        var youbioSubs = new Array();
+        var youbioBox = new Array();
+        if(newCustomer == "false" && myJSONObject['kunde-data']['aftaler']!=undefined){
+           var hasYouBioSub=hasYouBioSubscription(myJSONObject['kunde-data']['aftaler']);
+           //If user has active/inactive subscription, show only box on page
+           //Add logic to check for inactive subscription
+           if(hasYouBioSub=='false'){
+               youbioSubs = createProductsData(subString,'kr. pr. md.', newCustomer);          
+           }
+        }
+        youbioBox = createProductsData(boxString,'kr. pr. md.', newCustomer);
+        // END - 689  
+    </script> 
+    
+<apex:form id="theform" styleClass="fontVerdana"> 
+    <script type="text/javascript">printContentAreaBegin();</script>
+    <body>
+        <input type = "hidden" id="selectedProds" name = "selectedProds" value=""/>
+        <apex:actionStatus id="InProgress" startText="Søgning...">
+            <apex:facet name="start" ><img src="{!URLFOR($Resource.Loading)}" border="0" height="18px" width="18px" style="color:red;"  />  S�gning...</apex:facet>
+            <apex:facet name="stop" ></apex:facet>
+        </apex:actionStatus>
+        <apex:outputPanel id="errorMessage" >
+            <apex:messages globalOnly="true" styleClass="mailError" />
+        </apex:outputPanel>
+        <div id="errorBlock" style="color:red;display:block;" />
+        
+        <apex:panelGrid columns="2" width="100%" columnClasses="leftContent2,rightContent2">   
+            <apex:outputPanel styleClass="leftContent2" id="leftPanel1" layout="inline">     
+                <apex:pageblock id="pageBlockId" >
+                    <input id="hdnSecondPayee" type="hidden" name="hdnSecondPayee"/>
+                    <apex:pageBlockSection title="Kundeoplysninger" columns="1" collapsible="false" rendered="{!isNewCustomer}" id="newCustomerPbSection">
+                        <apex:pageBlockSectionItem id="newCustomerPbSectionItem">
+                             <apex:outputLabel value="Fornavn:" for="firstName" styleClass="fontVerdana"/>
+                             <apex:outputPanel styleClass="requiredInput" layout="block">
+                                 <apex:outputPanel styleClass="requiredBlock" layout="block" id="optPanelFnameId"/>
+                                 <apex:inputText value="{!customerInstallationAddress.firstName}"  id="firstName" /> 
+                             </apex:outputPanel>
+                         </apex:pageBlockSectionItem>
+                     
+                        <apex:pageBlockSectionItem id="newCustomerLastNameId">
+                             <apex:outputLabel value="Efternavn:" for="lastName" styleClass="fontVerdana"/>
+                             <apex:outputPanel styleClass="requiredInput" layout="block">
+                                 <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+                             <apex:inputText value="{!customerInstallationAddress.lastName}"  id="lastName" />
+                             </apex:outputPanel> 
+                         </apex:pageBlockSectionItem>
+                        <apex:pageBlockSectionItem >
+                             <apex:outputLabel value="Gade/Nr./Etage/Side/Dør:" styleClass="fontVerdana"/>
+                             <apex:outputLabel value="{!customerInstallationAddress.addr1}" styleClass="fontVerdana"/> 
+                        </apex:pageBlockSectionItem>
+                     
+                         <apex:pageBlockSectionItem >
+                             <apex:outputLabel value="Postnr./By:" styleClass="fontVerdana"/>
+                             <apex:outputLabel value="{!customerInstallationAddress.addr2}" styleClass="fontVerdana"/> 
+                         </apex:pageBlockSectionItem>
+                    </apex:pageBlockSection>
+            
+                    <apex:pageBlockSection title="Kundens nummer" id="phoneNumbers" rendered="{!NOT(OR(broadbandTelephonyCommonFlag,onlyBroadbandFlag))}" columns="1" collapsible="false">
+                        <apex:pageBlockSectionItem id="newCustomerTelephonenumberId">
+                             <apex:outputLabel value="Kundens fastnet nummer:" for="contactPhone" styleClass="fontVerdana"/>
+                             <apex:inputText value="{!customerInstallationAddress.contactNumber}"  id="landlineNumberId" maxlength="8" onKeyPress="return noenter(event);"/> 
+                        </apex:pageBlockSectionItem>
+                        
+                        <apex:pageBlockSectionItem LabelStyle="width:40%" id="pbSectionforTLF">
+                            <apex:outputLabel value="Kundens mobilnummer:" styleClass="fontVerdana"/>
+                            <apex:inputText value="{!tlfNumberForNumberPorting}"  id="mobileNumberId" maxlength="8" onKeyPress="return noenter(event);"/>
+                        </apex:pageBlockSectionItem> 
+                    </apex:pageBlockSection>
+                    
+                    <!-- This Block Section Needs to be shown only when the user comes from the Broadband Flow and select both broadband as well as telephoni products -->
+                    <apex:pageBlockSection title="Aktivteringskoder til Bredbånd" id="onlyForBB" rendered="{!OR(broadbandTelephonyCommonFlag,onlyBroadbandFlag)}" columns="1" collapsible="false">
+                        <apex:outputText value="{!salesFlowObj.messages[1]}" escape="false" styleClass="fontVerdana"/>
+                        
+                        <apex:pageBlockSectionItem id="newCustomerTelephonenumberId">
+                             <apex:outputLabel value="Kundens fastnet nummer:" for="contactPhone" styleClass="fontVerdana"/>
+                             <apex:inputText value="{!customerInstallationAddress.contactNumber}"  id="landlineNumberId" maxlength="8" onKeyPress="return noenter(event);"/> 
+                        </apex:pageBlockSectionItem>
+                        
+                        <apex:pageBlockSectionItem LabelStyle="width:40%" id="pbSectionforTLF">
+                            <apex:outputLabel value="Kundens mobilnummer:" styleClass="fontVerdana"/>
+                            <apex:inputText value="{!tlfNumberForNumberPorting}"  id="mobileNumberId" maxlength="8" onKeyPress="return noenter(event);"/>
+                        </apex:pageBlockSectionItem>
+                    </apex:pageBlockSection> 
+                       
+                    <!-- ADDED FOR YOUBIO DW - 689 : YouBio Products need Customer Email -->
+                    <apex:pageBlockSection title="E-mail-adresse" id="youbioEmail" columns="1" collapsible="false"> 
+                        <apex:outputText value="{!salesFlowObj.messages[2]}" escape="false" styleClass="fontVerdana" rendered="{!OR(broadbandTelephonyCommonFlag,onlyBroadbandFlag,telefoniFlag)}"/> 
+                        <apex:pageBlockSectionItem LabelStyle="width:40%" id="ybEmailId">
+                            <apex:outputLabel value="E-mail-adresse:" styleClass="fontVerdana"/>
+                            <apex:outputPanel styleClass="requiredInput" layout="block">
+                                <apex:outputPanel styleClass="requiredBlock" layout="block"/> 
+                                <apex:inputText value="{!emailIdForNumberporting}" id="customerEmailId"/>
+                           </apex:outputPanel>      
+                        </apex:pageBlockSectionItem>
+                 
+                        <apex:pageBlockSectionItem id="ybEmailId1">
+                            <apex:outputLabel value="Gentag e-mail-adresse:" styleClass="fontVerdana"/>
+                            <apex:outputPanel styleClass="requiredInput" layout="block">
+                                <apex:outputPanel styleClass="requiredBlock" layout="block"/> 
+                                <apex:inputText value="{!emailIdForNumberporting}" id="confirmEmail"/>
+                            </apex:outputPanel> 
+                        </apex:pageBlockSectionItem>
+                    </apex:pageBlockSection>
+                    <!-- ADDED FOR YOUBIO DW - 689 : YouBio Products need Customer Email -->
+                    
+                    <apex:pageBlockSection title="Oprettelses af anden betaler" columns="1" collapsible="false" rendered="{!AND(ISNULL(payeeCustInstAdd),!isYouBioSelected)}" >
+                        <apex:outputPanel >     
+                            <input  id="chkSecondPayee" type="checkbox" name="secondPayee" onchange="setSecondPayee();"/>  
+                            <span>Kunden ønsker at registrere en anden betaler</span> 
+                        </apex:outputPanel> 
+                    </apex:pageBlockSection>   
+                
+                    <apex:pageBlockButtons location="bottom" id="buttons">
+                         <apex:commandButton action="{!cancel}" value="Annuller" style="margin-right:280px;" onclick="if(isYouBioSelected == true){closeDibsOnTilbage();}"/>
+                          <apex:commandButton action="{!backFlow}" value="Tilbage" id="tilbageBtn" onclick="if(isYouBioSelected == true){closeDibsOnTilbage();}"/>
+                         <apex:commandButton onclick="salesFlowProductsValidation();" id="videreBtn" value="Videre" style="background-color:orangeRed;color:#FFFFFF;font-weight:bold;height:26px;" rerender="dummyPanel"/>
+                    </apex:pageBlockButtons>
+                    <input type = "hidden" name="perviousPage" value = "/apex/CustomerInfoPage"/>
+                    <apex:actionFunction name="backFlow" action="{!backFlow}" status="InProgress" />
+                    <apex:actionFunction name="finalApproval" action="{!finalApproval}" status="InProgress" />
+                     
+                    <input type = "hidden" id="resetBBFlags" name = "resetBBFlags" value=""/>
+                    <input type = "hidden" id="resetTlfFlags" name = "resetTlfFlags" value=""/>
+                    <input type = "hidden" id="resetSPFlags" name = "resetSPFlags" value=""/>
+
+                    <input type= "hidden" id="dibsTransactionId" name = "dibsTransactionId" value="" />
+                </apex:pageBlock> 
+            </apex:outputPanel>
+            <apex:outputPanel styleClass="rightContent2" id="rightPanel" layout="inline"> 
+                <c:CustomerAndProductComponent isNewKunde="{!isNewCustomer}" kundeNumber="{!cCustInstAdd.customerNumber}" 
+                                    kundeName="{!cCustInstAdd.firstName} {!cCustInstAdd.lastName}" Adresse="{!cCustInstAdd.addr1}"
+                                    Postnummer="{!cCustInstAdd.addr2}">
+                </c:CustomerAndProductComponent>
+            </apex:outputPanel>
+        </apex:panelGrid>           
+    </body>
+    <apex:actionFunction action="{!callToKasia}" name="callToKasia" reRender="jspanel,errorMessage" status="queryStatus">
+        <apex:param name="url" assignTo="{!url}" value="" />
+        <apex:param name="etag" assignTo="{!etag}" value="" />
+        <apex:param name="kundeData" assignTo="{!kundeData}" value="" />
+        <apex:param name="arrayInit" assignTo="{!arrayInit}" value="" />
+    </apex:actionFunction>
+    <apex:actionFunction action="{!resetBbTlfFlagForSletOperation}" name="resetBbTlfFlagForSletOperation"   reRender="resetAllFlags,leftPanel1" status="queryStatus">
+    </apex:actionFunction>
+    <apex:actionStatus id="queryStatus">
+        <apex:facet name="start">
+            <c:loadingComponent BackColor="#efefef" borderColor="#336699"
+                borderSize="3" height="50px" width="120px"
+                ImageUrl="{!$Resource.Loading}" Message="Loading..."
+                messageStyle="color:darkred;font-size:11pt;font-weight:bold;" />
+        </apex:facet>
+    </apex:actionStatus>
+    <apex:outputPanel id="jspanel">
+        <script type="text/javascript"> 
+            var myJSONObject={!jsonResponse};
+            var firstJSONResponse = {!firstJsonResponse}; 
+            myJSONObject=refreshFirstJSONResponse(firstJSONResponse,myJSONObject);
+            var serialNumber = {!dummySerialNo};
+            displayBasket();
+            var resetTlfFlagsInBackFlow = '{!resetTlfFlags}'; 
+            var resetBBFlagsInBackFlow = '{!resetBBFlags}'; 
+            var resetSPFlagsInBackFlow = '{!resetSPFlags}'; 
+
+            if (resetTlfFlagsInBackFlow!=null && resetTlfFlagsInBackFlow!=''){
+               if (resetTlfFlagsInBackFlow=='true') {
+                    resetTlfFlags=true;
+               }
+            }
+            if (resetBBFlagsInBackFlow!=null && resetBBFlagsInBackFlow!=''){
+               if (resetBBFlagsInBackFlow=='true') {
+                    resetBBFlags=true;
+               }
+            }
+            if (resetSPFlagsInBackFlow!=null && resetSPFlagsInBackFlow!=''){
+               if (resetSPFlagsInBackFlow=='true') {
+                    resetSPFlags=true;
+               }
+            }
+            document.getElementById('resetTlfFlags').value = resetTlfFlags;
+            document.getElementById('resetBBFlags').value = resetBBFlags;   
+            document.getElementById('resetSPFlags').value = resetSPFlags;   
+
+            if (resetTlfFlags==true || resetBBFlags==true || resetSPFlags==true){
+                resetBbTlfFlagForSletOperation();
+            }
+            
+        </script>
+    </apex:outputPanel>
+
+    <apex:outputPanel id="resetAllFlags">
+        <script>
+            var broadBandproductFlag ='{!onlyBroadbandFlag}';
+            var boradBandAndTlfFlag = '{!broadbandTelephonyCommonFlag}';
+            var tlfflag = '{!telefoniFlag}';
+            var SPflag = '{!SPBroadbandFlag}';
+            var myJSONObject={!jsonResponse};
+            var firstJSONResponse = {!firstJsonResponse}; 
+            myJSONObject=refreshFirstJSONResponse(firstJSONResponse,myJSONObject);
+            var serialNumber = {!dummySerialNo}; 
+            displayBasket();
+        </script>
+    </apex:outputPanel>
+    <script type="text/javascript">printContentAreaEnd();</script>
+    <script type="text/javascript">printFooter();</script>
+</apex:form>
+</html>
+</apex:page>

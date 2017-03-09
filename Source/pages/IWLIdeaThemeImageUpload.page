@@ -1,0 +1,60 @@
+<apex:page controller="IWLIdeaThemeImageUploadController" sidebar="false" showHeader="false" >
+    
+    <link rel="stylesheet" type="text/css" href="{!URLFOR($Resource.IWLResources, 'styles/IWLCommonsDefault.css')}"/>
+    
+    <apex:outputPanel layout="block" styleClass="IWLImageUploaderBackContainer">
+    	<apex:outputLink styleClass="IWLImageUploaderBackLink" value="javascript:window.location='{!URLENCODE(JSINHTMLENCODE(retUrl))}';">{!$Label.IWL_IDEA_THEME_IMAGE_UPLOAD_BACK_PAGE}</apex:outputLink>
+    </apex:outputPanel>
+    <apex:outputPanel layout="block" rendered="{!!doLoad || (!doDelete && !upload)}" >    	
+    	{!$Label.IWL_IDEA_THEME_IMAGE_UPLOAD_ERROR_OCCURRED}
+    </apex:outputPanel>    
+    
+    <apex:messages />
+    
+    <apex:outputPanel rendered="{!doLoad && upload}">
+    	
+        <apex:outputPanel layout="block">Upload an image to the idea theme</apex:outputPanel>
+        <apex:outputPanel styleClass="themeImageContainer" rendered="{!existingImageUrl != null}">
+            <img alt="{!$Label.IWL_IDEA_THEME_IMAGE_UPLOAD_CURRENT_IMAGE_ALT}" src="{!existingImageUrl}" />
+        </apex:outputPanel>
+        <apex:outputPanel styleClass="themeImageContainer" rendered="{!existingImageUrl == null}">
+            <img alt="{!$Label.IWL_IDEA_THEME_IMAGE_UPLOAD_CURRENT_NO_IMAGE_ALT}" src="{!URLFOR($Resource.IWLResources, 'styles/images/ideathemeemptyimage.jpg')}" />
+        </apex:outputPanel>
+        
+        <apex:outputPanel styleClass="IWLIdeaThemeImageUploadFormContainer">
+             
+            <apex:form >
+                <apex:inputFile value="{!themeImage.Body}" filename="{!themeImage.Name}" accept="png,bmp,gif,jpg,jpeg" contentType="{!imageContentType}" fileSize="{!imageFileSize}"></apex:inputFile>                
+                <apex:outputPanel layout="block" styleClass="IWLIdeaThemeImageUploadButtonsContainer">
+                	<apex:commandButton styleClass="IWLThemeImageSave IWLPrimaryButton" action="{!updateImage}" value="{!$Label.IWL_IDEA_THEME_IMAGE_UPLOAD_SAVE_LABEL}"></apex:commandButton>
+                	<apex:outputLink styleClass="IWLThemeImageCancel" value="javascript:window.location='{!URLENCODE(JSINHTMLENCODE(retUrl))}';">{!$Label.IWL_IDEA_THEME_IMAGE_UPLOAD_CANCEL_LABEL}</apex:outputLink>
+                </apex:outputPanel>
+            </apex:form>
+            
+        </apex:outputPanel>
+    </apex:outputPanel>
+    
+    <apex:outputPanel rendered="{!doLoad && doDelete}">
+    	<apex:outputPanel styleClass="themeImageContainer" rendered="{!existingImageUrl != null}">
+            <img alt="{!$Label.IWL_IDEA_THEME_IMAGE_UPLOAD_CURRENT_IMAGE_ALT}" src="{!existingImageUrl}" />
+        </apex:outputPanel>
+        <apex:outputPanel styleClass="themeImageContainer" rendered="{!existingImageUrl == null}">
+            <img alt="{!$Label.IWL_IDEA_THEME_IMAGE_UPLOAD_CURRENT_NO_IMAGE_ALT}" src="{!$Resource.IWLResources}/images/ideathemeemptyimage.jpg" />
+        </apex:outputPanel>
+    	<apex:outputPanel layout="block" styleClass="IWLDeleteConfirmMessage">
+    		{!$Label.IWL_IDEA_THEME_IMAGE_UPLOAD_DELETE_CONFIRM}
+    	</apex:outputPanel>
+    	<apex:outputPanel layout="block" styleClass="IWLIdeaThemeImageUploadFormContainer">
+	    	<apex:form >
+	    		<apex:outputPanel layout="block" styleClass="IWLIdeaThemeImageUploadButtonsContainer">
+		    		<apex:commandButton styleClass="IWLPrimaryButton" action="{!deleteImage}" value="{!$Label.IWL_IDEA_THEME_IMAGE_UPLOAD_DELETE_LABEL}"></apex:commandButton>
+		    		<apex:outputLink styleClass="IWLThemeImageCancel" value="javascript:window.location='{!URLENCODE(JSINHTMLENCODE(retUrl))}';">{!$Label.IWL_IDEA_THEME_IMAGE_UPLOAD_CANCEL_LABEL}</apex:outputLink>
+	    		</apex:outputPanel>
+	    	</apex:form>
+    	</apex:outputPanel>
+    </apex:outputPanel>
+    
+    
+    
+    
+</apex:page>

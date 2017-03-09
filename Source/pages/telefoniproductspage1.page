@@ -1,0 +1,250 @@
+<apex:page controller="DealerProductPageController31" sidebar="false" showHeader="false"  id="page1" action="{!initializeText}" applyHtmlTag="false">
+    <html class="cvi2015"> <!--spoc 2206-->
+
+<meta http-equiv="X-UA-Compatible" content="IE=8"/>
+<script type="text/javascript" src="https://yousee.dk/sitecore/content/data/export/export.aspx?itemguid={BD793F05-9B01-4210-BD63-F33431D1013A}&functions=true" > </script>
+<!-- Added for DW 750 -->
+<c:TopMenuComponent1 ></c:TopMenuComponent1>
+<script type="text/javascript">printHeader();</script>
+<script type="text/javascript">printTopMenu();</script>
+<script type="text/javascript">printContentAreaBegin();</script>
+
+<link class="user" href="{!$Resource.SalesFlowCSS}" rel="stylesheet" type="text/css" />
+<c:DealerComponent1 ></c:DealerComponent1>
+<style>
+.leftContent1 {float:left;overflow:visible;width:560px;min-height:800px;height: auto !important;height:1000px;max-height:1100px;}
+.rightContent1 {float:left;overflow:visible;width:365px;min-height:800px;height: auto !important;height:1000px;max-height:1100px;}
+</style>            
+    <script id="productTemplate2" type="text/x-jQuery-tmpl">
+  
+        <tr>
+            <td width="5%"><input type="${selectType}" name="selectOneProduct2" value="${varenr}" ${checked} ${disabled} class="prodCheckbox" onClick="productSelection2('${href}'+'@@'+'TLF')"/> </td>
+            <td>${navn}</td>
+            <td>${price}</td>
+            <td>${priceSuffix}</td>
+        </tr>
+    </script>
+    
+    <apex:outputPanel id="renderJsonForSletOperation">
+        <script type="text/javascript">
+        var bsxxFlag = '{!dtvtaflag}';
+            var myJSONObject={!jsonResponse};
+            var firstJSONResponse = {!firstJsonResponse};
+            var kundeData = JSON.stringify(myJSONObject['kunde-data']);
+            var arrayInit = myJSONObject['array-init'];
+            var etag = myJSONObject['ETag'];
+            var prefix=' kr. pr. md.';
+            var existingCustomerFlag = false;
+            var TLFString='tlf-ga-valg';
+            var TLFProducts =new Array();
+            myJSONObject=refreshFirstJSONResponse(firstJSONResponse,myJSONObject);
+            //var newCust=false; 
+            var custFlag = false; 
+            var a='';
+            var b='';
+            var prodSelected='';
+            var selectedProducts='';
+            var errMsg='';  
+            var isBroadbandSubscriptionNotAvailable='';
+            //DW-861
+            var bsxxFlag = {!dtvtaflag};
+            //Added for BS 
+            var freeChoiceFlag={!isFreeChoicePageFlag};   
+            var currentKundeNumber = '{!cCustInstAdd.customerNumber}';
+            var broadBandString = 'bb-ga-valg';
+          
+           var newCustFlag = '{!isNewCustomer}';  
+            if(newCustFlag == "true"){
+                custFlag  = "false"; 
+            }else if(newCustFlag == "false"){
+                custFlag  = "true";
+            }                
+                
+            TLFProducts=createProductsData(TLFString, prefix, custFlag);            
+           
+            if(TLFProducts.length == 1){
+                addProduct(TLFProducts[0],TLFString);
+                b = $("#productTemplateSingleRecord").tmpl(TLFProducts);
+            }else if(TLFProducts.length > 1){
+                b = $("#productTemplate2").tmpl(TLFProducts);    
+            }
+            
+            $(document).ready( function() {
+              $("table.zebra").find("tr:nth-child(even)").each(
+                function(i) {
+                    if( 0 == $(this).find("th").length ) {
+                        $(this).addClass("odd");
+                    }
+                }
+              );
+            } );
+        </script>
+        
+    </apex:outputPanel> 
+    
+    <script>           
+        function sellProducts(){
+                //alert("inside sell products");
+                var childs1 = $("#TelefoniID input:checked");
+                if (childs1.length==0){
+                    errMsg='Please select Telephoni product.';
+                    $("#errorBlock").html(errMsg);
+                } else {    
+                        if (TLFProducts.length>0){  
+                            setSelectedProducts(childs1,TLFProducts,TLFString);
+                        }
+                        var mergedstring = kundeData +'@@@'+arrayInit+'@@@'+etag;
+                        document.getElementById("mergedstring").value = mergedstring;
+                        document.getElementById("isBroadbandSubscriptionNotAvailable1").value = isBroadbandSubscriptionNotAvailable;
+                        nextFlow();
+                }
+        }
+        
+        
+        function productSelection2(sample){
+            var mergedstring = kundeData +'@@@'+arrayInit+'@@@'+etag;
+            document.getElementById("mergedstring").value = mergedstring;
+            //setSelectedProductBBValue(sample);
+            setSelectedProductTLFValue(sample);
+        }
+        
+        function isBroadbandSubscriptionMandatory(productString,productArray){
+                
+                try{
+                        var flag = false;
+                        if(newkundeFlag){
+                            if(myJSONObject[productString] != undefined &&
+                                    myJSONObject[productString].max != undefined && myJSONObject[productString].max != 0){
+                                    flag = true;
+                            }
+                        }else {
+                            if(myJSONObject[productString] != undefined &&
+                                            myJSONObject[productString].max != undefined &&
+                                            myJSONObject[productString].max != 0 && productArray.length == 0){
+                                            flag = true;
+                                            
+                            }
+                        }
+                        if(productString == "clear-ga-valg" && is_O_CustomerPresent()){
+                            flag = false;
+                        }
+                        return flag;
+                }catch(err){
+                    alert("Error: in isBasicSubscriptionMandatory method in CustomerAndProductComponent: "+err.description);
+                }
+        }
+          
+    </script>
+    
+    <style>
+        
+        tr.even{
+          background-color: #E3DCDB;
+        }
+        tr.odd{
+          background-color: #FCF7F7;
+        }
+    </style>
+    <body>
+    
+        <apex:form id="formId" styleClass="fontVerdana">
+            <br/>  
+            <apex:messages />
+            <br/>
+          <!--   <p> 
+                <strong>Vælg det abonnement, som kunden ønsker</strong><br/><br/>
+           </p> -->  
+          <apex:outputText value="{!salesFlowObj.messages[0]}" escape="false"/><br/><br/>
+          <!-- <p>Du kan klikke på de 3 abonnementsnavne og se, hvad de præcis indeholder.</p><br/><br/> -->
+            <div id="errorBlock" style="color:red;display:block;"/> 
+            <apex:panelGrid columns="2" width="100%" columnClasses="leftContent1,rightContent1">
+                <apex:outputPanel styleClass="leftContent1" id="leftPanel" layout="block">
+                <!-- <apex:panelGroup id="leftPanel" style="width:580px;vertical-align:top" > -->
+                    <apex:pageBlock id="pageBlockId">
+                        <apex:PageBlockSection title="Vælg Telefoni-abonnement" collapsible="false" columns="1"> 
+                            <table id="TelefoniID" class="zebra" width="100%"/>
+                        </apex:PageBlockSection>
+                        
+                        <apex:actionStatus id="nextflowStatus" startText="IN PROGRESS...."/>
+                        <apex:pageBlockButtons location="bottom" id="bbBtnId">
+                                <apex:commandButton action="{!cancel}" value="Annuller" style="margin-right:300px;"/>
+                                <apex:commandButton action="{!backFlow}" value="Tilbage" id="backID"/>
+                                <input type="button"  value="Videre" onclick="sellProducts();" class="videreBtnCls" id="forwardID"/>
+                                <input type = "hidden" id="selectedProds" name = "selectedProds" value=""/>
+                                <input type = "hidden" id="mergedstring" name = "mergedstring" value=""/>
+                                <input type = "hidden" id="BBVal" name = "BBVal" value=""/>
+                                <input type = "hidden" id="TLFVal" name = "TLFVal" value=""/> 
+                                <apex:actionFunction name="nextFlow" action="{!afterTelephonyProductSelection}" />
+                        </apex:pageBlockButtons>
+                        <apex:actionFunction name="setSelectedProductBBValue" action="{!selectedBBValue}" status="queryStatus" reRender="renderJason">
+                            <apex:param name="selectedProductParam" AssignTo="{!BBProduct}"  value=""/>
+                        </apex:actionFunction>
+                        <apex:actionFunction name="setSelectedProductTLFValue" action="{!selectedTLFValue}" status="queryStatus" reRender="renderJason">
+                            <apex:param name="selectedProductParam" AssignTo="{!TLFProduct}"  value=""/>
+                        </apex:actionFunction>
+                        <input type = "hidden" id="isBroadbandSubscriptionNotAvailable1" name = "isBroadbandSubscriptionNotAvailable1" value=""/>
+                    </apex:pageBlock>
+                <!-- </apex:panelGroup> -->
+                </apex:outputPanel>
+            <apex:outputPanel styleClass="rightContent1" id="rightPanel" layout="block">
+                <!-- <apex:panelGroup style="width:330px;" layout="block"> -->
+                    <c:CustomerAndProductComponent isNewKunde="{!isNewCustomer}" kundeNumber="{!cCustInstAdd.customerNumber}"
+                            kundeName="{!cCustInstAdd.firstName} {!cCustInstAdd.lastName}" Adresse="{!cCustInstAdd.addr1}"
+                            Postnummer="{!cCustInstAdd.addr2}"></c:CustomerAndProductComponent>
+                <!-- </apex:panelGroup>  --> 
+                </apex:outputPanel>
+            </apex:panelGrid> 
+            <apex:outputPanel id="renderJsonForSletOperation1">     
+                <script type="text/javascript">
+                      var basicHeader = [" "," "," "," "];   
+                      var requiredHeader = [" "," "," "," "];     
+                      /*if(a != ''){     
+                         a.appendTo(createHeaders(basicHeader,"#BroadBandID"));
+                       }*/
+                      if(b != ''){                 
+                          b.appendTo(createHeaders(requiredHeader,"#TelefoniID"));
+                      }
+                
+                </script>
+         </apex:outputPanel>
+                
+        <apex:actionStatus id="queryStatus"> 
+                <apex:facet name="start">
+                <c:loadingComponent BackColor="#efefef" borderColor="#336699"
+                 borderSize="3" height="50px" width="120px" 
+                 ImageUrl="{!$Resource.Loading}" Message="Loading..." 
+                 messageStyle="color:darkred;font-size:11pt;font-weight:bold;"/>
+                </apex:facet>         
+            </apex:actionStatus>
+            
+            <apex:outputpanel id="renderJason">
+                <script>
+                    myJSONObject={!jsonResponse};
+                    firstJSONResponse = {!firstJsonResponse};
+                    var serialNumber = {!dummySerialNo};
+                    kundeData = JSON.stringify(myJSONObject['kunde-data']);
+                    arrayInit = myJSONObject['array-init'];
+                    etag = myJSONObject['ETag'];
+                    
+                    isBroadbandSubscriptionNotAvailable = isBroadbandSubscriptionMandatory(broadBandString,broadband);
+                    if (isBroadbandSubscriptionNotAvailable!=null && isBroadbandSubscriptionNotAvailable!=''){
+                        document.getElementById("isBroadbandSubscriptionNotAvailable1").value = isBroadbandSubscriptionNotAvailable;
+                   }
+                   myJSONObject=refreshFirstJSONResponse(firstJSONResponse,myJSONObject); 
+                   displayBasket(); 
+                </script>
+            </apex:outputpanel>
+            
+            <apex:actionFunction action="{!callToKasia}" name="callToKasia" status="queryStatus" reRender="renderJsonForSletOperation,renderJason,renderJsonForSletOperation1,leftPanel">
+                                <apex:param name="url" assignTo="{!url}" value="" />
+                                <apex:param name="etag" assignTo="{!etag}" value="" />
+                                <apex:param name="kundeData" assignTo="{!kundeData}" value="" />
+                                <apex:param name="arrayInit" assignTo="{!arrayInit}" value="" />
+            </apex:actionFunction>
+            
+        </apex:form>
+    </body>
+    <script type="text/javascript">printContentAreaEnd();</script>
+    <script type="text/javascript">printFooter();</script> 
+    </html>
+</apex:page>

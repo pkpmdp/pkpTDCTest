@@ -1,0 +1,1710 @@
+<apex:page standardController="Account" extensions="fritValgSpocController" sidebar="false" id="fv">
+
+<style type="text/css">
+	div.ex {
+		width: 600px;
+		padding: 10px;
+		border: 5px solid black;
+		margin: 0px;
+	}
+	.panelgridcolumn{
+	   vertical-align: top;
+	}
+	#login_fader {
+    	background-color:#efefef;
+    	opacity:0.3;
+    	MozOpacity:0.3;
+    	filter:alpha(opacity=30);
+    	zoom:1;
+    	zIndex:50;
+    	position: absolute;
+    	top: 0;
+    	left: 0;
+    	height: 100%;
+    	width: 100%;
+    	display:none;
+    }
+    #login_box {
+    	width: 850px;
+    	height: 500px;
+    	background: #5a5a5a;
+    	position: fixed;
+    	top: 40%;
+    	left: 30%;
+    	margin: -100px 0 0 -160px;
+    	z-index: 10;
+    	display:none;
+    }
+</style> 
+	<script type="text/javascript" src="{!$Resource.jQuery13}"></script>
+	<script type="text/javascript" src="{!$Resource.JQuery_tmpl}"></script>
+	<script type="text/javascript" src="{!$Resource.jQueryTableSorter}"></script>
+	<script type="text/javascript" src="{!$Resource.multiFilter}"></script>	
+	<script type="text/javascript" src="{!$Resource.json}"></script>
+	<apex:stylesheet value="{!$Resource.blueTheme}" />
+	<apex:form id="frmKunde">
+	<div id="login_fader">&nbsp;</div>
+		<div id="login_box" style="height:190px;">
+		  <div style="width:850px; height:12px; vertical-align:top;background-color:blue;text-align:right;"></div>
+		  <div id="errorMsg" style="display:none; color:red; background-color:#ECECEC;"></div>
+		   <apex:pageBlock title="Ny kunde" id="pbCreateKunde">
+		    <apex:pageBlockSection id="sectionId" columns="2" collapsible="false">
+				<apex:pageBlockSectionItem id="sectionItemId1">
+		         <apex:outputLabel value="Fornavn" /> 
+		         <apex:outputPanel id="innetoptID" styleClass="requiredInput" layout="block">
+		           <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+				   <apex:inputText id="txtFirstName" value="{!account.FirstName}" onKeyPress="return validateSalesNumber(event);" maxlength="40"/>
+		         </apex:outputPanel>   	
+		       </apex:pageBlockSectionItem>
+		       <apex:inputHidden id="hidden1"/>
+	       	    
+	       	   <apex:pageBlockSectionItem id="sectionItemId3">
+		              <apex:outputLabel value="Efternavn" />
+		              <apex:outputPanel styleClass="requiredInput" layout="block">
+		                 <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+		                 <apex:inputText id="txtLastName" value="{!account.LastName}" onKeyPress="return validateSalesNumber(event);" maxlength="80"/>
+		              </apex:outputPanel> 
+		      </apex:pageBlockSectionItem>
+	          <apex:inputHidden id="hidden2"/>
+	       
+	          <apex:inputField value="{!account.Phone}" onKeyPress="return isNumberKey(event, this);"/>
+	          <apex:inputField value="{!account.Home_Phone__c}" onKeyPress="return isNumberKey(event, this);"/>
+	       
+	          <apex:inputField value="{!account.PersonMobilePhone}" onKeyPress="return isNumberKey(event, this);"/>
+	          <apex:inputField value="{!account.PersonEmail}" id="txtEmail"/>
+	       
+	          <apex:pageBlockSectionItem id="sectionItemId2">
+	             <apex:outputLabel value="Street" />
+		         <apex:outputPanel id="innetoptID1" layout="inline">
+  		           <apex:outputText value="{!fullAddress}" id="gadenavn"/>
+		         </apex:outputPanel>  
+	          </apex:pageBlockSectionItem>
+	          <apex:inputField value="{!account.No_Email__c}" id="checkEmailText"/>
+	       
+	          <apex:inputField value="{!account.Permission__c}"/>  
+	          <apex:inputField value="{!account.No_Thankyou__c}"/> 
+            </apex:pageBlockSection> 
+  			<apex:pageBlockButtons id="pgBlockButtonID" location="both">
+     			<input type="button" value="Gem" onClick="return validateKundeDetails();" id="btnGem" class="btn"/>
+     			<apex:commandButton value="Luk" id="luk" onClick="return closeKundeDetails();"/>
+  			</apex:pageBlockButtons> 
+  		   </apex:pageBlock>	
+		</div> 
+	
+		<apex:panelGrid columns="2" width="100%" columnClasses="panelgridcolumn">
+			<apex:panelGroup id="leftPanel" style="width:60%;" layout="inline">
+				<apex:pageBlock Title="Ekstra Kanaler">
+					<apex:pageMessages id="systemMessage"></apex:pageMessages>
+					<apex:outputPanel id="kundePanel" rendered="{!IF(addressFlag==true ,false,true)}">
+					<apex:pageBlockSection title="Kundeoplysninger" columns="1" id="kundeoplysninger" >
+						<apex:pageBlockSectionItem >
+							<input type="button" value="Triple" onClick="linkToTriple()" class="btn" />
+							<input type="button" value="Casper" onClick="linkToCasper()" class="btn" />
+						</apex:pageBlockSectionItem>
+					</apex:pageBlockSection>
+					<apex:pageBlockSection showHeader="false" id="kundeValues">
+						<apex:outputField value="{!account.name}" />
+						<apex:outputField value="{!account.Customer_No__c}" style="width:50px"/>
+					</apex:pageBlockSection>
+					</apex:outputPanel>
+					<apex:pageBlockSection title="Afsætning af produkter" id="afsaetningData" columns="1">
+						<apex:panelGrid columns="1" width="70%">
+							<apex:panelGroup id="warningPanel" layout="block" style="overflow:hidden">
+								<div id="warningBox" style="display: none;">
+									<apex:image url="{!$Resource.warningIcon}" width="50" height="50" style="float:left" />
+									<div>
+										<p id="warningMessage"></p>
+										<p id="conflictLink"></p>
+									</div>
+								</div>
+							</apex:panelGroup>
+							<apex:panelGroup id="afsaetningPanel">
+								<apex:panelGrid columns="2" width="70%">
+									<apex:panelGroup id="clear" layout="block" style="width:340px;overflow:hidden">
+										<table cellspacing="0" cellpadding="0">
+											<tr>
+												<td align="left" height="24"><b>Clear</b>
+												</td>
+											</tr>
+											<tr>
+												<td>
+													<table id="clearProductTable" border="1" cellspacing="0" class="tablesorter" align="center">
+														<thead>
+															<tr>
+																<th id="clearAction" style="text-align: center">Handling</th>
+																<th id="clearProduct" style="text-align: center">Produkt</th>
+																<th id="clearNo" style="text-align: center">Varenr</th>
+																<th id="clearProce" style="text-align: center">Pris</th>
+															</tr>
+														</thead>
+														<tbody id="clearBody"></tbody>
+													</table></td>
+											</tr>
+										</table>
+										<p style="color: red;" id="clearMessage"></p>
+									</apex:panelGroup>
+									<apex:panelGroup id="hardware" layout="block" style="width:340px;overflow:hidden">
+										<table id="hardwareSection" cellspacing="0" cellpadding="0">
+											<tr>
+												<td align="left" height="24"><b>Hardware</b></td>
+											</tr>
+											<tr>
+												<td>
+													<table id="hardwareProductTable" border="1" cellspacing="0" class="tablesorter" align="center">
+														<thead>
+															<tr>
+																<th id="hdAction" style="text-align: center">Handling</th>
+																<th id="hdProduct" style="text-align: center">Produkt</th>
+																<th id="hdNo" style="text-align: center">Varenr</th>
+																<th id="hdPrice" style="text-align: center">Pris</th>
+															</tr>
+														</thead>
+														<tbody id="hardwareBody"></tbody>
+													</table></td>
+											</tr>
+										</table>
+										<p style="color: red;" id="hardwareMessage"></p>
+									</apex:panelGroup>
+								</apex:panelGrid>
+							</apex:panelGroup>
+						</apex:panelGrid><br/>
+						<apex:panelGrid columns="2" width="70%">
+							<apex:panelGroup id="extrakanal" layout="block" style="width:340px;overflow:hidden">
+								<table id="fvSection" cellspacing="0" cellpadding="0">
+									<tr>
+										<td align="left"><b>Ekstrakanaler</b></td>
+									</tr>
+									<tr>
+										<td align="left" valign="top">Filter: <select id="channelPrice">
+												<option value="0">Vælg</option>
+												<option>10.00</option>
+												<option>20.00</option>
+												<option>30.00</option>
+												<option>40.00</option>
+										</select> <br />
+										<br /> Søg: <input type="text" id="filterBoxTwo" name="filterBoxTwo" size="8" /> &nbsp; 
+										            <input type="button" id="filterClearTwo" value="Ryd" class="btn" /></td>
+									</tr>
+									<tr>
+										<td colspan="2">
+											<table id="extraChannelTable" cellspacing="0" width="100%" border="1" class="tablesorter" align="center">
+												<thead>
+													<tr>
+														<th id="fvAction" style="text-align: center">Handling</th>
+														<th id="fvProduct" style="text-align: center">Produkt</th>
+														<th id="fvNo" style="text-align: center">Varenr</th>
+														<th id="fvPrice" style="text-align: center">Pris</th>
+														<th id="fvPackage" style="text-align: center">Pakker</th>
+													</tr>
+												</thead>
+												<tbody id="extraBody"></tbody>
+											</table></td>
+									</tr>
+								</table>
+								<p style="color: red;" id="fvMessage"></p>
+							</apex:panelGroup>
+							<apex:panelGroup id="digitalPakker" layout="block" style="width:340px;overflow:hidden">
+								<table id="dpSection" cellspacing="0" cellpadding="0" width="100%">
+									<tr>
+										<td align="left"><b>Ekstrapakker</b></td>
+									</tr>
+									<tr>
+										<td align="left" valign="top">Filter: <select id="groupSorting" /> <br />
+										<br /> Søg: <input type="text" id="filterBoxOne" name="filterBoxOne" size="8" /> &nbsp; 
+										<input type="button" id="filterClearOne" value="Ryd" class="btn" /></td>
+									</tr>
+									<tr>
+										<td colspan="2" align="right">
+											<table id="dtvPakkerProductTable" cellspacing="0" border="1" width="100%" class="tablesorter" align="center">
+												<thead>
+													<tr>
+														<th id="dpAction" style="text-align: center">Handling</th>
+														<th id="dpProduct" style="text-align: center">Produkt</th>
+														<th id="dpNo" style="text-align: center">Varenr</th>
+														<th id="dpPrice" style="text-align: center">Pris</th>
+														<th id="dpSortingGroup" style="text-align: center">Gruppe</th>
+													</tr>
+												</thead>
+												<tbody id="digitalBody"></tbody>
+											</table>
+										</td>
+									</tr>
+								</table>
+								<p style="color: red;" id="dtvPakkerMessage"></p>
+							</apex:panelGroup>
+						</apex:panelGrid>
+					</apex:pageBlockSection>
+				</apex:pageBlock>
+			</apex:panelGroup>
+			<apex:panelGroup layout="inline" style="width:40%; vertical-align:top">
+				<apex:pageBlock title="Indkøbsvogn" id="indkøbsvogn">
+					<div id="shoppingDiv" style="display: none;">
+						<apex:pageBlockSection title="Indkøbsvogn" columns="1">
+							<table id="shoppingCartTable" cellspacing="0" border="1" class="tablesorter" align="center">
+								<thead>
+									<tr>
+										<th id="cartAction" style="text-align: center">Handling</th>
+										<th id="cartName" style="text-align: center">Navn</th>
+										<th id="cartAgreement" style="text-align: center">Aftalenr</th>
+										<th id="cartNo" style="text-align: center">Varenr</th>
+										<th id="cartPrice" style="text-align: center">Pris</th>
+									</tr>
+								</thead>
+								<tbody id="shoppingBody"></tbody> 
+							</table>
+							<br />
+							<table id="priceTable" border="0">
+								<thead>
+									<tr>
+										<th></th>
+									</tr>
+								</thead>
+								<tbody id="priceBody"></tbody>
+							</table>
+							<br />
+							<input type="button" value="Bestil" onClick="placeOrder();" id="btnOrder" />
+						</apex:pageBlockSection>
+					</div>
+					<div>
+						<p style="color: blue; font-weight:bold" id="consequence"></p>
+					</div>
+					<div>
+						<p style="color:blue; font-weight:bold" id="pakkeforslag"></p>
+					</div>
+					<apex:pageBlockSection title="Eksisterende Clear på adressen" columns="1">
+						<table id="existingClearProductTable" width="100%" cellspacing="0" class="tablesorter" border="1" align="center">
+							<thead>
+								<tr>
+									<th id="clearAction" style="text-align: center;">Handling</th>
+									<th id="eksClearProduct" style="text-align: center;">Produkt</th>
+									<th id="eksClearKundenr" style="text-align: center;">Kundenr</th>
+									<th id="eksClearKundeType" style="text-align: center;">Type</th>
+									<th id="eksClearPrice" style="text-align: center;">Pris</th>
+									<th id="eksClearDato" style="text-align: left;">Ophør</th>
+								</tr>
+							</thead>
+							<tbody id="existingClearBody"></tbody>
+						</table>
+					</apex:pageBlockSection>
+					<apex:pageBlockSection title="Eksisterende digitale produkter" columns="1"> 
+                		  	Digital Kort: &nbsp;&nbsp;<select id="mySelect" />&nbsp;&nbsp;
+                		  	<input type="button" name="btnReset" onClick="resets();" value="Ryd" class="btn"/>&nbsp;&nbsp;
+                		  	<input type="button" name="btnClose" onClick="closeWindow();" value="Luk" class="btn"/>
+                		    <table id="existingProductTable" width="100%" cellspacing="0" class="tablesorter" border="1" align="center">
+							    <thead>
+								<tr>
+									<th id="eksLinks" style="text-align: center">Handling</th>
+									<th id="eksProduct" style="text-align: center">Produkt</th>
+									<th id="eksNr" style="text-align: center">Aftalernr</th>
+									<th id="eksPrice" style="text-align: center">Pris</th>
+									<th id="eksStartDate" style="text-align: center;">Itakst</th>
+									<th id="eksEndDate" style="text-align: center;">Ophør</th>
+								</tr>
+							    </thead>
+							    <tbody id="existingBody"></tbody>
+						    </table>
+					</apex:pageBlockSection>
+				</apex:pageBlock>
+			</apex:panelGroup>
+		</apex:panelGrid>
+		
+		<apex:actionFunction name="chooseAftale" action="{!chooseAftale}" reRender="jspanel" status="queryStatus">
+			<apex:param name="choosedAftale" value="" assignTo="{!choosedAftale}" />
+			<apex:param name="etag" assignTo="{!etag}" value="" />
+			<apex:param name="kundeData" assignTo="{!kundeData}" value="" />
+			<apex:param name="arrayInit" assignTo="{!arrayInit}" value="" />
+		</apex:actionFunction>
+		<apex:actionFunction action="{!callToKasia}" name="callToKasia" reRender="jspanel, systemMessage" status="queryStatus">
+			<apex:param name="url" assignTo="{!url}" value="" />
+			<apex:param name="etag" assignTo="{!etag}" value="" />
+			<apex:param name="kundeData" assignTo="{!kundeData}" value="" />
+			<apex:param name="arrayInit" assignTo="{!arrayInit}" value="" />
+			<apex:param name="runFlag" assignTo="{!runFlag}" value="" />
+		</apex:actionFunction>
+		<apex:actionFunction action="{!callToCasper}" name="callToCasper" reRender="afsaetningData">
+			<apex:param name="accountID" assignTo="{!accountID}" value="" />
+		</apex:actionFunction>
+		<apex:actionFunction action="{!reset}" name="reset">
+		</apex:actionFunction>
+		<apex:actionFunction name="bookOrder" action="{!bookOrder}" rerender="kundePanel, orderStatus" status="queryStatus"> 
+			<apex:param name="url" assignTo="{!url}" value="" />
+			<apex:param name="etag" assignTo="{!etag}" value="" />
+			<apex:param name="kundeData" assignTo="{!kundeData}" value="" />
+			<apex:param name="arrayInit" assignTo="{!arrayInit}" value="" />
+			<apex:param name="klientFunction" assignTo="{!klientFunction}" value="" />
+			<apex:param name="isNewKundeFlag" assignTo="{!isNewKundeFlag}" value="" />
+		</apex:actionFunction>
+		<apex:actionStatus id="queryStatus">
+			<apex:facet name="start">
+				<c:loadingComponent BackColor="#efefef" borderColor="#336699"
+					borderSize="3" height="50px" width="120px"
+					ImageUrl="{!$Resource.Loading}" Message="Loading..."
+					messageStyle="color:darkred;font-size:11pt;font-weight:bold;" />
+			</apex:facet>
+		</apex:actionStatus>
+	</apex:form>
+
+	<script id="existingProductTemplate" type="text/x-jQuery-tmpl">
+        <tr>
+        <td height="20" style="vertical-align:middle">{{html links}}</td>
+        <td height="20" style="vertical-align:middle">{{html kortnavn}}</td>
+        <td height="20" style="vertical-align:middle">${aftalenr}</td>
+		{{if(price == 0.00)}}
+        <td height="20" style="vertical-align:middle"></td>
+		{{else}}
+		<td height="20" style="vertical-align:middle">${price}</td>
+		{{/if}}
+		<td height="20" style="vertical-align:middle">${startDate}</td>
+		<td height="20" style="vertical-align:middle">${endDate}</td>
+        </tr>
+    </script>
+	<script id="existingClearProductTemplate" type="text/x-jQuery-tmpl">
+        <tr>
+		<td height="20" style="vertical-align:middle;">{{html links}}</td>  
+        <td height="20" style="vertical-align:middle;">{{html kortnavn}}</td>
+        <td style="vertical-align:middle;">${kundeid}</td>
+        <td style="vertical-align:middle;">${kundetype}</td> 
+		{{if(price == 0.00)}}
+        <td height="20" style="vertical-align:middle;"></td>
+		{{else}}
+		<td height="20" style="vertical-align:middle;">${price}</td>
+		{{/if}} 
+		<td height="20" style="vertical-align:middle;">${ophoerDate}</td>
+        </tr>
+    </script>
+	<script id="fvProductTemplate" type="text/x-jQuery-tmpl">
+        <tr>
+        <td height="20" style="vertical-align:middle">{{html links}}</td>
+        <td height="20" style="vertical-align:middle">${kortnavn}</td>
+        <td height="20" style="vertical-align:middle">${varenr}</td>
+        <td height="20" style="vertical-align:middle">${pris}</td>
+        <td height="20" style="vertical-align:middle">${package}</td>
+        </tr>
+    </script>
+	<script id="afsaetningProductTemplate" type="text/x-jQuery-tmpl">
+        <tr>
+        <td height="20" style="vertical-align:middle">{{html links}}</td>
+        <td height="20" style="vertical-align:middle">${kortnavn}</td>
+        <td height="20" style="vertical-align:middle">${varenr}</td>
+        <td height="20" style="vertical-align:middle">${pris}</td>
+        </tr>
+    </script>
+	<script id="dpProductTemplate" type="text/x-jQuery-tmpl">
+         <tr>
+        <td height="20" style="vertical-align:middle">{{html links}}</td>
+        <td height="20" style="vertical-align:middle">${kortnavn}</td>
+        <td height="20" style="vertical-align:middle">${varenr}</td>
+        <td height="20" style="vertical-align:middle">${pris}</td>
+        <td id="dpSortingColumn" height="20" style="vertical-align:middle">${sortingGroup}</td>
+        </tr>
+    </script>
+	<script id="shoppingProductTemplate" type="text/x-jQuery-tmpl">
+        <tr>
+           <td style="vertical-align:middle">{{html links}}</td>
+           <td style="vertical-align:middle">${navn}</td>
+           <td style="vertical-align:middle">${aftalenr}</td> 
+           <td style="vertical-align:middle">${varenr}</td>
+           <td height="20" style="vertical-align:middle">${pris}</td>
+        </tr>
+    </script>
+	<script id="messageTemplate" type="text/x-jQuery-tmpl">
+        <b>${information}</b>
+    </script>
+	<script id="messageTemplate2" type="text/x-jQuery-tmpl">
+        <b>${cqMessage}</b>
+    </script>
+	<script id="warningMessageTemplate" type="text/x-jQuery-tmpl">
+        <b>${warningMessage}</b>
+    </script>
+	<script id="conflictLinkTemplate" type="text/x-jQuery-tmpl">
+        {{html removeConflictLink}}
+    </script>
+	<script id="fvMessageTemplate" type="text/x-jQuery-tmpl">
+        <b>${fvMessage}</b>
+    </script>
+	<script id="dtvPakkerMessageTemplate" type="text/x-jQuery-tmpl">
+        <b>${dtvPakkerMessage}</b>
+    </script>
+	<script id="hardwareMessageTemplate" type="text/x-jQuery-tmpl">
+        <b>${hardwareMessage}</b>
+    </script>
+
+	<script type="text/javascript">
+      $(document).ready(function(){
+        sortingFunction();
+      });
+      
+Array.prototype.unique = function () {
+    var arrVal = this;
+    var uniqueArr = [];        
+    for (var i = arrVal.length; i--; ) {
+        var val = arrVal[i];            
+        if ($.inArray(val, uniqueArr) === -1) {
+            uniqueArr.unshift(val);            
+        }        
+    }        
+    return uniqueArr;    
+}
+
+function sortingFunction() {         
+   //if($('#extraChannelTable tbody tr').size() > 1)
+   	  $("#extraChannelTable:has(tbody tr)").tablesorter({widgets: ['zebra'], headers: {3: {sorter: 'currency'}}, sortList: [[1, 0]]})
+   //if($('#dtvPakkerProductTable tbody tr').size() > 1)	  
+   	  $("#dtvPakkerProductTable:has(tbody tr)").tablesorter({widgets: ['zebra'], headers: {3: {sorter: 'currency'}}, sortList: [[1, 0]]})
+   	  	     
+   var selected = $("select#mySelect").val();
+   if(selected != 'new' && selected != 'no')
+       $('#existingProductTable').multiFilter([{column:'Aftalernr', word: selected}]);  
+} 
+
+function linkToTriple() {
+    var url = 'http://darton:40202/?customerId=' + {!customerNr}; 
+    window.open(url, 'triple');
+}
+
+function linkToCasper() {
+    //var result = sforce.apex.execute('clsCasperButton' , 'sendToCasper', {accountId:'{!account.Id}'});
+    var accountID = '{!account.Id}';
+    callToCasper(accountID);
+}
+
+function getPrice(product,productNumber){
+     try{
+       var varenr = new String(productNumber);
+       var pris = "";
+       product.pris = parseFloat(0.00).toFixed(2);
+       
+       if(oldJson[varenr] != undefined){
+       	  if(product.aftaletype == 'clear'){
+       		 product.pris = getAbonnementPrice(productNumber);
+       		 product.price = getAbonnementPrice(productNumber);
+       	  }else{
+       	     if(oldJson[varenr].totalpris != undefined){
+	    		product.pris = parseFloat(oldJson[varenr].totalpris).toFixed(2);
+	    		product.price =	parseFloat(oldJson[varenr].totalpris).toFixed(2);   	  
+	   		 }
+       	  }	        		  
+          if(oldJson[varenr].betalingsperiode != undefined){            
+           	product.betalingsperiode = oldJson[varenr].betalingsperiode;
+          }	 
+       }
+     }catch(err){
+	     //alert("Error: in getPrice method: "+err.description);
+	 }            
+}
+
+function getAbonnementPrice(productNumber){ 
+    var pris = parseFloat(0);
+	if('{!customerSubType}' == 'Medarbejder'){
+        if(oldJson['abonnement'] != undefined){ 
+            var abonnementList = oldJson['abonnement'];
+            $.each(abonnementList, function(i, node){
+             if(node.varenr != undefined){ 
+               if(productNumber == node.varenr){
+                 pris = node['pris']!=undefined?parseFloat(node['pris']).toFixed(2):'';          	   
+               }
+             }  
+            });
+         }
+	}else{
+	   if(oldJson[productNumber] != undefined && oldJson[productNumber].totalpris != undefined){
+	      pris = parseFloat(oldJson[productNumber].totalpris).toFixed(2);	   	  
+	   }	
+	}
+	return pris;
+}
+
+function placeOrder(){
+	document.getElementById("errorMsg").style.display = "none";
+	if(!{!addressFlag}){
+	    document.getElementById("login_fader").style.display="none";
+		document.getElementById("login_box").style.display="none";
+		confirmOrder();
+	}else{
+	    document.getElementById("login_fader").style.display="block";
+		document.getElementById("login_box").style.display="block";
+	}
+}
+
+function closeKundeDetails(){
+    document.getElementById("login_fader").style.display="none";
+	document.getElementById("login_box").style.display="none";
+    return false;
+}
+
+function hideDivElements(){
+  $('#login_fader').hide("fast", function() {
+  });
+  $('#login_box').hide("fast", function() {
+  });
+}
+function validateEmailAddress(email) {
+       var reg = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/;
+	   if(reg.test(email)) {
+	      return true;
+	   } else {
+	   	  return false;			
+	   } 
+}
+
+function isNumberKey(evt, field){
+    var charCode = (evt.which) ? evt.which : evt.keyCode
+    if ((charCode > 31 && (charCode < 48 || charCode > 57 )) || keycode == 8 || keycode == 46 || keycode == 17){
+      	return false;
+    }
+     
+    if(field.value.length > 20){
+    	return false;
+    }
+    return true;
+} 
+
+function validateSalesNumber(ev){
+	var keycode;
+	if(ev.keyCode) //For IE
+      keycode = ev.keyCode;
+	else if(ev.Which)
+	  keycode = ev.Which; // For FireFox
+	else
+	  keycode = ev.charCode;
+
+	if (keycode == 17){
+	   return false;	
+	}
+	if ((keycode >= 48 && keycode <= 57) || (keycode >= 65 && keycode <= 90) || (keycode >= 97 && keycode <= 122) || keycode == 13 || keycode == 8 || keycode == 46 || keyCode == 39)
+ 	  return true;
+ 	  
+	return false; 
+}
+	
+function validateKundeDetails(){
+    var firstName = document.getElementById("fv:frmKunde:pbCreateKunde:sectionId:sectionItemId1:txtFirstName").value;
+    var lastName = document.getElementById("fv:frmKunde:pbCreateKunde:sectionId:sectionItemId3:txtLastName").value;
+    var email1 = document.getElementById("fv:frmKunde:pbCreateKunde:sectionId:txtEmail").value;
+    var chkEmail1 = document.getElementById("fv:frmKunde:pbCreateKunde:sectionId:checkEmailText").value;
+    if(firstName.length <= 0){
+        document.getElementById("errorMsg").innerHTML = "Skriv venligst fornavn";
+        document.getElementById("errorMsg").style.display = "block";
+        return false;
+    }
+    if(lastName.length <= 0){
+        document.getElementById("errorMsg").innerHTML = "Skriv venligst efternavn";
+        document.getElementById("errorMsg").style.display = "block";
+        return false;
+    }
+    if(document.getElementById("fv:frmKunde:pbCreateKunde:sectionId:checkEmailText").checked && email1.length > 0){
+    	document.getElementById("errorMsg").innerHTML = "Hvis kunden har en e-mail-adresse, fjerne markeringen No E-mail afkrydsningsfeltet"
+   		document.getElementById("errorMsg").style.display = "block";
+    	return false;
+    }
+    if(email1.length > 0){
+		if(!validateEmailAddress(email1)) {
+	      document.getElementById("errorMsg").innerHTML = "Please enter valid email address."
+   		  document.getElementById("errorMsg").style.display = "block";
+	      return false;
+	    } 	   
+    }
+    confirmOrder();  
+}
+
+function confirmOrder(){
+     var url = '', isNewKundeFlag = true;
+     hideDivElements();
+     $.each(links, function(i, link){
+       if(link.rel == 'bestil'){
+          url = link.href;
+          orderFlag = true;
+       }
+     });
+     if(resp['kunde-data'].aftaler != undefined && !{!addressFlag}) {
+       isNewKundeFlag = false;
+     }
+     bookOrder(url, etag, kundeData, arrayInit, klientFunction, isNewKundeFlag);
+}
+
+function getPackage(product, resp2) {
+    var package = '';
+    try{ 
+      if(resp2['GP'] != undefined && resp2['GP'].programmer != undefined){ 
+       var packageList = resp2['GP'].programmer;
+       $.each(packageList, function(i, programmerNode){
+         if(programmerNode['site-service-navn'] != undefined && programmerNode.varenr != undefined){ 
+           if(product.siteServiceNavn == programmerNode['site-service-navn'] || product.varenr == programmerNode.varenr){
+               package = 'GP';
+           }
+         }    
+       });
+      }
+      if(resp2['MP'] != undefined && resp2['MP'].programmer != undefined){ 
+       packageList = resp2['MP'].programmer;
+       $.each(packageList, function(j, programmerNode){
+         if(programmerNode['site-service-navn'] != undefined && programmerNode.varenr != undefined){
+           if(product.siteServiceNavn == programmerNode['site-service-navn'] || product.varenr == programmerNode.varenr){
+               if(package == ''){
+                   package = 'MP';
+               }else{
+                   package += ', MP';
+               }
+            }
+         }  
+       });
+      }
+      if(resp2['FP'] != undefined && resp2['FP'].programmer != undefined){ 
+       packageList = resp2['FP'].programmer;
+       $.each(packageList, function(k, programmerNode){
+         if(programmerNode['site-service-navn'] != undefined && programmerNode.varenr != undefined){ 
+           if(product.siteServiceNavn == programmerNode['site-service-navn'] || product.varenr == programmerNode.varenr){
+               if(package == ''){
+                   package = 'FP';
+               }else{
+                   package += ', FP';
+               }
+            }
+          } 
+       });
+      } 
+     }catch(err){
+	     //alert("Error: in getPackage method: "+err.description);
+	 }  
+     return package;
+}
+
+function totalClearProducts(){
+    var totalCount = 0;
+    try{
+		if(resp['kunde-data'].aftaler != null) {
+			var existingProduct = resp['kunde-data'].aftaler;
+			$.each(existingProduct, function(i, aftalerNode){
+			  if((aftalerNode.aftaletype != undefined && aftalerNode.aftaletype == 'clear'))
+				 totalCount = parseInt(totalCount) + 1;		  			  
+			  if(aftalerNode.aftaletype != undefined && aftalerNode.aftaletype == 'clear' && aftalerNode.kundetype == 'I')
+				 totalICount = parseInt(totalICount) + 1;		  			  
+			});
+		}
+	}catch(err){
+	    //alert("Error: in totalClearProducts method: "+err.description);
+	}
+	totalExistingProducts = totalCount;	  
+}
+
+function getExistingAbonnement(resp) {
+     var existingAftaleOptions = '';
+     var dtvAftaleOpsigLink = '';
+     OTypeFlag = false;
+     existingPrice = 0, existingPriceForClear = 0, existingPriceForDTV = 0, priceForDTV = 0;
+     myOptions = '<option value=\"new\">Ny kort</option>';
+     myOptionsMoreCards = '<option value=\"no\">Alle aftale</option><option value=\"new\">Ny kort</option>'; 
+     var size = 0;
+     var kundeType = ''; // Added By Vishal 
+     var clearOAftaleOpsigLink = '', linkhref = '', linkrel = ''; // Added By Vishal  
+     try{
+     	if(resp['kunde-data'].aftaler != null) {
+		     var existingProduct = resp['kunde-data'].aftaler;
+		     $.each(existingProduct, function(i, aftalerNode){
+		        if((aftalerNode.aftaletype != undefined) && (aftalerNode.aftaletype == 'dtv' || aftalerNode.aftaletype=='clear')){
+		           if(aftalerNode.links != null) {
+		               $.each(aftalerNode.links, function(k, linksNode){
+		                    if(linksNode.rel == 'opsig' && aftalerNode.aftaletype == 'dtv'){
+		                        dtvAftaleOpsigLink = '<input type=\"button\" onclick=\"callKasia(\''+linksNode.href+'\', \''+linksNode.rel+'\',etag, kundeData, arrayInit, 1, \'1201505\');\" value=\"opsig\" style=\"background-color:red\" />';
+		                    }else if(linksNode.rel == 'opsig' && aftalerNode.aftaletype == 'clear'){ // Added By Vishal  
+                        		linkhref = linksNode.href;
+                        		linkrel = linksNode.rel;
+                    		}                 
+		                });
+		            }
+		            if(aftalerNode.abonnementer != undefined){
+			            $.each(aftalerNode.abonnementer, function(j, abonnementerNode){
+			              var product = new Object();
+			              product.links = '';			              
+			              if(parseFloat(totalExistingProducts) > 1){
+			              	 OTypeFlag = true;
+			              	 if(aftalerNode.kundetype == 'I' && aftalerNode.aftaletype == 'clear'){
+			              	     existingKortNavn = abonnementerNode.kortnavn; 
+			              	     clearKundeType = aftalerNode.kundetype;
+			              	     IClearPrice = getAbonnementPrice(abonnementerNode.varenr);
+			              	 }    
+			              }else{
+			                 if(aftalerNode.aftaletype == 'clear'){
+			              	 	IClearPrice = getAbonnementPrice(abonnementerNode.varenr);
+			              	 	clearKundeType = aftalerNode.kundetype;
+			              	 	existingKortNavn = abonnementerNode.kortnavn;
+			              	 }
+			              }
+			              if(abonnementerNode.varetype != undefined && aftalerNode.aftaletype != undefined){
+				              if(abonnementerNode.varetype == 'ga' && aftalerNode.aftaletype == 'dtv') {
+				                product.links = dtvAftaleOpsigLink;
+				              } else if(aftalerNode.kundetype != undefined && abonnementerNode.varetype == 'ga' && aftalerNode.aftaletype == 'clear' && aftalerNode.kundetype != 'O' && OTypeFlag && linkhref != '' && linkrel != '') { // Added By Vishal
+				              	clearOAftaleOpsigLink = '<input type=\"button\" onclick=\"callKasia(\''+linkhref+'\', \''+linkrel+'\', etag, kundeData, arrayInit, 3, \''+abonnementerNode.varenr+'\');\" value=\"opsig\" style=\"background-color:red\" />';
+		              			product.links = clearOAftaleOpsigLink;
+		              		  } else if(abonnementerNode.varetype == 'ta' && aftalerNode.aftaletype == 'dtv' && abonnementerNode.links != null) {
+				                $.each(abonnementerNode.links,function(h,linksNode){
+				                    if(linksNode.rel == 'opsig'){
+				                        product.links = '<input type=\"button\" onclick=\"callKasia(\''+linksNode.href+'\', \''+linksNode.rel+'\',etag, kundeData, arrayInit, 2, \''+abonnementerNode.varenr+'\');\" value=\"opsig\" style=\"background-color:red\" />';
+				                    }                
+				                });
+				              } 
+				          }     
+			              product.varenr = abonnementerNode.varenr;
+			              if(abonnementerNode.varenr == '1201590'){
+			              	onDemandExFlag = true;
+			              }	
+			              if(aftalerNode.kundetype != undefined && aftalerNode.kundetype == 'O') {
+			                  product.kortnavn = '<p><font style=\"BACKGROUND-COLOR: yellow\">'+abonnementerNode.kortnavn+'</font></p>';
+			                  information ='Kunden har clear abonnement ved huslejen';
+			              }else
+			                  product.kortnavn = '<p>'+abonnementerNode.kortnavn+'</font></p>';
+			              product.aftalenr = aftalerNode.aftalenr;           
+			              product.aftaletype = aftalerNode.aftaletype;
+			              product.kundeid = aftalerNode.kundeid;
+			              product.kundetype = aftalerNode.kundetype;
+			              getPrice(product, product.varenr);
+			              if(product.price == 0.00){
+			              	product.price = '';
+			              }
+			              getAbonnementDates(product);
+			              product.ophoerDate = ''; 
+			              if(abonnementerNode.ophoer != undefined){
+			                 product.ophoerDate = abonnementerNode.ophoer.replace(/-/g, '.') ;
+			              } 
+			              if(aftalerNode.aftaletype == 'dtv' && aftalerNode.kundeid == customerno){
+							if(product.pris != null && $("#mySelect option:selected").val() == aftalerNode.aftalenr){
+		               			existingPriceForDTV += parseFloat(product.pris);
+		            		}
+		            		priceForDTV += parseFloat(product.pris);  
+			                productArray.splice(0,0,product);
+			              }else if (aftalerNode.aftaletype=='clear'){
+			                if(parseInt(totalExistingProducts) > 2){
+			                    if((aftalerNode.kundetype == 'O') || (aftalerNode.kundetype == 'I' && abonnementerNode.ophoer != undefined)){
+			                    	existingPriceForClear += parseFloat(product.pris);
+			                    }
+			                }else if(parseInt(totalExistingProducts) == 2){
+			                    if(parseInt(totalICount) == 2){
+			                    	if(aftalerNode.kundetype == 'I' && abonnementerNode.ophoer != undefined)
+			                    		existingPriceForClear += parseFloat(product.pris);			                    	
+			                    } else {
+			                    	existingPriceForClear += parseFloat(product.pris);
+			                    }
+			                }else{
+								if(product.pris != null){
+		                   			existingPriceForClear += parseFloat(product.pris);
+		                		}
+	                		}
+			                clearProductArray.splice(0,0,product);
+						  }
+			              if(abonnementerNode.varenr == '1201505' && aftalerNode.kundeid == customerno) {
+			                newAftale = false;
+			                size++; 
+			                existingAftaleOptions += '<option value=\"'+aftalerNode.aftalenr+'\">'+abonnementerNode.serienumre[0]+'</option>';   
+			              } 
+			            });
+		            }            
+		        }        
+		      });
+			  existingPrice = parseFloat(existingPriceForClear) + parseFloat(existingPriceForDTV);
+			  beforePrice = existingPrice; 
+		      if(size < 2 )
+		        myOptions = existingAftaleOptions + myOptions;
+		      else
+		        myOptions = myOptionsMoreCards +existingAftaleOptions;
+          }
+        }catch(err){
+	    	//alert("Error: in getExistingAbonnement method: "+err.description);
+		}  
+}
+
+function getAbonnementDates(product){
+	if(oldJson['abonnement'] != undefined){ 
+       var abonnementList = oldJson['abonnement'];
+       $.each(abonnementList, function(i, node){
+          if(product.varenr == node.varenr){
+             if(node['fakturering-start']!=undefined){
+               product.startDate = node['fakturering-start'].replace(/-/g, '.');
+             }
+         	 if(node['fakturering-slut']!=undefined){
+         	   product.endDate = node['fakturering-slut'].replace(/-/g, '.');
+         	 }
+         	 return false;	
+          }
+       });
+    }
+}
+      
+function getAfsaetningsProducts(productsJSON, destinationArray,hardwareArray, extraChannelArray, tablename){
+   try{
+	    var clearProducts0 = productsJSON.varer;
+	    var max = productsJSON.max;
+	    $.each(clearProducts0,function(i,varerNode){         
+	        var product = new Object();
+	        product.varenr = varerNode.varenr;
+	        product.kortnavn = varerNode.kortnavn; 
+	        var links = '';
+				         
+	        if(varerNode.links != null) {
+	            $.each(varerNode.links,function(j,linksNode){             
+		            if(linksNode.rel == 'opdater' && max == 1 && !(tablename!='clear' && newAftale==true)){
+		            	if(tablename == 'clear')                                     
+		                	links = '<input type=\"button\" onclick=\"callKasia(\''+linksNode.href+'\',\'skift\', etag, kundeData, arrayInit, 5, \''+varerNode.varenr+'\');\" value=\"skift\" style=\"background-color:lightblue\" />';
+		            	else 
+		            		links = '<input type=\"button\" onclick=\"callKasia(\''+linksNode.href+'\',\''+linksNode.rel+'\', etag, kundeData, arrayInit, 5, \''+varerNode.varenr+'\');\" value=\"tilkøb\" style=\"background-color:lightgreen\" />';
+		            }else if (linksNode.rel == 'opdater' && max == -1 && !(tablename!='clear'&&newAftale==true)) {
+		                links = '<input type=\"button\" onclick=\"callKasia(\''+linksNode.href+'\', \''+linksNode.rel+'\',etag, kundeData, arrayInit, 5, \''+varerNode.varenr+'\');\" value=\"tilkøb\" style=\"background-color:lightgreen\"/>';
+		            }else if(linksNode.rel == 'opret' && newAftale == true){
+		                links = '<input type=\"button\" onclick=\"callKasia(\''+linksNode.href+'\', \''+linksNode.rel+'\',etag, kundeData, arrayInit, 5, \''+varerNode.varenr+'\');\" value=\"ny\" style=\"background-color:yellow\" />';       
+		            }else if(linksNode.rel == 'opret' && tablename=='clear'){
+		                links = '<input type=\"button\" onclick=\"callKasia(\''+linksNode.href+'\', \''+linksNode.rel+'\',etag, kundeData, arrayInit, 5, \''+varerNode.varenr+'\');\" value=\"ny\" style=\"background-color:yellow\" />';       
+		            }else if(productsJSON.min == 1 && tablename=='clearKraevelt'){
+		            	links = '<input type=\"button\" onclick=\"callKasia(\''+linksNode.href+'\',\''+linksNode.rel+'\', etag, kundeData, arrayInit, 5, \''+varerNode.varenr+'\');\" value=\"tilkøb\" style=\"background-color:lightgreen\" />';
+		            }
+	           });
+       	   }
+	       
+	       product.links = links; 
+	       product.sortingGroup = varerNode.sorteringsgruppenavn;
+	       product.siteServiceNavn = varerNode['site-service-navn'];
+	       getPrice(product, product.varenr);
+	       
+	       if(varerNode.sorteringsgruppe != '02-0090' && varerNode.sorteringsgruppe != '02-0010' && varerNode.sorteringsgruppe != '02-0000' && tablename != 'dtveng'){    
+				if(product.links != '')              
+	           		destinationArray.splice(destinationArray.length,0,product);
+	           	if(tablename == 'dtvta')
+	               groupOptions.splice(groupOptions.length,0,product.sortingGroup);
+	       } else if (varerNode.sorteringsgruppe == '02-0000' && product.links != '' && tablename != 'dtveng') { 
+	           hardwareArray.splice(hardwareArray.length,0,product);
+	       } else if(varerNode.sorteringsgruppe =='02-0010' && product.links != '' && tablename != 'dtveng') {
+	           hardwareArray.splice(hardwareArray.length,0,product);
+	       }else if(varerNode.sorteringsgruppe == '02-0090' && product.links != '' && tablename != 'dtveng') {
+	           product.package = getPackage(product, oldJson);
+	           extraChannelArray.splice(extraChannelArray.length,0,product);                      
+	       }else if(product.varenr == '1218383' && product.links != ''){
+	       	   hardwareArray.splice(hardwareArray.length,0,product);
+	       }else if(product.varenr == '1213008' && product.links != ''){
+               hardwareArray.splice(hardwareArray.length,0,product);
+           }
+	   });
+	}catch(err){
+	    	//alert("Error: in getAfsaetningsProducts method: "+err.description);
+	}    
+}
+
+function callKasia(url, rel, etag, kundeData, arrayInit, option, vareNumber){
+	klientFunction = rel;
+    priceOption = option;
+    varNo = vareNumber;
+    document.getElementById("btnOrder").disabled = true;
+    if(option == 1)
+    	prodNo = vareNumber;
+    callToKasia(url, etag, kundeData, arrayInit, "true");
+}
+      
+function findPackageJavascript(anlægsnr, varernr) {
+    findPackage(anlægsnr, varernr);
+}
+      
+function chooseDigitalCard(selectedAftale, etag, kundeData, arrayInit) {
+    var link = findChoosedAftaleLink(resp['links'], selectedAftale);
+    chooseAftale(link, etag, kundeData, arrayInit);
+}
+
+function findChoosedAftaleLink(links, aftalenr) {
+    var aftalelink = '';
+    try{
+	    $.each(links, function(i,linksNode){       
+	        if(linksNode.rel == 'vaelg-aftale') {
+	            var link = linksNode.href;
+	            var aftalenrLink = link.split('vaelg-aftale/')[1];
+	            if(aftalenrLink == aftalenr) { 
+	                aftalelink = linksNode.href;
+	            }
+	        }       
+	    });
+	}catch(err){
+	   	//alert("Error: in findChoosedAftaleLink method: "+err.description);
+	} 	    
+    return aftalelink;
+}
+
+function populateShoppingCartProducts(valgt, opsagt){
+	shoppingProducts = new Array();
+	try{
+	    if(opsagt != null) {
+	      $.each(opsagt, function(j, opsagtNode){
+	    	if(opsagtNode.abonnementer != undefined) {
+	    		$.each(opsagtNode.abonnementer, function(h,abonnementerNode){
+	        		var product = new Object();
+	        		product.varenr = abonnementerNode.varenr;
+	        		product.aftalenr = opsagtNode.aftalenr;
+	        		product.navn = abonnementerNode.kortnavn;
+	        		product.links = ''; 
+	        		if(abonnementerNode.links != undefined) { 
+	        			$.each(abonnementerNode.links,function(k,linksNode){
+	           				if(linksNode.rel == 'slet')
+	            				product.links  = '<input type=\"button\" onclick=\"callKasia(\''+linksNode.href+'\', \''+linksNode.rel+'\',etag, kundeData, arrayInit, 6, \''+opsagtNode.varenr+'\');\" value=\"fortryd opsig\" style=\"background-color:red\" />';  
+	        			}); 
+	        		}
+	        		getPrice(product, product.varenr); 
+	        		shoppingProducts.splice(shoppingProducts.length,0,product);
+	       	 	});
+	        } 
+	     	if(opsagtNode.aftalenr != undefined && opsagtNode.abonnementer == undefined) {
+	     		if(resp['kunde-data'].aftaler != undefined) {
+		     	  $.each(resp['kunde-data'].aftaler, function(i, aftalerNode){
+		     	    if(aftalerNode.aftalenr == opsagtNode.aftalenr){
+	     			  if(aftalerNode.abonnementer != undefined){
+			            $.each(aftalerNode.abonnementer, function(k, abonnementerNode){
+			              $.each(opsigArray, function(l, node){			                
+			                if(abonnementerNode.varenr == node){
+			                    var product = new Object();
+	        					product.varenr = abonnementerNode.varenr;
+	        					product.aftalenr = opsagtNode.aftalenr;
+	        					product.navn = abonnementerNode.kortnavn;
+	        					product.links = '';
+			        			if(opsagtNode.links != undefined) { 
+			        			   $.each(opsagtNode.links,function(k,linksNode){
+			           				if(linksNode.rel == 'slet')
+			            				product.links  = '<input type=\"button\" onclick=\"callKasia(\''+linksNode.href+'\', \''+linksNode.rel+'\',etag, kundeData, arrayInit, 6, \''+product.varenr+'\');\" value=\"fortryd opsig\" style=\"background-color:red\" />';  
+			        			   });
+			        			} 
+			        			getPrice(product, product.varenr); 
+			        			shoppingProducts.splice(shoppingProducts.length,0,product);
+			                 }
+			              });
+			            });
+			          }
+			       }          
+			     });
+			   }
+		    }  
+		});
+	  }       
+	prodNo = 0;	
+	}catch(err){
+	   //	alert("Error: in populateShoppingCartProducts method, opsagt section: "+err.description);
+	}   
+	try{ 
+	    if(valgt != null) {
+	        $.each(valgt, function(i, valgtNode){       
+	            $.each(valgtNode.varer, function(j, varerNode){
+	                var product = new Object();
+	                product.varenr = varerNode.varenr;
+	                product.navn = varerNode.kortnavn;
+	                product.aftalenr = valgtNode.aftalenr;
+	                product.links = '';
+	                if(varerNode.links != undefined){  
+		                $.each(varerNode.links, function(k, linksNode){
+		                    if(linksNode.rel == 'slet')
+		                        product.links  = '<input type=\"button\" onclick=\"callKasia(\''+linksNode.href+'\', \''+linksNode.rel+'\',etag, kundeData, arrayInit, 7, \''+varerNode.varenr+'\');\" value=\"slet\" style=\"background-color:red\" />';  
+		                });
+	                }
+	                getPrice(product, product.varenr);
+	                shoppingProducts.splice(shoppingProducts.length,0,product);
+	            });
+	       });
+	   }
+	}catch(err){
+	   	//alert("Error: in populateShoppingCartProducts method, valgt section: "+err.description);
+	}    
+}
+
+// updated by Navneet
+
+function populateConsequenceMessage(consequence) {
+     var message = ''; 
+     var addProduct = '';
+     var deletedProduct = '';   
+     try{  
+        $.each(consequence, function(i,konsekvenserNode){
+           if(konsekvenserNode.status == 'O' && konsekvenserNode.varenr != null) {
+               if (addProduct==null || addProduct==''){
+	           		addProduct = addProduct+konsekvenserNode.kortnavn;
+	           } else {
+	           		addProduct = addProduct + ', ' + konsekvenserNode.kortnavn;
+	           }
+	       } else if(konsekvenserNode.status == 'F' && konsekvenserNode.varenr != null) {
+	           if (deletedProduct==null || deletedProduct=='') {
+            		deletedProduct = deletedProduct+konsekvenserNode.kortnavn;
+            	}  else {
+            		deletedProduct =deletedProduct+', '+konsekvenserNode.kortnavn;
+            	}
+            }
+            if(konsekvenserNode.status == 'F' && konsekvenserNode.varenr == '1201590'){
+            	onDemandFlag = true; 
+            }
+        });
+        if(addProduct != ''){
+            message = addProduct+''+ ' er tilføjet automatisk';
+        }   
+        if(deletedProduct != '') {
+        	if(addProduct != ''){
+        		message = message+', ';
+        	}
+            message += deletedProduct + ' er fjernet automatisk';
+        }
+    }catch(err){
+	   	//alert("Error: in populateConsequenceMessage method: "+err.description);
+	}
+    return message;
+}
+      
+function parseJSON(resp) {   
+    if(resp['clear-ga-valg']!= null) {
+        getAfsaetningsProducts(resp['clear-ga-valg'], clearProducts,hardwareProducts, extraChannels, 'clear');
+    }
+	
+	if(resp['clear-kraevet-valg'] != null && resp['clear-kraevet-valg'].min == 1) { 
+        getAfsaetningsProducts(resp['clear-kraevet-valg'], clearProducts, hardwareProducts, extraChannels, 'clearKraevelt'); 
+    }
+    
+	if(resp['dtv-ga-valg']!= null) {  
+        getAfsaetningsProducts(resp['dtv-ga-valg'], dtvProducts,hardwareProducts, extraChannels, 'dtvga');
+    }
+
+    if(resp['dtv-ta-valg']!= null) { 
+       getAfsaetningsProducts(resp['dtv-ta-valg'], dtvProducts,hardwareProducts, extraChannels, 'dtvta');
+    } 
+    
+    if(resp['dtv-eng-valg'] != null) { 
+       getAfsaetningsProducts(resp['dtv-eng-valg'], dtvProducts,hardwareProducts, extraChannels, 'dtveng'); 
+    } 
+} 
+      
+function redrawTables() {
+    var sorting;
+    parseJSON(resp);
+    $("#hardwareBody").replaceWith('<tbody id=\"hardwareBody\"></tbody>');
+    $("#afsaetningProductTemplate").tmpl(hardwareProducts).appendTo("#hardwareBody");
+    $("#hardwareProductTable").trigger("update");
+        
+    $("#clearBody").replaceWith('<tbody id=\"clearBody\"></tbody>');
+    $("#afsaetningProductTemplate").tmpl(clearProducts).appendTo("#clearBody");
+    $("#clearProductTable").trigger("update"); 
+    
+    $("#extraBody").replaceWith('<tbody id=\"extraBody\"></tbody>');
+    $("#fvProductTemplate").tmpl(extraChannels).appendTo("#extraBody");
+    $("#extraChannelTable").trigger("update"); 
+    if($('#extraChannelTable tbody tr').size() > 1) {
+    	sorting = [[1,0]]; 
+    	$("#extraChannelTable").trigger("sorton",[sorting]);
+    }
+    
+    $("#digitalBody").replaceWith('<tbody id=\"digitalBody\"></tbody>');
+    $("#dpProductTemplate").tmpl(dtvProducts).appendTo("#digitalBody");
+    $("#dtvPakkerProductTable").trigger("update");
+    if($('#dtvPakkerProductTable tbody tr').size() > 1) {
+    	sorting = [[1,0]]; 
+    	$("#dtvPakkerProductTable").trigger("sorton",[sorting]);
+    } 
+    
+    $("#existingBody").replaceWith('<tbody id=\"existingBody\"></tbody>');
+    $("#existingProductTemplate").tmpl(productArray).appendTo("#existingBody");
+    $("#existingProductTable").trigger("update"); 
+    if($('#existingProductTable tbody tr').size() > 1) {
+        sorting = [[0,0]]; 
+    	$("#existingProductTable").trigger("sorton",[sorting]);
+    }
+
+    $("#existingClearBody").replaceWith('<tbody id=\"existingClearBody\"></tbody>');
+    $("#existingClearProductTemplate").tmpl(clearProductArray).appendTo("#existingClearBody");
+    $("#existingClearProductTable").trigger("update");
+    if($('#existingClearProductTable tbody tr').size() > 1) { 
+    	sorting = [[0,0]]; 
+    	$("#existingClearProductTable").trigger("sorton",[sorting]);
+    }
+    
+    if($("#mySelect").val() != 'no')
+    	$('#existingProductTable').multiFilter([{column:'Aftalernr', word: $("#mySelect").val()}]);  
+}
+
+function dropDownSearch() {
+     $("#filterBoxOne").keyup(function(){
+        if($('#groupSorting').val() == 0){      
+          $('#dtvPakkerProductTable').multiFilter([{column:'Produkt', word: $('#filterBoxOne').val()}]);
+       }else{
+          $('#dtvPakkerProductTable').multiFilter([{column: 'Produkt', word: $('#filterBoxOne').val()}, {column: 'Gruppe', word: $('#groupSorting').val()}]);                               
+       }     
+    });
+    
+    $("#filterClearOne").click(function() {        
+        $("#filterBoxOne").val(''); //clear all the value from textbox
+        $('#dtvPakkerProductTable').multiFilter([{column: 'Produkt', word: ''}]);
+        $('#groupSorting').val("0");
+    });   
+       
+    $("#groupSorting").change(function(){
+    if($('#groupSorting').val() == 0){
+           $('#dtvPakkerProductTable').multiFilter([{column: 'Produkt', word: $('#filterBoxOne').val()}]);
+        }else{    
+           $('#dtvPakkerProductTable').multiFilter([{column: 'Produkt', word: $('#filterBoxOne').val()}, {column: 'Gruppe', word: $('#groupSorting').val()}]);                               
+        }
+    }); 
+        
+    $('#filterBoxTwo').keyup(function(){
+       if($('#channelPrice').val() == 0){      
+          $('#extraChannelTable').multiFilter([{column:'Produkt', word: $('#filterBoxTwo').val()}]);
+       }else{
+          $('#extraChannelTable').multiFilter([{column: 'Produkt', word: $('#filterBoxTwo').val()}, {column: 'Pris', word: $('#channelPrice').val()}]);                               
+       } 
+    });
+    
+    $("#filterClearTwo").click(function() {
+        $("#filterBoxTwo").val(''); //clear all the value from textbox
+        $('#extraChannelTable').multiFilter([{column: 'Produkt', word: ''}]);
+        $('#channelPrice').val("0");
+    }); 
+         
+    $("#channelPrice").change(function(){
+        if($('#channelPrice').val() == 0){
+           $('#extraChannelTable').multiFilter([{column: 'Produkt', word: $('#filterBoxTwo').val()}]);
+        }else{    
+           $('#extraChannelTable').multiFilter([{column: 'Produkt', word: $('#filterBoxTwo').val()}, {column: 'Pris', word: $('#channelPrice').val()}]);                               
+        }  
+    });
+}
+
+function findFortrydOpsigLink(links, aftalenr) {
+    $.each(links, function(i,linksNode){       
+        if(linksNode.rel == 'fortryd-opsig') {
+            var link = linksNode.href;
+            var aftalenrLink = link.split('fortryd-opsig/')[1];
+            if(aftalenrLink == aftalenr) { 
+                fortrydOpsigLink = linksNode.href;
+            }
+        }       
+    });
+}
+
+function findOpsigLink(links, aftalenr) {
+    $.each(links, function(i,linksNode){       
+        if(linksNode.rel == 'opsig') {
+            var link = linksNode.href;
+            var aftalenrLink = link.split('opsig/')[1];
+            if(aftalenrLink == aftalenr) 
+                opsigLink = linksNode.href; 
+        }       
+    });
+}
+// updated by Navneet
+
+function getPakkeForSlagMessage(){
+	var slagMessage = '';
+	
+	$.each(resp['pakkeforslag'], function(k, node){
+	    if(k == 'CLEAR1ST'){
+	       if(existingKortNavn == 'LT' && clearKundeType == 'I'){
+	          slagMessage = slagMessageForTP;
+	       }else if(existingKortNavn == 'MP' && clearKundeType == 'I'){
+	          slagMessage = slagMessageForFP;
+	       }else if(existingKortNavn == 'MP' && clearKundeType == 'O'){
+	          slagMessage = slagMessageForST;
+	       }else if(existingKortNavn == 'GP' && clearKundeType == 'O'){
+	          slagMessage = slagMessageForTP;
+	       }   
+	    }else if(k == 'CLEAR1LT'){
+	       if(existingKortNavn == 'GP' && clearKundeType == 'I'){
+	          slagMessage = slagMessageForMP;
+	       }else if(existingKortNavn == 'GP' && clearKundeType == 'O'){
+	          slagMessage = slagMessageForLT;   
+	       }else if(existingKortNavn == 'MP' && clearKundeType == 'O'){
+	          slagMessage = slagMessageForST;
+	       }
+		}
+    });
+    return slagMessage;
+}
+
+
+function getWarningMessage(warning) {
+    try{
+    	var warningLinks = warning.links;
+    	var responseNode = resp['dtv-ta-valg'].varer;
+    	warningMessage='';
+	    $.each(warning, function(j, node){	    	
+		    if(j == 'CLEAR1ST'){
+		        if(warningMessage != '')
+		        	warningMessage += ',  ';
+		    	warningMessage += displayProductName(warning.CLEAR1ST, responseNode);
+		   	  	warningMessage += ' er inkluderet i FP'
+		    }else if(j == 'CLEAR1LT'){
+		    	if(warningMessage != '')
+		        	warningMessage += ',  ';
+		    	warningMessage += displayProductName(warning.CLEAR1LT, responseNode);
+		   	  	warningMessage += ' er inkluderet i MP';
+		    }else if(j == 'CLEAR1GP'){
+		    	if(warningMessage != '')
+		        	warningMessage += ',  ';
+		    	warningMessage += displayProductName(warning.CLEAR1GP, responseNode);
+		   	  	warningMessage += ' er inkluderet i GP';
+		    }else{
+		       if(j != 'links'){
+		       	 if(warningMessage != '')
+		        	warningMessage += ',  ';
+		    	 warningMessage += displayProductName(node, responseNode);
+		   	  	 warningMessage += ' er inkluderet i ';
+		   	  	 $.each(responseNode, function(i, varerNode){
+	  			   if(varerNode.varenr != undefined && varerNode.varenr == j){
+							warningMessage += varerNode.navn;					    
+				   }
+     	     	 });
+		       }	
+		    }
+	    });
+	    $.each(warningLinks,function(i,linksNode){
+	        if(linksNode.rel == 'fjern-advarsler'){
+	            removeConflictLink = '<input type=\"button\" onclick=\"callKasia(\''+linksNode.href+'\',\''+linksNode.rel+'\', etag, kundeData, arrayInit, 4, 11);\" value=\"Fjern Konflikt\" style=\"background-color:lightblue\" />';   
+	        }
+	    }); 
+    }catch(err){
+	   	//alert("Error: in getWarningMessage method: "+err.description);
+	}
+}
+
+// Added by navneet
+
+function displayProductName(productNumberNode, productNameNode){
+    var productNames = '';
+    try{
+		$.each(productNumberNode, function(j, clearNode){
+            $.each(productNameNode, function(i, varerNode){
+	  			if(varerNode.varenr != undefined){
+				     if (varerNode.varenr == clearNode) {
+				        if (productNames == null || productNames == '')
+							productNames = varerNode.navn + ' ';
+					    else 
+							productNames += ',' + ' ' + varerNode.navn;
+					 }
+				 }
+     	     });
+	    });	    
+    }catch(err){
+	   	//alert("Error: in displayProductName method: "+err.description);
+	}
+	return productNames;
+}
+
+function calculatePrice(){
+	var clearPrice = parseFloat(0), existingClearPrice = parseFloat(0);
+    valgtPrice = 0, opsagtPrice = parseFloat(0), lumsumPrice = parseFloat(0);
+    try{ 
+	    if(resp['kunde-data'].valgt != undefined){
+	        $.each(resp['kunde-data'].valgt, function(i, valgtNode){
+	            $.each(valgtNode.varer, function(j, varerNode){
+	                if(oldJson[varerNode.varenr] != undefined && oldJson[varerNode.varenr].totalpris != undefined && oldJson[varerNode.varenr].betalingsperiode == 'maaned'){
+	                	valgtPrice += parseFloat(oldJson[varerNode.varenr].totalpris);
+	                }else if(oldJson[varerNode.varenr] != undefined && oldJson[varerNode.varenr].totalpris != undefined && oldJson[varerNode.varenr].betalingsperiode == 'enkelt'){
+	                	lumsumPrice += parseFloat(oldJson[varerNode.varenr].totalpris);
+	                }
+	                if(valgtNode.aftaletype == 'clear' && varerNode.varetype == 'ga'){
+	           			existingPrice = parseFloat(existingPrice) - parseFloat(IClearPrice);
+	           		}	
+	            });
+	        });
+	     }
+    }catch(err){
+	   //	alert("Error: in calculatePrice method, valgt section: "+err.description);
+	}
+	try{
+	    if(resp['kunde-data'].opsagt != undefined){
+	        $.each(resp['kunde-data'].opsagt, function(i,opsagtNode){
+	             if(opsagtNode.aftalenr != undefined && opsagtNode.abonnementer == undefined && opsagtNode.aftaletype == 'dtv') {
+	                 opsagtPrice = parseFloat(opsagtPrice) - parseFloat(existingPriceForDTV);	             
+	             }else{
+	                 if(opsagtNode.abonnementer != undefined){
+	                   $.each(opsagtNode.abonnementer, function(j, abonnementerNode){
+	                    if(oldJson[abonnementerNode.varenr] != undefined && oldJson[abonnementerNode.varenr].totalpris != undefined){
+	                       opsagtPrice = parseFloat(opsagtPrice) - parseFloat(oldJson[abonnementerNode.varenr].totalpris);
+	                    }   
+	                   }); 
+	                 }     
+	             }
+	             if(opsagtNode.aftalenr != undefined && opsagtNode.abonnementer == undefined) {
+	     		   if(resp['kunde-data'].aftaler != undefined) {
+		     	     $.each(resp['kunde-data'].aftaler, function(l, aftalerNode){
+		     	       if(aftalerNode.aftalenr == opsagtNode.aftalenr){
+	     			     if(aftalerNode.abonnementer != undefined){
+			               $.each(aftalerNode.abonnementer, function(m, abonnementerNode){
+			                 $.each(opsigArray, function(n, node){			                
+			                   if(abonnementerNode.varenr == node && opsagtNode.aftaletype == 'clear'){
+			                	if(oldJson[abonnementerNode.varenr] != undefined && oldJson[abonnementerNode.varenr].totalpris != undefined){
+	                              opsagtPrice = parseFloat(opsagtPrice) - getAbonnementPrice(abonnementerNode.varenr);
+	                            }        
+			                   }
+			                  });
+			               });
+			             }
+			            }           
+			          });
+			         }
+		           }
+	        });
+	    }
+    }catch(err){
+	   	//alert("Error: in calculatePrice method, opsagt section: "+err.description);
+	}
+}
+
+function resets(){
+	reset();
+}
+
+	var resp = {!JSONResponse};
+    var oldJson = {!oldJson};
+    var anlægsnr = '';
+    if(resp['kunde-data'].anlaegsnr != null)
+    	anlægsnr = resp['kunde-data'].anlaegsnr;
+    var etag = resp['ETag'];
+    
+    var customerno = {!customerNr};
+    var kundeData = JSON.stringify(resp['kunde-data']);
+    var arrayInit  = JSON.stringify(resp['array-init']);
+    var totalExistingProducts = 0, totalICount = 0, existingKortNavn = '', clearKundeType = ''; 
+	var orderFlag = false, skiftFlag = false, onDemandExFlag = false, onDemandFlag = false;
+    var productArray = new Array();
+    var clearProductArray = new Array();           
+    var clearProducts = new Array();
+    var dtvProducts = new Array();
+    var hardwareProducts = new Array();
+    var extraChannels = new Array(); 
+    var shoppingProducts = new Array();
+    var groupOptions = new Array();
+    var opsigArray = ['1101002', '1101003', '1101004', '1201505']; 
+	var varNo, prodNo;
+    var newAftale = true;
+    var information = '', myOptions = '', links = '', klientFunction = '';
+    var cqMessage = '';
+    var warningMessage = '', fvMessage = '', dtvPakkerMessage = '', hardwareMessage = '', pakkeForSlagMessage = '';
+	var beforePrice = parseFloat(0), existingPrice = parseFloat(0), existingPriceForClear = parseFloat(0), existingPriceForDTV = parseFloat(0), IClearPrice = parseFloat(0);
+    var valgtPrice = parseFloat(0), opsagtPrice = parseFloat(0), priceOption = parseFloat(0), totalPrice = parseFloat(0), priceForDTV = parseFloat(0), lumsumPrice = parseFloat(0); 
+	var GP, MP, FP;
+    var OTypeFlag = false;
+    var opsigLink = '', fortrydOpsigLink = '', removeConflictLink = '';
+    var emptyChannelMessage = 'Ingen produkt kan afsættes';
+    var moreThanTwoKortsMessage = 'Kunden kan kun have max. 2 yousee korter';
+    var opsigKortMessage = ' Kunden har andre abonnementer som slettes'; 
+    var orderSuccessMessage = 'Ordren er blevet sendt til kasia.'
+    var orderFailureMessage = 'Ordren fejlede, tryk Luk for at lukke Ekstrakanal vindue.';
+    var slagMessageForFP = '  Det anbefales at kunden vælger en Fuldpakke i stedet for de valgte Ekstrakanaler';
+    var slagMessageForTP = '  Det anbefales at kunden vælger en Tillægspakke i stedet for de valgte Ekstrakanaler';
+    var slagMessageForLT = '  Det anbefales at kunden vælger en Lille Tillægspakke i stedet for de valgte Ekstrakanaler';
+    var slagMessageForST = '  Det anbefales at kunden vælger en Stor Tillægspakke i stedet for de valgte Ekstrakanaler';
+	var slagMessageForMP = '  Det anbefales at kunden vælger en Mellepakke i stedet for de valgte Ekstrakanaler';
+	totalClearProducts();
+	getExistingAbonnement(resp);	
+    $("#pakkeforslag").html("");
+    if(resp['advarsler'] != null && $("#mySelect").val() != 'no'){
+        getWarningMessage(resp['advarsler']); 
+        document.getElementById('warningBox').style.display='block';
+        $("#warningMessageTemplate").tmpl(warningMessage).appendTo("#warningMessage");
+        $("#conflictLinkTemplate").tmpl(removeConflictLink).appendTo("#conflictLink");
+    }
+    
+    $('#mySelect').html(myOptions);
+    var optionSize = $("#mySelect option").length;
+    var selected = '';
+    var options = '<option value=0>Vælg</option>';
+    if(resp[links] != null ) {
+        findOpsigLink(resp['links'], $("#mySelect").val());
+    }
+    parseJSON(resp);
+    if(resp['pakkeforslag'] != undefined) {
+        pakkeForSlagMessage = getPakkeForSlagMessage();
+    }
+    var arr = groupOptions.unique();
+    for (var i = 0; i < arr.length; i++) {
+          options += '<option>' + arr[i] + '</option>';
+    }
+    $('#groupSorting').html(options);
+    
+    clearProducts = clearProducts.sort(function(a,b) {
+		 return parseFloat(a.pris) - parseFloat(b.pris);
+ 	});
+    
+    $("#existingProductTemplate").tmpl(productArray).appendTo("#existingProductTable");
+    $("#existingClearProductTemplate").tmpl(clearProductArray).appendTo("#existingClearProductTable");  
+    $("#afsaetningProductTemplate").tmpl(clearProducts).appendTo("#clearProductTable");
+    $("#afsaetningProductTemplate").tmpl(hardwareProducts).appendTo("#hardwareProductTable");      
+    $("#dpProductTemplate").tmpl(dtvProducts).appendTo("#dtvPakkerProductTable");
+    $("#fvProductTemplate").tmpl(extraChannels).appendTo("#extraChannelTable");
+    if(clearProducts.length <= 0){
+    	information = emptyChannelMessage;
+    }    
+    $("#messageTemplate").tmpl(information).appendTo("#clearMessage");
+    var msg = '';
+    if(resp['konsekvenser'] != undefined) {
+        cqMessage = populateConsequenceMessage(resp['konsekvenser']);
+    }
+    
+    $("#consequence").replaceWith('<p style=\"color:blue\" id=\"consequence\"></p>');
+    $("#messageTemplate2").tmpl(cqMessage).appendTo("#consequence");
+    $("#consequence").trigger("update");
+    
+    if(extraChannels.length <= 0){
+    	fvMessage = emptyChannelMessage;
+    	var extraRow = "<tr id=\"extraRow\"><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>";
+    	$(extraRow).appendTo("#extraBody");
+	    $("#dtvPakkerProductTable").trigger("update");
+	    document.getElementById("extraRow").style.display='none';        
+    }
+    
+    if(dtvProducts.length <= 0){
+    	dtvPakkerMessage = emptyChannelMessage;
+    	var dtvRow = "<tr id=\"dtvRow\"><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>";
+    	$(dtvRow).appendTo("#digitalBody");
+	    $("#extraChannelTable").trigger("update");
+	    document.getElementById("dtvRow").style.display='none';
+	}    
+    if(hardwareProducts.length <= 0)
+    	hardwareMessage = emptyChannelMessage;
+    		
+    $("#fvMessageTemplate").tmpl(fvMessage).appendTo("#fvMessage");
+    $("#dtvPakkerMessageTemplate").tmpl(dtvPakkerMessage).appendTo("#dtvPakkerMessage");
+    $("#hardwareMessageTemplate").tmpl(hardwareMessage).appendTo("#hardwareMessage");		
+    $("#pakkeforslag").html(pakkeForSlagMessage);     
+                  
+    var requestBody = JSON.stringify(resp['kunde-data']+','+resp['array-init']);
+    $("#mySelect").change(function(){
+        var optionSize = $("#mySelect option").length;
+        document.getElementById("consequence").innerHTML = '';
+        selected = $(this.options[this.selectedIndex]).val();
+        if(selected == 'new') {
+             if(optionSize > 2){
+               document.getElementById("consequence").innerHTML = moreThanTwoKortsMessage;
+             }
+             newAftale = true;
+             $('#existingBody').hide();
+             $("#hardwareSection").show();
+             $("#dpSection").show();
+             $("#fvSection").show();
+             document.getElementById('warningBox').style.display='none';
+        } else if(selected == 'no'){
+             $('#existingProductTable').show();
+             newAftale = true;
+             $("#hardwareSection").show();
+             $("#dpSection").show();
+             $("#fvSection").show();
+             $("#existingBody").show();
+             document.getElementById('warningBox').style.display='none';
+        } else {
+             if(resp['links'] != null) {
+                findOpsigLink(resp['links'], selected);
+             }
+             $('#existingProductTable').multiFilter([{column:'Aftalernr', word: selected}]);
+             newAftale = false;
+             $("#hardwareSection").show();
+             $("#dpSection").show();
+             $("#fvSection").show();
+             $('#existingProductTable').show();
+             $('#existingBody').show();
+             if(resp['advarsler'] != null)
+             	document.getElementById('warningBox').style.display='block';
+             	
+             if(optionSize > 2) {
+                 chooseDigitalCard(selected, etag, kundeData, arrayInit);
+             }     
+        }
+        hardwareProducts = [];           
+        clearProducts = [];
+        dtvProducts = [];
+        extraChannels = [];
+        redrawTables(); 
+    });
+    dropDownSearch();
+               
+</script>
+
+	<apex:outputPanel id="jspanel">
+		<script type="text/javascript">
+      var flag = '{!runFlag}';
+      if(flag == "true"){
+        resp = {!JSONResponse};
+        var clearProducts = new Array();
+        var clearProductArray = new Array();     
+        var dtvProducts = new Array();
+        var productArray = new Array();
+        var hardwareProducts = new Array();
+        var extraChannels = new Array(); 
+        var shoppingProducts = new Array(); 
+        var myOptions = '';
+        var groupOptions = new Array();
+        var selected = $("select#mySelect").val();
+        var valgt = resp['kunde-data'].valgt;
+        var dummyAftale = false;
+        var fortrydOpsigLink = '';
+        var cqMessage = '';
+        warningMessage ='';
+        var removeConflictLink = '';
+        var opsigLink = '';
+        var fortrydOpsigLink = '';
+        var fvMessage = '';
+    	var dtvPakkerMessage = ''; 
+    	var hardwareMessage = '';
+    	pakkeForSlagMessage = '';
+    	OTypeFlag = true;
+    	$('#dtvPakkerProductTable').multiFilter([{column:'Produkt', word: ''}]);
+    	$('#extraChannelTable').multiFilter([{column:'Produkt', word: ''}]);
+    	$("#filterBoxOne").val('');
+    	$("#filterBoxTwo").val('');
+    	$('#channelPrice').val("0");
+    	$('#groupSorting').val("0");
+    	$('#groupSorting').html(options);
+        if(valgt != null) {
+           $.each(valgt, function(i,valgtNode){
+               $.each(valgtNode.varer, function(j,varerNode){
+                   if(valgtNode.aftalenr.indexOf("dummy") >= 0 && valgtNode.aftaletype == 'dtv') 
+                       dummyAftale = true;
+               });       
+           }); 
+        }
+        if(selected == 'new' && !dummyAftale) {
+            newAftale = true;
+        } else {
+            newAftale = false;
+        }  
+        var bestilFlag = false;  
+        links = resp['links']; 
+        if(links != null){
+        	$.each(links, function(i, linkNode){
+        		if(linkNode.rel == 'bestil'){
+        			bestilFlag = true;
+        		}
+			});
+		}
+		if(!bestilFlag){            
+			document.getElementById("btnOrder").disabled = true;           
+        }else{
+        	document.getElementById("btnOrder").disabled = false;
+        }   
+        $("#pakkeforslag").html("");  
+        etag = resp['ETag'];
+        kundeData = JSON.stringify(resp['kunde-data']);
+        arrayInit  = JSON.stringify(resp['array-init']);
+        document.getElementById('warningBox').style.display='none';
+        if(resp['advarsler'] != null && $("#mySelect").val() != 'no'){
+            getWarningMessage(resp['advarsler']); 
+            document.getElementById('warningBox').style.display='block';
+        }
+        if($("#mySelect").val() != 'no'){
+        	$('#mySelect').attr('disabled', 'disabled');
+        }
+        if(resp['kunde-data'].valgt != null || resp['kunde-data'].opsagt != null) {
+            populateShoppingCartProducts(resp['kunde-data'].valgt, resp['kunde-data'].opsagt);
+            document.getElementById('shoppingDiv').style.display = 'block';
+        }
+        //refresh existing table
+            getExistingAbonnement(resp);    
+        //end of refreshing 
+        redrawTables();
+        dropDownSearch();
+        $("#shoppingBody").replaceWith('<tbody id=\"shoppingBody\"></tbody>');
+        $("#shoppingProductTemplate").tmpl(shoppingProducts).appendTo("#shoppingBody");
+        $("#shoppingCartTable").trigger("update");        
+        if(resp['konsekvenser'] != undefined) {
+            cqMessage = populateConsequenceMessage(resp['konsekvenser']);
+        }
+        if(resp['pakkeforslag'] != undefined) {
+            pakkeForSlagMessage = getPakkeForSlagMessage();
+        }
+        if(priceOption == 1){
+          	cqMessage += opsigKortMessage;		
+        }
+        $("#consequence").replaceWith('<p style=\"color:blue\" id=\"consequence\"></p>');
+        $("#messageTemplate2").tmpl(cqMessage).appendTo("#consequence");
+        $("#consequence").trigger("update");
+        $("#warningMessage").replaceWith('<p id=\"warningMessage\"></p>');
+        $("#warningMessageTemplate").tmpl(warningMessage).appendTo("#warningMessage");
+        $("#warningMessage").trigger("update"); 
+        $("#conflictLink").replaceWith('<p id=\"conflictLink\"></p>');
+        $("#conflictLinkTemplate").tmpl(removeConflictLink).appendTo("#conflictLink");
+        $("#wconflictLink").trigger("update");
+        $("#pakkeforslag").html(pakkeForSlagMessage);
+        calculatePrice();
+		totalPrice = parseFloat(existingPrice) + parseFloat(valgtPrice) + parseFloat(opsagtPrice);
+		totalPrice = Math.round(totalPrice*100)/100;
+		if($("#mySelect").val() == 'new' || $("#mySelect").val() == 'no'){
+           beforePrice = parseFloat(beforePrice) + parseFloat(priceForDTV);
+           totalPrice = parseFloat(totalPrice) + parseFloat(priceForDTV);
+           if(parseFloat(totalPrice) <= 0){
+	        	totalPrice = 0.00;
+	       }
+        }
+    	if((varNo == '1203021' || varNo == '1201504') && klientFunction == 'slet'){
+    		onDemandFlag = false;
+    		onDemandExFlag = false;
+    	}
+		if(onDemandFlag && onDemandExFlag){
+			if(oldJson['1201590'] != undefined && oldJson['1201590'].totalpris != undefined){
+	           	totalPrice = totalPrice - oldJson['1201590'].totalpris;
+	        }
+	        if(parseFloat(totalPrice) <= 0){
+	        	totalPrice = 0.00;
+	        } 	
+		}
+		if (beforePrice.toFixed){ //if browser supports toFixed() method
+			beforePrice = beforePrice.toFixed(2);
+			totalPrice = totalPrice.toFixed(2);
+			lumsumPrice = lumsumPrice.toFixed(2);
+		}
+        if(shoppingProducts.length > 0){
+	       $("#priceBody").replaceWith('<tbody id=\"priceBody\"></tbody>');
+	       var bodyData  = "<tr><td>Nuværende pris: </td><td>"+beforePrice+"</td></tr>";
+	       bodyData += "<tr class=\"after\"><td>Efter pris: </td><td>"+totalPrice+"</td></tr>";
+	       if(lumsumPrice != 0)
+	       		bodyData += "<tr class=\"after\"><td>Engangsbeløb pris: </td><td>"+lumsumPrice+"</td></tr>";
+	       $(bodyData).appendTo("#priceBody");
+	       $("#priceTable").trigger("update");        
+		}else{
+			document.getElementById('shoppingDiv').style.display = "none";
+		}
+		if(clearProducts.length == 0){
+    		information = emptyChannelMessage;
+    	}
+    	$("#clearMessage").replaceWith('<p style=\"color:red;\" id=\"clearMessage\"></p>');
+    	$("#messageTemplate").tmpl(information).appendTo("#clearMessage");
+    	
+	    if(extraChannels.length == 0){
+	    	fvMessage = emptyChannelMessage;
+	    	var extraRow = "<tr id=\"extraRow\"><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>";
+	    	$(extraRow).appendTo("#extraBody");
+		    $("#dtvPakkerProductTable").trigger("update");
+		    document.getElementById("extraRow").style.display='none';        
+	    }
+	    
+	    if(dtvProducts.length == 0){
+	    	dtvPakkerMessage = emptyChannelMessage;
+	    	var dtvRow = "<tr id=\"dtvRow\"><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>";
+	    	$(dtvRow).appendTo("#digitalBody");
+		    $("#extraChannelTable").trigger("update");
+		    document.getElementById("dtvRow").style.display='none';
+		} 
+		
+   		if(hardwareProducts.length == 0) 
+    		hardwareMessage = emptyChannelMessage;
+    	
+    	$("#fvMessage").replaceWith('<p style=\"color:red;\" id=\"fvMessage\"></p>');	
+    	$("#fvMessageTemplate").tmpl(fvMessage).appendTo("#fvMessage");
+    	$("#fvMessage").trigger("update");
+    	$("#dtvPakkerMessage").replaceWith('<p style=\"color:red;\" id=\"dtvPakkerMessage\"></p>');
+    	$("#dtvPakkerMessageTemplate").tmpl(dtvPakkerMessage).appendTo("#dtvPakkerMessage"); 
+    	$("#dtvPakkerMessage").trigger("update");
+    	$("#hardwareMessage").replaceWith('<p style=\"color:red;\" id=\"hardwareMessage\"></p>');
+    	$("#hardwareMessageTemplate").tmpl(hardwareMessage).appendTo("#hardwareMessage");
+    	$("#hardwarePakkerMessage").trigger("update");
+      }    
+  </script>
+	</apex:outputPanel>
+	<apex:outputPanel id="orderStatus">
+	 <script type="text/javascript">
+		  if(orderFlag){ 
+		  	var statusCode = {!statusCode};
+			if(statusCode == '201'){
+				$("#consequence").html(orderSuccessMessage);
+				resets();
+			}else{
+				$("#consequence").html(orderFailureMessage);
+			}
+		  }
+		  function closeWindow(){
+		  	window.open('', '_self', ''); //bug fix for IE
+			window.close();
+		  }
+	 </script> 
+	</apex:outputPanel>
+</apex:page>

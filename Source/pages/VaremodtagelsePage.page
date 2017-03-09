@@ -1,0 +1,1059 @@
+<apex:page controller="DealerGoodsReceiptController" showHeader="false" sidebar="false" id="GoodsReceipt" action="{!callOutDealerGoods}" applyHtmlTag="false">
+<html class="cvi2015"><!--SPOC-2206-->
+<apex:stylesheet value="{!URLFOR($Resource.styleCss,'myStyle/myStyle.css')}"/>  
+<apex:form id="GRForm" styleClass="fontVerdana">
+<script type="text/javascript" src="https://yousee.dk/sitecore/content/data/export/export.aspx?itemguid={0B93668E-7DA6-482D-B811-1C03BCEF8083}&functions=true"></script>
+<!-- Added for DW 750 -->
+<c:TopMenuComponent ></c:TopMenuComponent>
+<script type="text/javascript">printHeader();</script>
+   <script type="text/javascript">printTopMenu();</script>     
+<script type="text/javascript">printContentAreaBegin();</script>
+<style>
+ .fontVerdana{ font-family: 'Verdana'; }
+ .SøgBtnCls {border-width: 0;padding: 0 15px;text-transform: capitalize;margin: 0 2px;background-position: left top;background-repeat: repeat-x;border-color: -moz-use-text-color #FF4500;border-right: 1px solid #FF4500;border-style: none solid solid none;display: inline;font-family: 'Verdana','Geneva',sans-serif;font-size: 80%;color: #FFFFFF;font-weight: bold;height: 26px;background-color: #FF4500;width:76px}
+ .GokendBtnCls {border-width: 0;padding: 0 15px;text-transform: capitalize;margin: 0 2px;background-position: left top;background-repeat: repeat-x;border-color: -moz-use-text-color #FF4500;border-right: 1px solid #FF4500;border-style: none solid solid none;display: inline;font-family: 'Verdana','Geneva',sans-serif;font-size: 80%;color: #FFFFFF;font-weight: bold;height: 26px;background-color: #FF4500;width:76px}
+        
+</style>
+<apex:includeScript value="{!$Resource.jQuery151}" /> 
+<body>
+ <input type="hidden" id="defectiveOrMissing" name="defectiveOrMissing" value="" />
+ <input type="hidden" id="defectiveOrderedProducts" name="defectiveOrderedProducts" value="" />
+ <input type="hidden" id="notReceivedOrderedProducts" name="notReceivedOrderedProducts" value="" />
+ <input type="hidden" id="receivedOrderedProducts" name="receivedOrderedProducts" value="" />
+        
+        <script type="text/javascript">
+            var jsonResponse = {!dealerGoods};
+            var defectAndMissingHardware = {!defectAndMissingHardware};
+            var htmlTable = "";
+            var htmlRelated = "";
+            var oldestDate; 
+            var latestDate;
+            var activeArraySerialNumbers=[];
+            var defectiveAndMissingProducts ={};
+            var defectiveHardware = [];
+            var missingHardware = [];
+            var receivedProductsList = [];
+            var notReceivedProductsList = [];
+            var defectiveProductsList = [];
+            if(jsonResponse.logistik != undefined){
+                newActiveArraySerialNumbers();
+                listView("default");
+            }
+            function newActiveArraySerialNumbers(){
+                 if(jsonResponse.logistik.iTransit != undefined &&
+                            jsonResponse.logistik.iTransit.length > 0){
+                  var activeArraySerialNumbersList=[]; 
+                  if(defectAndMissingHardware != 'nope'){
+                    for(k=0;k<defectAndMissingHardware.length;k++){
+                      for(x=0; x<jsonResponse.logistik.iTransit.length;x++){
+                        if(($.inArray(jsonResponse.logistik.iTransit[x].serienummer,
+                                        defectAndMissingHardware[k].Defective) != -1)||
+                                        ($.inArray(jsonResponse.logistik.iTransit[x].serienummer,
+                                        defectAndMissingHardware[k].Missing) != -1)){
+                           activeArraySerialNumbersList.push(jsonResponse.logistik.iTransit[x].serienummer);
+                           if($.inArray(jsonResponse.logistik.iTransit[x].serienummer,defectAndMissingHardware[k].Defective) != -1){
+                              defectiveHardware.push(jsonResponse.logistik.iTransit[x].serienummer);
+                              }else{
+                                 missingHardware.push(jsonResponse.logistik.iTransit[x].serienummer);
+                               }
+                            }
+                          }
+                        }
+                        
+                        for(x=0; x<jsonResponse.logistik.iTransit.length;x++){
+                            if($.inArray(jsonResponse.logistik.iTransit[x].serienummer,activeArraySerialNumbersList) == -1){
+                                activeArraySerialNumbers.push(jsonResponse.logistik.iTransit[x]);
+                                }
+                        }
+                    }else{ 
+                        activeArraySerialNumbers = jsonResponse.logistik.iTransit;
+                        }
+                 }      
+            }
+            
+            function noenter(ev)
+            {
+                        var keycode;
+                        if(ev.keyCode) //For IE
+                            keycode = ev.keyCode;
+                        else if(ev.Which)
+                            keycode = ev.Which; // For FireFox
+                        else
+                            keycode = ev.charCode;
+                        if ((keycode > 31 && (keycode < 48 || keycode > 57)) || keycode == 46 ){
+                            return false;
+                        }
+                        if(window.event && window.event.keyCode == 13) {
+                            search();
+                            return false;
+                        }
+                            return true;     
+            }
+            
+            function submitenter(ev){
+                if(window.event && window.event.keyCode == 13 || ev.which == 13){
+                    search();
+                    return false;
+                }else{
+                    return true;
+                }
+            }
+            
+            function listView(viewType){
+                
+                if(viewType=="Active" || viewType=="default")
+                {
+                  if(jsonResponse.logistik.iTransit != undefined){
+                        if(jsonResponse.logistik.iTransit.length > 0)
+                        {
+                            setTableHeader("main");
+                            activeView(); 
+                        }
+                       /**
+                        if(viewType=="default")
+                        {
+                         dateBoundary();
+                         
+                        }
+                        */
+                    }
+                }
+                if(viewType=="All")
+                {
+                    //DW-616
+                        if(jsonResponse.logistik.iTransit != undefined ||  jsonResponse.logistik.paaLager != undefined){
+                            if(jsonResponse.logistik.iTransit != undefined &&  jsonResponse.logistik.paaLager != undefined){
+                                if(jsonResponse.logistik.iTransit.length > 0 || jsonResponse.logistik.paaLager.length > 0)
+                                {
+                                    setTableHeader("main");
+                                    activeView(); 
+                                    inactiveView();
+                                }
+                             }
+                             if(jsonResponse.logistik.iTransit != undefined && jsonResponse.logistik.paaLager == undefined){
+                                 if(jsonResponse.logistik.iTransit.length > 0){
+                                    setTableHeader("main");
+                                    activeView(); 
+                                 }
+                             }
+                              if(jsonResponse.logistik.iTransit == undefined && jsonResponse.logistik.paaLager != undefined){
+                                 if(jsonResponse.logistik.paaLager.length > 0){
+                                    setTableHeader("main");
+                                    inactiveView(); 
+                                 }
+                             }
+                         }
+                     } 
+            }
+            
+            function finalDisplayActions()
+            {   
+                document.getElementById("approveButton").style.display = "block";
+                if(htmlTable.search(/TRANSIT/i) < 0 && htmlRelated.search(/TRANSIT/i) < 0)
+                 document.getElementById("approveButton").style.display = "none";
+                 
+                if(htmlTable.length > 0 && htmlTable.search(/No item/i) < 0)
+                {
+                 if(htmlTable.search(/TRANSIT/i) >= 0)
+                  document.getElementById("selectAllM").style.display = "block";
+                 else
+                  document.getElementById("selectAllM").style.display = "none";
+                }
+                  
+                if(htmlRelated.length > 0 && htmlRelated.search(/No item/i) < 0)
+                {
+                 if(htmlRelated.search(/TRANSIT/i) >= 0)
+                  document.getElementById("selectAllR").style.display = "block";
+                 else
+                  document.getElementById("selectAllR").style.display = "none";
+                }
+                if(activeVidereflag){
+                    document.getElementById("approveButton").style.display = "block";
+                }else{
+                    document.getElementById("approveButton").style.display = "none";
+                }
+            }
+            
+           /**
+            function dateBoundary()
+            {
+                var d1,d2;
+                var tmpStrArr = jsonResponse.logistik.iTransit[0].ordredato.split('-');
+                var d1 = new Date(tmpStrArr[2] + '/' + tmpStrArr[1] + '/' + tmpStrArr[0]);
+               // d1 = new Date(jsonResponse.logistik.iTransit[0].ordredato.substr(0,10).replace(/-/g,"/"));
+                tmpStrArr = jsonResponse.logistik.paaLager[0].ordredato.split('-');
+                d2 = new Date(tmpStrArr[2] + '/' + tmpStrArr[1] + '/' + tmpStrArr[0]);
+                
+                if(d1<d2)
+                 oldestDate = d1;
+                else
+                 oldestDate = d2;
+                
+                tmpStrArr = jsonResponse.logistik.iTransit[jsonResponse.logistik.iTransit.length-1].ordredato.split('-');
+                d1 = new Date(tmpStrArr[2] + '/' + tmpStrArr[1] + '/' + tmpStrArr[0]);
+                tmpStrArr = jsonResponse.logistik.paaLager[jsonResponse.logistik.iTransit.length-1].ordredato.split('-');
+                d2 = new Date(tmpStrArr[2] + '/' + tmpStrArr[1] + '/' + tmpStrArr[0]);
+                if(d1>d2)
+                 latestDate = d1;
+                else
+                 latestDate = d2;
+            }
+            */
+                      
+            function setTableHeader(type)
+            {   
+                if(type=="main"){
+                 //htmlTable = "<tr><th>" + "<input type=\"checkbox\" id =\"selectAllM\" onclick=\"selectAll(this,'main');\"/>" + "</th><th><b>Serienummer</b></th><th><b>Ordrenummer</b></th><th><b>Varenavn</b></th><th><b>Status</b></th><th><b>Ordredato</b></th></tr>";
+                 htmlTable = '<tr><th>' + '<select id="selectAllM" value ="+ on +" onChange="changeAll(this)" style="font-weight:bold"><option>Ingen</option><option>Modtaget</option><option>Beskadiget</option> <option>Ej Modtaget</option></select>'+'</th><th><b>Serienummer</b></th><th><b>Ordrenummer</b></th><th><b>Varenavn</b></th><th><b>Status</b></th><th><b>Ordredato</b></th></tr>';
+                 }
+                else{
+                 //htmlRelated = "<tr><th>" + "<input type=\"checkbox\" id =\"selectAllR\" onclick=\"selectAll(this,'related');\"/>" + "</th><th><b>Serienummer</b></th><th><b>Ordrenummer</b></th><th><b>Varenavn</b></th><th><b>Status</b></th><th><b>Ordredato</b></th></tr>";
+                 htmlRelated = '<tr><th>' + '<select id="selectAllR" value ="+ on +" onChange="changeAll(this)" style=""><option>Ingen</option><option>Modtaget</option><option>Beskadiget</option> <option>Ej Modtaget</option></select>'+'</th><th><b>Serienummer</b></th><th><b>Ordrenummer</b></th><th><b>Varenavn</b></th><th><b>Status</b></th><th><b>Ordredato</b></th></tr>';
+                 }
+            }
+            var activeVidereflag = false;
+            function activeView()
+            {
+                activeVidereflag = false;
+                //var activeArraySerialNumbers = newActiveArraySerialNumbers();
+                //newActiveArraySerialNumbers();
+                setSelectedArrays();
+                for(x=0;x<jsonResponse.logistik.iTransit.length;x++){
+                 setActiveItem(jsonResponse.logistik.iTransit[x],"main"); 
+                }
+                if(activeVidereflag){
+                    document.getElementById("approveButton").style.display = "block";
+                }else{
+                    document.getElementById("approveButton").style.display = "none";
+                }
+            }
+            
+            function inactiveView()
+            {
+                for(y=0;y<jsonResponse.logistik.paaLager.length;y++)
+                 setInActiveItem(jsonResponse.logistik.paaLager[y],"main");
+            }
+            
+            function setActiveItem(objA,type)
+            {
+                var sn=objA.serienummer;
+                var on=objA.ordrenummer;
+                var vn=objA.varenavn;
+                var st=objA.status;
+                var dt="";
+                if(objA.ordredato != null || objA.ordredato != ""){
+                    dt  = objA.ordredato.substr(0,10).split("-");
+                    dt = dt[2] + "." + dt[1] + "." + dt[0];
+                }
+                
+                if(sn!="")
+                {   
+                    if(type=="main"){
+                        if(($.inArray(sn,defectiveHardware) != -1)||($.inArray(sn,missingHardware) != -1) || ({!receivedProducts}) || ({!notReceivedProducts}) || ({!defectiveProducts})){
+                            if(($.inArray(sn,defectiveHardware) != -1)){
+                                htmlTable = htmlTable + '<tr bgcolor="EAE5E5"><td>' + '<select id="'+on+':'+sn+'"  value ="'+ on +'" disabled="true"><option value="Ingen">Ingen</option><option value="Modtaget">Modtaget</option><option  value="Beskadiget" selected="selected" >Beskadiget</option><option  value="Ej Modtaget">Ej Modtaget</option></select></td><td>' + sn + '</td><td>' + on + '</td><td>' + vn + '</td><td>' + st + '</td><td>' + dt + '</td></tr>';
+                            }
+                            else if(($.inArray(sn,missingHardware) != -1)){
+                                htmlTable = htmlTable + '<tr bgcolor="EAE5E5"><td>' + '<select id="'+on+':'+sn+'"  value ="'+ on +'" disabled="true"><option value="Ingen">None</option><option value="Modtaget">Modtaget</option><option  value="Beskadiget">Beskadiget</option><option  value="Ej Modtaget" selected="selected">Ej Modtaget</option></select></td><td>' + sn + '</td><td>' + on + '</td><td>' + vn + '</td><td>' + st + '</td><td>' + dt + '</td></tr>';
+                            }
+                            else if(($.inArray(sn,receivedProductsList) != -1)){
+                                htmlTable = htmlTable + '<tr><td>' + '<select id="'+on+':'+sn+'"  value ="'+ on +'"><option value="Ingen">Ingen</option><option value="Modtaget" selected="selected">Modtaget</option><option  value="Beskadiget" >Beskadiget</option><option  value="Ej Modtaget">Ej Modtaget</option></select></td><td>' + sn + '</td><td>' + on + '</td><td>' + vn + '</td><td>' + st + '</td><td>' + dt + '</td></tr>';
+                                activeVidereflag = true;
+                            }
+                            else if(($.inArray(sn,notReceivedProductsList) != -1)){
+                                htmlTable = htmlTable + '<tr><td>' + '<select id="'+on+':'+sn+'"  value ="'+ on +'"><option value="Ingen">Ingen</option><option value="Modtaget">Modtaget</option><option  value="Beskadiget" >Beskadiget</option><option  value="Ej Modtaget" selected="selected">Ej Modtaget</option></select></td><td>' + sn + '</td><td>' + on + '</td><td>' + vn + '</td><td>' + st + '</td><td>' + dt + '</td></tr>';
+                                activeVidereflag = true;
+                            }
+                            else if(($.inArray(sn,defectiveProductsList) != -1)){
+                                htmlTable = htmlTable + '<tr><td>' + '<select id="'+on+':'+sn+'"  value ="'+ on +'"><option value="Ingen">Ingen</option><option value="Modtaget" >Modtaget</option><option  value="Beskadiget" selected="selected">Beskadiget</option><option  value="Ej Modtaget">Ej Modtaget</option></select></td><td>' + sn + '</td><td>' + on + '</td><td>' + vn + '</td><td>' + st + '</td><td>' + dt + '</td></tr>';
+                                activeVidereflag = true;
+                            }
+                            else{
+                            //htmlTable = htmlTable + "<tr><td>" + "<input type=\"checkbox\" id=\"" + sn +  "\" value =\"" + on + "\" onclick=\"updateApprovalList(this);\"/></td><td>" + sn + "</td><td>" + on + "</td><td>" + vn + "</td><td>" + st + "</td><td>" + dt + "</td></tr>";
+                            htmlTable = htmlTable + '<tr><td>' + '<select id="'+on+':'+sn+'"  value ="'+ on +'"><option value="Ingen">Ingen</option><option value="Modtaget">Modtaget</option><option  value="Beskadiget">Beskadiget</option><option  value="Ej Modtaget">Ej Modtaget</option></select></td><td>' + sn + '</td><td>' + on + '</td><td>' + vn + '</td><td>' + st + '</td><td>' + dt + '</td></tr>';
+                            activeVidereflag = true;
+                            }
+                          }else{
+                            //htmlTable = htmlTable + "<tr><td>" + "<input type=\"checkbox\" id=\"" + sn +  "\" value =\"" + on + "\" onclick=\"updateApprovalList(this);\"/></td><td>" + sn + "</td><td>" + on + "</td><td>" + vn + "</td><td>" + st + "</td><td>" + dt + "</td></tr>";
+                            htmlTable = htmlTable + '<tr><td>' + '<select id="'+on+':'+sn+'"  value ="'+ on +'"><option value="Ingen">Ingen</option><option value="Modtaget">Modtaget</option><option  value="Beskadiget">Beskadiget</option><option  value="Ej Modtaget">Ej Modtaget</option></select></td><td>' + sn + '</td><td>' + on + '</td><td>' + vn + '</td><td>' + st + '</td><td>' + dt + '</td></tr>';
+                            activeVidereflag = true;
+                            }
+                        }
+                    else{
+                      /**
+                      if(($.inArray(sn,defectiveHardware) != -1)||($.inArray(sn,missingHardware) != -1)){
+                            if(($.inArray(sn,defectiveHardware) != -1)){
+                                htmlRelated = htmlRelated + '<tr bgcolor="EAE5E5"><td>' + '<select id="'+on+':'+sn+'"  value ="'+ on +'" disabled="true"><option value="Ingen">Ingen</option><option value="Modtaget">Modtaget</option><option  value="Beskadiget" selected="selected" >Beskadiget</option><option  value="Ej Modtaget">Ej Modtaget</option></select></td><td>' + sn + '</td><td>' + on + '</td><td>' + vn + '</td><td>' + st + '</td><td>' + dt + '</td></tr>';
+                            }else{
+                                htmlRelated = htmlRelated + '<tr bgcolor="EAE5E5"><td>' + '<select id="'+on+':'+sn+'"  value ="'+ on +'" disabled="true"><option value="Ingen">Ingen</option><option value="Modtaget">Modtaget</option><option  value="Beskadiget">Beskadiget</option><option  value="Ej Modtaget" selected="selected">Ej Modtaget</option></select></td><td>' + sn + '</td><td>' + on + '</td><td>' + vn + '</td><td>' + st + '</td><td>' + dt + '</td></tr>';
+                            }
+                            */
+                        if(($.inArray(sn,defectiveHardware) != -1)||($.inArray(sn,missingHardware) != -1) || ({!receivedProducts}) || ({!notReceivedProducts}) || ({!defectiveProducts})){
+                            if(($.inArray(sn,defectiveHardware) != -1)){
+                                htmlRelated = htmlRelated + '<tr bgcolor="EAE5E5"><td>' + '<select id="'+on+':'+sn+'"  value ="'+ on +'" disabled="true"><option value="Ingen">Ingen</option><option value="Modtaget">Modtaget</option><option  value="Beskadiget" selected="selected" >Beskadiget</option><option  value="Ej Modtaget">Ej Modtaget</option></select></td><td>' + sn + '</td><td>' + on + '</td><td>' + vn + '</td><td>' + st + '</td><td>' + dt + '</td></tr>';
+                            }
+                            else if(($.inArray(sn,missingHardware) != -1)){
+                                htmlRelated = htmlRelated + '<tr bgcolor="EAE5E5"><td>' + '<select id="'+on+':'+sn+'"  value ="'+ on +'" disabled="true"><option value="Ingen">None</option><option value="Modtaget">Modtaget</option><option  value="Beskadiget">Beskadiget</option><option  value="Ej Modtaget" selected="selected">Ej Modtaget</option></select></td><td>' + sn + '</td><td>' + on + '</td><td>' + vn + '</td><td>' + st + '</td><td>' + dt + '</td></tr>';
+                            }
+                            else if(($.inArray(sn,receivedProductsList) != -1)){
+                                htmlRelated = htmlRelated + '<tr><td>' + '<select id="'+on+':'+sn+'"  value ="'+ on +'"><option value="Ingen">Ingen</option><option value="Modtaget" selected="selected">Modtaget</option><option  value="Beskadiget" >Beskadiget</option><option  value="Ej Modtaget">Ej Modtaget</option></select></td><td>' + sn + '</td><td>' + on + '</td><td>' + vn + '</td><td>' + st + '</td><td>' + dt + '</td></tr>';
+                                activeVidereflag = true;
+                            }
+                            else if(($.inArray(sn,notReceivedProductsList) != -1)){
+                                htmlRelated = htmlRelated + '<tr><td>' + '<select id="'+on+':'+sn+'"  value ="'+ on +'"><option value="Ingen">Ingen</option><option value="Modtaget">Modtaget</option><option  value="Beskadiget" >Beskadiget</option><option  value="Ej Modtaget" selected="selected">Ej Modtaget</option></select></td><td>' + sn + '</td><td>' + on + '</td><td>' + vn + '</td><td>' + st + '</td><td>' + dt + '</td></tr>';
+                                activeVidereflag = true;
+                            }
+                            else if(($.inArray(sn,defectiveProductsList) != -1)){
+                                htmlRelated = htmlRelated + '<tr><td>' + '<select id="'+on+':'+sn+'"  value ="'+ on +'"><option value="Ingen">Ingen</option><option value="Modtaget" >Modtaget</option><option  value="Beskadiget" selected="selected">Beskadiget</option><option  value="Ej Modtaget">Ej Modtaget</option></select></td><td>' + sn + '</td><td>' + on + '</td><td>' + vn + '</td><td>' + st + '</td><td>' + dt + '</td></tr>';
+                                activeVidereflag = true;
+                        }else{
+                            //htmlTable = htmlTable + "<tr><td>" + "<input type=\"checkbox\" id=\"" + sn +  "\" value =\"" + on + "\" onclick=\"updateApprovalList(this);\"/></td><td>" + sn + "</td><td>" + on + "</td><td>" + vn + "</td><td>" + st + "</td><td>" + dt + "</td></tr>";
+                            htmlRelated = htmlRelated + '<tr><td>' + '<select id="'+on+':'+sn+'"  value ="'+ on +'"><option value="Ingen">Ingen</option><option value="Modtaget">Modtaget</option><option  value="Beskadiget">Beskadiget</option><option  value="Ej Modtaget">Ej Modtaget</option></select></td><td>' + sn + '</td><td>' + on + '</td><td>' + vn + '</td><td>' + st + '</td><td>' + dt + '</td></tr>';
+                            activeVidereflag = true;
+                        }
+                      }else{
+                            //htmlTable = htmlTable + "<tr><td>" + "<input type=\"checkbox\" id=\"" + sn +  "\" value =\"" + on + "\" onclick=\"updateApprovalList(this);\"/></td><td>" + sn + "</td><td>" + on + "</td><td>" + vn + "</td><td>" + st + "</td><td>" + dt + "</td></tr>";
+                            htmlRelated = htmlRelated + '<tr><td>' + '<select id="'+on+':'+sn+'"  value ="'+ on +'"><option value="Ingen">Ingen</option><option value="Modtaget">Modtaget</option><option  value="Beskadiget">Beskadiget</option><option  value="Ej Modtaget">Ej Modtaget</option></select></td><td>' + sn + '</td><td>' + on + '</td><td>' + vn + '</td><td>' + st + '</td><td>' + dt + '</td></tr>';
+                            activeVidereflag = true;
+                     }
+                   } 
+                }
+            }
+            
+            function setInActiveItem(objIA,type)
+            {
+                var sn=objIA.serienummer;
+                var on=objIA.ordrenummer;
+                var vn=objIA.varenavn;
+                var st=objIA.status;
+                var dt='';
+                if(objIA.ordredato != null && objIA.ordredato != ''){
+                    dt = objIA.ordredato.substr(0,10).split("-");
+                    dt = dt[2] + "." + dt[1] + "." + dt[0];
+                }
+                if(sn!="")
+                {
+                    if(type=="main")
+                        htmlTable = htmlTable + "<tr><td></td><td>" + sn + "</td><td>" + on + "</td><td>" + vn + "</td><td>" + st + "</td><td>" + dt + "</td></tr>";
+                    else
+                        htmlRelated = htmlRelated + "<tr><td></td><td>" + sn + "</td><td>" + on + "</td><td>" + vn + "</td><td>" + st + "</td><td>" + dt + "</td></tr>";
+                }
+            }
+            
+            function refreshList(selection)
+            {
+                 htmlTable = '';
+                 listView(selection.value);
+                 $("#tableFormat").html(htmlTable);
+                 htmlRelated = '';
+                 $("#relatedTable").html(htmlRelated);
+                 finalDisplayActions();
+                 document.getElementById("RelatedItemsSection").style.display = "none";
+                 document.getElementById("jsErrorSection").style.display = 'none';
+                 document.getElementById("searchOptions").value = "Vaelg";
+                 resetDate();
+                 resetSerialnummer();
+                 resetOrdrenummer();
+            }
+          /**
+            var serialList='';
+            function updateApprovalList(item)
+            {   
+                    if(item.checked)
+                        serialList = serialList + item.id + ":";
+                    else
+                        serialList = serialList.replace(item.id+":","");
+            }
+            */
+            function showSearch(item)
+            {
+                if(item.value=="Serialnummer") 
+                { 
+                    resetDate();
+                    resetOrdrenummer();
+                    document.getElementById("SerialnummerSearch").style.display = "block";
+                    document.getElementById("SøgBtn").style.display = "block";
+                }
+                else if(item.value=="Ordrenummer") 
+                { 
+                    resetSerialnummer();
+                    resetDate();
+                    document.getElementById("OrdrenummerSearch").style.display = "block";
+                    document.getElementById("SøgBtn").style.display = "block";
+                }
+                else if(item.value=="Dato") 
+                { 
+                    resetSerialnummer();
+                    resetOrdrenummer();
+                    document.getElementById("DatoSearch").style.display = "block";
+                    document.getElementById("SøgBtn").style.display = "block";
+                }
+                else
+                {
+                    resetOrdrenummer();
+                    resetSerialnummer();
+                    resetDate();
+                    document.getElementById("SøgBtn").style.display = "none";
+                }
+            }
+            
+            function resetDate()
+            {
+                hideCalendarControl();
+                document.getElementById("FromDate").value = '';
+                document.getElementById("ToDate").value = '';
+                document.getElementById("DatoSearch").style.display = "none";
+            }
+            
+            function resetSerialnummer()
+            {
+                document.getElementById("SerialnummerEntry").value = '';
+                document.getElementById("SerialnummerSearch").style.display = "none";
+            }
+            
+            function resetOrdrenummer()
+            {
+                document.getElementById("OrdrenummerEntry").value = '';
+                document.getElementById("OrdrenummerSearch").style.display = "none";
+            }
+            
+            function selectAll(item,type)
+            {
+                var elems;
+                if(type=="main")
+                 elems = document.getElementById("tableFormat").getElementsByTagName("input");
+                else
+                 elems = document.getElementById("relatedTable").getElementsByTagName("input");
+                 
+                for(x=0;x<elems.length;x++)
+                {  
+                      if(elems[x].id!="selectAllM" && elems[x].id!="selectAllR" && elems[x].id!=undefined)
+                      {
+                       if(item.checked)
+                        {elems[x].checked = true;updateApprovalList(elems[x]);} 
+                       else
+                        {elems[x].checked = false;updateApprovalList(elems[x]);} 
+                      }
+                }
+            }
+            
+            function Trim(str) 
+            {
+                var str = str.replace(/^\s\s*/, ''),
+                ws = /\s/,
+                i = str.length;
+                while (ws.test(str.charAt(--i)));
+                return str.slice(0, i + 1);
+            }
+           
+            function search()
+            {
+                htmlTable = '';
+                htmlRelated = '';
+                $("#relatedTable").html(htmlRelated);
+                document.getElementById("ListView").value = "Search";
+                document.getElementById("RelatedItemsSection").style.display = "none";
+                var searchCondition = document.getElementById("searchOptions").value;
+                document.getElementById("jsErrorSection").style.display = 'none'; 
+                document.getElementById("jsErrorText").innerHTML = '';
+                var ordNum = '';
+                var headerSet = false;
+                var relatedHeaderSet = false;
+                var found = false;
+                var relatedFound = false;
+                activeVidereflag = false;
+                
+                if(searchCondition=="Serialnummer" || searchCondition=="Ordrenummer")
+                {
+                    var clause = searchCondition=="Serialnummer" ? document.getElementById("SerialnummerEntry").value : document.getElementById("OrdrenummerEntry").value;
+                    clause = Trim(clause);
+                    searchCondition=="Serialnummer" ? document.getElementById("SerialnummerEntry").value=clause : document.getElementById("OrdrenummerEntry").value=clause;
+                    if(clause==null || clause=="")
+                    {
+                        document.getElementById("jsErrorSection").style.display = 'block'; 
+                        document.getElementById("jsErrorText").innerHTML = 'Ingen ordre fundet.';
+                        document.getElementById("approveButton").style.display = "none";
+                        //htmlTable = "<tr><td><div style=\"text-align:center\"><b>Ingen ordre fundet.</b></div></td></tr>";
+                        $("#tableFormat").html(htmlTable);
+                        return;
+                    }
+                    // var activeArraySerialNumbers = newActiveArraySerialNumbers();
+                    //DW-616 check -(jsonResponse.logistik.iTransit != undefined or jsonResponse.logistik.paaLager != undefined )
+                    if(jsonResponse.logistik.iTransit != undefined && jsonResponse.logistik.iTransit.length > 0){
+                        for(x=0; x<jsonResponse.logistik.iTransit.length;x++)
+                        {
+                            var num = searchCondition=="Serialnummer" ? jsonResponse.logistik.iTransit[x].serienummer : jsonResponse.logistik.iTransit[x].ordrenummer;
+                            if(num==clause)
+                            {
+                                if(!headerSet)
+                                { setTableHeader("main");
+                                  headerSet = true;
+                                }
+                                setActiveItem(jsonResponse.logistik.iTransit[x],"main");
+                                $("#tableFormat").html(htmlTable);
+                                found=true;
+                                ordNum = jsonResponse.logistik.iTransit[x].ordrenummer;
+                            }
+                        }
+                    }
+                    if(jsonResponse.logistik.paaLager != undefined && jsonResponse.logistik.paaLager.length > 0){
+                        for(y=0;y<jsonResponse.logistik.paaLager.length;y++)
+                        {
+                            var num = searchCondition=="Serialnummer" ? jsonResponse.logistik.paaLager[y].serienummer : jsonResponse.logistik.paaLager[y].ordrenummer;
+                            if(num==clause)
+                            {
+                                if(!headerSet)
+                                { setTableHeader("main");
+                                  headerSet = true;
+                                }
+                                setInActiveItem(jsonResponse.logistik.paaLager[y],"main");
+                                $("#tableFormat").html(htmlTable);
+                                found=true;
+                                ordNum = jsonResponse.logistik.paaLager[y].ordrenummer;
+                            }
+                        }
+                    }
+                    if(!found)
+                    {
+                        document.getElementById("jsErrorSection").style.display = 'block';
+                        document.getElementById("jsErrorText").innerHTML = 'Ingen ordre fundet.';
+                        document.getElementById("approveButton").style.display = "none";
+                        //htmlTable = "<tr><td><div style=\"text-align:center\"><b>Ingen ordre fundet.</b></div></td></tr>";
+                        $("#tableFormat").html(htmlTable);
+                    }
+                    
+                    if(found && searchCondition=="Serialnummer")
+                    {
+                      if(jsonResponse.logistik.iTransit != undefined && jsonResponse.logistik.iTransit.length > 0){
+                        for(r1=0;r1<jsonResponse.logistik.iTransit.length;r1++)
+                        {
+                            if(jsonResponse.logistik.iTransit[r1].ordrenummer == ordNum && jsonResponse.logistik.iTransit[r1].serienummer!= clause)
+                            {
+                                if(!relatedHeaderSet)
+                                {
+                                  setTableHeader("related")
+                                  relatedHeaderSet = true;
+                                }
+                                setActiveItem(jsonResponse.logistik.iTransit[r1],"related");
+                                relatedFound = true;
+                            }
+                        }
+                       } 
+                     if(jsonResponse.logistik.paaLager != undefined && jsonResponse.logistik.paaLager.length > 0){  
+                        for(r2=0;r2<jsonResponse.logistik.paaLager.length;r2++)
+                        {
+                            if(jsonResponse.logistik.paaLager[r2].ordrenummer == ordNum && jsonResponse.logistik.paaLager[r2].serienummer!= clause)
+                            {
+                                if(!relatedHeaderSet)
+                                {
+                                  setTableHeader("related")
+                                  relatedHeaderSet = true;
+                                }
+                                setInActiveItem(jsonResponse.logistik.paaLager[r2],"related");
+                                relatedFound = true;
+                            }
+                        }
+                      } 
+                       if(relatedFound)
+                       {
+                        $("#relatedTable").html(htmlRelated);
+                        document.getElementById("RelatedItemsSection").style.display = "block";
+                       }
+                    }
+                }
+                
+                if(searchCondition=="Dato")
+                {
+                    var fromDateFormatted;
+                    var toDateFormatted;
+                    var fromDate = document.getElementById("FromDate").value.split('.');
+                    if(fromDate.length>1)
+                     fromDateFormatted = new Date(fromDate[2] + '/' + fromDate[1] + '/' + fromDate[0]);
+                    else
+                    {
+                     //fromDateFormatted = oldestDate;
+                     fromDateFormatted = null;
+                     //document.getElementById("FromDate").value = fromDateFormatted.getDate() + '-' + (parseInt(fromDateFormatted.getMonth())+1) + '-' + fromDateFormatted.getFullYear();
+                    }
+                    var toDate =   document.getElementById("ToDate").value.split('.');
+                    if(toDate.length>1)
+                     toDateFormatted = new Date(toDate[2] + '/' + toDate[1] + '/' + toDate[0]);
+                    else
+                    {
+                     //toDateFormatted = latestDate;
+                     toDateFormatted = null;
+                     //document.getElementById("ToDate").value = toDateFormatted.getDate() + '-' + (parseInt(toDateFormatted.getMonth())+1) + '-' + toDateFormatted.getFullYear();
+                    }
+                    //DW-616
+                    if(jsonResponse.logistik.iTransit != undefined && jsonResponse.logistik.iTransit.length > 0){  
+                        for(x=0; x<jsonResponse.logistik.iTransit.length;x++)
+                        {
+                            if(jsonResponse.logistik.iTransit[x].ordredato != undefined){
+                            var tmpStrArr = jsonResponse.logistik.iTransit[x].ordredato.split('-');
+                                var dt = new Date(tmpStrArr[2] + '/' + tmpStrArr[1] + '/' + tmpStrArr[0]);
+                                //alert(dt);
+                                    if((fromDateFormatted != null) && (toDateFormatted != null)){
+                                        if(dt>=fromDateFormatted && dt<=toDateFormatted)
+                                        {
+                                            //alert('Inside x check');
+                                            if(!headerSet)
+                                            { setTableHeader("main");
+                                              headerSet = true;
+                                            }
+                                            setActiveItem(jsonResponse.logistik.iTransit[x],"main");
+                                            $("#tableFormat").html(htmlTable);
+                                            found=true;
+                                        }
+                                    }else if((fromDateFormatted != null) && (toDateFormatted == null)){
+                                        if(dt>=fromDateFormatted)
+                                        {
+                                            //alert('Inside x check');
+                                            if(!headerSet)
+                                            { setTableHeader("main");
+                                              headerSet = true;
+                                            }
+                                            setActiveItem(jsonResponse.logistik.iTransit[x],"main");
+                                            $("#tableFormat").html(htmlTable);
+                                            found=true;
+                                        }
+                                    }else if((fromDateFormatted == null) && (toDateFormatted != null)){
+                                        if(dt<=toDateFormatted)
+                                        {
+                                            //alert('Inside x check');
+                                            if(!headerSet)
+                                            { setTableHeader("main");
+                                              headerSet = true;
+                                            }
+                                            setActiveItem(jsonResponse.logistik.iTransit[x],"main");
+                                            $("#tableFormat").html(htmlTable);
+                                            found=true;
+                                        }
+                                    }
+                                       
+                            }
+                         }
+                    }
+                    if(jsonResponse.logistik.paaLager != undefined && jsonResponse.logistik.paaLager.length > 0){    
+                        for(y=0;y<jsonResponse.logistik.paaLager.length;y++)
+                        {
+                            if(jsonResponse.logistik.paaLager[y].ordredato != undefined){
+                                var tmpStrArr = jsonResponse.logistik.paaLager[y].ordredato.split('-');
+                                var dt = new Date(tmpStrArr[2] + '/' + tmpStrArr[1] + '/' + tmpStrArr[0]);
+                                /**
+                                if(dt>=fromDateFormatted && dt<=toDateFormatted)
+                                {
+                                    if(!headerSet)
+                                    { setTableHeader("main");
+                                      headerSet = true;
+                                    }
+                                    setInActiveItem(jsonResponse.logistik.paaLager[y],"main");
+                                    $("#tableFormat").html(htmlTable);
+                                    found=true;
+                                }
+                                */
+                                
+                                
+                                if((fromDateFormatted != null) && (toDateFormatted != null)){
+                                        if(dt>=fromDateFormatted && dt<=toDateFormatted)
+                                        { 
+                                            if(!headerSet)
+                                            { setTableHeader("main");
+                                              headerSet = true;
+                                            }
+                                            setInActiveItem(jsonResponse.logistik.paaLager[y],"main");
+                                            $("#tableFormat").html(htmlTable);
+                                            found=true;
+                                        }
+                                    }else if((fromDateFormatted != null) && (toDateFormatted == null)){
+                                        if(dt>=fromDateFormatted)
+                                        {
+                                            //alert('Inside x check');
+                                            if(!headerSet)
+                                            { setTableHeader("main");
+                                              headerSet = true;
+                                            }
+                                            setInActiveItem(jsonResponse.logistik.paaLager[y],"main");
+                                            $("#tableFormat").html(htmlTable);
+                                            found=true;
+                                        }
+                                    }else if((fromDateFormatted == null) && (toDateFormatted != null)){
+                                        if(dt<=toDateFormatted)
+                                        {
+                                            //alert('Inside x check');
+                                            if(!headerSet)
+                                            { setTableHeader("main");
+                                              headerSet = true;
+                                            }
+                                            setInActiveItem(jsonResponse.logistik.paaLager[y],"main");
+                                            $("#tableFormat").html(htmlTable);
+                                            found=true;
+                                        }
+                                    }
+                            }
+                        }
+                    }
+                    if(!found)
+                    {
+                        document.getElementById("jsErrorSection").style.display = 'block';
+                        document.getElementById("jsErrorText").innerHTML = 'Ingen ordre fundet.';
+                        //htmlTable = "<tr><td><div style=\"text-align:center\"><b>Ingen ordre fundet.</b></div></td></tr>";
+                        $("#tableFormat").html(htmlTable);
+                    }
+                }
+                
+                finalDisplayActions();
+            }
+            
+            function changeAll(selec){
+            var selecVal = '';
+                var totalSelectedOrderedProducts1 = '';
+                var allActiveOrderNumbers = [];
+                if(selec.id == 'selectAllM'){
+                    selecVal = $("#selectAllM").val();
+                    totalSelectedOrderedProducts1 = $("#tableFormat td > select");
+                    var mn =0;
+                    for(j=0; j<activeArraySerialNumbers.length; j++){
+                         for(k=0; k<totalSelectedOrderedProducts1.length; k++){
+                            var selectedNum = totalSelectedOrderedProducts1[k].id;
+                            var orderSerialNum=[];
+                            orderSerialNum= selectedNum.split(':');
+                            if( orderSerialNum[1] == activeArraySerialNumbers[j].serienummer){
+                               allActiveOrderNumbers[mn] =totalSelectedOrderedProducts1[k];
+                               mn++;
+                              } 
+                         }
+                    
+                    }
+                }else{
+                    selecVal = $("#selectAllR").val();
+                    totalSelectedOrderedProducts1 = $("#relatedTable td > select");
+                    var m =0;
+                        for(j=0; j<activeArraySerialNumbers.length; j++){
+                         for(k=0; k<totalSelectedOrderedProducts1.length; k++){
+                            var selectedNum = totalSelectedOrderedProducts1[k].id;
+                            var orderSerialNum=[];
+                            orderSerialNum= selectedNum.split(':');
+                            if( orderSerialNum[1] == activeArraySerialNumbers[j].serienummer){
+                               allActiveOrderNumbers[m] =totalSelectedOrderedProducts1[k];
+                               m++;
+                              } 
+                         }
+                    }
+                }
+                $.each(allActiveOrderNumbers,function(i,j){
+                    
+                    j.value = selecVal;
+                });
+            }
+            function fullOrderPopUp(){
+                var selectedOrderedProducts=[];
+                var selectedOrderedProductsSerialNumbers=[];
+                var receivedOrderedProducts=[];
+                var notReceivedOrderedProducts=[]; 
+                var defectiveOrderedProducts=[];
+                var totalSelectedOrderedProducts = [];
+                //var allActiveOrderNumbers = jsonResponse.logistik.iTransit ;
+                //var allActiveOrderNumbers =newActiveArraySerialNumbers();
+                //var activeArraySerialNumbers = newActiveArraySerialNumbers();
+                var allActiveOrderNumbers = [];
+              
+                var tableFormatSelectArr =[];
+                tableFormatSelectArr = $("#tableFormat td > select");
+                for(var i=0; i<tableFormatSelectArr.length; i++){
+                    totalSelectedOrderedProducts[i] = tableFormatSelectArr[i];
+                }
+                
+                var relatedTableSelectArr =[];
+                relatedTableSelectArr = $("#relatedTable td > select");
+                var combineTotal = tableFormatSelectArr.length+relatedTableSelectArr.length;
+                var ii=0;
+                 for(var j = tableFormatSelectArr.length; j<combineTotal; j++){
+                    
+                    totalSelectedOrderedProducts[j] = relatedTableSelectArr[ii];
+                    ii++;
+                 }
+                 var m = 0;
+                for(j=0; j<activeArraySerialNumbers.length; j++){
+                     for(k=0; k<totalSelectedOrderedProducts.length; k++){
+                        var selectedNum = totalSelectedOrderedProducts[k].id;
+                        var orderSerialNum=[];
+                        orderSerialNum= selectedNum.split(':');
+                        if( orderSerialNum[1] == activeArraySerialNumbers[j].serienummer){
+                           allActiveOrderNumbers[m] =totalSelectedOrderedProducts[k];
+                           m++;
+                          } 
+                     }
+                
+                }
+                //totalSelectedOrderedProducts = $.merge(tableFormatSelectArr,relatedTableSelectArr); 
+                //$.each(totalSelectedOrderedProducts,function(i,j){
+                $.each(allActiveOrderNumbers,function(i,j){
+                    var selectedValue = j.value;
+                    var selectedNumber = j.id;
+                    var orderSerialNumber=[];
+                    orderSerialNumber= selectedNumber.split(':');
+                    if(selectedValue!="Ingen"){
+                        selectedOrderedProducts.push(orderSerialNumber[0]);
+                        selectedOrderedProductsSerialNumbers.push(orderSerialNumber[1]);
+                            if(selectedValue=="Modtaget"){
+                                receivedOrderedProducts.push(orderSerialNumber[1]);
+                            }
+                            else if(selectedValue=="Ej Modtaget"){
+                                notReceivedOrderedProducts.push(orderSerialNumber[1]);
+                            }else{ 
+                                defectiveOrderedProducts.push(orderSerialNumber[1]);
+                            }
+                        }
+                    });
+                var defectiveAndMissingProducts ={};
+                defectiveAndMissingProducts["Defective"] = defectiveOrderedProducts;
+                defectiveAndMissingProducts["Missing"] = notReceivedOrderedProducts;
+                var defectiveAndMissingProductsJson = JSON.stringify(defectiveAndMissingProducts);
+                document.getElementById('defectiveOrderedProducts').value=""+defectiveOrderedProducts;
+                document.getElementById('notReceivedOrderedProducts').value=""+notReceivedOrderedProducts;
+                document.getElementById('receivedOrderedProducts').value=""+receivedOrderedProducts;
+                document.getElementById('defectiveOrMissing').value=""+defectiveAndMissingProductsJson;
+                if(selectedOrderedProducts.length == 0){
+                    document.getElementById("jsErrorText").innerHTML = 'Ingen varer er valgt.';
+                    document.getElementById("jsErrorSection").style.display = 'block';
+                    //alert("please Donot open the popup");
+                    return true;
+                }
+                var orderListNumber=0; 
+                var orderListArrayUnaccepted = new Array();
+                for(var i =0;i<selectedOrderedProducts.length;i++){
+                    var totalOrderListNumber = 0;
+                    for(var j=0;j<allActiveOrderNumbers.length;j++){
+                        var selectedNum = allActiveOrderNumbers[j].id;
+                        var orderSerialNum=[];
+                        orderSerialNum= selectedNum.split(':');
+                    //for(var j=0;j<jsonResponse.logistik.iTransit.length;j++){
+                    //if(selectedOrderedProducts[i]==jsonResponse.logistik.iTransit[j].ordrenummer){
+                    if(selectedOrderedProducts[i]==orderSerialNum[0]){
+                        totalOrderListNumber++;
+                     }
+                    }
+                    var orderListArrayElement = selectedOrderedProducts[i];
+                    orderListNumber = orderListNumberValue(orderListArrayElement,allActiveOrderNumbers);
+                    
+                    if(totalOrderListNumber!=orderListNumber)
+                    {
+                        orderListArrayUnaccepted[i]=selectedOrderedProducts[i];
+                    }
+                  }
+                  if(orderListArrayUnaccepted.length>0)
+                  {
+                        var r=confirm("Du har kun varemodtaget dele af ordren. Ønsker du at fortsætte, selvom dele af ordren står til “ingen”. ");
+                        if (r==true)
+                          {
+                          return false;
+                          }
+                        else
+                          {
+                          return true;
+                          }
+                        //document.getElementById("jsErrorText").innerHTML = 'Du skal vælge en årsag fra drop-down listen, inden du kan godkende varemodtagelsen';
+                        //document.getElementById("jsErrorSection").style.display = 'block';
+                        //alert("please open the popup");
+                        return true;
+                  }else{
+                        return false;
+                  }
+            }
+            
+            function orderListNumberValue(orderListNumber,allActiveOrderNumbers){
+                var selectedOrderedProducts=[];
+                 $.each(allActiveOrderNumbers,function(i,j){
+                    var selectedValue = j.value;
+                    var selectedNumber = j.id;
+                    var orderSerialNumber=[];
+                    orderSerialNumber= selectedNumber.split(':');  
+                    if(selectedValue!="Ingen"){
+                    selectedOrderedProducts.push(orderSerialNumber[0]);
+                }});
+                var orderNumberValue = 0;
+                for(var k=0;k<selectedOrderedProducts.length;k++){
+                    if(orderListNumber==selectedOrderedProducts[k]){
+                    orderNumberValue++;
+                    }
+                }
+                return orderNumberValue;
+            }
+            function setSelectedArrays(){
+                if({!receivedProducts}){
+                    receivedProductsList = '{!receivedOrderedProducts}'.split(',');
+                    }
+                if({!notReceivedProducts}){
+                    notReceivedProductsList = '{!notReceivedOrderedProducts}'.split(',');
+                    }
+                if({!defectiveProducts}){
+                    defectiveProductsList = '{!defectiveOrderedProducts}'.split(',');
+                    }
+            }
+            
+        </script>
+                <div class="message errorM3" id="jsErrorSection" style="display:none;font-family: 'Verdana';">
+                <table border="0" cellpadding="0" cellspacing="0" class="messageTable" style="padding:0px;margin:0px;">
+                <tr valign="top">
+                    <td>
+                        <img alt="Fejl" src="/s.gif" class="msgIcon" title="Fejl" />
+                     </td>
+                     <td class="messageCell">
+                        <div class="messageText">
+                            <span style="color:#cc0000">
+                                <h4>Fejl:</h4>
+                            </span> 
+                            <div id="jsErrorText"></div>
+                            
+                        </div>
+                     </td>
+                </tr>
+                <tr>
+                </tr>
+            </table>
+        </div>
+           <div id="bck" styleClass="popupBackground" />  
+     
+<apex:stylesheet value="{!URLFOR($Resource.CalendarControl, 'CalendarControl/CalendarControl.css')}"/>
+<apex:includeScript value="{!URLFOR($Resource.CalendarControl, 'CalendarControl/CalendarControl.js')}"/>
+<br></br> 
+<apex:pageMessages />
+<apex:actionFunction name="nextPage" action="{!updateApprovalStatus}" />
+<apex:actionFunction name="confirmActon" action="{!confirmationPage}" />
+<apex:dataTable value="{!VaremodtagelseHeader}" var="info" rendered="{!NOT(hidePageBlock)}">
+     <apex:column value="{!info.Description__c}"  />
+</apex:dataTable> 
+<div id="fullPageBlock">
+<apex:pageBlock id="ListBlock" rendered="{!NOT(hidePageBlock)}">
+  <div id="SearchBlock">
+ <apex:PageBlockSection title="Find Ordre" collapsible="false" columns="1">
+      <div id="seachOrder" >    
+      <b>Søg på &nbsp; &nbsp; &nbsp; </b> 
+        <select id="searchOptions" onchange="showSearch(this);">
+                <option value="Vaelg">Vælg</option>
+                <option value="Ordrenummer">Ordrenummer</option>
+                <option value="Serialnummer">Serienummer</option>
+                <option value="Dato">Dato</option>
+        </select>   
+      </div>
+       <br/>   
+        <div id="OrdrenummerSearch" style="display:none">           
+           <b>Ordrenummer</b>      
+           <input type="text" id="OrdrenummerEntry" onKeyPress="return noenter(event);"/>        
+           <input type="button" value="Søg" class="SøgBtnCls" onclick="search();"/>        
+        </div>               
+          
+        <div id="SerialnummerSearch" style="display:none">
+            
+           <b>Serienummer</b>
+           <input type="text" id="SerialnummerEntry" onKeyPress="return noenter(event);"/>           
+           <input type="button" value="Søg" class="SøgBtnCls" onclick="search();"/>                        
+        </div> 
+     
+      
+     <div id="DatoSearch" style="display:none">                
+                
+                <b>Fra dato</b>&nbsp;<input type="text" id="FromDate" style="background-color:#D3D3D3" readonly="readonly"/>
+                <input type="hidden" id="startDate" value="{!startDate}"/>
+                <img class="datePickerIcon" alt="Pick A Date" title="Pick A Date" src="/s.gif"  onclick="openCalender('FromDate','startDate')"/> &nbsp;&nbsp;
+                <b>Til dato </b>&nbsp;<input type="hidden" id="searchEndDate" value="{!searchEndDate}"/>
+                <input type="text" id="ToDate" style="background-color:#D3D3D3" readonly="readonly"/>
+                <img class="datePickerIcon" alt="Pick A Date" title="Pick A Date" src="/s.gif" onclick="openCalender('ToDate','searchEndDate');"/>
+                <input type="button" value="Søg"  class="SøgBtnCls" onclick="search();"/>
+                   
+      </div>
+  
+   </apex:PageBlockSection>
+  </div>
+        <p></p>
+           
+    <apex:pageBlockSection title="{!dateListlabel}" collapsible="false"  columns="1"> 
+        <p align="right">
+                <b>Visning</b> &nbsp;
+        <select id="ListView" onchange="refreshList(this);">
+            <option value="Active">Aktive</option>
+            <option value="All">Alle</option>
+            <option value="Search">Søgekriterium</option>
+            
+        </select>
+        </p>
+
+       <br/>
+       
+       <table width="100%" id="tableFormat" border="1" cellpadding="0" cellspacing="5" class="list" >   
+        <script> 
+            
+            $("#tableFormat").html(htmlTable);
+            
+        </script> 
+       </table>          
+    </apex:pageBlockSection>
+    
+    <div id="RelatedItemsSection" style="display:none">   
+    <apex:pageBlockSection title="Related Items" collapsible="false"  columns="1"> 
+        <table width="100%" id="relatedTable" border="1" cellpadding="0" cellspacing="5" class="list" >   
+        <script> 
+            
+            $("#relatedTable").html(htmlRelated);
+            
+        </script> 
+       </table>   
+    </apex:pageBlockSection>
+    </div>
+    
+      <div id="approveButton" align="center">
+       <!-- <apex:commandButton value="Godkend" action="{!updateApprovalStatus}" onclick="approvalAction();"  /> -->
+       <input type="button" value="Videre" onclick="approvalAction();" class="GokendBtnCls"/>
+       
+      </div>
+    </apex:pageBlock> 
+</div>
+<script>
+       //DW-616
+           if(jsonResponse.logistik != undefined ){
+                if(jsonResponse.logistik.iTransit != undefined || jsonResponse.logistik.paaLager != undefined){
+                    if(jsonResponse.logistik.iTransit != undefined && jsonResponse.logistik.paaLager != undefined){
+                        if(jsonResponse.logistik.iTransit.length == 0)
+                         document.getElementById("approveButton").style.display = "none";
+                        if(jsonResponse.logistik.iTransit.length == 0 && jsonResponse.logistik.paaLager.length == 0)
+                         document.getElementById("SearchBlock").style.display = "none";
+                    }
+                 }else{
+                     document.getElementById("fullPageBlock").style.display = "none";
+                 }
+           }else{
+             document.getElementById("fullPageBlock").style.display = "none";
+           }
+           //End of DW-616
+         /*Actual code was
+         if(jsonResponse.logistik.iTransit.length == 0)
+         document.getElementById("approveButton").style.display = "none";
+         if(jsonResponse.logistik.iTransit.length == 0 && jsonResponse.paaLager.length == 0)
+         document.getElementById("SearchBlock").style.display = "none"; 
+         */
+         
+  </script>
+<script type="text/javascript">printContentAreaEnd();</script>
+
+
+
+</body> 
+<apex:inputHidden id="ETAG" value="{!ETAG}"></apex:inputHidden>
+    <script>
+        function approvalAction() 
+        {
+            var flag = fullOrderPopUp();
+            //document.getElementById('{!$Component.GoodsReceipt.GRForm.serialList}').value = serialList;
+            document.getElementById('{!$Component.GoodsReceipt.GRForm.ETAG}').value = jsonResponse.ETag;
+            if(flag){
+            }
+            else{
+            confirmActon();
+            }
+        }
+        
+    </script>
+   
+</apex:form>
+</html>
+</apex:page>

@@ -1,0 +1,186 @@
+<!--@ Author : Navneet Rajput
+    @ Description :- This page gives us information about broadband modem.
+  -->
+
+<apex:page controller="DealerProductPageController3" sidebar="false" showHeader="false"  id="page1" action="{!initializeText}"  applyHtmlTag="false">
+    <html class="cvi2015"> <!--spoc 2206-->
+    <script type="text/javascript" src="https://yousee.dk/sitecore/content/data/export/export.aspx?itemguid={BD793F05-9B01-4210-BD63-F33431D1013A}&functions=true" > </script>
+    <!--Added for DW 750-->
+    <c:TopMenuComponent ></c:TopMenuComponent>
+        <script type="text/javascript">printHeader();</script>
+        <script type="text/javascript">printTopMenu();</script>
+    <link class="user" href="{!$Resource.SalesFlowCSS}" rel="stylesheet" type="text/css" />
+    <c:DealerComponent ></c:DealerComponent>
+   <style>
+   .leftContent3{
+                float:left;
+                width:560px;
+                overflow:visible;
+                min-height: 800px;
+                height: auto !important;
+                height:1000px;
+                max-height:1100px;
+            }
+            .rightContent3{
+                float:left;
+                width:365px;
+                overflow:visible;
+                min-height: 800px;
+                height: auto !important;
+                height:100px;
+                max-height:1100px;
+            }
+   </style>
+    
+    <script id="productTemplate1" type="text/x-jQuery-tmpl">  
+        <tr>
+            <td width="5%"><input type="${selectType}" name="selectOneProduct" value="${varenr}" checked="checked" class="prodCheckbox"/> </td>
+            <td>${navn}</td>
+            <td>${price}</td>
+            <td>${priceSuffix}</td> 
+        </tr>
+    </script>
+  
+    <script type="text/javascript">   
+           var prefix=' kr. pr. md.';
+           var myJSONObject={!jsonResponse};
+           var firstJSONResponse = {!firstJsonResponse};
+           var kundeid = '{!cCustInstAdd.firstName}';
+           myJSONObject=refreshFirstJSONResponse(firstJSONResponse,myJSONObject);
+           var existingCustomerFlag = false;
+           var broadBandString = 'bb-kraevet-valg';
+           var broadbandProducts = new Array();
+           var custFlag = false;
+           //DW-861
+            var bsxxFlag = {!dtvtaflag};
+           //Added for BS
+           var freeChoiceFlag={!isFreeChoicePageFlag};
+           var currentKundeNumber = '{!cCustInstAdd.customerNumber}';
+           var errMsg=''; 
+           var a='';
+            //var b='';
+            var prodSelected='';
+            
+            var newCustFlag = '{!isNewCustomer}'; 
+                if(newCustFlag == "true"){
+                    custFlag  = "false"; 
+                }else if(newCustFlag == "false"){
+                    custFlag  = "true";
+            }                
+            broadbandProducts = createProductsData(broadBandString, prefix, custFlag);
+            if(broadbandProducts.length == 1){
+                //alert('single product'+broadbandProducts[0].value);
+                addProduct(broadbandProducts[0],broadBandString);
+                a = $("#productTemplate1").tmpl(broadbandProducts);
+                
+            }else if(broadbandProducts.length > 1){
+                //alert('Multiple products');
+                a = $("#productTemplate1").tmpl(broadbandProducts);    
+            }            
+            
+            $(document).ready( function() {
+              $("table.zebra").find("tr:nth-child(even)").each(
+                function(i) {
+                    if( 0 == $(this).find("th").length ) {
+                        $(this).addClass("odd");
+                    }
+                }
+              );
+            } );
+            
+        var selectedProducts='';    
+        function sellProducts(){
+        var selectedHardwareProducts = $("#BroadBandID input:checked");
+            if(selectedHardwareProducts.length > 0){
+               var tempSelection=selectedHardwareProducts[0].value;
+                if(tempSelection == '1314063' || tempSelection == '1314065'){
+                    var errMsg = 'Kundens stik er ikke opgraderet til at understøtte 1000Mbit hastigheder. Det kan pt. kun bestilles hos YouSee kundeservice, som kunden kan kontakte på 70704040.';
+                                    $("#errorBlock").html(errMsg);
+                                    $("#errorBlock").show();
+                }else{
+                    nextFlow();
+                }
+            }
+        }
+    </script>
+    <body>
+    <script type="text/javascript">printContentAreaBegin();</script>
+    <apex:form styleClass="fontVerdana">
+            <br/>
+            <!--<span><font style="font-size:18px;font-weight:bold;">Valg af trådløs modem og evt. telefonnr.</font><br></br><br></br>
+                <p>Har kunden også valgt Telefoni, skal der enten vælges nyt telefonnr. som er gratis, eller behold nuværende telefonnr. Ønsker kunden at  beholde nuværende, koster det 95 kr.</p>
+            </span>
+            <br></br>-->
+            <span><apex:outputText value="{!salesFlowObj.messages[0]}" escape="false" style="font-size:18px;font-weight:bold;"/><br></br>
+            <apex:outputText value="{!salesFlowObj.messages[1]}" escape="false"/>
+            </span><br></br><br></br>
+            <apex:panelGrid columns="2" width="100%" columnClasses="leftContent3,rightContent3">
+                <apex:outputPanel styleClass="leftContent3" >   
+                    <apex:panelGroup id="columnA">
+                        <div id="errorBlock" class="errorMessage" style="display:block"/>
+                            <apex:pageblock >
+                                <apex:PageBlockSection title="Vælg installation til Bredbånd " collapsible="false" columns="1">
+                                </apex:PageBlockSection>
+                                <apex:PageBlockSection title="Trådløst modem" collapsible="false" columns="1">
+                                    <table id="BroadBandID" class="zebra" width="100%"/>
+                                </apex:PageBlockSection>
+                                <apex:pageBlockButtons location="bottom">
+                                        <apex:commandButton action="{!cancel}"  value="Annuller" style="margin-right:250px;"/>
+                                        <apex:commandButton action="{!backFlow}" value="Tilbage"/>
+                                        <input type="button" value="Videre" onclick="sellProducts();" class="videreBtnCls"/>
+                                        <input type = "hidden" id="selectedProds" name = "selectedProds" value=""/>
+                                        <apex:actionFunction name="nextFlow" action="{!RedirectToCustomerInfoPage}" />
+                               </apex:pageBlockButtons>
+                            </apex:pageblock>
+                    </apex:panelGroup>
+                    </apex:outputPanel>
+                    <apex:outputPanel styleClass="rightContent3">   
+                    <apex:panelGroup id="columnB">
+                        <c:CustomerAndProductComponent isNewKunde="{!isNewCustomer}" kundeNumber="{!cCustInstAdd.customerNumber}"
+                            kundeName="{!cCustInstAdd.firstName} {!cCustInstAdd.lastName}" Adresse="{!cCustInstAdd.addr1}"
+                            Postnummer="{!cCustInstAdd.addr2}">
+                        </c:CustomerAndProductComponent>
+                    </apex:panelGroup>
+                </apex:outputPanel>
+            </apex:panelGrid>
+            
+            
+            <script type="text/javascript">
+                  var basicHeader = [" "," "," "," "];   
+                  var requiredHeader = [" "," "," "," "];     
+                  if(a != ''){     
+                     a.appendTo(createHeaders(basicHeader,"#BroadBandID"));
+                   }
+                   //displayBasket();
+           </script>
+            
+           <apex:actionFunction action="{!callToKasia}" name="callToKasia"  status="queryStatus"  reRender="renderJason">
+                <apex:param name="url" assignTo="{!url}" value="" />
+                <apex:param name="etag" assignTo="{!etag}" value="" />
+                <apex:param name="kundeData" assignTo="{!kundeData}" value="" />
+                <apex:param name="arrayInit" assignTo="{!arrayInit}" value="" />
+            </apex:actionFunction>
+            <apex:actionStatus id="queryStatus">
+                    <apex:facet name="start">
+                        <c:loadingComponent BackColor="#efefef" borderColor="#336699"
+                            borderSize="3" height="50px" width="120px"
+                            ImageUrl="{!$Resource.Loading}" Message="Loading..."
+                            messageStyle="color:darkred;font-size:11pt;font-weight:bold;" />
+                    </apex:facet>
+            </apex:actionStatus>
+            
+           <apex:outputpanel id="renderJason">
+                <script>
+                   myJSONObject={!jsonResponse};
+                   firstJSONResponse = {!firstJsonResponse};
+                   var serialNumber = {!dummySerialNo};
+                   myJSONObject=refreshFirstJSONResponse(firstJSONResponse,myJSONObject);
+                   displayBasket(); 
+                </script>
+        </apex:outputpanel>
+    </apex:form>
+    <script type="text/javascript">printContentAreaEnd();</script>
+    <script type="text/javascript">printFooter();</script>  
+    </body>
+    </html>
+</apex:page>

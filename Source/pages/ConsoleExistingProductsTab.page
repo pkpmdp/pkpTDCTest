@@ -1,0 +1,23 @@
+<apex:page standardController="Account" extensions="clsExistingProductsTabController" action="{!pageAction}" showHeader="true" sidebar="false" cache="true">
+  <apex:pageMessages />
+  <apex:form id="form">
+    <apex:pageBlock id="productPageBlock">
+      <apex:inputHidden value="{!Account.Customer_No__c}" />
+      <apex:inputHidden value="{!Account.Currency_Format__c}" />
+      <apex:outputField value="{!Account.Street_YK__r.External_Id__c}" rendered="false" />
+
+      <apex:pageBlockSection columns="1" title="{!$Label.Existing_Products}">
+        <apex:pageBlockTable value="{!existingProducts}" var="product" id="existingProductsTable" rules="rows">
+          <apex:column headerValue="{!$Label.Street}" value="{!product.street}" />
+          <apex:column headerValue="{!$Label.Business_Group}" value="{!product.businessGroup}" />
+          <apex:column headerValue="{!$Label.Subscription}" value="{!product.subscription}" />
+          <apex:column headerValue="{!$Label.Active}" value="{!product.active}" />
+          <apex:column headerValue="{!$Label.Billing_Start}" value="{!product.billingStart}" />
+          <apex:column headerValue="{!$Label.Billing_End}" value="{!product.billingEnd}" />
+          <apex:column headerValue="{!$Label.Price}" value="{!product.account.Currency_Format__c}" headerClass="headerClass" style="text-align:right"></apex:column>
+        </apex:pageBlockTable>
+      </apex:pageBlockSection>
+
+    </apex:pageBlock>
+  </apex:form>
+</apex:page>

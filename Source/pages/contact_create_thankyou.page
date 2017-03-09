@@ -1,0 +1,25 @@
+<apex:page controller="ContactCreateController">
+  <apex:sectionHeader title="Visualforce Example" subtitle="Thank You"/>
+ 
+  <apex:form >
+    <apex:pageBlock title="Contact Information">
+     {!myparam}
+      <apex:pageBlockSection showHeader="false" columns="2">
+        <apex:outputField value="{!contact.Id}" />
+        <apex:outputField value="{!contact.firstName}" />
+        <apex:outputField value="{!contact.lastName}" />
+        <apex:outputField value="{!contact.email}" />
+        <apex:outputField value="{!contact.Account}" />
+        <apex:outputField value="{!contact.CanAllowPortalSelfReg}" />
+        <apex:outputField value="{!user.IsPortalEnabled }" />
+        <apex:outputField value="{!user.ContactId}" />
+
+        
+
+
+
+      </apex:pageBlockSection>
+ 
+    </apex:pageBlock>
+  </apex:form>
+</apex:page>

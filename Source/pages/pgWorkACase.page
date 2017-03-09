@@ -1,0 +1,26 @@
+<apex:page standardcontroller="Case" extensions="clsWorkACaseController" showHeader="false" sidebar="false">
+
+<apex:includeScript value="/soap/ajax/26.0/connection.js"/>
+<apex:includeScript value="/soap/ajax/26.0/apex.js"/>
+<apex:includeScript value="/support/console/26.0/integration.js"/>
+
+<script type="text/javascript">
+var isConsole;
+window.onload = function() { testIsInConsole();}
+function testIsInConsole(){
+if(sforce.console.isInConsole()){
+workcase('true');
+}else{
+workcase('false');;
+}
+
+}
+</script>
+<apex:form >
+
+<apex:actionFunction name="workcase" action="{!gotocase2}" rerender="">
+<apex:param name="isConsole" value="" assignTo="{!isConsole}" />
+</apex:actionFunction>
+</apex:form>
+
+</apex:page>

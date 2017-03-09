@@ -1,0 +1,6 @@
+<apex:page standardController="Account" extensions="AnlaegNumberSearchController" action="{!showAccount}">
+    <apex:form >
+        <apex:Messages />
+        
+    </apex:form>
+</apex:page>

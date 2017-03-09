@@ -1,0 +1,7 @@
+<apex:page controller="Amazon_FileList_CT" showHeader="false" sidebar="false">
+    <script type="text/javascript" >
+        alert('Fil(er) Succesfuld Flyttet.');
+        window.location.href ='/apex/Amazon_AccountFileList?id={!Id}';
+        //window.location.href ='/{!Id}';
+    </script>
+</apex:page>

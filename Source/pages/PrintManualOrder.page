@@ -1,0 +1,87 @@
+<apex:page controller="ManualOrderingDocController" sidebar="false" showHeader="false" standardStylesheets="false" id="pageId" applyHtmlTag="false">
+<html class="cvi2015">   <!--spoc 2206--> 
+<header>
+    <title>Blanketter</title>
+</header> 
+<script type="text/javascript" src="https://yousee.dk/sitecore/content/data/export/export.aspx?itemguid={E8D8D815-5C17-44A5-9B46-364B89821372}&functions=true" > </script>
+<apex:form >
+ <body>
+    <script type="text/javascript" language="javascript">printHead();</script>
+    <!-- Added for DW 750 -->
+    <c:TopMenuComponent ></c:TopMenuComponent>
+    <script type="text/javascript">printHeader();</script>
+    <script type="text/javascript">printTopMenu();</script>
+    <script type="text/javascript">printContentAreaBegin();</script>
+
+<style> 
+     .textHeader {    font-weight:bold;    font-size:16px;    color:green ;width:70px; align:center;  }
+  </style>  
+
+<apex:inputHidden value="{!DocumentID}" id="controllerCall"/>
+
+<script>
+function redirectPrint(){  
+ if(document.getElementById('{!$Component.controllerCall}').value != null){
+ alert('fgfgd');
+     var docURL = '/servlet/servlet.FileDownload?file=' +document.getElementById('{!$Component.controllerCall}').value;
+   window.open(docURL,'_Self','menubar=no,width=680,height=692,toolbar=no,scrollbars=yes');
+     return false;
+}
+}
+</script>
+
+<p style="font-size:5px;">
+<div align="center" style="border-width: 1px; border-style: solid; border-color: black; ">  
+<!--<img onclick="redirectPrint()" title="Printable View (New Window)" class="printerIcon" onmouseover="this.className = 'printerIconOn';this.className = 'printerIconOn';" onmouseout="this.className = 'printerIcon';this.className = 'printerIcon';"  onfocus="this.className = 'printerIconOn';" onblur="this.className = 'printerIcon';" alt="Printable View (New Window)" src="/s.gif" /> -->
+<apex:outputText value="Bestilling er nu sendt til Forhandlersupport. Venligst udskriv kvitteringen til kunden" styleClass="textHeader"  />  
+
+</div>
+<br></br>
+<apex:pageBlock >
+
+<br></br>
+    <apex:outputLabel value="Forhandlernavn: {!dealerName}" /> 
+    <apex:outputLabel value="Forhandlernummer: {!dealerNumber}" /> 
+    <apex:outputLabel value="Dato : {!longDate}" />
+<br></br>
+<br></br>
+
+<apex:outputText value="{!formHeader}" styleClass="textHeader"  />    
+       <apex:dataTable value="{!orderingList}" var="list" width="100%" cellspacing="8" >
+           <apex:column rendered="{!(list.document.FieldType__c == 'TextBox')}" style="{!list.document.FontStyling__c}" >  
+                    <apex:outputText value="{!list.document.Description__c}" /> &nbsp; &nbsp; &nbsp;
+                    <apex:outputText value="{!list.document.FieldValue__c}"  />
+           </apex:column> 
+            <apex:column rendered="{!(list.document.FieldType__c == 'RadioButton')}" style="{!list.document.FontStyling__c}" > 
+               <img src="{!IF((list.fieldValue == list.description),$Resource.RadionButton_Checked,$Resource.RadionButton_UnChecked)}" style="width: 12px;height: 8px;" />  
+               &nbsp;  <apex:outputText value="{!list.description}"  />
+           </apex:column> 
+           <apex:column rendered="{!(list.document.FieldType__c == 'CheckBox')}" style="{!list.document.FontStyling__c}" > 
+               <img src="{!IF((list.document.FieldValue__c == 'true'),$Resource.CheckBox_Checked,$Resource.CheckBox_UnChecked)}" style="width: 12px;height: 8px;" />  
+               &nbsp;  <apex:outputText value="{!list.document.Description__c}"  />
+           </apex:column> 
+           <apex:column rendered="{!(list.document.FieldType__c == 'Text')}" style="{!list.document.FontStyling__c}" > 
+                <apex:outputText value="{!list.document.Description__c}"  /> &nbsp; &nbsp; &nbsp;
+           </apex:column> 
+       </apex:dataTable>
+</apex:pageBlock>
+</p>    
+
+<br> </br>
+   
+<table> 
+    <tr> 
+        <td width="78%">     
+        <apex:commandButton action="{!back}"  value="Tilbage" /> </td>
+        <td width="22%"> 
+        <apex:commandLink action="{!print}"  target="_blank" styleClass="button" ><span>Print</span></apex:commandLink>
+        </td>
+    </tr>     
+</table> 
+ 
+<script type="text/javascript">printContentAreaEnd();</script>
+<script type="text/javascript">printFooter();</script>
+</body>
+</apex:form>
+</html>
+</apex:page>

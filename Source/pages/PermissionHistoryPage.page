@@ -1,0 +1,53 @@
+<apex:page standardController="Permission__c" extensions="clsPermissionHistory" sidebar="false" showHeader="false">
+		<br/>
+		<br/>
+ <apex:form >
+	<apex:pageBlock title="Historik for permissionfelter" >
+		<apex:PageBlockTable value="{!perhis}" var="permHistory" id="HistTable" rowClasses="odd,even" width="80%">
+			<!-- <apex:facet name="caption"></apex:facet>
+			<apex:facet name="header">Permission Field History</apex:facet>
+			<apex:facet name="footer"></apex:facet>-->
+			
+			<apex:column >
+				<apex:facet name="header">Opdateret den</apex:facet>
+				<apex:facet name="footer"></apex:facet>
+				<apex:outputText value="{!permHistory.createddate}">
+				</apex:outputText>
+			</apex:column>
+			
+			<apex:column >
+				<apex:facet name="header">Field</apex:facet>
+				<apex:facet name="footer"></apex:facet>
+				<b> <apex:outputText value="{!permHistory.field}"/></b>
+			</apex:column>
+			
+			<apex:column >
+				<apex:facet name="header">Opdateret af</apex:facet>
+				<apex:facet name="footer"></apex:facet>
+				<apex:outputText value="{!permHistory.createdby}"/>
+			</apex:column>
+			
+			<apex:column >
+				<apex:facet name="header">Gammel værdi</apex:facet>
+				<apex:facet name="footer"></apex:facet>
+				<apex:outputText value="{!IF(permHistory.oldvalue=='false', "Nej",permHistory.oldvalue)}"/>
+			</apex:column>
+			
+			<apex:column >
+				<apex:facet name="header">Ny værdi</apex:facet>
+				<apex:facet name="footer"></apex:facet>
+				<apex:outputText value="{!IF(permHistory.newvalue=='true', "Ja",permHistory.newvalue)}"/>
+			</apex:column>
+			
+		</apex:PageBlockTable>
+		 <apex:pageBlockButtons rendered="{!IF(perhis.size >0,true,false)}">
+                <apex:commandButton onclick="closeWindow()" value="Luk"/>
+         </apex:pageBlockButtons>
+	</apex:pageBlock>
+  </apex:form>
+	<script>
+		function closeWindow(){
+			window.close();
+		}
+	</script>
+</apex:page>

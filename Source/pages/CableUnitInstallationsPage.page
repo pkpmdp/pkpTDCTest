@@ -1,0 +1,102 @@
+<apex:page standardController="Cable_Unit__c" extensions="CableUnitInstallations" tabStyle="Account">
+    <apex:messages />
+    <apex:form id="form"> 
+        <apex:pageBlock id="instId" title="{!$ObjectType.Cable_Unit__c.Fields.Cable_Unit_No__c.Label} : {!Cable_Unit__c.Cable_Unit_No__c}">
+            <apex:pageBlockSection columns="2" collapsible="false" title="{!$Label.PG_Filter}">
+                <apex:pageblockSectionItem rendered="{!isYFFMode==true}">
+                    <apex:outputLabel value="Gadenavn"></apex:outputLabel> 
+                        <apex:selectList id="streetnameslist" size="1" value="{!streetName}">     
+                            <apex:selectOptions value="{!streetnames}"/>   
+                        </apex:selectList>                  
+                </apex:pageblockSectionItem>
+                <apex:pageBlockSectionItem >
+                              <apex:outputLabel value="Installationsnr." />
+                              <apex:inputField value="{!filter.Name}"/>
+                </apex:pageBlockSectionItem>
+                <apex:inputField value="{!filter.Address__c}" rendered="{!isYFFMode==false}"/>
+                <apex:inputField value="{!filter.Status__c}"/>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="{!$Label.StreetNumberFrom}" for="streetFromID"/>
+                    <apex:inputText value="{!streetFrom}" id="streetFromID"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Stiktype" />
+                   <apex:inputField value="{!filter.Stiktype__c}"/><!-- Added for EDM-738 -->
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="{!$Label.StreetNumberTo}" for="streetToID"/>
+                    <apex:inputText value="{!streetTo}" id="streetToID"/>
+                </apex:pageBlockSectionItem>
+                <apex:commandButton action="{!findInstallationsFilter}" value="Søg" status="statusupdate" rerender="instId"/>
+            </apex:pageBlockSection>
+            <apex:outputpanel >
+                <apex:actionstatus id="statusupdate">
+                    <apex:facet name="start">
+                        <div class="waitingSearchDiv" id="el_loading" style="background-color: #fbfbfb;
+                        height: 100%;opacity:0.65;width:100%;"> 
+                        <div class="waitingHolder" style="top: 130px; width: 91px;">
+                            <img class="waitingImage" src="/img/loading.gif" title="Please Wait..." />
+                            <span class="waitingDescription">Henter data...</span>
+                        </div>
+                    </div>
+                    </apex:facet>
+                </apex:actionstatus>
+            </apex:outputpanel>   
+            <apex:panelGrid columns="1" width="100%" cellpadding="0px" cellspacing="0px">
+                <apex:pageBlockSection title="{!$ObjectType.Net_Installations__c.Label}" columns="1">                
+                    <apex:pageBlockTable value="{!installations}" var="inst" rules="rows">
+                         <apex:column value="{!inst.Name}">
+                             <apex:facet name="header">
+                                 <apex:commandLink action="{!findInstallations}" value="{!$ObjectType.Net_Installations__c.Fields.Name.Label}{!IF(sortExpression=='Name',IF(sortDirection='ASC','▲','▼'),'')}">
+                                     <apex:param value="Name" name="column" assignTo="{!sortExpression}" ></apex:param>
+                                 </apex:commandLink>
+                             </apex:facet>
+                         </apex:column>
+                         <apex:column >
+                             <apex:facet name="header">
+                                 <apex:commandLink action="{!findInstallations}" value="{!$ObjectType.Net_Installations__c.Fields.Address__c.Label}{!IF(sortExpression=='Address__r.Full_Address__c',IF(sortDirection='ASC','▲','▼'),'')}">
+                                     <apex:param value="Address__r.Full_Address__c" name="column" assignTo="{!sortExpression}" ></apex:param>
+                                 </apex:commandLink>
+                             </apex:facet>
+                             <!-- Existing Address
+                             <apex:outputLink value="{!URLFOR($Action.Address__c.View, inst.Address__c)}" target="_blank">{!inst.Address__r.Full_Address__c}</apex:outputLink> -->
+                             <apex:outputLink value="{!URLFOR($Action.Address__c.View, inst.Address__c)}" target="_blank">{!(inst.Address__r.Name + IF(ISBLANK(inst.Address__r.House_No__c),"", " " & inst.Address__r.House_No__c) + IF(ISBLANK(inst.Address__r.Entrance__c),"", " " + $Label.ADR_entrance + " " + inst.Address__r.Entrance__c + ",") +  IF(ISBLANK(inst.Address__r.Floor__c),"", " " & inst.Address__r.Floor__c) + IF(ISBLANK(inst.Address__r.Door_No__c),"", " " + $Label.ADR_door_number + " " + inst.Address__r.Door_No__c + ",") + IF(ISBLANK(inst.Location__c),"", " " & inst.Location__c) + IF(ISBLANK(inst.Address__r.Postcode__c),"", " " & inst.Address__r.Postcode__c + IF(ISBLANK(inst.Address__r.Town__c),"", " " & inst.Address__r.Town__c)) + IF(ISBLANK(inst.Address__r.District__c),"", " " & inst.Address__r.District__c) )}</apex:outputLink>
+                         </apex:column> 
+                         <!-- <apex:column >
+                            <apex:outputLink value="{!URLFOR($Action.Address__c.View, inst.Address__c)}" target="_blank">{!(inst.Address__r.Name + IF(ISBLANK(inst.Address__r.House_No__c),"", " " & inst.Address__r.House_No__c) + IF(ISBLANK(inst.Address__r.Entrance__c),"", " " + $Label.ADR_entrance + " " + inst.Address__r.Entrance__c + ",") +  IF(ISBLANK(inst.Address__r.Floor__c),"", " " & inst.Address__r.Floor__c) + IF(ISBLANK(inst.Address__r.Door_No__c),"", " " + $Label.ADR_door_number + " " + inst.Address__r.Door_No__c + ",") + IF(ISBLANK(inst.Location__c),"", " " & inst.Location__c) + IF(ISBLANK(inst.Address__r.Postcode__c),"", " " & inst.Address__r.Postcode__c + IF(ISBLANK(inst.Address__r.Town__c),"", " " & inst.Address__r.Town__c)) + IF(ISBLANK(inst.Address__r.District__c),"", " " & inst.Address__r.District__c) )}</apex:outputLink>
+                         </apex:column> -->
+                         <apex:column value="{!inst.Status__c}">
+                             <apex:facet name="header">
+                                 <apex:commandLink action="{!findInstallations}" value="{!$ObjectType.Net_Installations__c.Fields.Status__c.Label}{!IF(sortExpression=='Status__c',IF(sortDirection='ASC','▲','▼'),'')}">
+                                     <apex:param value="Status__c" name="column" assignTo="{!sortExpression}" ></apex:param>
+                                 </apex:commandLink>
+                             </apex:facet>
+                         </apex:column>
+                         <apex:column value="{!inst.Stiktype__c}">
+                             <apex:facet name="header">
+                                 <apex:commandLink action="{!findInstallations}" value="{!$ObjectType.Net_Installations__c.Fields.Stiktype__c.Label}{!IF(sortExpression=='Stiktype__c',IF(sortDirection='ASC','▲','▼'),'')}">
+                                     <apex:param value="Stiktype__c" name="column" assignTo="{!sortExpression}" ></apex:param>
+                                 </apex:commandLink>
+                             </apex:facet>
+                         </apex:column>                         
+                    </apex:pageBlockTable>
+                </apex:pageBlockSection>
+            </apex:panelGrid>
+            <apex:outputPanel style="text-align:center;horizontal-align:center;">
+                <apex:commandButton style="width:2em;" disabled="{!pageNumber == 0}" action="{!first}" rerender="instId" value="<<"/>&nbsp;&nbsp;&nbsp;
+                <apex:commandButton style="width:2em;" disabled="{!pageNumber == 0}" action="{!previous}" rerender="instId" value="<"/>&nbsp;&nbsp;&nbsp;
+                <apex:commandButton style="width:2em;" disabled="{!(pageNumber == noOfPages -1 || noOfPages == 0)}" action="{!next}" rerender="instId" value=">"/>&nbsp;&nbsp;&nbsp;
+                <apex:commandButton style="width:2em;" disabled="{!(pageNumber == noOfPages -1 || noOfPages == 0 || isLastBtnDisabled)}" action="{!last}" rerender="instId"  value=">>"/>&nbsp;&nbsp;&nbsp;
+                <apex:selectList size="1" value="{!pageSize}">                        
+                        <apex:selectOption itemValue="10" itemLabel="10"/>
+                        <apex:selectOption itemValue="50" itemLabel="50"/>
+                        <apex:selectOption itemValue="100" itemLabel="100"/>
+                        <apex:actionSupport event="onchange" action="{!findInstallationsNumOfRecords}" rerender="instId"/>
+                </apex:selectList>&nbsp;&nbsp;&nbsp;
+                <apex:outputText escape="false" value="{!$Label.PG_Page}: {!pageNumber + 1}"/>&nbsp;&nbsp;&nbsp;
+                <apex:outputText escape="false" value="{!$Label.PG_Number_Of_Pages}: {!noOfPages}"/>&nbsp;&nbsp;&nbsp;
+            </apex:outputPanel>
+            <br/> 
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

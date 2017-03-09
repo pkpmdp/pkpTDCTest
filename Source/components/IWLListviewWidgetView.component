@@ -1,0 +1,332 @@
+<apex:component controller="IWLListviewWidgetController" layout="none" allowDml="true">
+
+    <apex:attribute name="DeveloperName" type="String" required="true" description="The Developer Name of the Widget record that will be loaded by this widget" assignTo="{!widgetDeveloperName}" />
+    <apex:attribute name="Widget" type="IWLWidget__c" required="false" description="A Pre-loaded widget record to be used as the source of information for this widget" assignTo="{!widgetRecord}" />
+    <apex:outputPanel layout="block" id="IWLLoadFailed" styleClass="IWLLoadFailed" rendered="{!NOT(loadWidget)}">
+        <!-- This panel is rendered when an error occurs while loading the widget's controller -->
+        <c:IWLStatusRenderer StatusMessagesWrap="{!statusMessagesWrap}" />
+    </apex:outputPanel>
+    <apex:outputPanel layout="block" rendered="{!loadWidget}" id="IWLListviewWidgetView" styleClass="yui3-cssreset IWLListviewWidgetView {!OriginClassName} {!IF(ShowDetailedView, 'IWLListviewDetailed', 'IWLListviewSimple')} IWLListviewWidgetView{!DeveloperName}" >
+        <!-- This panel renders when the widget has been correctly loaded -->
+    
+        <!-- BEGINS WIDGET STYLING -->
+        
+        <apex:outputPanel rendered="{!widgetRecord.CSSFileUrl__c != null}" layout="none">
+            <!-- Custom Widget Style -->
+            <link href="{!widgetRecord.CSSFileUrl__c}" rel="stylesheet" type="text/css" />
+        </apex:outputPanel>
+        
+        <apex:outputPanel rendered="{!widgetRecord.overrideCSS__c}">
+            <!-- CSS override rules -->
+            <style>
+                
+                .IWLListviewWidgetView{!DeveloperName} {
+                    color: #{!widgetRecord.fontColor__c};
+                    font-family: {!widgetRecord.FontFamily__c};
+                    width: {!widgetRecord.width__c}px;
+                    height: {!widgetRecord.height__c}px;
+                    background-color: #{!widgetRecord.backgroundColor__c};
+                }
+                
+                .IWLListviewWidgetView{!DeveloperName} .IWLListviewTitle {
+                    color: #{!widgetRecord.titleColor__c};
+                }
+            </style>        
+        </apex:outputPanel>
+        
+        <!-- Script to load into a js variable the source of the loading image -->
+        <script type="text/javascript">
+            var IWLListviewLoadingIconUrl{!DeveloperName} = '{!$Resource.IWLResources}/images/ajax-loader.gif';
+            
+        </script>
+        
+        <!-- The widget's title -->
+        <div class="IWLListviewTitle">{!widgetRecord.Title__c}</div>
+        <apex:outputPanel layout="block" styleClass="IWLListviewSeeMoreLinkContainer">
+            <apex:outputLink styleClass="IWLListviewSeeMoreLink" value="{!widgetRecord.seeMoreUrl__c}" title="{!$Label.IWL_LISTVIEW_SEE_MORE_TEXT}"/>
+        </apex:outputPanel>
+        <!-- The widget's description -->
+        <div class="IWLListviewDescription">{!widgetRecord.description__c}</div>
+        <apex:outputPanel layout="block" id="IWLMessagePanel" >
+        	<c:IWLStatusRenderer StatusMessagesWrap="{!statusMessagesWrap}" />
+        
+        </apex:outputPanel>
+        
+        <apex:outputPanel id="IWLListviewItemsListContainer" layout="block" styleClass="IWLListviewItemsListContainer">
+            <!-- the next repeat renders the items that have been loaded from the database in the controller -->
+            <apex:repeat value="{!visualDataList}" var="visualData" id="theRepeat">
+           		
+                <!-- The next is the container for each item in the widget -->
+                <apex:outputPanel layout="block" styleClass="IWLListviewItem IWLListviewItem{!visualData.recordId.value}" id="IWLListviewItem">
+                
+                    <!-- The item's image -->
+                    <apex:outputPanel styleClass="IWLListviewItemAttributeContainer IWLListviewItemImageContainer" layout="block">
+                        <apex:outputPanel layout="block" styleClass="IWLListviewItemAttributeLabel IWLListviewItemImageLabel" rendered="{!widgetRecord.showLabels__c}">{!visualData.imageURL.fieldLabel}</apex:outputPanel>
+                        <apex:outputPanel layout="block" rendered="{!visualData.imageURL.value != ''}" styleClass="IWLListviewItemImageContent">
+                            <img alt="{!HTMLENCODE(visualData.title.value)}" src="{!visualData.imageURL.value}" class="IWLListviewItemImage" />
+                        </apex:outputPanel>
+                    </apex:outputPanel>
+                
+                    <!-- The item's title and link -->
+                    <apex:outputPanel styleClass="IWLListviewItemAttributeContainer IWLListviewItemTitle" layout="block">
+                        <apex:outputPanel layout="block" styleClass="IWLListviewItemAttributeLabel IWLlistviewItemTitleLabel" rendered="{!widgetRecord.showLabels__c}">{!visualData.title.fieldLabel}</apex:outputPanel>
+                        <apex:outputLink styleClass="IWLListviewItemTitleLink" value="{!visualData.link.value}">
+                            <apex:outputField value="{!sObjResultMap[visualData.recordId.value][visualData.title.fieldDevName]}"/>
+                        </apex:outputLink>                
+                    </apex:outputPanel>
+                    
+                     <!-- This is for the author's information -->
+                    <apex:outputPanel styleClass="IWLListviewItemAttributeContainer IWLListviewItemAuthorImageCont" layout="block">
+                        <apex:outputPanel layout="block" styleClass="IWLListviewItemAttributeLabel IWLListviewItemAuthorLabel" rendered="{!widgetRecord.showLabels__c}">{!visualData.authorImage.fieldLabel}</apex:outputPanel>
+                        <apex:outputPanel layout="block" styleClass="IWLListviewItemAttributeValue IWLListviewItemAuthorImageContainer" >
+                            <img alt="{!HTMLENCODE(visualData.authorName.value)}" src="{!visualData.authorImage.value}" class="IWLListviewItemAuthorImage" />                           
+                        </apex:outputPanel>                         
+                    </apex:outputPanel>
+                    
+                    <!-- Promote/Demote Panel -->
+                    <apex:outputPanel id="IWLListviewPromotePanel" layout="block" styleClass="IWLListviewPromotePanel" rendered="{!ShowDetailedView && widgetRecord.votePanel__c && visualData.canVote}">
+                        
+                        <apex:outputPanel layout="block" id="IWLListviewPromoteButtonContainer" styleClass="IWLListviewPromoteButtonContainer">
+                            <apex:outputPanel layout="block" id="IWLListviewItemVoteUpImage" styleClass="IWLListviewItemVoteUpImage" onclick="IWLListview_onIdeaVoteAttempt('{!JSENCODE(DeveloperName)}', IWLListview_voteJavascript{!DeveloperName}, '{!JSENCODE(visualData.recordId.value)}', 'Up', IWLListviewLoadingIconUrl{!JSENCODE(DeveloperName)})"></apex:outputPanel>
+                            <apex:outputPanel layout="block" id="IWLListviewItemVoteUpLabel" styleClass="IWLListviewItemVoteUpLabel" onclick="IWLListview_onIdeaVoteAttempt('{!JSENCODE(DeveloperName)}', IWLListview_voteJavascript{!DeveloperName}, '{!JSENCODE(visualData.recordId.value)}', 'Up', IWLListviewLoadingIconUrl{!JSENCODE(DeveloperName)})">{!$Label.IWL_LISTVIEW_VOTE_UP}</apex:outputPanel> 
+                            
+                        </apex:outputPanel>
+                        <apex:outputPanel layout="block" styleClass="IWLListviewTotalScoreContainer">
+                            {!visualData.likes.value}
+                        </apex:outputPanel>
+                        <apex:outputPanel layout="block" id="IWLListviewDemoteButtonContainer" styleClass="IWLListviewDemoteButtonContainer">
+                            <apex:outputPanel layout="block" id="IWLListviewItemVoteDownImage" styleClass="IWLListviewItemVoteDownImage" onclick="IWLListview_onIdeaVoteAttempt('{!JSENCODE(DeveloperName)}', IWLListview_voteJavascript{!JSENCODE(DeveloperName)}, '{!visualData.recordId.value}', 'Down', IWLListviewLoadingIconUrl{!JSENCODE(DeveloperName)})"></apex:outputPanel>
+                            <apex:outputPanel layout="block" id="IWLListviewItemVoteDownLabel" styleClass="IWLListviewItemVoteDownLabel" onclick="IWLListview_onIdeaVoteAttempt('{!JSENCODE(DeveloperName)}', IWLListview_voteJavascript{!JSENCODE(DeveloperName)}, '{!visualData.recordId.value}', 'Down', IWLListviewLoadingIconUrl{!JSENCODE(DeveloperName)})">{!$Label.IWL_LISTVIEW_VOTE_DOWN}</apex:outputPanel>
+                            
+                            
+                        </apex:outputPanel>
+                    </apex:outputPanel>
+                    <!-- Promote/Demote Panel Ends -->
+                    
+                    <apex:outputPanel layout="block" styleClass="IWLListviewItemAttributeContainer IWLListviewItemAuthorNameLinkContainer" >
+                        <apex:outputPanel layout="block" styleClass="IWLListviewItemAttributeLabel IWLListviewItemAuthorNameLinkLabel" rendered="{!widgetRecord.showLabels__c}">
+                            {!visualData.authorName.fieldLabel}
+                        </apex:outputPanel>
+                        <apex:outputPanel layout="block" styleClass="IWLListviewItemAttributeValue IWLListviewItemAuthorLinkContentContainer">
+                            <a class="IWLListviewItemAuthorNameLink" href="{!authorDetailPageBaseUrl}{!visualData.authorId.value}">
+                                <apex:outputText value="{!HTMLENCODE(visualData.authorName.value)}" styleClass="IWLListviewItemAuthorName" />
+                            </a>
+                        </apex:outputPanel>
+                    </apex:outputPanel>
+                    
+                    <!-- Last Activity date info -->
+                    <apex:outputPanel layout="block" styleClass="IWLListviewItemAttributeContainer IWLListviewItemLastActivityDateContainer">
+                        <apex:outputPanel layout="block" styleClass="IWLListviewItemAttributeLabel IWLListviewItemLastActivityDateLabel" rendered="{!widgetRecord.showLabels__c}">{!visualData.activityDate.fieldLabel}</apex:outputPanel>
+                        <apex:outputPanel layout="block" styleClass="IWLListviewItemAttributeValue IWLListviewItemLastActivityDate">{!visualData.activityDate.value}</apex:outputPanel>
+                    </apex:outputPanel> 
+                    
+                    <!-- The item's content field -->
+                    <apex:outputPanel layout="block" styleClass="IWLListviewItemAttributeContainer IWLListviewItemContentContainer">
+                        <apex:outputPanel layout="block" styleClass="IWLListviewItemAttributeLabel IWLListviewItemContentLabel" rendered="{!widgetRecord.showLabels__c}">{!visualData.content.fieldLabel}</apex:outputPanel>
+                        <apex:outputPanel layout="block" styleClass="IWLListviewItemAttributeValue IWLListviewItemContent"><apex:outputField value="{!sObjResultMap[visualData.recordId.value][visualData.content.fieldDevName]}" /></apex:outputPanel>
+                    </apex:outputPanel>
+                    
+                    <!-- Categories for Ideas and Idea Themes -->
+                    <apex:outputPanel id="IWLListviewRelatedTopicsContainer" layout="block" styleClass="IWLListviewItemAttributeContainer IWLListviewRelatedTopicsContainer" rendered="{!visualData.hasRelatedTopics}" >
+                        <apex:outputPanel layout="block" styleClass="IWLListviewItemAttributeLabel IWLListviewRelatedTopicsLabel" rendered="{!widgetRecord.showLabels__c}">{!visualData.relatedTopics.fieldLabel}</apex:outputPanel>
+                        <apex:repeat value="{!visualData.relatedTopics.valuesList}" var="relatedTopicName">
+                            <apex:outputPanel layout="block" styleClass="IWLListviewRelatedTopic" >{!relatedTopicName}</apex:outputPanel>
+                        </apex:repeat>
+                    </apex:outputPanel>
+                    
+                   
+                    
+                    <!-- Rating info -->
+                    <apex:outputPanel layout="block" styleClass="IWLListviewItemAttributeContainer IWLListviewItemRatingContainer">
+                        <apex:outputPanel layout="block" styleClass="IWLListviewItemAttributeImage IWLListviewItemRatingImage"></apex:outputPanel>
+                        <apex:outputPanel layout="block" styleClass="IWLListviewItemAttributeLabel IWLListviewItemRatingLabel" rendered="{!widgetRecord.showLabels__c}">{!visualData.rating.fieldLabel}</apex:outputPanel>
+                        <apex:outputPanel layout="block" styleClass="IWLListviewItemAttributeValue IWLListviewItemRating">{!visualData.rating.value}</apex:outputPanel> 
+                    </apex:outputPanel>
+                    
+                    <!-- Likes info -->
+                    <apex:outputPanel layout="block" styleClass="IWLListviewItemAttributeContainer IWLListviewItemLikesContainer">
+                        <apex:outputPanel layout="block" styleClass="IWLListviewItemAttributeImage IWLListviewItemLikesImage"></apex:outputPanel>
+                        <apex:outputPanel layout="block" styleClass="IWLListviewItemAttributeLabel IWLListviewItemLikesLabel" rendered="{!widgetRecord.showLabels__c}" >{!visualData.likes.fieldLabel}</apex:outputPanel>
+                        <apex:outputPanel layout="block" styleClass="IWLListviewItemAttributeValue IWLListviewItemLikes">{!visualData.likes.value}</apex:outputPanel>
+                    </apex:outputPanel>
+                    
+                    <!-- Feed Size info -->
+                    <apex:outputPanel layout="block" styleClass="IWLListviewItemAttributeContainer IWLListviewItemFeedSizeContainer">
+                        <apex:outputPanel layout="block" styleClass="IWLListviewItemAttributeImage IWLListviewItemFeedSizeImage"></apex:outputPanel>
+                        <apex:outputPanel layout="block" styleClass="IWLListviewItemAttributeLabel IWLListviewItemFeedSizeLabel" rendered="{!widgetRecord.showLabels__c}">{!visualData.feedSize.fieldLabel}</apex:outputPanel>
+                        <apex:outputPanel layout="block" styleClass="IWLListviewItemAttributeValue IWLListviewItemFeedSize">{!visualData.feedSize.value}</apex:outputPanel> 
+                        <apex:outputPanel layout="block" styleClass="IWLListviewItemAttributeValue IWLListviewITFeedSizeLabel">{!$Label.IWL_PROPOSED_IDEAS}</apex:outputPanel> 
+                    </apex:outputPanel>
+                    
+                    <!-- Status info -->
+                    <apex:outputPanel layout="block" styleClass="IWLListviewItemAttributeContainer IWLListviewItemStatusContainer">
+                        <apex:outputPanel layout="block" styleClass="IWLListviewItemAttributeImage IWLListviewItemStatusImage"></apex:outputPanel>
+                        <apex:outputPanel layout="block" styleClass="IWLListviewItemAttributeLabel IWLListviewItemStatusLabel" rendered="{!widgetRecord.showLabels__c}">{!visualData.status.fieldLabel}</apex:outputPanel>
+                        <apex:outputPanel layout="block" styleClass="IWLListviewItemAttributeValue IWLListviewItemStatus">{!visualData.status.value}</apex:outputPanel>
+                    </apex:outputPanel>
+                    
+                    <apex:outputPanel layout="block" styleClass="IWLListviewMergedIdeasContainer" rendered="{!widgetRecord.loadMerged__c && visualData.mergedIdeas != null && visualData.mergedIdeas.size > 0}">
+		                <apex:outputPanel layout="block" styleClass="IWLListviewMergedIdeasContainerTitle">
+		                	{!$Label.IWL_MERGED_IDEAS}
+		                </apex:outputPanel>
+						<apex:repeat value="{!visualData.mergedIdeas}" var="relatedItem" id="IWLMergedIdeas">
+							<apex:outputPanel layout="block" styleClass="IWLListviewMergedIdeaContainer">
+								<apex:outputPanel layout="block" styleClass="IWLListviewMergedIdeaImageContainer">
+									<apex:outputLink value="{!authorDetailPageBaseUrl}{!relatedItem.authorId}" styleClass="IWLListviewMergedIdeaLink">
+										<img src="{!relatedItem.authorImage}" class="IWLListviewItemAuthorImage" title="{!relatedItem.authorName}" />
+									</apex:outputLink>
+								</apex:outputPanel>
+								<apex:outputPanel layout="block" styleClass="IWLListviewMergedIdeaAuthorNameContainer">
+									<apex:outputLink value="{!detailPageBaseUrl}{!relatedItem.Id}" styleClass="IWLListviewMergedIdeaAuthorLink">
+										{!relatedItem.Title}
+									</apex:outputLink>
+								</apex:outputPanel>
+							</apex:outputPanel>
+						</apex:repeat>
+	                </apex:outputPanel>
+                    
+                    <!-- Additional Attributes -->
+                    <apex:repeat value="{!visualData.additionalAttributes}" var="additionalAttribute" id="itemAdditionalAttributes">
+                        <apex:outputPanel layout="block" styleClass="IWLListviewItemAttributeContainer IWLListviewAdditionalAttribute">
+                            <apex:outputPanel layout="block" styleClass="IWLListviewItemAttributeLabel IWLListviewAdditionalAttributeLabel IWLListview{!additionalAttribute.fieldDevName}Label" rendered="{!widgetRecord.showLabels__c}" >{!additionalAttribute.fieldLabel}</apex:outputPanel>
+                            <apex:outputPanel layout="block" styleClass="IWLListviewItemAttributeValue IWLListviewAdditionalAttributeValue IWLListview{!additionalAttribute.fieldDevName}Value">{!additionalAttribute.value}</apex:outputPanel>
+                        </apex:outputPanel>
+                    </apex:repeat>
+                    <!-- End of additional attributes -->
+                    
+                    <!-- Related feed -->
+                    <apex:outputPanel id="IWLListviewItemRelatedFeedsContainer" layout="block" styleClass="IWLListviewItemRelatedFeedsContainer" rendered="{!ShowDetailedView && widgetRecord.showRelatedFeed__c}">
+                        <apex:outputPanel layout="block" styleClass="IWLListivewRelatedItemsTitleContainer">
+                            <apex:outputPanel layout="block" styleClass="IWLListviewRelatedItemsTitleImage" rendered="{!visualData.feedItemsCount > 0}"></apex:outputPanel>
+                            <apex:outputPanel layout="block" styleClass="IWLListviewRelatedItemsTitle" rendered="{!visualData.feedItemsCount > 0}">
+                                <apex:outputLink value="{!visualData.link.value}" styleClass="IWLListviewRelatedItemsTitleLink" >{!$Label.IWL_LISTVIEW_SHOW_MORE}</apex:outputLink>
+                            </apex:outputPanel>
+                        </apex:outputPanel>
+                        <!-- This is the container for the feeds related to this item, such as Comments for Ideas, or Ideas for Idea Themes. Will always be missing for users -->
+
+                        <apex:outputPanel layout="block" styleClass="IWLListviewItemRelatedFeeds IWLListviewItemRelatedFeeds{!visualData.recordId.value}" >
+
+                            <apex:repeat value="{!visualData.feedItems}" var="relatedItem" id="IWLRelatedItems">
+                                <!-- The related item's content -->
+                                <apex:outputPanel layout="block" styleClass="IWLListviewItemRelatedFeedContainer" >
+                                    <!-- The related item's author information: Name, link to the user and profile photo -->
+                                    <apex:outputPanel layout="block" styleClass="IWLListviewItemAttributeContainer IWLListviewRelItemAuthorImage">
+                                        <apex:outputPanel layout="block" styleClass="IWLListviewItemAttributeLabel IWLListviewRelItemAuthorImageLabel" rendered="{!widgetRecord.showLabels__c}">{!relatedItem.authorImage.fieldLabel}</apex:outputPanel>
+                                        <apex:outputPanel layout="block" styleClass="IWLListviewItemAttributeValue IWLListviewRelItemAuthorImgContainer">
+                                            <img src="{!relatedItem.authorImage.value}" class="IWLListviewRelItemAuthorImg" alt="{!relatedItem.authorName.value}"/>
+                                        </apex:outputPanel>                                     
+                                    </apex:outputPanel>
+                                    <apex:outputPanel layout="block" styleClass="IWLListviewItemAttributeContainer IWLListviewRelItemAuthorLinkContainer" >
+                                        <apex:outputPanel layout="block" styleClass="IWLListviewItemAttributeLabel IWLListviewRelItemAuthorLinkLabel" rendered="{!widgetRecord.showLabels__c}">{!relatedItem.authorName.fieldLabel}</apex:outputPanel>
+                                        <apex:outputPanel layout="block" styleClass="IWLListviewItemAttributeValue IWLListviewRelItemAuthorLinkContent">
+                                            <apex:outputLink value="{!authorDetailPageBaseUrl}{!relatedItem.authorId.value}" styleClass="IWLListviewRelItemAuthorLink">
+                                                {!relatedItem.authorName.value}
+                                            </apex:outputLink>
+                                        </apex:outputPanel>
+                                    </apex:outputPanel> 
+                                    <!-- The related item's creation date -->
+                                    <apex:outputPanel layout="block" styleClass="IWLListviewItemAttributeContainer IWLListviewRelItemCreationDateContainer">
+                                        <apex:outputPanel layout="block" styleClass="IWLListviewItemAttributeLabel IWLListviewRelItemCreationDateLabel" rendered="{!widgetRecord.showLabels__c}">{!relatedItem.creationDate.fieldLabel}</apex:outputPanel>
+                                        <apex:outputPanel layout="block" styleClass="IWLListviewItemAttributeValue IWLListviewRelItemCreationDate" >{!relatedItem.creationDate.value}</apex:outputPanel>
+                                    </apex:outputPanel>                             
+                                    <apex:outputPanel layout="block" styleClass="IWLListviewItemAttributeContainer IWLListviewRelItemTitleContainer">
+                                        <apex:outputPanel layout="block" styleClass="IWLListviewItemAttributeLabel IWLListviewRelItemTitleLabel" rendered="{!widgetRecord.showLabels__c}">{!relatedItem.content.fieldLabel}</apex:outputPanel>
+                                        <apex:outputPanel layout="block" styleClass="IWLListviewItemAttributeValue IWLListviewRelItemTitle"><apex:outputText value="{!relatedItem.content.value}" escape="false" /> </apex:outputPanel>
+                                    </apex:outputPanel>                 
+                                    
+                                    <!-- Information about the "likes" that each related item has received. -->
+                                    <apex:outputPanel layout="block" styleClass="IWLListviewItemAttributeContainer IWLListviewRelItemLikesContainer">
+                                        <apex:outputPanel layout="block" styleClass="IWLListviewItemAttributeLabel IWLListviewRelItemLikesLabel" rendered="{!widgetRecord.showLabels__c}">{!relatedItem.likes.fieldLabel}</apex:outputPanel>
+                                        <apex:outputPanel layout="block" styleClass="IWLListviewItemAttributeValue IWLListviewRelItemLikes" >{!relatedItem.likes.value}</apex:outputPanel>
+                                    </apex:outputPanel>
+                                </apex:outputPanel>
+                            </apex:repeat>
+
+                        </apex:outputPanel>
+                        
+                        <apex:outputPanel layout="block" styleClass="IWLListviewComment" rendered="{!ShowDetailedView && canComment}">
+                            <p></p><textarea class="IWLListviewCommentBox CommentBox{!visualData.recordId.value}" />
+                            <input type="button" onClick="IWLCommons_showLoadingPanel('Listview', '.IWLListviewWidgetView{!JSENCODE(DeveloperName)} .IWLListviewItem{!JSENCODE(visualData.recordId.value)}'); doComment{!JSENCODE(DeveloperName)}( '{!JSENCODE(visualData.recordId.value)}', jQuery('.CommentBox{!JSENCODE(visualData.recordId.value)}').val() );" value="{!$Label.IWL_LISTVIEW_WIDGET_COMMENT}" class="IWLPrimaryButton" />
+                            <apex:outputPanel layout="none">
+                            	<script type="text/javascript">
+                            		IWLCommons_limitField('.IWLListviewWidgetView{!JSENCODE(DeveloperName)} .CommentBox{!JSENCODE(visualData.recordId.value)}', {!MaxCommentSize}, '{!$Label.IWL_TEXT_CHARACTERS_LEFT}');
+                            	</script>
+                            </apex:outputPanel>
+                        </apex:outputPanel>
+                    </apex:outputPanel>
+                    
+                    <!-- Ends related feed -->
+                    
+                    
+                </apex:outputPanel>
+            </apex:repeat>  
+            <script type="text/javascript">
+            	jQuery('.IWLListviewItemContent').find('img').remove();
+            </script>
+        </apex:outputPanel>
+        
+        <apex:outputPanel layout="block" id="IWLListviewPaginationContainer" styleClass="IWLListviewPaginationContainer" rendered="{!ShowDetailedView && widgetRecord.showPagination__c}">
+            <apex:outputPanel layout="block" styleClass="IWLListviewPrevPage" rendered="{!hasPreviousPage}"  onclick="IWLListview_onPageChangeButtonPressed(IWLListview_showPreviousPage{!DeveloperName}, '{!DeveloperName}', IWLListviewLoadingIconUrl{!DeveloperName});">{!$Label.IWL_PAGINATION_PREVIOUS}</apex:outputPanel>
+            <apex:outputPanel layout="block" styleClass="IWLListviewNextPage" rendered="{!hasNextPage}"  onclick="IWLListview_onPageChangeButtonPressed(IWLListview_showNextPage{!DeveloperName}, '{!DeveloperName}', IWLListviewLoadingIconUrl{!DeveloperName});">{!$Label.IWL_PAGINATION_NEXT}</apex:outputPanel>
+        </apex:outputPanel>
+        
+        
+        <!-- Begin Action Functions -->
+        <apex:form >    
+        
+            <!-- Comment action function -->    
+            <apex:actionFunction name="doComment{!DeveloperName}" action="{!IWLListViewComment}" rerender="SuccessfulComment,IWLMessagePanel">
+                <apex:param name="idi" value="" />
+                <apex:param name="txt" value="" />
+            </apex:actionFunction>
+
+            <!-- Vote action function -->           
+            <apex:actionFunction action="{!vote}" name="IWLListview_voteJavascript{!DeveloperName}" rerender="IWLMessagePanel,SuccessfulVote" >
+                <apex:param name="IdeaId" assignTo="{!voteIdeaId}" value="" />
+                <apex:param name="VoteType" assignTo="{!voteType}" value="" />
+            </apex:actionFunction>
+            
+            <apex:actionFunction action="{!showNextPage}" name="IWLListview_showNextPage{!DeveloperName}" rerender="IWLListviewItemsListContainer,IWLListviewPaginationContainer">
+            </apex:actionFunction>
+            
+            <apex:actionFunction action="{!showPreviousPage}" name="IWLListview_showPreviousPage{!DeveloperName}" rerender="IWLListviewItemsListContainer,IWLListviewPaginationContainer">
+            </apex:actionFunction>
+            
+        </apex:form>
+        <!-- End Action Functions -->
+
+        <!-- Begins Comment complete actions - Executed upon successful commenting-->
+        <apex:outputPanel layout="block" id="SuccessfulComment" >
+            <apex:outputPanel layout="none" id="SuccessfulCommentScript" rendered="{!successfulComment}">
+                <script type="text/javascript">
+                    IWLListview_onIdeaCommentComplete('{!DeveloperName}', {!commentSuccess});
+                    IWLCommons_limitField('.IWLListviewWidgetView{!JSENCODE(DeveloperName)} .CommentBox' + {!commentSuccess}['IdeaId'], {!MaxCommentSize}, '{!$Label.IWL_TEXT_CHARACTERS_LEFT}')
+                </script>
+            </apex:outputPanel>
+        </apex:outputPanel>
+
+        <!-- Begins Vote complete actions - Executed upon successful voting -->
+        <apex:outputPanel layout="block" id="SuccessfulVote">
+            <apex:outputPanel layout="none" id="SuccessfulVoteScript" rendered="{!successfulVote}">
+                <script type="text/javascript">
+                    IWLListview_onIdeaVoteComplete('{!JSENCODE(DeveloperName)}', '{!JSENCODE(voteIdeaId)}', '{!JSENCODE(TEXT(voteTotal))}');
+                </script>
+            </apex:outputPanel>
+        </apex:outputPanel>
+        <!-- End of Vote complete actions -->
+        
+        <!-- Begin page change complete actions -->
+        <apex:outputPanel layout="block" id="PageChangeCompleted">
+            <apex:outputPanel layout="none" id="PageChangeCompletedScript" rendered="{!pageChanged}">
+                <script type="text/javascript">
+                    IWLListview_onPageChangeCompleted('{!JSENCODE(DeveloperName)}');
+                </script>
+            </apex:outputPanel>
+        </apex:outputPanel>
+        <!-- End of page change complete actions -->
+        
+    </apex:outputPanel>
+    
+    
+    
+</apex:component>

@@ -1,0 +1,7 @@
+<apex:page standardController="Opportunity" extensions="clsKissCaseContractDurationYasu" showHeader="false" sidebar="false" cache="true" standardStylesheets="true">
+  <apex:form >
+    <apex:panelGrid id="panel" width="100%" border="0" cellpadding="0" cellspacing="0"> 
+      <apex:outputText value="{!contractDurationView}" id="contractDurationView"/>
+    </apex:panelGrid>
+  </apex:form>
+</apex:page>

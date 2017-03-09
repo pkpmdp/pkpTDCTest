@@ -1,0 +1,689 @@
+<apex:page controller="DealerProductPageController3" sidebar="false" showHeader="false" pageStyle="true" id="page1" action="{!initializeText}" applyHtmlTag="false">
+        <html class="cvi2015"> <!--spoc 2206-->
+        <script type="text/javascript" src="https://yousee.dk/sitecore/content/data/export/export.aspx?itemguid={BD793F05-9B01-4210-BD63-F33431D1013A}&functions=true" > </script>
+        <!--Added for DW 750-->
+        <c:TopMenuComponent ></c:TopMenuComponent>
+        <script type="text/javascript">printHeader();</script>
+        <script type="text/javascript">printTopMenu();</script>
+        <link class="user" href="{!$Resource.SalesFlowCSS}" rel="stylesheet" type="text/css" />
+        <c:DealerComponent ></c:DealerComponent>
+        <!-- jira 510 -->
+        <c:ProductOfferORcampaign ></c:ProductOfferORcampaign>
+        <style>
+            .verticalSpacingCls {
+                margin-right:300px;
+            }
+            .leftContent2 {
+                float:left;
+                width:570px;
+                overflow:auto;
+                min-height:800px;
+            }
+            .rightContent2 {
+                float:left;
+                width:350px;
+                overflow:auto;
+                min-height:800px;
+            }
+            .leftContent3{
+                float:left;
+                width:560px;
+                overflow:visible;
+                min-height: 800px;
+                height: auto !important;
+                height:1000px;
+                max-height:1100px;
+            }
+            .rightContent3{
+                float:left;
+                width:370px;
+                overflow:visible;
+                min-height: 800px;
+                height: auto !important;
+                height:100px;
+                max-height:1100px;
+            }   
+            p {margin-bottom: -125px;}
+         
+            
+        </style>
+        <apex:outputPanel id="renderJsonForSletOperation2">
+        
+                <script id ="productTemplate1" type="text/x-jQuery-tmpl">
+
+                    <tr>
+                        <td width="5%"><input type="${selectType}" name="selectOneProduct1" value="${varenr}" ${checked} ${disabled} class="prodCheckbox" onClick="productSelection1('${href}'+'@@'+'bb')" /> </td>
+                        
+
+
+                        <td width="30%">${navn}</td>
+                        <td  width="30%" align="right"> 
+                            {{if ProductOffer =="true"}}
+                                <img src="{!$Resource.ProductOffer}" >
+                            {{/if}}
+                            {{if ProductCampaign =="true"}}
+                                <img src="{!$Resource.ProductCampaign}">
+                            {{/if}}
+                        </td>
+                        <td width="10%">${price}</td>
+                        <td width="25%">${priceSuffix}</td> 
+                    </tr>
+                    <tr><td></td><td style="text-align:left;font-size:10px;" COLSPAN="5">${productSummary}</td></tr>
+                </script>
+                <!-- DW-855 line 91 -->
+                
+                 <script id ="productTemplate4" type="text/x-jQuery-tmpl">
+                    
+                   <tr>
+                        
+                        <td width="5%"><input type="${selectType}" name="selectOneProduct4" id="${varenr}" value="${varenr}" ${checked} ${disabled} class="prodCheckbox" onClick="productSelection4('${href}'+'@@'+'ta',this.value)" /> </td>
+                        
+                        <td width="30%">${navn}</td>
+                        <td  width="30%" align="right"> 
+                            {{if ProductOffer =="true"}}
+                                <img src="{!$Resource.ProductOffer}" >
+                            {{/if}}
+                            {{if ProductCampaign =="true"}}
+                                <img src="{!$Resource.ProductCampaign}">
+                            {{/if}}
+                        </td>   
+                        <td width="10%">${price}</td>
+                        <td width="25%">${priceSuffix}</td>
+                    </tr>
+                    <tr><td></td><td style="text-align:left;font-size:10px;" COLSPAN="5">${productSummary}</td></tr>
+                    
+                        {{if navn == "Sikkerhedspakken"}}
+                        <tr><td colspan="2"><b>Cloud Disk</b></td>
+                        </tr>
+                        {{/if}}
+                </script>
+                
+                <script id ="productTemplate2" type="text/x-jQuery-tmpl">
+
+                    <tr>
+                        <td width="5%"><input type="${selectType}" name="selectOneProduct2" id="${varenr}" value="${varenr}" ${checked} ${disabled} class="prodCheckbox" onClick="productSelection2('${href}'+'@@'+'TLF',this.value)"/> </td>
+                        <td width="30%">${navn}</td>
+                        <td  width="30%" align="right"> 
+                            {{if ProductOffer =="true"}}
+                                <img src="{!$Resource.ProductOffer}" >
+                            {{/if}}
+                            {{if ProductCampaign =="true"}}
+                                <img src="{!$Resource.ProductCampaign}">
+                            {{/if}}
+                        </td>   
+                        <td width="10%">${price}</td>
+                        <td width="25%">${priceSuffix}</td>
+                    </tr>
+                    <tr><td></td><td style="text-align:left;font-size:10px;" COLSPAN="5">${productSummary}</td></tr>
+                </script>
+                <script id="productTemplate3" type="text/x-jQuery-tmpl">
+                    <tr> 
+                        <td width="5%"><font color="white">1</font></td>        
+                        <td width="30%">${navn}</td>
+                        <td  width="30%" align="right"> 
+                            {{if ProductOffer =="true"}}
+                                <img src="{!$Resource.ProductOffer}" >
+                            {{/if}}
+                            {{if ProductCampaign =="true"}}
+                                <img src="{!$Resource.ProductCampaign}">
+                            {{/if}}
+                        </td>   
+                        <td width="10%">${price}</td>
+                        <td width="25%">${priceSuffix}</td>
+                    </tr>
+                </script>
+                <script id ="productTemplate5" type="text/x-jQuery-tmpl">
+                   <tr>
+                        <td width="5%"><input type="${selectType}" name="selectOneProduct4" id="${varenr}" value="${varenr}" ${checked} ${disabled} class="prodCheckbox" onClick="productSelection4('${href}'+'@@'+'ta',this.value)" /> </td>
+                        
+                        <td width="30%">${navn}</td>
+                        <td  width="30%" align="right"> 
+                            {{if ProductOffer =="true"}}
+                                <img src="{!$Resource.ProductOffer}" >
+                            {{/if}}
+                            {{if ProductCampaign =="true"}}
+                                <img src="{!$Resource.ProductCampaign}">
+                            {{/if}}
+                        </td>   
+                        <td width="10%">${price}</td>
+                        <td width="25%">${priceSuffix}</td>
+                    </tr>
+                    <tr><td></td><td style="text-align:left;font-size:10px;" COLSPAN="5">${productSummary}</td></tr>
+                </script>
+        </apex:outputPanel>
+    <script type="text/javascript">
+        var firstJSONResponse = '';
+        var bsxxFlag = '{!dtvtaflag}'; 
+        var myJSONObject = '';
+        var kundeData ='';
+        var arrayInit ='';
+        var etag = '';
+        var isBroadbandSubscriptionNotAvailable='';
+        var canDealerSellTlfprod='{!canDealerSellTlfprod}';
+        //alert('canDealerSellTlfprod---------------'+canDealerSellTlfprod);
+       // alert('firstJSONResponse ---------------'+firstJSONResponse );
+       // alert('myJSONObject ---------------'+myJSONObject );
+
+        var kundeid ='{!cCustInstAdd.firstName}';
+        var prefix=' kr. pr. md.';
+        var existingCustomerFlag = false;
+        var broadBandString = 'bb-ga-valg';
+        var TLFString='tlf-ga-valg';
+        var SPString='bb-ta-valg';
+        var CloudStrng = 'Cloud Disk';
+        var broadbandProducts = new Array();
+        var TLFProducts =new Array();
+        var SPProducts =new Array();
+        var newSPArray = new Array();
+var tempSPProducts = new Array();
+        var custFlag = false; 
+        var a='';
+        var b='';
+        var c='';
+        var d=''; //DE-855
+        var prodSelected='';
+        var newCustFlag = '{!isNewCustomer}';
+        //DW-861
+        var bsxxFlag = {!dtvtaflag}; 
+        //Added for BS 
+        var freeChoiceFlag={!isFreeChoicePageFlag};
+        var currentKundeNumber = '{!cCustInstAdd.customerNumber}';
+        //alert('Its for developement purpose-----newCustFlag----- '+newCustFlag);
+        if(newCustFlag == "true"){
+            custFlag  = "false"; 
+        }else if(newCustFlag == "false"){
+            custFlag  = "true";
+        } 
+        var bbSubscriptionValidator=''; 
+       var selectedProducts='';
+       getproductOffers();
+       
+    </script>   
+      <apex:outputPanel id="renderJsonForSletOperation">
+        <script type="text/javascript">
+            var clProdArray = {!prodArray};// DW-855
+            clProdArray.sort();
+            //alert('Cloud Array *** '+clProdArray);
+           myJSONObject={!jsonResponse};
+           firstJSONResponse = {!firstJsonResponse};
+           myJSONObject=refreshFirstJSONResponse(firstJSONResponse,myJSONObject);
+           kundeData = JSON.stringify(myJSONObject['kunde-data']);
+           arrayInit = myJSONObject['array-init'];
+           etag = myJSONObject['ETag'];
+            //var newCust=false; 
+            broadbandProducts = createProductsData(broadBandString, prefix, custFlag);
+            $.each(broadbandProducts, function(i, product){
+                var isProductOffer='';
+                var isProductCampaign='';
+                var productSummary='';
+                var productoffervar = getOfferFlag(product.varenr);                                                                                             
+                if(productoffervar != undefined){                                                               
+                    isProductOffer = productoffervar.ProductOfferExists;
+                    isProductCampaign = productoffervar.ProductCampaignExists;
+                    productSummary = productoffervar.ProductSummary;
+                }
+                product.productSummary = productSummary;
+                product.ProductOffer='';                                                            
+                if(isProductOffer=='true'){
+                    product.ProductOffer = isProductOffer;
+                }
+                product.ProductCampaign='';
+                if(isProductCampaign=='true'){
+                    product.ProductCampaign=isProductCampaign;
+                }
+            }); 
+            if(broadbandProducts.length == 1){
+                addProduct(broadbandProducts[0],broadBandString); 
+                a = $("#productTemplate3").tmpl(broadbandProducts);
+                
+            }else if(broadbandProducts.length > 1){
+                a = $("#productTemplate1").tmpl(broadbandProducts);    
+            }       
+            if (isBroadbandSubscriptionPresent=='false'){
+                bbSubscriptionValidator='false';
+            }  else {
+                bbSubscriptionValidator='true';
+            }
+           
+           
+            TLFProducts=createProductsData(TLFString, prefix, custFlag);  
+
+            $.each(TLFProducts, function(i, product){
+                var isProductOffer='';
+                var isProductCampaign='';
+                var productSummary='';
+                var productoffervar = getOfferFlag(product.varenr);                                                                                             
+                if(productoffervar != undefined){                                                               
+                    isProductOffer = productoffervar.ProductOfferExists;
+                    isProductCampaign = productoffervar.ProductCampaignExists;
+                    productSummary = productoffervar.ProductSummary;
+                }
+                product.productSummary = productSummary;
+                product.ProductOffer='';                                                            
+                if(isProductOffer=='true'){
+                    product.ProductOffer = isProductOffer;
+                }
+                product.ProductCampaign='';
+                if(isProductCampaign=='true'){
+                    product.ProductCampaign=isProductCampaign;
+                }
+            }); 
+
+            if(TLFProducts.length == 1){
+                addProduct(TLFProducts[0],TLFString);
+                b = $("#productTemplate3").tmpl(TLFProducts);
+            }else if(TLFProducts.length > 1){
+                   
+                b = $("#productTemplate2").tmpl(TLFProducts);    
+            }
+            
+             SPProducts=createProductsData(SPString, prefix, custFlag);  
+             SPProducts.sort();
+             
+             // DW-855
+             //Added condition to display products from Dw-855
+              var j=0;
+              //alert('sP products ++++ '+SPProducts.length);
+              for(var i=SPProducts.length-1;i>=0;i--)
+              {
+                var ans = $.inArray(SPProducts[i].varenr, clProdArray);
+                //alert('ans In Array **** '+ans);
+                if(ans != -1)
+                {
+                    newSPArray[j] = SPProducts[i];
+                    j++;
+                }
+              }
+              
+            $.each(newSPArray, function(i, product){
+                var isProductOffer='';
+                var isProductCampaign='';
+                var productSummary='';
+                var productoffervar = getOfferFlag(product.varenr);  
+                var prouctnumber=product.varenr;  
+                
+                if(productoffervar != undefined){                                                               
+                    isProductOffer = productoffervar.ProductOfferExists;
+                    isProductCampaign = productoffervar.ProductCampaignExists;
+                    productSummary = productoffervar.ProductSummary;
+                }
+                product.productSummary = productSummary;
+                product.ProductOffer='';       
+                product.disabled = '';                                                     
+                if(isProductOffer=='true'){
+                    product.ProductOffer = isProductOffer;
+                }
+                product.ProductCampaign='';
+                if(isProductCampaign=='true'){
+                    product.ProductCampaign=isProductCampaign;
+                }
+            });
+            // DW-855
+             if(newSPArray.length == 1){
+                addProduct(SPProducts[0],SPString);
+                c = $("#productTemplate5").tmpl(newSPArray);
+            }else if(newSPArray.length > 1){
+                c = $("#productTemplate5").tmpl(newSPArray);    
+            }
+            
+             
+            
+            $(document).ready( function() {
+              $("table.zebra").find("tr:nth-child(even)").each(
+                function(i) {
+                    if( 0 == $(this).find("th").length ) {
+                        $(this).addClass("odd");
+                    }
+                }
+              );
+            } );
+           //displayBasket();
+    </script>
+    
+    </apex:outputPanel> 
+        <script>            
+        
+            function sellProducts(){
+                    var CustomerInfoFlag='';
+                    
+                    errMsg=''; 
+                    var childs = $("#BroadBandID input:checked");
+                    var childs1 = $("#TelefoniID input:checked");
+                    var childs2 = $("#SPID input:checked");
+                    var redirectToNewPage='';
+                    var selectedBroadBandProduct;
+                    var selectedTlfProduct;
+                    var selectedSPBroadBandProduct;
+                     
+                    if (childs.length>0){
+                        selectedBroadBandProduct='bb'+'@@';
+                        redirectToNewPage = selectedBroadBandProduct;     
+                    }
+                    if (childs1.length>0){
+                        selectedTlfProduct='TLF'+'@@';
+                        redirectToNewPage = redirectToNewPage + selectedTlfProduct;
+                    }
+                    if (childs2.length>0){
+                        selectedSPBroadBandProduct='ta';
+                        redirectToNewPage = redirectToNewPage + selectedSPBroadBandProduct;
+                    }
+                  
+
+                    if (isBroadbandSubscriptionPresent!=null && isBroadbandSubscriptionPresent!='') {
+                        document.getElementById("isBroadbandSubscriptionPresent").value = bbSubscriptionValidator;
+                    }  
+                    if(BroadbandprodPrsnt == true)
+                    {
+                                        var mergedstring = kundeData +'@@@'+arrayInit+'@@@'+etag;
+                                    document.getElementById("mergedstring").value = mergedstring;
+                                    document.getElementById("redirectToNewPage").value = redirectToNewPage;
+                                    document.getElementById("isBroadbandSubscriptionNotAvailable").value = isBroadbandSubscriptionNotAvailable;                                 
+                                    
+                                    nextFlow();
+                                    
+                    }
+                    else if (isBroadbandSubscriptionNotAvailable==true){
+                            if (childs.length==0 ){
+                            
+                                errMsg='Vælg venligst et bredbåndsprodukt';
+                                $("#errorBlock").html(errMsg);
+                            } else {
+                           
+                            
+                                if (!(childs.length==0 && childs1.length==0 && childs2.length==0)){
+                                    var mergedstring = kundeData +'@@@'+arrayInit+'@@@'+etag;
+                                    document.getElementById("mergedstring").value = mergedstring;
+                                    document.getElementById("redirectToNewPage").value = redirectToNewPage;
+                                    document.getElementById("isBroadbandSubscriptionNotAvailable").value = isBroadbandSubscriptionNotAvailable;                                 
+                                    nextFlow();
+                                }
+                                
+                                else if (!(childs.length==0 && childs1.length==0)){
+                                    var mergedstring = kundeData +'@@@'+arrayInit+'@@@'+etag;
+                                    document.getElementById("mergedstring").value = mergedstring;
+                                    document.getElementById("redirectToNewPage").value = redirectToNewPage;
+                                    document.getElementById("isBroadbandSubscriptionNotAvailable").value = isBroadbandSubscriptionNotAvailable;                                 
+                                    nextFlow();
+                                }
+                                else if (!(childs.length==0 && childs2.length==0)){
+                                    var mergedstring = kundeData +'@@@'+arrayInit+'@@@'+etag;
+                                    document.getElementById("mergedstring").value = mergedstring;
+                                    document.getElementById("redirectToNewPage").value = redirectToNewPage;
+                                    document.getElementById("isBroadbandSubscriptionNotAvailable").value = isBroadbandSubscriptionNotAvailable;                                 
+                                    nextFlow();
+                                }
+                                else if (!(childs1.length==0 && childs2.length==0)){
+                                    var mergedstring = kundeData +'@@@'+arrayInit+'@@@'+etag;
+                                    document.getElementById("mergedstring").value = mergedstring;
+                                    document.getElementById("redirectToNewPage").value = redirectToNewPage;
+                                    document.getElementById("isBroadbandSubscriptionNotAvailable").value = isBroadbandSubscriptionNotAvailable;                                 
+                                    nextFlow();
+                                }
+                                
+                                 else {
+                                    errMsg='Vælg venligst et bredbåndsprodukt';
+                                    $("#errorBlock").html(errMsg);
+                                }
+                            }
+                    } else {
+                                            if (!(childs.length==0 && childs1.length==0)){
+                                var mergedstring = kundeData +'@@@'+arrayInit+'@@@'+etag;
+                                document.getElementById("mergedstring").value = mergedstring;
+                                document.getElementById("redirectToNewPage").value = redirectToNewPage;
+                                document.getElementById("isBroadbandSubscriptionNotAvailable").value = isBroadbandSubscriptionNotAvailable;                            
+                                nextFlow();
+                        } 
+                        else {
+                             errMsg='Vælg venligst et bredbåndsprodukt';    
+                            //errMsg='Du skal vælge enten et bredbåndsprodukt eller telefoni produkt';
+                            $("#errorBlock").html(errMsg);
+                        }
+                    
+                    }      
+            }
+            
+            function productSelection1(sample){
+                errMsg='';
+                $("#errorBlock").html(errMsg);
+                var mergedstring = kundeData +'@@@'+arrayInit+'@@@'+etag;
+                document.getElementById("mergedstring").value = mergedstring;
+                //setSelectedProductTLFValue(sample);
+                setSelectedProductBBValue(sample);
+                
+            }
+            function productSelection4(selectedSPProductValues,selectedPorductId){
+                 errMsg='';
+                $("#errorBlock").html(errMsg);
+                
+                 var mergedstring = kundeData +'@@@'+arrayInit+'@@@'+etag;
+                 document.getElementById("mergedstring").value = mergedstring;
+                 setSelectedProductSPValue(selectedSPProductValues);                 
+            }
+            
+            function productSelection2(selectedProductValues,selectedProductId){
+                
+                 errMsg='';
+                $("#errorBlock").html(errMsg);
+                
+                 var mergedstring = kundeData +'@@@'+arrayInit+'@@@'+etag;
+                 document.getElementById("mergedstring").value = mergedstring;
+                 setSelectedProductTLFValue(selectedProductValues);                 
+            }
+            
+            function isBroadbandSubscriptionMandatory(productString,productArray){
+                //alert('Inside isBroadbandSubscriptionMandatory---'+productArray.length);
+                try{
+                        var flag = false;
+                        if(newkundeFlag){
+                            if(myJSONObject[productString] != undefined &&
+                                    myJSONObject[productString].max != undefined && myJSONObject[productString].max != 0){
+                                    flag = true;
+                            }
+                        }else {
+                            if(myJSONObject[productString] != undefined &&
+                                            myJSONObject[productString].max != undefined &&
+                                            myJSONObject[productString].max != 0 && productArray.length == 0){
+                                            flag = true;
+                                            
+                            }
+                        }
+                        if(productString == "clear-ga-valg" && is_O_CustomerPresent()){
+                            flag = false;
+                        }
+                        return flag;
+                }catch(err){
+                    alert("Error: in isBasicSubscriptionMandatory method in CustomerAndProductComponent: "+err.description);
+                }
+        }
+            
+        </script>
+        
+    <body>
+    <script type="text/javascript">
+        
+    </script>
+        <script type="text/javascript">printContentAreaBegin();
+                </script>
+          <apex:form id="formId" styleClass="fontVerdana">
+                <style>
+                    tr.even{
+                    background-color: #E3DCDB;
+                    }
+                    tr.odd{
+                    background-color: #FCF7F7;
+                    }
+                </style>
+                <br/>  
+                <apex:messages />
+                <br/>
+                <!-- <p>
+                    <strong>Vælg Bredbåndshastighed og spørg, om kunden evt. også vil have Telefoni</strong> 
+                </p>
+                <p>
+                    <span>Telefoni er et selvbetjeningsprodukt, hvor kunden selv v<span style="COLOR: #333333; FONT-SIZE: 9pt"><span style="mso-bookmark: OLE_LINK2"><span style="COLOR: #333333; FONT-SIZE: 10pt">ia <span style="COLOR: #000000">www.yousee.dk</span> skal overflytte penge til sin telefonikonto</span></span>, s� kunden kan ringe til numre, der ikke er inkl. i deres abonnement, fx udland og s�rnumre. </span> </span>
+                </p><br/><br/>-->
+                <p><apex:outputText value="{!salesFlowObj.messages[0]}" escape="false"/>
+                </p>
+                <div id="errorBlock" style="color:red;display:block;"></div>
+                <apex:panelGrid id="panalgrd" columns="2" width="100%" columnClasses="leftContent3,rightContent3">
+                    <apex:outputPanel id="outptpnl" styleClass="leftContent3" >   
+                        <apex:panelGroup id="columnA">
+                                    <apex:pageBlock id="pageBlockId">
+                                    
+                                        <apex:PageBlockSection title="Vælg Bredbånds-abonnement" collapsible="false" columns="1">
+                                            <table id="BroadBandID" class="zebra" width="100%"></table>
+                                        </apex:PageBlockSection>
+                                        <!--start of DW-851-->
+                                        <apex:PageBlockSection title="Vælg tillægsydelser til Bredbånd" collapsible="false" columns="1">
+                                            <table id="SPID" class="zebra" width="100%"></table>
+                                        </apex:PageBlockSection>
+                                        <!--Endof DW-851-->
+                                        
+                                        <apex:PageBlockSection title="Kunden kan også få Telefoni" collapsible="false" columns="1" rendered="{!canDealerSellTlfprod}">
+                                            <!-- <div class="mf-text">Vi kan også tilbyde kunden <a href="javascript:pop('https://yousee.dk/sitecore/content/data/export/export.aspx?itemguid={E93E0965-21B3-4DCE-A356-493C21808892}&amp;html=true&amp;popup=true')"  >Telefoni fra YouSee</a>.</div> -->
+                                            <table id="TelefoniID" class="zebra" width="100%"></table>
+                                        </apex:PageBlockSection>
+                                        
+                                        <apex:actionStatus id="nextflowStatus" startText="IN PROGRESS...."/>
+                                        
+                                           <apex:pageBlockButtons location="bottom" id="bbBtnId">
+                                                    <apex:commandButton action="{!cancel}" style="margin-right:250px;" value="Annuller"/>
+                                                    <apex:commandButton action="{!backFlow}" value="Tilbage" id="backID"/>
+                                                    <input type="button"  value="Videre" onclick="sellProducts();" class="videreBtnCls" id="forwardID"/>
+                                                    <input type = "hidden" id="selectedProds" name = "selectedProds" value=""/>
+                                                    <input type = "hidden" id="mergedstring" name = "mergedstring" value=""/>
+                                                    <input type = "hidden" id="BBVal" name = "BBVal" value=""/>
+                                                    <input type = "hidden" id="TLFVal" name = "TLFVal" value=""/>
+                                                    <input type = "hidden" id="SPVal" name = "SPVal" value=""/>
+
+                                                    
+                                                    <input type = "hidden" id="redirectToNewPage" name = "redirectToNewPage" value=""/>
+                                                    <input type = "hidden" id="isBroadbandSubscriptionPresent" name = "isBroadbandSubscriptionPresent" value=""/>
+                                                    <input type = "hidden" id="isBroadbandSubscriptionNotAvailable" name = "isBroadbandSubscriptionNotAvailable" value=""/>
+                                                    <!-- DW-855 -->
+                                                    <input type = "hidden" id = "telephninbasket" name = "telephninbasket" value="" />
+                                                    <apex:actionFunction name="nextFlow" action="{!afterBroadBandOrTelephonyProductSelection}" />
+                                        </apex:pageBlockButtons>
+                                        
+                                        <apex:actionFunction name="setSelectedProductBBValue" action="{!selectedBBValue}" status="queryStatus" reRender="renderJsonForSletOperation,renderJason">
+                                            <apex:param name="selectedProductParam" AssignTo="{!BBProduct}"  value=""/>
+                                      
+                                        </apex:actionFunction>
+                                        <apex:actionFunction name="setSelectedProductSPValue" action="{!selectedSPValue}" status="queryStatus" reRender="renderJsonForSletOperation,renderJason">
+                                            <apex:param name="selectedProductParam" AssignTo="{!SPProduct}"  value=""/>
+                                        </apex:actionFunction>
+
+                                        
+                                        <apex:actionFunction name="setSelectedProductTLFValue" action="{!selectedTLFValue}" status="queryStatus" reRender="renderJsonForSletOperation,renderJason">
+                                            <apex:param name="selectedProductParam" AssignTo="{!TLFProduct}"  value=""/>
+                                        </apex:actionFunction>
+                                    </apex:pageBlock>
+                            </apex:panelGroup>
+                        </apex:outputPanel>
+                         <apex:outputPanel styleClass="rightContent3">
+                            <apex:panelGroup id="columnB">
+                                    <c:CustomerAndProductComponent isNewKunde="{!isNewCustomer}" kundeNumber="{!cCustInstAdd.customerNumber}"
+                                    kundeName="{!cCustInstAdd.firstName} {!cCustInstAdd.lastName}" Adresse="{!cCustInstAdd.addr1}"
+                                    Postnummer="{!cCustInstAdd.addr2}"></c:CustomerAndProductComponent>
+                             </apex:panelGroup>
+                        </apex:outputPanel>
+                </apex:panelGrid>   
+                
+                <apex:outputPanel id="renderJsonForSletOperation1">
+                    <script type="text/javascript">
+                         var basicHeader = [" "," "," "," "];   
+                          var requiredHeader = [" "," "," "," "]; 
+                          var requiredHeader1=[" "," "," "," "];
+                          if(a != ''){     
+                             a.appendTo(createHeaders(basicHeader,"#BroadBandID"));
+                           }
+                          if(b != ''){                 
+                              b.appendTo(createHeaders(requiredHeader,"#TelefoniID"));
+                          }
+                           if(c != ''){                 
+                              c.appendTo(createHeaders(requiredHeader1,"#SPID"));
+                          } 
+                          //DW-855
+                          if(d != ''){                 
+                              d.appendTo(createHeaders(requiredHeader1,"#CLID"));
+                          } 
+                                    
+                    </script>
+            </apex:outputPanel> 
+                
+                <apex:actionStatus id="queryStatus"> 
+                           <apex:facet name="start">
+                           <c:loadingComponent BackColor="#efefef" borderColor="#336699"
+                            borderSize="3" height="50px" width="120px" 
+                            ImageUrl="{!$Resource.Loading}" Message="Loading..." 
+                            messageStyle="color:darkred;font-size:11pt;font-weight:bold;"/>
+                           </apex:facet>         
+                </apex:actionStatus>
+        
+                <apex:outputpanel id="renderJason">
+                <script>
+                   /*myJSONObject={!jsonResponse};
+                   firstJSONResponse = {!firstJsonResponse};
+                   myJSONObject = refres
+                   kundeData = JSON.stringify(myJSONObject['kunde-data']);
+                   arrayInit = myJSONObject['array-init'];
+                   etag = myJSONObject['ETag']; 
+                   kundeid = '{!cCustInstAdd.firstName}';*/
+                   var serialNumber = {!dummySerialNo};
+                   //alert(broadBandString);
+                   isBroadbandSubscriptionNotAvailable = isBroadbandSubscriptionMandatory(broadBandString,broadband);
+                    //alert('isBroadbandSubscriptionNotAvailable--while loading----'+isBroadbandSubscriptionNotAvailable);
+                    if (isBroadbandSubscriptionNotAvailable!=null && isBroadbandSubscriptionNotAvailable!=''){
+                        document.getElementById("isBroadbandSubscriptionNotAvailable").value = isBroadbandSubscriptionNotAvailable;
+                   }
+                   if(isCloudProdPrsnt == true)
+                   {
+                        document.getElementById("1302009").disabled = true;
+                   }    
+                   displayBasket(); 
+                   // DW-855
+                   
+                   if(isSPselected == true)
+                   {
+                        //alert('isSPselected '+isSPselected);
+                       // alert('document.getElementById("1302003")'+document.getElementById("1302003"));
+                        document.getElementById("1302003").checked = true;
+                        document.getElementById("1302003").disabled = true;
+                        
+                   }
+                   if(undelSP == true )
+                   {
+                        //alert('undelSP '+isSPselected);
+                        document.getElementById("1302003").checked = false;
+                        document.getElementById("1302003").disabled = false;    
+                   }
+                   if(undelCloud == true)
+                   {
+                        document.getElementById("1302009").disabled = false;
+                   }
+                   if(isSPselected && undelCloud)
+                   {
+                        document.getElementById("1302003").checked = true;
+                   }
+                   if(isTeleinBasket == true)
+                   {
+                    //alert('isTeleinBasket on page ');
+                    settelephnflag();
+                        document.getElementById("telephninbasket").value = 'true';
+                   }
+                   
+                </script>
+                </apex:outputpanel>
+                <apex:actionFunction name="settelephnflag" action="{!settelephnflag}"/>  
+                <apex:actionFunction action="{!callToKasia}" name="callToKasia" status="queryStatus" reRender="renderJsonForSletOperation,renderJason,renderJsonForSletOperation1,columnA">
+                                <apex:param name="url" assignTo="{!url}" value="" />
+                                <apex:param name="etag" assignTo="{!etag}" value="" />
+                                <apex:param name="kundeData" assignTo="{!kundeData}" value="" />
+                                <apex:param name="arrayInit" assignTo="{!arrayInit}" value="" />
+                </apex:actionFunction>
+        </apex:form>
+        <script type="text/javascript">printContentAreaEnd();</script>
+        <script type="text/javascript">printFooter();</script>
+    </body>
+    </html>
+</apex:page>

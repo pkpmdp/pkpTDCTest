@@ -1,0 +1,75 @@
+<apex:page standardController="Contact" extensions="DealerWebConferenceTicketController" renderAs="pdf"> 
+    <head>
+        <style type="text/css" media="print">
+            @page {
+                margin-top: 60px;
+                @top-center {
+                    content: element(header);
+                }
+            } 
+                             
+            body {
+                font-family: serif; font-size:15px;
+            }                   
+            
+            div.header {
+                padding: 10px;
+                position: running(header);
+            } 
+        </style>
+    </head>
+    
+    <center>
+        <div class="header">
+            <apex:image value="{!$Resource.YouSee13LiveLogo}" height="50" width="250"/>
+        </div> 
+    </center>
+    <br/>
+     
+    <body>
+     	<apex:outputText value="{!ticketHeaderText}" escape="false" />
+        <b>Dine oplysninger:</b> 
+        <br/>
+        Fornavn: {!Contact.FirstName}<br/>
+        Efternavn: {!Contact.LastName}<br/> 
+        Stillingsbetegnelse: {!Contact.Stillingsbetegnelse__c}<br/>
+        Mobilnr.: {!Contact.Conference_Mobile_Phone__c}<br/>
+        E-mail-adresse: {!Contact.Email}<br/> 
+        Unik løbenr: {!Contact.Ticket_Number__c} 
+        <br/><br/>  
+    
+        <b>Dit program for dagen:</b>         
+        <br/>
+        <apex:outputText escape="false" value="{!dayProgram}"/><br/>
+    
+        <b>Transport:</b>
+        <br/>
+        <apex:outputPanel rendered="{!Contact.Transportation_Required__c != 'Ja'}" >
+            Du sørger selv for transport (t/r) til Bella Centret.<br/><br/>
+        </apex:outputPanel>
+     
+        <apex:outputPanel rendered="{!Contact.Transportation_Required__c = 'Ja'}"> 
+            Rute: {!Contact.Valg_rute__c}<br/>
+            Opsamlingssted: {!Contact.Valg_opsamlingsby__c}<br/>
+            Adgangstidspunkt:  {!Contact.Pickup_Time__c} &nbsp; / Hjemkomst tid: &nbsp; {!Contact.Drop_Time__c}
+            <apex:outputText value="{!transportInfo}" style="font-family: serif; font-size:15px;" escape="false"/>
+        </apex:outputPanel>
+    
+        <b>Butiksoplysninger:</b> 
+        <br/>                 
+        {!Contact.Account.Dealer_Number__c}.
+        <br/>
+        {!Contact.Account.Name} 
+        <br/>
+        <br/>
+        <b>Information: </b><br/>
+        Vi glæder os meget til at se dig og håber, vi får en fantastisk dag sammen. Skulle du blive forhindret i at deltage, venligst kontakt din forhandlerkonsulent eller Forhandlersupport for afmelding. Sker der større ændringer til fx programmet, vil vi kontakte dig.
+        <br/>
+        <br/>
+        Venlig hilsen
+        <br/>
+        YouSee Forhandlersalg
+        <br/>
+        <br/>               
+    </body>
+</apex:page>

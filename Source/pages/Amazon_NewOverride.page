@@ -1,0 +1,6 @@
+<apex:page standardController="Cloud_File__c" extensions="Amazon_NewOverride_CTE" action="{!redirect}" >
+    <script language = "javascript">
+        alert('Brug knappen Upload nyt dokument på Kunde-billedet for at uploade nyt dokument.');
+        window.location.href = '/001/o';
+    </script>
+</apex:page>

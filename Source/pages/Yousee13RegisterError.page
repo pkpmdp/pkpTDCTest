@@ -1,0 +1,10 @@
+<apex:page controller="Yousee13RegisterController">
+<html>
+<body>
+<br></br>
+<br></br>
+<br></br>
+<apex:outputText value="{!errorStatus}" style="font-size:20pt" /> 
+</body>
+</html>
+</apex:page>

@@ -1,0 +1,144 @@
+<apex:component controller="IWLSlideshowWidgetController" allowDML="true" id="IWLSlideshowWidgetView" layout="none">
+	<apex:attribute name="DeveloperName" type="String" required="true" description="The 'Developer Name' of the IWLWidget record that will be loaded by this widget" assignTo="{!widgetDeveloperName}"/>
+	<apex:attribute name="Widget" type="IWLWidget__c" required="false" description="A Pre-loaded widget record to be used as the source of information for this widget" assignTo="{!widgetRecord}" />	
+	
+			
+	<apex:outputPanel layout="block" rendered="{!loadWidget}" styleClass="yui3-cssreset IWLSlideshowWidgetView {!OriginClassName} IWLSlideshowWidgetView{!DeveloperName}" >
+		<!-- This panel renders when the widget has been correctly loaded -->
+			
+		<script type="text/javascript">
+			
+			
+			jQuery(document).ready(function(){		
+				IWLSlideshow_onIWLSlideshowWidgetLoad('{!JSENCODE(DeveloperName)}', '{!$Component.theRepeat.IWLSlideshowWidgetItemView}', {!itemsCount}, {!transitionInterval});
+				jQuery('.IWLSlideshowItemContent').find('img').remove();
+			});
+		</script>
+		<!-- BEGINS WIDGET STYLING -->
+	
+		<apex:outputPanel rendered="{!widgetRecord.CSSFileUrl__c != null}" layout="none">
+			<!-- Custom Widget Style -->
+			<link href="{!widgetRecord.CSSFileUrl__c}" rel="stylesheet" type="text/css" />
+		</apex:outputPanel>
+		<apex:outputPanel layout="block" rendered="{!widgetRecord.overrideCSS__c}">
+		
+			<!-- CSS override rules -->
+			<style type="text/css">
+				
+				.IWLSlideshowWidgetView{!DeveloperName} {
+                	width: {!widgetRecord.width__c}px;
+                    height: {!widgetRecord.height__c}px;
+                    background-color: #{!widgetRecord.backgroundColor__c};
+                    color: #{!widgetRecord.fontColor__c};
+                    font-family: {!widgetRecord.FontFamily__c};
+                }
+			
+               	.IWLSlideshowWidgetView{!DeveloperName} .IWLSlideshowTitle {
+					color: #{!widgetRecord.titleColor__c};
+                   	font-family: {!widgetRecord.FontFamily__c};
+				}
+									
+				
+			
+			</style>
+		</apex:outputPanel>
+			
+		<!-- This is the widget's title -->	
+		<div class="IWLSlideshowTitle">{!HTMLENCODE(widgetRecord.Title__c)}</div>
+		
+		<div>			
+			<!-- next we show the items to be rendered in this widget -->			
+			<apex:repeat value="{!visualDataList}" var="visualData" id="theRepeat">
+				<!-- The next container shows the information regarding one of the items to be rendered in the widget -->
+				<apex:outputPanel layout="block" id="IWLSlideshowWidgetItemView" Styleclass="IWLSlideshowItemViewClass">
+					<!-- The item's image -->
+	            	<apex:outputPanel layout="block" styleClass="IWLSlideshowItemAttributeContainer IWLSlideshowItemImageContainer" rendered="{!visualData.imageURL.value != ''}">
+	            		<apex:outputPanel layout="block" styleClass="IWLSlideshowItemAttributeLabel IWLSlideshowItemImageLabel" rendered="{!widgetRecord.showLabels__c}">{!visualData.imageURL.fieldLabel}</apex:outputPanel>
+	            		<img alt="{!HTMLENCODE(visualData.title.value)}" src="{!visualData.imageURL.value}" class="IWLSlideshowItemImage" />
+	            	</apex:outputPanel>
+	            	
+					<apex:outputPanel layout="block" styleClass="IWLSlideshowItemAttributeContainer IWLSlideshowItemTitleContainer">
+						<apex:outputPanel layout="block" styleClass="IWLSlideshowItemAttributeLabel IWLSlideshowItemTitleLabel" rendered="{!widgetRecord.showLabels__c}">{!visualData.title.fieldLabel}</apex:outputPanel>
+						<apex:outputLink styleClass="IWLSlideshowItemTitleLink" value="{!detailPageBaseUrl}{!visualData.recordId.value}"><apex:outputText escape="false" styleClass="IWLSlideshowItemTitle" value="{!HTMLENCODE(visualData.title.value)}" id="IWLSlideshowItemTitle"/></apex:outputLink>
+					</apex:outputPanel>
+					
+					<!-- This is for the author's information -->
+	                <apex:outputPanel styleClass="IWLSlideshowItemAttributeContainer IWLSlideshowItemAuthorImageCont" layout="block">
+	                    <apex:outputPanel layout="block" styleClass="IWLSlideshowItemAttributeLabel IWLSlideshowItemAuthorLabel" rendered="{!widgetRecord.showLabels__c}">{!visualData.authorImage.fieldLabel}</apex:outputPanel>
+	                    <apex:outputPanel layout="block" styleClass="IWLSlideshowItemAttributeValue IWLSlideshowItemAuthorImageContainer" >
+	                        <img alt="{!HTMLENCODE(visualData.authorName.value)}" src="{!visualData.authorImage.value}" class="IWLSlideshowItemAuthorImage" />                           
+	                    </apex:outputPanel>                         
+	                </apex:outputPanel>
+				
+					<apex:outputPanel layout="block" styleClass="IWLSlideshowItemAttributeContainer IWLSlideshowItemAuthorNameLinkContainer" >
+	                    <apex:outputPanel layout="block" styleClass="IWLSlideshowItemAttributeLabel IWLSlideshowItemAuthorNameLinkLabel" rendered="{!widgetRecord.showLabels__c}">
+	                        {!visualData.authorName.fieldLabel}
+	                    </apex:outputPanel>
+	                    <apex:outputPanel layout="block" styleClass="IWLSlideshowItemAttributeValue IWLSlideshowItemAuthorLinkContentContainer">
+	                        <a class="IWLSlideshowItemAuthorNameLink" href="{!authorDetailPageBaseUrl}{!visualData.authorId.value}">
+	                            <apex:outputText value="{!HTMLENCODE(visualData.authorName.value)}" styleClass="IWLSlideshowItemAuthorName" />
+	                        </a>
+	                    </apex:outputPanel>
+	                </apex:outputPanel>
+					
+	        		<apex:outputPanel layout="block" styleClass="IWLSlideshowItemAttributeContainer IWLSlideshowItemActivityDateContainer">
+	        			<apex:outputPanel layout="block" styleClass="IWLSlideshowItemAttributeLabel IWLSlideshowItemLastActivityDateLabel" rendered="{!widgetRecord.showLabels__c}">{!visualData.activityDate.fieldLabel}</apex:outputPanel>
+	        			<apex:outputPanel layout="block" styleClass="IWLSlideshowItemLastActivityDate">{!visualData.activityDate.value}</apex:outputPanel>
+	        		</apex:outputPanel>
+	        		
+	        		<apex:outputPanel layout="block" styleClass="IWLSlideshowItemAttributeContainer IWLSlideshowItemContentContainer">
+	        			<apex:outputPanel layout="block" styleClass="IWLSlideshowItemAttributeLabel IWLSlideshowItemContentLabel" rendered="{!widgetRecord.showLabels__c}">{!visualData.content.fieldLabel}</apex:outputPanel>
+	        			<apex:outputPanel layout="block" styleClass="IWLSlideshowItemContent" ><apex:outputField value="{!sObjResultMap[visualData.recordId.value][visualData.content.fieldDevName]}"/></apex:outputPanel>
+	        		</apex:outputPanel>
+	        		
+	        		<!-- Categories for Ideas and Idea Themes -->
+	                <apex:outputPanel layout="block" id="IWLSlideshowRelatedTopicsContainer" styleClass="IWLSlideshowItemAttributeContainer IWLSlideshowRelatedTopicsContainer" rendered="{!visualData.hasRelatedTopics}" >
+	                	<apex:outputPanel layout="block" styleClass="IWLSlideshowItemAttributeLabel IWLSlideshowRelatedTopicsLabel" rendered="{!widgetRecord.showLabels__c}">{!visualData.relatedTopics.fieldLabel}</apex:outputPanel>
+	                	<apex:repeat value="{!visualData.relatedTopics.valuesList}" var="relatedTopicName">
+	                		<apex:outputPanel layout="block" styleClass="IWLSlideshowRelatedTopic" >{!relatedTopicName}</apex:outputPanel>
+	                	</apex:repeat>
+	                </apex:outputPanel>
+	        		
+	        		
+	        		<apex:outputPanel layout="block" styleClass="IWLSlideshowItemAttributeContainer IWLSlideshowItemRatingContainer">
+	        			<apex:outputPanel layout="block" styleClass="IWLSlideshowItemAttributeLabel IWLSlideshowItemRatingLabel" rendered="{!widgetRecord.showLabels__c}">{!visualData.rating.fieldLabel}</apex:outputPanel>
+	        			<apex:outputPanel layout="block" styleClass="IWLSlideshowItemRating">{!visualData.rating.value}</apex:outputPanel> {!$Label.IWL_PROPOSED_IDEAS}
+	        		</apex:outputPanel>
+	        		<apex:outputPanel layout="block" styleClass="IWLSlideshowItemAttributeContainer IWLSlideshowItemLikesContainer">
+	        			<apex:outputPanel layout="block" styleClass="IWLSlideshowItemAttributeLabel IWLSlideshowItemLikesLabel" rendered="{!widgetRecord.showLabels__c}" >{!visualData.likes.fieldLabel}</apex:outputPanel>
+	        			<apex:outputPanel layout="block" styleClass="IWLSlideshowItemLikes">{!visualData.likes.value}</apex:outputPanel>
+	        		</apex:outputPanel>
+	        		<apex:outputPanel layout="block" styleClass="IWLSlideshowItemAttributeContainer IWLSlideshowItemFeedSizeContainer">
+	        			<apex:outputPanel layout="block" styleClass="IWLSlideshowItemAttributeLabel IWLSlideshowItemFeedSizeLabel" rendered="{!widgetRecord.showLabels__c}">{!visualData.feedSize.fieldLabel}</apex:outputPanel>
+	        			<apex:outputPanel layout="block" styleClass="IWLSlideshowItemFeedSize">{!visualData.feedSize.value}</apex:outputPanel>
+	        		</apex:outputPanel>
+	        		       		
+	        		<!-- Additional Attributes -->
+	        		<apex:repeat value="{!visualData.additionalAttributes}" var="additionalAttribute" id="itemAdditionalAttributes">
+	        			<apex:outputPanel layout="block" styleClass="IWLSlideshowItemAttributeContainer IWLSlideshowAdditionalAttribute">
+		        			<apex:outputPanel layout="block" styleClass="IWLSlideshowItemAttributeLabel IWLSlideshowAdditionalAttributeLabel IWLSlideshow{!additionalAttribute.fieldDevName}Label" rendered="{!widgetRecord.showLabels__c}">{!additionalAttribute.fieldLabel}</apex:outputPanel>
+		        			<apex:outputPanel layout="block" styleClass="IWLSlideshowAdditionalAttributeValue IWLSlideshow{!additionalAttribute.fieldDevName}Value">{!additionalAttribute.value}</apex:outputPanel>
+	        			</apex:outputPanel>
+	        		</apex:repeat>
+	        		<!-- End of additional attributes -->
+					
+				</apex:outputPanel>
+	   		</apex:repeat>
+		</div>	
+		
+		<!-- These are the controls for the slider that works on Javascript -->
+		<ul class="IWLSlideshowSlider" >
+        	<apex:repeat value="{!visualDataList}" var="visualData" id="sequenceGenerator" rendered="{!itemsCount > 1}">
+				<li class="IWLSlideshowSliderNumber">
+					<a href="#{!visualData.index+1}">&nbsp;</a>
+				</li>
+			</apex:repeat>	
+    	</ul>
+		
+		
+	</apex:outputPanel>
+	<apex:outputPanel rendered="{!!loadWidget}" styleClass="IWLLoadErrorMessage IWLSlideshowLoadErrorMessage IWLSlideshowLoadErrorMessage{!DeveloperName}">
+		<c:IWLStatusRenderer StatusMessagesWrap="{!statusMessagesWrap}" />
+	</apex:outputPanel>
+
+</apex:component>

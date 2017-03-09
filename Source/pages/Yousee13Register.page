@@ -1,0 +1,26 @@
+<apex:page controller="Yousee13RegisterController" standardStylesheets="false" renderAs="pdf" action="{!updateCampaignStatus}" cache="false">
+<head>
+<style type="text/css">
+    @page {
+        /* Page spaces */
+        
+        /* Landscape orientation 
+        //size:landscape;*/
+        size: 12in 5.5in;  /* A4 width and height */
+        /* Footer content */         
+        
+    }
+    
+</style>
+</head>
+<body>
+<table>
+        <tr align="left"> <td> <b> <apex:outputText value="{!campaignMemberName}" style="font-size:50pt"> </apex:outputText> </b> </td> </tr>
+        <tr align="left"> <td> <apex:outputText value="{!accountName}" style="font-size:40pt"> </apex:outputText>  <br> </br> </td> </tr>
+        <tr align="left"> <td> <b> <apex:outputText value="{!schedule}" style="font-size:40pt" escape="false"> </apex:outputText> </b> </td> </tr>
+        <tr align="left"> <td>  <apex:outputText value="{!memberType}" style="font-size:40pt"> </apex:outputText> </td> </tr>
+    </table>
+    
+    
+</body>
+</apex:page>

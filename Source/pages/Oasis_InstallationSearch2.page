@@ -1,0 +1,561 @@
+<apex:page controller="Oasis_InstallationSearch_CT" sidebar="false" showheader="false" 
+           standardstylesheets="false"  doctype="HTML-5.0" id="thePage" cache="false">
+   
+    
+    <style>
+        .unlocked:tr {  background:green !important; }
+        .locked:hover { background-color: #F78181; }
+        .locked{ background-color: #F78181;}
+        .CasperAct{ background-color: #F78181;}
+        .locked_CasperAct{ background-color: #F78181; }
+        #nohover tr.locked:hover{
+        background-color: #F78181;
+        color: #F78181;
+        }
+        #nohover tr.CasperAct:hover{
+        background-color: #F78181;
+        color: #F78181;
+        }
+        
+    </style>
+    <apex:composition template="Oasis_SiteTemplate"/>
+    <apex:define name="body">       
+        <div class="container-fluid">                
+            <apex:form styleclass="form-horizontal" id="theForm" >
+                <apex:actionFunction name="regCase" action="{!registerCase}"/>
+                <apex:messages />                                
+                <legend>Adresse søgning</legend>
+                <br/>
+                <div class="row-fluid">
+                    <div class = "span6">
+                        <div class="control-group">
+                            <label class="control-label" for="cuNo">
+                                Anlægs ID&nbsp;
+                            </label> 
+                            <div class="controls">
+                            <apex:outputPanel id="anglesidPanel">
+                                <apex:actionRegion >
+                                    <apex:inputText styleclass="input-large" value="{!cuNo}" id="cuNo" onblur="onCuTabout(this);" rendered="{!!showCUPicklist}">
+                                        <apex:actionSupport event="onchange"
+                                                            action="{!getListStreetValues}"
+                                                            rerender="streetPanel,noInst"
+                                                            status="ajaxStatus"/>
+                                    </apex:inputText>
+                                                                
+                                
+                                    <!-- to change the cable unit text into select list -->
+                                    <apex:selectList id="cuNoList" 
+                                                         value="{!cuNo}" size="1"  
+                                                         styleclass="input-large" rendered="{!showCUPicklist}" >                                         
+                                        <apex:selectOptions value="{!cuForKunde}"/>  
+                                        <apex:actionSupport event="onchange"
+                                                            action="{!getListStreetValues}"
+                                                            rerender="streetPanel,noInst"
+                                                            status="ajaxStatus"/>
+                                    
+                                    </apex:selectList>
+                                    
+                                    <apex:actionStatus startText="Henter gader..." 
+                                                             stopText="" 
+                                                             onstart="DisableSearchBtn()"
+                                                             onstop="EnableSearchBtn()"
+                                                             id="ajaxStatus"/>       
+                                </apex:actionRegion>
+                            </apex:outputPanel>
+                            </div> 
+                        </div> 
+                    </div>
+                        <!--<apex:outputPanel id="kundenum" rendered="{!!ISBLANK(custNumber)}">-->
+                        <div class = "span6">
+                        <div class="control-group">
+                                <label class="control-label" for="kunde">
+                                    Kundenummer&nbsp;
+                                </label> 
+                                <div class="controls">
+                                     <apex:inputText styleclass="input-large" value="{!custNumber}" id="kunde" >     
+                                        <apex:actionSupport event="onchange"
+                                                            action="{!getListCUtValues}"
+                                                            rerender="anglesidPanel,streetPanel,noInst"
+                                                            status="ajaxStatus"/>
+                                     </apex:inputText>
+                                </div>
+                            </div>
+                        </div>
+                        <!--</apex:outputPanel> -->
+                                    
+                </div>
+                <div class="row-fluid">
+                    <apex:outputPanel id="streetPanel">
+                        <div class = "span6">
+                            <div class="control-group">
+                                <label class="control-label" for="gade">
+                                    Gade&nbsp;<span class = "errorStar">*</span> 
+                                </label> 
+                                <div class="controls">
+                                    
+                                    <apex:inputText styleclass="input-large requ" value="{!address.Street__c}" id="gade" 
+                                                    rendered="{!!showStreetPicklist}"/>
+                                    <apex:selectList id="gadeSelect" 
+                                                     value="{!address.Street__c}" size="1"  
+                                                     styleclass="input-large" rendered="{!showStreetPicklist}">                                         
+                                        <apex:selectOptions value="{!streetsForCU}"/>                                           
+                                    </apex:selectList>                   
+                                    
+                                </div>
+                            </div>
+                        </div>
+                    </apex:outputPanel>
+                    <div class = "span6"> 
+                        <div class="control-group">
+                            <label class="control-label" for="Postnummer">
+                                Postnummer&nbsp;<span class = "errorStar">*</span>
+                            </label>                    
+                            <div class="controls">
+                                <apex:inputText styleclass="input-large requ" value="{!address.Postcode__c}" id="Postnummer"/>                        
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row-fluid">
+                    <div class="span6">
+                        <div class="control-group">
+                            <label class="control-label" for="hfra">
+                                Husnummer fra&nbsp;<span class = "errorStar">*</span>
+                            </label> 
+                            <div class="controls">
+                                <apex:inputText styleclass="input-large requ" value="{!houseNumberFrom}" id="hfra"/>                        
+                            </div>
+                        </div> 
+                    </div>
+                    <div class="span6">
+                        <div class="control-group">
+                            <label class="control-label" for="htil">
+                                Husnummer til&nbsp;<span class = "errorStar">*</span>
+                            </label> 
+                            <div class="controls">
+                                <apex:inputText styleclass="input-large requ" value="{!houseNumberTo}" id="htil"/>                        
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row-fluid">
+                    <div class="span6">
+                        <div class="control-group">
+                            <label class="control-label" for="Opgang">Opgang</label> 
+                            <div class="controls">
+                                <apex:inputText styleclass="input-large" value="{!address.Entrance__c}" id="Opgang"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="span6">
+                        <div class="control-group">
+                            <label class="control-label" for="Etage">Etage</label> 
+                            <div class="controls">
+                                <apex:inputText styleclass="input-large" value="{!address.Floor__c}" id="Etage"/>
+                            </div>
+                        </div>  
+                    </div>                   
+                </div>  
+                <div class="row-fluid">
+                    <div class="span6">
+                        <div class="control-group">
+                            <label class="control-label" for="Side">Side</label> 
+                            <div class="controls">
+                                <apex:inputText styleclass="input-large" value="{!address.Side__c}" id="Side"/>
+                            </div>
+                        </div>
+                    </div>  
+                    <div class="span6">
+                        <div class="control-group">
+                            <label class="control-label" for="Dør">Dør</label> 
+                            <div class="controls">
+                                <apex:inputText styleclass="input-large" value="{!address.Door_No__c}" id="Dør"/>
+                            </div>
+                        </div> 
+                    </div> 
+                </div>
+                <!--<div class="row-fluid">
+<div class="span6">
+<div class="control-group">
+<label class="control-label" for="By">By</label> 
+<div class="controls">
+<apex:inputText styleclass="input-large" value="{!searchBy}" id="By" />                                
+</div>
+</div>
+</div>                                
+</div> -->                 
+                <div class="control-group">
+                    <div class="controls">
+                        <apex:commandButton value="Søg" action="{!searchWrapper}" styleclass="btn" onClick="searchInstallation();" id="btnSearch"/>                        
+                        <input type = "button" value = "Ryd" class = "btn" onClick = "openWindow(urlInstallationSearch)" />
+                        <!--<apex:commandButton value="Søg Anlæg" 
+onclick="openWindow(urlCUSearch); return false;"
+styleclass="btn hidden-desktop"/>-->
+                    </div>
+                </div>   
+                <br/>
+                <apex:outputPanel id="listId" rendered="{!searchResults != null}" layout="block"> 
+                    <legend>Installations liste </legend>
+                    <apex:outputPanel rendered="{!searchResults.size != 0}"> 
+                        <div class="row-fluid">
+                            <div class="span6"><b>Page Size</b>&nbsp;
+                                <apex:selectList value="{!pageSize}" size="1" onchange="changPaging();" 
+                                                 rendered="{!searchResults.size != 0}" style="width:80px">
+                                    <apex:selectOption itemValue="10" itemLabel="10" ></apex:selectOption>
+                                    <apex:selectOption itemValue="20" itemLabel="20" ></apex:selectOption>
+                                    <apex:selectOption itemValue="50" itemLabel="50" ></apex:selectOption>
+                                    <apex:selectOption itemValue="100" itemLabel="100"></apex:selectOption>
+                                    <apex:selectOption itemValue="500" itemLabel="500"></apex:selectOption> 
+                                </apex:selectList>
+                            </div>
+                            <div class="span6">
+                                <apex:outputLabel value="{!currentCountText}" rendered="true" style="text-align:right; font-weight:bold;"></apex:outputLabel>
+                                <ul class="pager" style="text-align:right">
+                                    <li><apex:commandLink value="Første" rendered="{!NOT(pageNumber == 1)}"
+                                                          action="{!first}"  onclick="toggleMandatoryValidation()"/></li>
+                                    <li class="disabled">
+                                        <apex:outputLink value="javascript: void(0)" rendered="{!(pageNumber == 1)}">Forste</apex:outputLink>
+                                    </li>
+                                    <li><apex:commandLink value="Forrige" rendered="{!hasPrevious}"
+                                                          action="{!previous}"  onclick="toggleMandatoryValidation()"/></li>
+                                    <li class="disabled">
+                                        <apex:outputLink value="javascript: void(0)" rendered="{!NOT(hasPrevious)}">Forrige</apex:outputLink>
+                                    </li>
+                                    <li><apex:commandLink value="Næste" rendered="{!hasNext}"
+                                                          action="{!next}"  onclick="toggleMandatoryValidation()"/></li>
+                                    <li class="disabled">
+                                        <apex:outputLink value="javascript: void(0)" rendered="{!NOT(hasNext)}">Næste</apex:outputLink>
+                                    </li>
+                                    <li><apex:commandLink value="Sidste" rendered="{!hasNext}"
+                                                          action="{!last}" onclick="toggleMandatoryValidation()"/></li>
+                                    <li class="disabled">
+                                        <apex:outputLink value="javascript: void(0)" rendered="{!NOT(hasNext)}">Sidste</apex:outputLink>
+                                    </li>
+                                </ul>
+                            </div> 
+                        </div>
+                        <legend></legend>
+                    </apex:outputPanel>
+                    <apex:actionFunction name="changPaging" action="{!changPaging}"></apex:actionFunction>
+                    <apex:outputPanel rendered="{!successfulCaseCreation}">
+                        <br/>
+                        <div class="alert alert-success">
+                            <a class="close" data-dismiss="alert" href="#">×</a>
+                            Case(s) created successfully
+                        </div> 
+                    </apex:outputPanel>
+                    <!--SUPPORT-5484 show duplicate cases message-->
+                    <apex:outputPanel rendered="{!duplicateCases}">
+                        <br/>
+                        <div class="alert alert-success">
+                            <a class="close" data-dismiss="alert" href="#">×</a>
+                            Case(s) have already been created
+                        </div> 
+                    </apex:outputPanel>
+                    <!--SUPPORT-5484 END-->
+                    <apex:outputPanel rendered="{!searchResults.size == 0}" layout="block"> 
+                        Ingen søgeresultater fundet
+                    </apex:outputPanel> 
+                    <apex:outputPanel rendered="{!searchResults.size != 0}" layout="block">  
+                        <table class = "table" border = "0" id="nohover">
+                            <thead>
+                                <th style = "vertical-align: top">Adresse</th>
+                                <th style = "vertical-align: top">Lokation</th>
+                                <th style = "vertical-align: top">Produkt</th>
+                                <th style = "vertical-align: top">AnlægsID</th>
+                                <!--<th style = "vertical-align: top">Inst. Status</th> --> <!-- Added for EDM-738 -->                              
+                                <th style = "vertical-align: top">Stiktype</th>      <!-- Added for EDM-738 -->                                                                                          
+                                <th style = "vertical-align: top">Registrering</th>
+                                <!--<th style = "vertical-align: top">Fejltype</th>--><!-- Commented for EDM-738 -->
+                                <th style = "vertical-align: top">Strike
+                                    <br/>
+                                    <apex:selectList style="width:85px" value="{!defaultSelectValue}" size="1" onChange="selectDefault(this);">
+                                        <apex:selectOption itemvalue="{!PICKLIST_OPTION_SELECT}" itemLabel="{!PICKLIST_OPTION_SELECT}"/>
+                                        <apex:selectOptions value="{!listStrikeValues}"/>
+                                    </apex:selectList> 
+                                </th>
+                                <th style = "vertical-align: top">Kontrol dato</th> 
+                                <th></th>
+                                <th></th>                       
+                            </thead> 
+                            <apex:repeat value="{!searchResults}" var="c">
+                                <tr class="{!c.trID}" id="{!c.trID}">                                 
+                                    <td>                                   
+                                        <apex:outputLink rendered="{!c.installation != null}" 
+                                                         target="_blank"
+                                                         value="{!$Site.prefix}/Oasis_InstallationInfo2?id={!c.installation.Id}">{!c.formattedAddress}</apex:outputLink>
+                                        <apex:outputText rendered="{!c.installation == null}" value="{!c.formattedAddress}"/>                                    
+                                    </td>
+                                    <td>{!c.installation.Location__c}</td>
+                                    <td>{!c.productName}</td>
+                                    <td>{!c.installation.Cable_Unit_No__c}</td>
+                                    <!-- <td>{!c.installation.Status__c}</td>--><!-- {!c.installation.Status__c} Added this line for EDM-738-->
+                                    <td>{!c.installation.Stiktype__c}</td> <!--Added this line for EDM-738-->                                                                        
+                                    <td>
+                                        <apex:selectList value="{!c.regCode}" size="1" disabled="{!OR(c.lockedCableUnit==true, c.installation == null,c.installation.Move_Flag__c==true,c.productMismatch==true)}" id="regCode">
+                                            <apex:selectOption itemvalue="{!PICKLIST_OPTION_SELECT}" itemLabel="{!PICKLIST_OPTION_SELECT}" />
+                                            <apex:selectOptions value="{!listInstRegCodes}"/>
+                                        </apex:selectList> 
+                                    </td>
+                                    
+                                    <!--<td>
+<apex:selectList value="{!c.errorTypeLabel}" size="1" disabled="{!OR(c.lockedCableUnit,c.installation == null,c.installation.Move_Flag__c==true)}">
+<apex:selectOption itemvalue="{!PICKLIST_OPTION_SELECT}" itemLabel="{!PICKLIST_OPTION_SELECT}"/> 
+<apex:selectOptions value="{!listErrorTypeLabels}"/>                                        
+</apex:selectList>
+</td>--><!-- Commented for EDM-738 -->
+                                    <td> 
+                                        <apex:selectList value="{!c.strikeValue}" size="1" style="width:85px" 
+                                                         html-data-selectname="strikeselect" 
+                                                         disabled="{!OR(c.lockedCableUnit,c.installation == null,c.installation.Move_Flag__c==true,c.productMismatch==true)}">
+                                            <apex:selectOption itemvalue="{!PICKLIST_OPTION_SELECT}" itemLabel="{!PICKLIST_OPTION_SELECT}"/>
+                                            <apex:selectOptions value="{!listStrikeValues}"/>
+                                        </apex:selectList>
+                                    </td>                                 
+                                    <td>
+                                        <apex:outputText value="{0, date, MMM dd',' yyyy}">
+                                            <apex:param value="{!c.installation.Control_Date__c}"/>        
+                                        </apex:outputText>    
+                                    </td>
+                                    <td>
+                                        <apex:outputPanel rendered="{!c.oasisCase != null}">                                        
+                                            <i class = "icon-flag" 
+                                               data-toggle = "popover" 
+                                               data-content = "<b>Case&nbsp;Number</b>:&nbsp;{!c.oasisCase.CaseNumber}<br/>
+                                                               <b>Case&nbsp;Status</b>:&nbsp;{!c.oasisCase.Status}<br/>
+                                                               <b>Reg Code</b>:&nbsp;{!c.oasisCase.Oasis_Case__r.Oasis_Inst_Case_Registration_Code__c}<br/>
+                                                               <b>Strike</b>:&nbsp;{!c.oasisCase.Oasis_Case__r.Oasis_Strike__c}<br/>
+                                                               <!--<b>Fejltype</b>:&nbsp;{!c.oasisCase.Oasis_Case__r.Oasis_Error_type_Label__c}--><!-- Commented for EDM-738 -->
+                                                               ">
+                                            </i> 
+                                        </apex:outputPanel>                                    
+                                    </td>
+                                    <td>
+                                        <apex:outputPanel rendered="{!!c.customerPresent}">
+                                            <i class = 'icon-exclamation-sign' title = 'No individual customer at this installation.'></i>
+                                        </apex:outputPanel> 
+                                    </td>
+                                    <td>  
+                                        <apex:outputPanel rendered="{!c.isBlandSelv}">
+                                            <i class = 'icon-wrench' title = 'For Bland Selv products, the filter setting should be Grundepakke.'></i>
+                                        </apex:outputPanel>                    
+                                    </td>
+                                    <td width="5%">
+                                        <apex:outputPanel rendered="{!c.lockedCableUnit}">
+                                            <i class = 'icon-lock' title = 'Cable unit is locked.'></i>
+                                        </apex:outputPanel>
+                                        <!--<apex:outputPanel rendered="{!c.lockedOSUnit}">
+                                            <i class = 'icon-lock' title = ' locked.'></i>
+                                        </apex:outputPanel>
+                                        -->
+                                        <apex:outputPanel rendered="{!OR(OR(c.installation.Move_Flag__c==true,c.casperAct==true,c.productMismatch==true),AND(c.installation.Move_Flag__c==true,c.casperAct==true))}">
+                                            <i class = 'icon-share' title = '{!c.hoverMsg}'></i>
+                                        </apex:outputPanel>
+                                    </td>
+                                </tr>    
+                            </apex:repeat>
+                        </table>
+                        <apex:outputPanel rendered="{!searchResults.size != 0}" layout="block">
+                            <div align="right">
+                                <apex:outputLabel value="{!currentCountText}" rendered="true" style="text-align:right; font-weight:bold;"></apex:outputLabel>
+                                <ul class="pager" style="text-align:right">
+                                    <li><apex:commandLink value="Første" rendered="{!NOT(pageNumber == 1)}"
+                                                          action="{!first}"  onclick="toggleMandatoryValidation()"/></li>
+                                    <li class="disabled">
+                                        <apex:outputLink value="javascript: void(0)" rendered="{!(pageNumber == 1)}">Forste</apex:outputLink>
+                                    </li>
+                                    <li><apex:commandLink value="Forrige" rendered="{!hasPrevious}"
+                                                          action="{!previous}"  onclick="toggleMandatoryValidation()"/></li>
+                                    <li class="disabled">
+                                        <apex:outputLink value="javascript: void(0)" rendered="{!NOT(hasPrevious)}">Forrige</apex:outputLink>
+                                    </li>
+                                    <li><apex:commandLink value="Næste" rendered="{!hasNext}"
+                                                          action="{!next}"  onclick="toggleMandatoryValidation()"/></li>
+                                    <li class="disabled">
+                                        <apex:outputLink value="javascript: void(0)" rendered="{!NOT(hasNext)}">Næste</apex:outputLink>
+                                    </li>
+                                    <li><apex:commandLink value="Sidste" rendered="{!hasNext}"
+                                                          action="{!last}" onclick="toggleMandatoryValidation()"/></li>
+                                    <li class="disabled">
+                                        <apex:outputLink value="javascript: void(0)" rendered="{!NOT(hasNext)}">Sidste</apex:outputLink>
+                                    </li>
+                                </ul>
+                            </div> 
+                        </apex:outputPanel>
+                        <div class="control-group">
+                            <div class="controls">
+                                <apex:commandButton value="Gem Registreringer" id="regbutton" 
+                                                    onClick="return disableValidation();" 
+                                                    styleclass="btn"
+                                                    disabled="{!searchedCULocked && searchOnCableUnit}"/>
+                            </div>
+                        </div>  
+                    </apex:outputPanel>   
+                </apex:outputPanel>
+                <apex:outputPanel layout="block" id="noInst"> 
+                    <apex:outputPanel rendered="{!noInstFlag}">{!$Label.NoInstallationMessage}</apex:outputPanel>    
+                    
+                </apex:outputPanel>
+            </apex:form>  
+        </div>
+        <script language = "javascript">                     
+        
+        $j(document).ready(function() {
+            // define validation styles at the form level               
+            enableFormValidation($j('[id$=theForm]')); 
+            
+            // enable tooltips
+            $j("[data-toggle=popover]").popover({html: true, placement: 'left',trigger:'hover',title:''});
+            
+            // make the fields marked with class "requ" as required
+            //$j(".requ").attr("required",true);
+            
+            // validation definition at the field level
+            addFieldRules();     
+            
+            // remove star icon
+            removeStarIcon();
+        });
+        
+        // validation definition at the field level
+        function addFieldRules() {
+            if($j('[id$=gade]').length > 0) {
+                $j('[id$=gade]').rules("add", {required: true, messages: {required: "Gade er påkrævet"}});  
+                $j('[id$=gade]').rules("add", {minlength: 3, messages: {minlength: "Indtast mindst 3 charachters"}});                                           
+            }   
+            
+            // cu no                    
+            $j('[id$=cuNo]').rules("add", {number: true, messages: {number: "Anlæg skal være et tal"}}); 
+            
+            // for post number
+            $j('[id$=Postnummer]').rules("add", {required: true, messages: {required: "Postnummer er påkrævet"}});
+            $j('[id$=Postnummer]').rules("add", {number: true, messages: {number: "Postnummer skal være et tal"}});
+            
+            $j('[id$=hfra]').rules("add", {required: true, messages: {required: "Husnummer er påkrævet"}});
+            $j('[id$=hfra]').rules("add", {number: true, messages: {number: "Husnummer skal være et tal"}});
+            
+            $j('[id$=htil]').rules("add", {required: true, messages: {required: "Husnummer er påkrævet"}}); 
+            $j('[id$=htil]').rules("add", {number: true, messages: {number: "Husnummer skal være et tal"}});
+            
+            
+            $j('[id$=Opgang]').rules("add", {specialChar: true, messages: {specialChar: ERROR_MSG_SPECIAL_CHARS}});
+            $j('[id$=Etage]').rules("add", {specialChar: true, messages: {specialChar: ERROR_MSG_SPECIAL_CHARS}});
+            $j('[id$=Side]').rules("add", {specialChar: true, messages: {specialChar: ERROR_MSG_SPECIAL_CHARS}});   
+            $j('[id$=Dør]').rules("add", {specialChar: true, messages: {specialChar: ERROR_MSG_SPECIAL_CHARS}});
+        }   
+        
+        
+        // this method is called on tabing out of CU textbox
+        function onCuTabout(cuTxtbox) {
+            // clear all errors
+            $j("[id$=theForm]").data('validator').resetForm();
+            // check if the Cu NO field is valid
+            $j('[id$=cuNo]').valid();  
+            
+            // format the CU number
+            fixCUNo(cuTxtbox);                   
+            
+            // clear the fields 
+            resetFields();                   
+        }
+        
+        // function to reset Fields
+        function resetFields(){
+            $j('[id$=Postnummer]').val("");
+            $j('[id$=hfra]').val("");
+            $j('[id$=htil]').val("");
+            $j('[id$=Opgang]').val("");
+            $j('[id$=Etage]').val("");
+            $j('[id$=Side]').val("");
+            $j('[id$=Dør]').val("");
+        }
+        
+        
+        function toggleMandatoryValidation(){
+            if($j('[id$=cuNo]').val() != '')
+            {
+                //$j("[id$=Postnummer]").removeAttr("required");
+                
+                $j('[id$=Postnummer]').rules("remove", "required"); 
+                $j('[id$=hfra]').rules("remove", "required"); 
+                $j('[id$=htil]').rules("remove", "required"); 
+                
+            } else {
+                addFieldRules();                        
+            }
+        } 
+        
+        // this method will disable the search btn, while fetching streets for a CU
+        function DisableSearchBtn() {                 
+            $j("[id$=btnSearch]").attr("disabled","disabled");
+            $j("[id$=btnSearch]").attr("class","btn btn-primary disabled");
+            $j("[id$=btnSearch]").attr("style","cursor: not-allowed");                            
+        } 
+        
+        // this method will enable the search button once the ajax call for
+        // getting streets is complete
+        function EnableSearchBtn() {                        
+            $j("[id$=btnSearch]").removeAttr("disabled");
+            $j("[id$=btnSearch]").attr("class","btn btn-primary");
+            $j("[id$=btnSearch]").attr("style","cursor: pointer");   
+            
+            // toggle all mandatory validations
+            toggleMandatoryValidation();  
+            
+            // remove star icon
+            removeStarIcon();
+            
+        }           
+        
+        </script>
+        <script language = "javascript">
+        //remove startIcon from mandatory fields
+        function removeStarIcon(){
+            if($j('[id$=cuNo]').val() != '')
+            {
+                // remove star fethching element by class
+                $j(".errorStar").each(function(){
+                    $j(this).text("");
+                });
+            } else {
+                // add star fethching element by class
+                $j(".errorStar").each(function(){
+                    $j(this).text("*");
+                });                       
+            }
+        }
+        
+        
+        // turn off field validation if a CU no is present.
+        function searchInstallation() 
+        {
+            toggleMandatoryValidation(); 
+            
+        } 
+        
+        // turn of validatoin when register case button is clicked
+        function disableValidation(){
+            
+            $j('[id$=theForm]').validate().cancelSubmit = true;
+            document.getElementById('thePage:theForm:regbutton').disabled = true;
+            //var list = '{!searchResults}';
+            //console.log(list.toJSON());
+            regCase();
+            
+            return true;
+        } 
+        
+        // function to select default strike value
+        function selectDefault(dflt){
+            $j(("select[data-selectname='strikeselect']")).each(function(i){
+                if(!this.disabled){
+                    this.selectedIndex = dflt.selectedIndex;
+                }
+            });
+        }
+        </script>
+    </apex:define>   
+    <apex:define name="footer">
+        <apex:includeScript value="{!URLFOR($Resource.Bootstrap,'js/bootstrap-tooltip.js')}"/>         
+    </apex:define>
+</apex:page>

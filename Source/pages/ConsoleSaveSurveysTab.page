@@ -1,0 +1,8 @@
+<apex:page standardController="Account" showHeader="true" sidebar="false" cache="true">
+    <apex:pageMessages />
+    <apex:pageBlock >
+        <apex:pageBlockSection columns="1" title="{!$Label.CO_SaveSurvey}"> 
+            <apex:relatedList list="SAVE_Surveys__r"/>
+        </apex:pageBlockSection>
+    </apex:pageBlock>
+</apex:page>

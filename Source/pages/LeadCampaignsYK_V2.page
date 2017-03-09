@@ -1,0 +1,33 @@
+<apex:page standardController="Lead" extensions="clsProductsYKController_V3" showHeader="false" sidebar="false" cache="true">
+  <style>
+    .activeTab { background-color: #ebaf59; color:white; background-image:none }
+    .inactiveTab { background-color: #D3D3D3; color:black; background-image:none }
+    .viewLink { font-size: 8pt; font-weight:bold }
+  </style>
+  <apex:pageMessages />
+  <apex:form >        
+    <apex:pageBlock >    
+      <apex:inputHidden value="{!Lead.AmsID__c}"/>
+      <apex:tabPanel switchType="ajax" height="200px" value="{!currentTab}" tabClass="activeTab" inactiveTabClass="inactiveTab">            
+        <apex:tab label="{!$Label.Campaign_History}" labelWidth="150px" id="campaignHistoryTab" status="campaignHistoryStatus">
+          <apex:actionStatus startText="Requesting..." id="campaignHistoryStatus">
+            <apex:facet name="stop"> 
+              <apex:pageBlockTable value="{!campaignHistory}" var="campaign" id="campaignHistoryTable">
+                <apex:column title="{!campaign.mouseOverText}" headerValue="{!$Label.Subject}">
+                    <apex:outputLink rendered="{!IF(campaign.contentURL != '', true, false)}" value="{!campaign.contentURL}" target="_blank" id="scriptLink" styleClass="viewLink">{!campaign.subject}</apex:outputLink>
+                    <apex:outputText rendered="{!IF(campaign.contentURL == '', true, false)}" value="{!campaign.subject}" styleClass="viewLink" />
+                </apex:column>
+                <apex:column headerValue="{!$Label.Category}" value="{!campaign.category}"/>
+                <apex:column headerValue="{!$Label.Type}" value="{!campaign.type}"/>
+                <apex:column headerValue="{!$Label.Sender}" value="{!campaign.sender}"/>
+                <!-- <apex:column headerValue="{!$Label.Receiver}" value="{!campaign.receiver}"/> -->
+                <apex:column headerValue="{!$Label.Campaign_Time}" value="{!campaign.timeDate}"/>
+                <apex:column headerValue="{!$Label.Campaign_Status}" value="{!campaign.responseStatus}"/>
+              </apex:pageBlockTable>   
+            </apex:facet>
+          </apex:actionStatus>
+        </apex:tab>
+      </apex:tabPanel>              
+    </apex:pageBlock>  
+  </apex:form>
+</apex:page>

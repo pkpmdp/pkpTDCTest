@@ -1,0 +1,22 @@
+<apex:component controller="PagingController">
+  <div align="right"> 
+      <b>
+      <apex:attribute name="pageController" type="PageControllerBase" assignTo="{!pageController}"  required="true" 
+            description="The controller for the page." >
+        </apex:attribute>
+       
+        <apex:selectList value="{!pageSize}" size="1" onchange="changPaging();" rendered="{!requirePageChange}">
+            <apex:selectOption itemValue="5" itemLabel="5"></apex:selectOption>
+            <apex:selectOption itemValue="10" itemLabel="10" ></apex:selectOption>
+            <apex:selectOption itemValue="20" itemLabel="20" ></apex:selectOption>
+            <apex:selectOption itemValue="50" itemLabel="50" ></apex:selectOption>
+            <apex:selectOption itemValue="100" itemLabel="100"></apex:selectOption>
+             <apex:selectOption itemValue="500" itemLabel="500"></apex:selectOption> 
+      <!--  <apex:selectOption itemValue="{!resultSize}" itemLabel="Alle"></apex:selectOption> -->
+        </apex:selectList>
+        <br/>
+         </b>
+    </div>
+    <br/>
+    <apex:actionFunction name="changPaging" action="{!changPaging}"></apex:actionFunction>
+</apex:component>

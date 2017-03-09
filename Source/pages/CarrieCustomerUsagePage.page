@@ -1,0 +1,374 @@
+<apex:page standardcontroller="Aria_Account__c" extensions="CarrieCustomerUsageController" sidebar="False" showHeader="False" tabStyle="Invoice_Usage__c" id="thePage">
+    <apex:includeScript value="{!URLFOR($Resource.DynaTree_JS,'jquery/jquery.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.DynaTree_JS,'jquery/jquery-ui.custom.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.DynaTree_JS,'jquery/jquery.cookie.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.DynaTree_JS,'src/jquery.dynatree.js')}"/>
+    <apex:stylesheet value="{!URLFOR($Resource.DynaTree_JS,'src/skin/ui.dynatree.css')}"/> 
+    <apex:stylesheet value="{!URLFOR($Resource.CarrieCalendarControl, 'CalendarControl/CalendarControl.css')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.CarrieCalendarControl, 'CalendarControl/CalendarControl.js')}"/> 
+    <apex:stylesheet value="{!URLFOR($Resource.CarrieErrorStyleCss,'scStyleCss/myStyle/myStyle.css')}"/>
+    <apex:stylesheet value="{!URLFOR($Resource.CarrieColumnStyleForDynatree)}"/>
+
+    <style type="text/css"> 
+    .colored{
+        background-color: lightgray;    
+    }
+    #toTop {
+        bottom: 20px;
+        color: #333333;
+        cursor: pointer;
+        display: none;
+        font-family: verdana;
+        font-size: 11px;
+        position: fixed;
+        right: 5px;
+        text-align: right;
+        width: 100px;
+    }
+    #toBottomPage {
+        top: 15px;
+        color: #333333;
+        cursor: pointer;
+        display: none;
+        font-family: verdana;
+        font-size: 11px;
+        position: fixed;
+        right: 5px;
+        text-align: right;
+        width: 100px;
+    }
+    #stopScrollingPage {
+        top: 320px;
+        color: #333333;
+        cursor: pointer;
+        font-family: verdana;
+        display: none;
+        font-size: 11px;
+        position: fixed;
+        right: 5px;
+        text-align: right;
+        width: 100px;
+    }
+    </style>
+    <body>
+        <apex:outputPanel id="scriptPanel">
+            <script type="text/javascript">
+            var scrollBottom;
+            var hasScrollbar;
+            function changePeriod(field){
+                document.getElementById('{!$Component.thePage.theForm:pbOuter:pBForm:selectSectionItem:selectList}').value  = 'Vælg periode';
+                if(field=='thePage:theForm:pbOuter:pBForm:frmDate:oPforFromDate'){           
+                    openCalender('{!$Component.thePage.theForm.pbOuter.pBForm.frmDate.orderStartDate}','{!$Component.thePage.theForm.pbOuter.startDate}');                        
+                }else if(field=='thePage:theForm:pbOuter:pBForm:endDate:oPforToDate'){    
+                    openCalender('{!$Component.thePage.theForm.pbOuter.pBForm.endDate.orderEndDate}','{!$Component.thePage.theForm.pbOuter.searchEndDate}');               
+                }    
+            } 
+            var  fraDato;  
+            var tilDato;       
+            function checkValue(){ 
+                fraDato = document.getElementById('{!$Component.thePage.theForm.pbOuter.pBForm.frmDate.orderStartDate}').value;
+                tilDato = document.getElementById('{!$Component.thePage.theForm.pbOuter.pBForm.endDate.orderEndDate}').value; 
+                document.getElementById('{!$Component.thePage.theForm.pbOuter.dateType}').value = '';
+                if(fraDato == '' && tilDato == '')    
+                    document.getElementById('{!$Component.thePage.theForm.pbOuter.dateType}').value = 'bothDate';    
+                else{
+                    if(fraDato == '')        
+                        document.getElementById('{!$Component.thePage.theForm.pbOuter.dateType}').value = 'fromDate';            
+                    if(tilDato == '')  
+                        document.getElementById('{!$Component.thePage.theForm.pbOuter.dateType}').value = 'toDate';            
+                }
+                getUsage(fraDato,tilDato);          
+            }           
+            try
+            {
+                var j$ = jQuery.noConflict();
+                j$(document).ready(function(){ 
+                    
+                scrollBottom = j$(document).height() - j$(window).height() - j$(window).scrollTop();
+                var toTopFlag= false;
+                var toBottomFlag = false; 
+                var animStarted = false;
+                
+                if(j$(window).scrollTop()==0){
+                    j$('#toBottomPage').fadeIn();
+                    j$('#toTop').fadeOut();
+                }               
+                j$(window).scroll(function() {    
+                    if(j$(this).scrollTop() != 0) {
+                        j$('#toTop').fadeIn();                      
+                    } 
+                    else {
+                        j$('#toBottomPage').fadeIn();   
+                    }
+                });
+                j$('#toTop').click(function() {
+                    toTopFlag = true;
+                    toBottomFlag = false;
+                    animStarted = true;        
+                    j$('#stopImg').attr('src','{!$Resource.CarriePauseScrolling}');
+                    j$('body,html').stop();
+                    var windowTime = j$(document).height() * 4;
+                    var timeToScroll = (j$(window).scrollTop()*windowTime)/j$(document).height();        
+                    j$('body,html').animate({scrollTop:0},timeToScroll, function(){
+                        j$('#stopImg').attr('src','{!$Resource.CarrieStartScrolling}');
+                    }); 
+                });
+                j$('#toBottomPage').click(function() {
+                    toTopFlag = false;
+                    toBottomFlag = true;
+                    animStarted = true;        
+                    j$('#stopImg').attr('src','{!$Resource.CarriePauseScrolling}');       
+                    j$('body,html').stop();
+                    var windowTime = j$(document).height() * 4;
+                    var docToScroll = j$(document).height() - j$(window).scrollTop();
+                    var timeToScroll = (docToScroll*windowTime)/j$(document).height();       
+                    j$('body,html').animate({scrollTop:scrollBottom},timeToScroll, function(){
+                        j$('#stopImg').attr('src','{!$Resource.CarrieStartScrolling}');
+                    });
+                });         
+                j$('#stopScrollingPage').click(function() {
+                    if(animStarted){
+                        animStarted = false;    
+                        j$('body,html').stop();
+                        j$('#stopImg').attr('src','{!$Resource.CarrieStartScrolling}');
+                    }
+                    else{           
+                        var windowTime = j$(document).height() * 4;
+                        animStarted = true;
+                        j$('#stopImg').attr('src','{!$Resource.CarriePauseScrolling}');
+                        var timeToScroll;
+                        if(toTopFlag){                  
+                            timeToScroll = (j$(window).scrollTop()*windowTime)/j$(document).height();
+                            j$('body,html').stop();
+                            j$('body,html').animate({scrollTop:0},timeToScroll, function(){
+                        j$('#stopImg').attr('src','{!$Resource.CarrieStartScrolling}');
+                    });         
+                        }
+                        else if(toBottomFlag){      
+                            var docToScroll = j$(document).height() - j$(window).scrollTop();
+                            timeToScroll = (docToScroll*windowTime)/j$(document).height();
+                            j$('body,html').stop();
+                            j$('body,html').animate({scrollTop:scrollBottom},timeToScroll, function(){
+                        j$('#stopImg').attr('src','{!$Resource.CarrieStartScrolling}');
+                    });
+                        }
+                    }
+                });                       
+                hasScrollbar = j$('body').outerHeight() > j$(window).height();
+                if(!hasScrollbar){
+                    j$('#toBottomPage').fadeOut();    
+                    j$('#stopScrollingPage').fadeOut();      
+                 }
+                else{
+                    j$('#toBottomPage').fadeIn(); 
+                    j$('#stopScrollingPage').fadeIn();    
+                }
+                j$.ui.dynatree.nodedatadefaults["icon"] = false;   
+                
+                j$("#tree").dynatree({ 
+                  autoCollapse: true, 
+                  onRender: function(node, nodeSpan) 
+                  {      
+                    var isHeader = j$(nodeSpan).hasClass("colored");        
+                    if(isHeader==true){           
+                        if(node.data.title.indexOf("Beskrivelse")>=0)
+                            j$(nodeSpan).closest('li').css({'background-color':'lightgray','padding-bottom':'3px','width':'93%'});  //CARRIE-963                    
+                        else
+                            j$(nodeSpan).closest('li').css({'background-color':'lightgray','padding-bottom':'3px','width':'80%'});                     
+                    }    
+                  },  
+                  onExpand: function(flag, node){         
+                     hasScrollbar = j$('body').outerHeight() > j$(window).height();          
+                     if(!hasScrollbar){
+                        j$("#toTop").fadeOut();
+                        j$("#toBottomPage").fadeOut();   
+                        j$('#stopScrollingPage').fadeOut();          
+                     }
+                     else{              
+                        j$("#toBottomPage").fadeIn();  
+                        j$('#stopScrollingPage').fadeIn();   
+                     }
+                     scrollBottom = j$(document).height() - j$(window).height() - j$(window).scrollTop();                       
+                  },         
+                  onActivate: function(node){                  
+                     return false;
+                  },        
+                  onCustomRender: function(node) {                
+                    var htmlstring = '';                            
+                    if(node.data.title.indexOf("#")>=0){
+                        var nodeData = node.data.title.split("#");
+                        htmlstring+="<h6>";
+                        for(var i=0; i<nodeData.length; i++){ 
+                          htmlstring += nodeData[i]; 
+                        }                                                                         
+                        htmlstring += "</h6>";                                 
+                    }   
+                    else if(node.data.title.indexOf("^")>=0){
+                        var nodeData = node.data.title.split("^");
+                        htmlstring+="<span>";
+                        for(var i=0; i<nodeData.length; i++){ 
+                          htmlstring += nodeData[i]; 
+                        }                
+                        htmlstring += "</span>";                                 
+                    }   
+                    else{
+                        htmlstring += "<span>" +node.data.title+ "</span>";
+                    } 
+                    return htmlstring;                       
+                    },
+                  children: {!JSONString} 
+                });        
+              });
+            }
+            catch(e)
+            {
+                result = jQuery.parseJSON( '{"code":"error"}' );                
+            }  
+            
+            function goBack(){
+	            window.history.go(-1);
+	        }
+            </script>
+        </apex:outputPanel>
+    
+        <div id="toBottomPage">
+            <img src="{!$Resource.CarrieBackToBottom}" title="Back to Bottom" width="15px" height="15px"/>
+        </div>
+    
+        <div id="stopScrollingPage">
+            <img id="stopImg" src="{!$Resource.CarrieStartScrolling}" title="Toggle Scrolling" width="15px" height="15px"/>
+        </div>
+    
+        <apex:form id="theForm">
+            <apex:actionFunction action="{!getUsageDetails}" name="getUsage" rerender="treeBlock,scriptPanel,pageMsgs,noRecordsPanel,tree"  status="loadStatus" >
+            <apex:param name="fraDato" assignTo="{!startDate}" value="" />
+            <apex:param name="tilDato" assignTo="{!searchEndDate}" value="" />
+
+            </apex:actionFunction>
+            <div align="center"><h1 style="font-size:12pt"><i>Mit forbrug</i></h1></div>
+            <br/>
+            <apex:outputPanel id="pageMsgs">
+                <apex:pageMessages escape="false"></apex:pageMessages>
+            </apex:outputPanel>
+            <apex:pageBlock id="pbOuter">
+<!--                 <div align="right"><apex:commandButton value="Tilbage til oversigt" action="{!backToCustomer}"/></div>     -->
+					<div align="right"><input id="tilbage" type="button" value="Tilbage til oversigt" onClick="goBack()" class="btn"/> </div>
+                <br/>
+                <apex:inputHidden value="{!searchEndDate}" id="searchEndDate" />
+                <apex:inputHidden value="{!startDate}" id="startDate"/>
+                <apex:inputHidden value="{!dateType}" id="dateType"/>
+               
+                <div id="formSection">  
+                    <apex:pageBlockSection title="Kundeoplysninger" columns="3" collapsible="false" id="kundeoplysninger" >
+                        <apex:panelGrid columns="3" style="width:100%">
+                            <apex:panelGroup style="position: relative; left:5%;">
+                                <apex:outputLabel style="font-weight:bold" value="Kundenavn: " />  
+                                <apex:outputField value="{!Aria_Account__c.account__r.name}"/>
+                            </apex:panelGroup>
+                            <apex:panelGroup style="position: absolute;left:40%;">
+                                <apex:outputLabel style="font-weight:bold" value="Email: " />  
+                                <apex:outputField value="{!Aria_Account__c.account__r.PersonEmail}" />  
+                            </apex:panelGroup>
+                            <apex:panelGroup style="position: absolute;left:75%;">
+                                <apex:outputLabel style="font-weight:bold" value="Kundenummer: " />  
+                                <apex:outputField value="{!Aria_Account__c.account__r.Customer_No__c}" /> 
+                            </apex:panelGroup>
+                        </apex:panelGrid>
+                    </apex:pageBlockSection>
+                </div>    
+                <apex:pageBlockButtons location="bottom" >
+                    <apex:commandButton value="Vis Forbrug" id="visfro" reRender="treeBlock,scriptPanel,pageMsgs,noRecordsPanel,tree,toTop,toBottomPage,stopScrollingPage" onclick="return checkValue();"></apex:commandButton>                       
+                </apex:pageBlockButtons>
+            
+                <apex:outputPanel id="dates">    
+                    <apex:pageBlockSection collapsible="false" columns="1" title="Forbrug" id="pBForm">    
+                        
+                        <apex:pageBlockSectionItem id="frmDate"  >
+                            <apex:outputLabel style="font-weight:bold" value="Fra dato: " />        
+                            <apex:outputPanel styleClass="requiredInput" layout="block" > 
+                                <apex:inputText id="orderStartDate" value="{!fromDate}" styleClass="txtReadOnly"  disabled="true"  />
+                                <apex:outputPanel styleClass="requiredBlock" layout="block"/>    
+                                <apex:outputPanel id="oPforFromDate" onclick="changePeriod(this.id);">                     
+                                    <img class="datePickerIcon" alt="Pick A Date" title="Pick A Date" src="/s.gif"/>
+                                </apex:outputPanel>
+                            </apex:outputPanel>
+                        </apex:pageBlockSectionItem>           
+                        <apex:pageBlockSectionItem id="endDate" >
+                            <apex:outputLabel style="font-weight:bold" value="Til Dato: " />   
+                            <apex:outputPanel styleClass="requiredInput" layout="block" >
+                                <apex:inputText id="orderEndDate" value="{!toDate}" styleClass="txtReadOnly" disabled="true"/>
+                                <apex:outputPanel styleClass="requiredBlock" layout="block"/>  
+                                <apex:outputPanel id="oPforToDate" onclick="changePeriod(this.id);"> 
+                                    <img class="datePickerIcon" alt="Pick A Date" title="Pick A Date" src="/s.gif"/>
+                                </apex:outputPanel>
+                            </apex:outputPanel>
+                        </apex:pageBlockSectionItem>                            
+                             
+                          
+   
+                    <apex:pageBlockSectionItem id="selectSectionItem">
+        
+                            <apex:outputLabel style="font-weight:bold" value="Vælg periode: " />        
+                            <apex:selectList size="1" value="{!selectedPeriod}" id="selectList">
+                                <apex:actionSupport event="onchange" action="{!reRenderDates}" reRender="dates,pageMsgs,treePage" status="loadDates"/>
+                                <apex:selectOptions value="{!TimePeriod}" id="selOpts"></apex:selectOptions>
+                            </apex:selectList>
+         
+                </apex:pageBlockSectionItem>      
+                        
+                                
+                        <apex:actionStatus id="loadDates">
+                        <apex:facet name="start">        
+                            <div align="center">       
+                                <img src="{!$Resource.CarrieLoading}" height="20px" width="20px"/> <br/><br/>
+                            </div>
+                        </apex:facet>
+                        </apex:actionStatus> 
+                    </apex:pageBlockSection>  
+                </apex:outputPanel>      
+            </apex:pageBlock>
+            
+            <apex:pageBlock id="treePage">
+                <apex:outputPanel id="treeBlock">
+                    <apex:actionStatus id="loadStatus">   
+                        <apex:facet name="start">        
+                            <div align="center">       
+                                <img src="{!$Resource.CarrieLoading}" /> <br/><br/>
+                            </div>
+                        </apex:facet>
+                        <apex:facet name="stop"> 
+                            <apex:outputPanel >
+                                <apex:outputPanel rendered="{!LEN(JSONString)>2}" >
+                                    <table style="width:100%;" >
+                                        <th style="width:80%;text-align:left;">Beskrivelse</th>
+                                        <th style="width:10%;text-align:left;">Samlet pris</th>
+                                        <th style="width:5%;text-align:left;">
+                                            <apex:commandLink value="Print" id="printUsage" target="_blank" styleClass="btn" action="{!renderAsPDF}" style="text-decoration:none"/>
+                                        </th>
+                                        <th style="width:5%;text-align:left;">
+                                         <!--   <apex:commandLink value="Email" id="emailUsage" styleClass="btn" action="{!emailAsPDF}" style="text-decoration:none"/> -->
+                                          <apex:commandButton value="Email" id="emailUsage" action="{!emailAsPDF}" ></apex:commandButton>                       
+                                        </th>
+                                        <tr>
+                                            <td colspan="4">
+                                                <div id="tree" ></div> 
+                                            </td>            
+                                        </tr>            
+                                    </table>                    
+                                </apex:outputPanel>                                        
+                                <apex:outputPanel id="noRecordsPanel">
+                                    <b><apex:outputLabel rendered="{!noRecords}">{!noRecError}</apex:outputLabel></b>
+                                </apex:outputPanel>
+                            </apex:outputPanel>  
+                        </apex:facet>    
+                    </apex:actionStatus>      
+                </apex:outputPanel> 
+            </apex:pageBlock>
+            <br/><br/>
+                    
+      </apex:form> 
+        <div id="toTop" >
+            <img src="{!$Resource.CarrieBackToTop}" title="Back to Top" width="15px" height="15px"/>
+        </div>
+    </body>
+</apex:page>

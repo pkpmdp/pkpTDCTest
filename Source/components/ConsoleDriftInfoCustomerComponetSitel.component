@@ -1,0 +1,78 @@
+<apex:component controller="clsDriftInfoCustomer"><!-- SPOC-2294 -->
+     <apex:includeScript value="{!URLFOR($Resource.jQuery160)}"/>
+  
+    <apex:includeScript value="/support/console/31.0/integration.js"/>
+    <apex:attribute name="currentId1" description="This is the Account Id for displaying Acccount drifts info" type="String" required="true" assignTo="{!currentId}"/>
+    <script type="text/javascript">
+    function openObject(id,tabName) {
+        
+        sforce.console.getEnclosingPrimaryTabId(function (result) {
+            sforce.console.openSubtab(result.id, '/'+id, true, tabName);
+        });
+    }
+    function ViewAll(){
+            //alert('in here testing');
+        sforce.console.getFocusedPrimaryTabId(openSub); 
+        /* sforce.console.getEnclosingPrimaryTabId(function (result1) {
+                sforce.console.openSubtab(result1.id, url , true, 'Drift Info');
+            }); */         
+    }
+    var openSub = function openSub(result){
+        var primaryTabId = result.id;
+        var accid = '{!currentId}';
+        var url = '/apex/DriftInfoCustomerPage?Id='+accid;
+            sforce.console.openSubtab(primaryTabId , url, true, 'Drift Info', null, null, 'Drift Info');
+          };
+</script>
+    
+    <apex:form id="formId" >
+    <!-- <apex:actionFunction name="getErrorInfo" action="{!getErrorInfo}" reRender="formId" />  
+            <apex:OutputPanel rendered="{!ActiveErrorsCount > 0}">
+                <apex:outputText style="padding:1px 0 1px 25px; background:url('{!URLFOR($Resource.BierDots, 'img/exc.png')}') no-repeat 0 0" value="{!$Label.BIER_ActiveErrors_Label}" />
+                <apex:outputLink id="di_type_ae" value="{!ActiveErrorsUrl}" target="{!IF(ActiveErrorsCount == 1, '_blank', '_parent')}">{!ActiveErrorsCount}</apex:outputLink>
+            </apex:OutputPanel>
+            <apex:OutputPanel rendered="{!ActiveErrorsCount == 0}">
+                <apex:outputLabel value="{!$Label.BIER_ActiveErrors_Label}" for="di_type_ae1"/>
+                <apex:outputText id="di_type_ae1" value="0" />
+            </apex:OutputPanel>
+            <apex:OutputPanel rendered="{!ActiveActivitiesCount > 0 && ActiveActivitiesUrl!='#'}">
+                <apex:outputText style="padding:1px 0 1px 25px; background:url('{!URLFOR($Resource.BierDots, 'img/exc.png')}') no-repeat 0 0" value="{!$Label.BIER_ActiveActivities_Label}" />
+                <apex:outputLink id="di_type_aa3" value="{!ActiveActivitiesUrl}" target="{!IF(ActiveActivitiesCount == 1, '_blank', '_parent')}">{!ActiveActivitiesCount}</apex:outputLink>
+            </apex:OutputPanel>
+            <apex:OutputPanel rendered="{!ActiveActivitiesCount > 0 && ActiveActivitiesUrl=='#'}">
+                <apex:outputText style="padding:1px 0 1px 25px; background:url('{!URLFOR($Resource.BierDots, 'img/exc.png')}') no-repeat 0 0" value="{!$Label.BIER_ActiveActivities_Label}" />
+                <span onclick="document.getElementById('warn').style.display='inline'" style="text-decoration:underline">{!ActiveActivitiesCount}</span>
+                <span id = "warn" style="color:red;display:None" >{!$Label.BIER_Activity_Not_in_Bier}</span>
+            </apex:OutputPanel>
+            <apex:OutputPanel rendered="{!ActiveActivitiesCount == 0}">
+                <apex:outputLabel value="{!$Label.BIER_ActiveActivities_Label}" for="di_type_aa2"/>
+                <apex:outputText id="di_type_aa2" value="0" />
+            </apex:OutputPanel>-->
+        <table style="height:100%; position:relative; width:100%;border-collapse: collapse;" cellpadding="2" cellspacing="0" >
+                    <tr>
+                        
+                            <apex:outputPanel style="height:300%; position:relative; width:300%;">
+                                <th style="border-width:1px;border-right:#F0F0F0">{!$Label.DriftsInfo_id}</th>
+                                <th style="border-width:1px;border-right:#F0F0F0">{!$Label.DriftsInfo_Overskrift}</th>
+                            </apex:outputPanel>
+                        
+                    </tr>
+                    <apex:repeat value="{!existingProducts}" var="product" rows="3">
+                        <tr>
+                                <td style="border-width:1px;border-bottom-style:solid;border-color:#F0F0F0"><!--  style="border-width:2px;border-bottom-style:solid;border-color:#F0F0F0">-->
+                                    <apex:outputPanel >
+                                          <a href="http://www.driks.dk/?id={!product.driftInfo_id}" target="_blank" style="text-align: center;">{!product.driftInfo_id}</a>
+                                    </apex:outputPanel>
+                            </td>
+                            <td style="border-width:1px;border-bottom-style:solid;border-color:#F0F0F0">
+                                    <apex:outputPanel >
+                                        <apex:outputText value="{!product.overskrift}" escape="false"/>
+                                    </apex:outputPanel>
+                            </td>
+                        </tr>
+                    </apex:repeat>
+                </table>
+               <span style="float:left;text-decoration:underline;font-weight:bold;cursor:pointer;visibility:{!IF(existingProducts.empty,'hidden','visible')};" onclick="ViewAll();"><apex:toolbar style="background-color:#F0F0F0;background-image:none;"><font color="black">{!$Label.View_All}</font></apex:toolbar></span>
+                <span style="visibility:{!IF(existingProducts.empty,'visible','hidden')};float:left;font-weight:bold;"><apex:toolbar style="background-color:#F0F0F0;background-image:none;"><font color="black">Ingen Driftsinfo</font></apex:toolbar></span>  
+        </apex:form>
+</apex:component>

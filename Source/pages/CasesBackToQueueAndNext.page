@@ -1,0 +1,5 @@
+<apex:page standardController="Case" extensions="clsCasesBackToQueueController" action="{!backToQueueAndNext}">
+<apex:form >
+		<apex:inputHidden value="{!Case.Status}" />
+	</apex:form>
+</apex:page>

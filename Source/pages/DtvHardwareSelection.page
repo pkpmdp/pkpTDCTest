@@ -1,0 +1,902 @@
+<apex:page sidebar="false" showHeader="false"  id="dtvHardwareSelection" controller="DealerProductPageController3" action="{!initializeText}" applyHtmlTag="false">
+    <html class="cvi2015"> <!--spoc 2206-->
+    <!--<script type="text/javascript" src="https://yousee.dk/sitecore/content/data/export/export.aspx?itemguid={9F945BC8-CCE7-43FF-8EF3-F2C81EFF66C8}&functions=true" > </script>
+    -->
+   <script type="text/javascript">
+       var produktUrl ='';
+       //Added for BS
+       var freeChoiceFlag={!isFreeChoicePageFlag};
+       var currentKundeNumber = '{!cCustInstAdd.customerNumber}';
+       var selectedvarnrValue ='';
+       var dtvFlag = {!plusFlag};
+       var bsxxFlag = {!dtvtaflag};
+       var ekstraFlag={!ekstrakanalerFlag};
+       //alert('freeChoiceFlag***'+freeChoiceFlag+'***dtvFlag***'+dtvFlag+'****bsxxFlag***'+bsxxFlag+'***ekstraFlag**'+ekstraFlag);
+   </script>
+    <script type="text/javascript" src="https://yousee.dk/sitecore/content/data/export/export.aspx?itemguid={BD793F05-9B01-4210-BD63-F33431D1013A}&functions=true" > </script>
+    <!-- Added for DW 750 -->
+    <c:TopMenuComponent1 ></c:TopMenuComponent1>
+    <script type="text/javascript">printHeader();</script>
+    <script type="text/javascript">printTopMenu();</script>
+    <script type="text/javascript">printContentAreaBegin();</script>
+    <link class="user" href="{!$Resource.SalesFlowCSS}" rel="stylesheet" type="text/css" />
+    <c:DealerComponent ></c:DealerComponent> 
+    <c:ProductOfferORcampaign ></c:ProductOfferORcampaign>
+    <!-- onchange="callKasia(this.value)"  onClick="callPopup(this.value)" onchange="callKasia(this.value)" -->
+    <script id="dgCardNumbersTemplate" type="text/x-jQuery-tmpl"> 
+    
+        <tr>
+            <td width="10%">Kortnummer: </td>
+            <td width="5%"><input ${Selected} type="radio" name="smartCard" value="${Number + "Â¶" + aftalenr}" class="prodCheckbox" onchange="callKasiaForCardSelection(this.value)"/> </td>
+            <td>${Number}</td>              
+        </tr>
+    </script>
+    <script id="dgCardNumbersTemplateForSingleRecord" type="text/x-jQuery-tmpl">  
+        <tr>
+            <td width="15%">Kortnummer: </td>
+            <td>${Number}</td>              
+        </tr>
+    </script>
+    <script id="hardwareproductTemplate" type="text/x-jQuery-tmpl"> 
+                    <tr> 
+                        
+                        <td width="5%">
+                            <input type="radio" name="hardwareProduct" id= "${navn}" value="${varenr + "Â¶" + href +"Â¶" + navn}" class="prodCheckbox" ${isDisabled} 
+                                ${checked} onClick="callPopup(this.value)"/>
+                        </td> 
+                        <td width="50%">
+                            {{if varenr=="1201504"}} 
+                                ${navn+" (YouSee HD-Boks med harddisk + YouSee Kort)"}
+                            {{else}}
+                                {{if varenr=="1218385"}}
+                                    ${navn+" uden harddisk uden YouSee Kort"}
+                                {{else}}
+                                    ${navn}
+                                {{/if}}
+                            {{/if}}
+                        </td> 
+                        <!-- {{if navn=="YouSee Plus"}} 
+                        {{if varenr=="1201504"}} 
+                            <td width="50%">${navn+" (YouSee HD-Boks med harddisk + YouSee Kort)"}</td>
+                        {{else if varenr=="1218385"}}
+                            <td width="50%">${navn+" uden YouSee Kort"}</td>
+                        {{else}}
+                            <td width="50%">${navn}</td>
+                        {{/if}}-->                     
+                        <td  width="20%" align="right">
+                            {{if ProductOffer =="true"}}
+                                <img src="{!$Resource.ProductOffer}" >
+                            {{/if}}
+                            {{if ProductCampaign =="true"}}
+                                <img src="{!$Resource.ProductCampaign}">
+                            {{/if}}
+                        </td>
+                        <td width="10%" style="text-align:right">${pris}&nbsp;&nbsp;</td>
+                        <td width="15%">${priceSuffix}</td> 
+                    </tr>
+                    {{if navn=="YouSee Kort" && isDisabled=="Disabled"}}
+                        <tr><td width="5%"></td><td width="55%" colspan="5">Denne kunde abonnerer allerede på det maximale antal kort.
+                        <br> Kontakt forhandlersupport på 70 13 37 00.</td></tr>
+                    {{/if}}
+                    <!--We need to change the Tvillingkort Name to Ekstrakort  For Dealerweb-834 -->
+                    <!--{{if navn=="Tvillingkort" && isDisabled=="Disabled"}} -->
+                     {{if navn=="Ekstrakort" && isDisabled=="Disabled"}}
+                        <!--<tr><td width="5%"></td><td width="55%" colspan="5">Disable because rel type is not opret or opdater.
+                        <br> Kontakt forhandlersupport på 70 13 37 00.</td></tr>-->
+                    {{/if}} 
+                     <tr><td></td><td colspan="3" style="font-size:11px;">${productSummary}</td></tr>            
+    </script>
+    <apex:outputPanel id="jsonPanel" >
+            <script type="text/javascript">
+                var myJSONObject={!jsonResponse};                                                        
+                var firstJSONResponse = {!firstJsonResponse}; 
+                myJSONObject=refreshFirstJSONResponse(firstJSONResponse,myJSONObject);
+                displayBasket();  
+            </script>
+    </apex:outputPanel>
+    <script type="text/javascript">
+             
+            var digitalCards = new Array();
+            var selectedAbonnementerAftalenr = '';
+            function hasCustomerDTVCard(){   
+                var digitalCard = new Object(); 
+                var kundeId='{!cCustInstAdd.customerNumber}';  
+                var returnValue='';   
+                try{
+                        if(kundeId!=''){
+                            digitalCards = new Array();
+                            if(myJSONObject['kunde-data'] != undefined){
+                                var json = myJSONObject['kunde-data'].aftaler;
+                                //alert('kunde aftaler '+json);
+                                if(json != undefined){
+                                    var selectedSmartCardNumber=document.getElementById("{!$Component.theform.hiddenSmartCardNumber}").value;
+                                    //alert('selectedSmartCardNumber '+selectedSmartCardNumber);
+                                    $.each(json,function(i,aftalerNode){ 
+                                            if(aftalerNode.kundeid==kundeId){
+                                            //alert('aftalerNode.kundeid == kundeId '+aftalerNode.kundeid);
+                                                $.each(aftalerNode.abonnementer,function(j,abonnementerNode){
+                                                        // The Digital card should be removed if status in abonometer of kunde-data is is not active.
+                                                        if(aftalerNode.aftaletype == "dtv") {  
+                                                        //alert('aftalerNode.aftaletype == dtv '+aftalerNode.aftaletype);                                             
+                                                            if(abonnementerNode.navn=='YouSee Kort' && abonnementerNode.status == 'aktiv'){     
+                                                                //alert(' abonnementerNode.navn==YouSee Kort && abonnementerNode.status == aktiv ');                                
+                                                                digitalCard = new Object();
+                                                                digitalCard.Number=abonnementerNode.serienumre[0]; 
+                                                                //if(selectedSmartCardNumber==abonnementerNode.serienumre[0])
+                                                                if(myJSONObject.links != undefined && myJSONObject.links.length>0){ 
+                                                                    for(m=0; m<myJSONObject.links.length; m++){
+                                                                      if(myJSONObject.links[m].rel == "vaelg-aftale"){
+                                                                        if(myJSONObject.links[m].href.substr(myJSONObject.links[m].href.lastIndexOf('/')+1) != aftalerNode.aftalenr){
+                                                                            
+                                                                            digitalCard.Selected='checked';
+                                                                             selectedAbonnementerAftalenr= aftalerNode.aftalenr;
+                                                                        }
+                                                                      }
+                                                                    }
+                                                                    digitalCard.aftalenr=aftalerNode.aftalenr;
+                                                                    //digitalCard.radioSelected="false";
+                                                                    digitalCards.push(digitalCard);  
+                                                                 }else{
+                                                                    digitalCard.aftalenr=aftalerNode.aftalenr;
+                                                                    //digitalCard.radioSelected="false";
+                                                                    digitalCards.push(digitalCard);
+                                                                 }                                                                                               
+                                                            }                                               
+                                                        }
+                                                 });
+                                            }
+                                     });
+                                }
+                            }                   
+                           if(digitalCards.length > 0){
+                                //digitalCards = digitalCards.unique(digitalCards);
+                                digitalCards = digitalCards.sort(function(a,b) {
+                                   return parseInt(a.Number) - parseInt(b.Number);
+                                });
+                                returnValue="true";  
+                           }
+                           else{
+                                returnValue="false";  
+                           }
+                           //alert('digitalCards.length '+digitalCards.length);
+                        }
+                        else{
+                            returnValue="false";
+                        }
+                        
+                        return returnValue;
+                }
+                catch(err){
+                    alert("Error: in hasCustomerDTVProduct method: "+err.description);
+                }
+            }
+            
+          
+           
+            var custFlag = false;
+            var newCustFlag = '{!isNewCustomer}';                
+            if(newCustFlag == "true"){
+                custFlag  = "false"; 
+            }else if(newCustFlag == "false"){
+                custFlag  = "true";
+            } 
+              
+            var fcFlag={!ekstrakanalerFlag};
+            var  dtvHardwareProducts;
+            var hardwareSelections = new Array(); 
+            var allProducts = new Array();
+            var reqdProducts = new Array(); 
+            var isExistingKortOrBox  = false;         
+            function getDTVData(){  
+                try{    
+                    if(myJSONObject == null) {
+                        alert('Calling kasia has encountered problem.');
+                    }
+                    else {  
+                       var dtvGaValg = new Array();
+                       var dtvTaValg = new Array();
+                       var dtvEngValg = new Array();
+                       dtvGaValg = createProductsData('dtv-ga-valg', 'kr. pr. md.', custFlag);
+                       //alert('dtvGaValg ****'+dtvGaValg );
+                      // console.log('dtvGaValg ****'+dtvGaValg);
+                       //myJSONObject['dtv-ga-valg'].min == 0
+                       if(myJSONObject['dtv-ga-valg'].min >= 0){
+                         reqdProducts = $.merge(reqdProducts,dtvGaValg);
+                        } 
+                      //Getting product from dtv-ga-valg node
+                      
+                        dtvTaValg = createProductsData('dtv-ta-valg', 'kr. pr. md.', custFlag);
+                        dtvTaValg = $.grep(dtvTaValg,function(element,index){
+                              return (element.sorteringsgruppe!='undefined' &&  element.sorteringsgruppe!='' &&  element.sorteringsgruppe!=null && (element.sorteringsgruppe == '02-0000' || element.sorteringsgruppe == '02-0010'));
+                        });
+                        //myJSONObject['dtv-ta-valg'].min == 0
+                       if(myJSONObject['dtv-ta-valg'].min >= 0){
+                        reqdProducts = $.merge(reqdProducts,dtvTaValg);
+                       }
+                       //Getting product from dtv-ga-valg node
+                       if(myJSONObject['dtv-eng-valg'] != undefined){
+                            dtvEngValg = createProductsData('dtv-eng-valg', 'kr. pr. md.', custFlag);
+                            dtvEngValg = $.grep(dtvEngValg,function(element,index){
+                                return (element.varenr!='undefined' && element.varenr=='1218385')
+                            });
+                            //myJSONObject['dtv-eng-valg'].min == 0
+                            if(myJSONObject['dtv-eng-valg'].min >= 0){
+                                reqdProducts = $.merge(reqdProducts,dtvTaValg);
+                           } 
+                        }
+                        
+                        //Merging data from all the node  
+                        /**
+                        if('{!currentPageId}'=='dtvEngIdBS'){
+                            allProducts= $.merge([],dtvGaValg);
+                        }else{
+                            allProducts=$.merge($.merge( $.merge([],dtvGaValg), dtvTaValg),dtvEngValg);
+                        }
+                        */
+                        allProducts=$.merge($.merge( $.merge([],dtvGaValg), dtvTaValg),dtvEngValg);
+                        var productForExistingCustomer = new Object();
+                        hardwareSelections = new Array();                 
+                        var selectedHardwareProductNumber=document.getElementById("{!$Component.theform.theHiddenInput}").value;
+                        getproductOffers(); 
+                        if(myJSONObject['kunde-data']['aftaler'] != undefined){
+                        //console.log('myJSONObject["kunde-data"]["aftaler"]**'+myJSONObject['kunde-data']['aftaler']);
+                        isExistingKortOrBox = isKortOrBoxInExistingproducts(myJSONObject['kunde-data']['aftaler']);
+                        }
+                        //alert('isExistingKortOrBox ***'+isExistingKortOrBox+'*******bsxxFlag****'+bsxxFlag);                     
+                        if(bsxxFlag && !isExistingKortOrBox){
+                        //alert('inside bssxx***'+reqdProducts);
+                        console.log('reqdProducts****'+reqdProducts);
+                            jQuery.each(reqdProducts, function() {
+                           // alert('inside reqdProducts'+reqdProducts);
+                                productForExistingCustomer = new Object();
+                                var isProductOffer='';
+                                var isProductCampaign='';
+                                var productoffervar ='';
+                                var productSummary='';
+                                console.log('selectedHardwareProductNumber**'+selectedHardwareProductNumber);
+                                console.log('this.varenr**'+this.varenr);
+                                if(this.varenr != '1201601'){
+                                    productForExistingCustomer.varenr = this.varenr;
+                                    if(this.varenr==selectedHardwareProductNumber){
+                                        productForExistingCustomer.checked="checked";
+                                    }
+                                    productForExistingCustomer.navn=this.navn;
+                                    productForExistingCustomer.href =this.href;
+                                   // alert('1');
+                                    getPrice(productForExistingCustomer, productForExistingCustomer.varenr);
+                                    if(productForExistingCustomer.betalingsperiode=='maaned'){
+                                        productForExistingCustomer.priceSuffix="kr. pr. md.";
+                                    }else if(productForExistingCustomer.betalingsperiode=='enkelt') {
+                                        productForExistingCustomer.priceSuffix="kr.";
+                                    }
+                                    if(this.varenr=='1201505'){
+                                    //alert('inside yousee kort');
+                                        if(myJSONObject['kunde-data'].valgt!= undefined){
+                                        //alert('inside valgt node');
+                                            var valgtNode = myJSONObject['kunde-data'].valgt;
+                                            $.each(valgtNode,function(i,valgtNodesingle)
+                                            {
+                                                if(valgtNodesingle.aftaletype=='dtv')
+                                                {
+                                                    //alert('valgtNodesingle.aftaletype==dtv');
+                                                    var json1 = valgtNodesingle.varer;
+                                                    $.each(json1,function(i,varerNode){
+                                                        if(varerNode.varenr == '1201505'){
+                                                            productForExistingCustomer.checked="checked";
+                                                            //alert('**document.getElementById("{!$Component.theform.theHiddenInput}").value**'+document.getElementById("{!$Component.theform.theHiddenInput}").value);
+                                                            document.getElementById("{!$Component.theform.theHiddenInput}").value = varerNode.varenr;
+                                                            document.getElementById("{!$Component.theform.theHiddenInputname}").value = varerNode.navn;
+                                                        }
+                                                    });
+                                                  }
+                                            });
+                                      }
+                                    }
+                                    productForExistingCustomer.isDisabled=this.disabled;
+                                     
+                                    productoffervar = getOfferFlag(this.varenr);                                                                                                
+                                    if(productoffervar != undefined){                                                               
+                                        isProductOffer = productoffervar.ProductOfferExists;                                    
+                                        isProductCampaign = productoffervar.ProductCampaignExists;                                  
+                                        productSummary = productoffervar.ProductSummary;                                        
+                                    }
+                                
+                                    productForExistingCustomer.productSummary = productSummary;                                                         
+                                                                    
+                                    if(isProductOffer=='true'){
+                                        productForExistingCustomer.ProductOffer=isProductOffer;
+                                    }else{
+                                        productForExistingCustomer.ProductOffer='';
+                                    }
+                                    if(isProductCampaign=='true'){
+                                        productForExistingCustomer.ProductCampaign=isProductCampaign;
+                                    }else{
+                                        productForExistingCustomer.ProductCampaign='';
+                                    }
+                                     hardwareSelections.push(productForExistingCustomer); 
+                             }
+                             });
+                       }else{
+                            jQuery.each(allProducts, function() {                               
+                                productForExistingCustomer = new Object();
+                                var isProductOffer='';
+                                var isProductCampaign='';
+                                var productoffervar ='';
+                                var productSummary='';
+                                productForExistingCustomer.varenr = this.varenr;
+                                if(this.varenr==selectedHardwareProductNumber){
+                                    productForExistingCustomer.checked="checked";
+                                }
+                                productForExistingCustomer.navn=this.navn;
+                                productForExistingCustomer.href =this.href;
+                               // alert('2');
+                                getPrice(productForExistingCustomer, productForExistingCustomer.varenr);
+                                if(productForExistingCustomer.betalingsperiode=='maaned'){
+                                    productForExistingCustomer.priceSuffix="kr. pr. md.";
+                                }else if(productForExistingCustomer.betalingsperiode=='enkelt') {
+                                    productForExistingCustomer.priceSuffix="kr.";
+                                }
+                                productForExistingCustomer.isDisabled=this.disabled;
+                                 
+                                productoffervar = getOfferFlag(this.varenr);                                                                                                
+                                if(productoffervar != undefined){                                                               
+                                    isProductOffer = productoffervar.ProductOfferExists;                                    
+                                    isProductCampaign = productoffervar.ProductCampaignExists;                                  
+                                    productSummary = productoffervar.ProductSummary;                                        
+                                }
+                            
+                                productForExistingCustomer.productSummary = productSummary;                                                         
+                                                                
+                                if(isProductOffer=='true'){
+                                    productForExistingCustomer.ProductOffer=isProductOffer;
+                                }else{
+                                    productForExistingCustomer.ProductOffer='';
+                                }
+                                if(isProductCampaign=='true'){
+                                    productForExistingCustomer.ProductCampaign=isProductCampaign;
+                                }else{
+                                    productForExistingCustomer.ProductCampaign='';
+                                }
+                                if(this.varenr!=1201590){   
+                                    hardwareSelections.push(productForExistingCustomer); 
+                                }
+                            });
+                            //Adding option for HD box with card 
+                            var selectedYouSeecard = $("#dgCardsTable input:checked"); 
+                            if(dtvEngValg.length > 0){
+                                productForExistingCustomer = new Object();
+                                productForExistingCustomer.varenr   ='HDstandardboksWithCard';
+                                productForExistingCustomer.navn     ='HD-standardboks uden harddisk med YouSee Kort';
+                                getPrice(productForExistingCustomer, "1218385");
+                                productForExistingCustomer.priceSuffix="kr.";
+                                if(digitalCards.length==1){
+                                    productForExistingCustomer.isDisabled="Disabled";
+                                }else if(digitalCards.length==0){
+                                   productForExistingCustomer.isDisabled="";
+                                }else if(digitalCards.length > 1 && selectedYouSeecard.length > 0){
+                                    productForExistingCustomer.isDisabled="";
+                                }else{
+                                    productForExistingCustomer.isDisabled="Disabled";
+                                }
+                                productForExistingCustomer.href ='';
+                                productForExistingCustomer.ProductOffer='';
+                                productForExistingCustomer.ProductCampaign='';
+                                productForExistingCustomer.productSummary = '100 kr. i oprettelsesgebyr';
+                                if(selectedHardwareProductNumber=='HDstandardboksWithCard'){
+                                     productForExistingCustomer.checked  ='checked'; 
+                                }                          
+                                hardwareSelections.push(productForExistingCustomer);
+                            }                  
+                            //Adding option to add/remove program                      
+                            productForExistingCustomer = new Object();
+                            productForExistingCustomer.varenr   ='existingDTVCard';
+                            productForExistingCustomer.navn     ='Ekstrakanaler/pakker og On Demand *';
+                            productForExistingCustomer.isDisabled="";
+                            productForExistingCustomer.href ='';
+                            productForExistingCustomer.ProductOffer='';
+                            productForExistingCustomer.ProductCampaign='';
+                            productForExistingCustomer.productSummary = '';
+                            if(selectedHardwareProductNumber=='existingDTVCard'){
+                                 productForExistingCustomer.checked  ='checked'; 
+                            }
+                            hardwareSelections.push(productForExistingCustomer);
+                        } 
+                        dtvHardwareProducts = $("#hardwareproductTemplate").tmpl(hardwareSelections); 
+                     }
+                     //alert('***dtvHardwareProducts***'+dtvHardwareProducts);
+                     //console.log(dtvHardwareProducts);
+                 }catch(err){
+                    alert("Error: in getDTVData method: "+err.description);
+                 }
+           }       
+    
+        var hasBlandSelvInBasket =false; 
+        var hasKortOrBoxInExistingproducts = false;
+      
+        //Next flow
+        function bringNextPageAfterHarwardwareSelection(){
+            var selectedHardwareProduct = '';
+            //if(newCustFlag){
+            if(myJSONObject['kunde-data'] != undefined){
+                hasBlandSelvInBasket = isBlandSelvInBasket(myJSONObject['kunde-data']);
+                if(myJSONObject['kunde-data']['aftaler'] != undefined){
+                    hasKortOrBoxInExistingproducts = isKortOrBoxInExistingproducts(myJSONObject['kunde-data']['aftaler']);
+                }
+                if(myJSONObject['kunde-data']['valgt']!= undefined){
+                     var numup = 0;
+                     var json = myJSONObject['kunde-data']['valgt']; 
+                     if(json != undefined){
+                      $.each(json,function(i,varerNode){
+                       if(json[numup].aftaletype =='dtv'){
+                        for(g=0; g<json[numup].aftaletype.length; g++){
+                           if(varerNode.varer[g] != undefined &&(varerNode.varer[g].navn=='YouSee Kort' ||varerNode.varer[g].navn=='YouSee Plus')){
+                            hasDTVCard='true';
+                            }
+                          }
+                       }
+                       numup =numup+1;
+                      });
+                  }
+               }
+            }
+            try{
+                var selectedHardwareProducts = $("#hardwareSelTable input:checked");
+               // console.log('selectedHardwareProducts ***'+selectedHardwareProducts);
+                //alert('selectedHardwareProducts ***'+selectedHardwareProducts);
+                if(selectedHardwareProducts.length > 0){
+                   var tempSelection=selectedHardwareProducts[0].value;
+                   //alert('tempSelection***'+tempSelection);
+                   //call kasai 
+                   //callKasia(tempSelection);                 
+                   var tempSelectionArray =  tempSelection.split("Â¶");
+                   //alert('tempSelectionArray ***'+tempSelectionArray );
+                   selectedHardwareProduct=tempSelectionArray[0];
+                  // alert(tempSelectionArray[2]);
+                   // The variable "donotShowKortValidationMessage" is used to show the validation of kort necessary to take if Bland Selv is choosen as product.
+                   // The variable is only set to true if customer is choosing Bland Selv product and he has no Kort in existing or basket products.
+                   var donotShowKortValidationMessage = true;
+                   //alert('****hasBlandSelvInBasket***'+hasBlandSelvInBasket);
+                   //alert('****hasKortOrBoxInExistingproducts ***'+hasKortOrBoxInExistingproducts+'****hasDTVCard***'+hasDTVCard+'****tempSelectionArray[2]***'+tempSelectionArray[2]);
+                   if(hasBlandSelvInBasket){
+                        if(((hasKortOrBoxInExistingproducts || hasDTVCard)==true || (tempSelectionArray[2]=='YouSee Kort' || tempSelectionArray[2]=='YouSee Plus' || tempSelectionArray[2]=='TV-Boks'))==true){
+                           // alert('inside kort vali true');
+                            donotShowKortValidationMessage = true;
+                            if(tempSelectionArray[2]=='YouSee Kort'){
+                                //alert('INSIDE KORT');
+                                // document.getElementById("theHiddenInput").value = '1201505';
+                                // document.getElementById("theHiddenInputname").value = tempSelectionArray[2];
+                                // alert('INSIDE KORT 2');
+                            }
+                        }else{
+                        //alert('inside kort vali false');
+                            donotShowKortValidationMessage = false;
+                        }
+                   }
+                   //alert('donotShowKortValidationMessage ****'+donotShowKortValidationMessage);
+                   if(donotShowKortValidationMessage == true){
+                        $("#errorBlock").hide();
+                        if(selectedHardwareProduct== "existingDTVCard"){
+                           if(hasDTVCard=="true"){
+                               //document.getElementById("divHardwareProducts").style.display = "none";
+                               //To allow the dealers to select Extra channels if they have a kort in Shopping Basket for that i have added "digitalCards.length == 0" condition.
+                               if(digitalCards.length == 1 || digitalCards.length == 0){
+                                //document.getElementById("{!$Component.theform.theHiddenInput}").value =selectedHardwareProduct;
+                                if(dtvFlag==false && fcFlag==true){
+                                    bringFCChanelSelectionPage();
+                                }
+                                else{                              
+                                    bringDTVChanelSelectionPage();
+                                }
+                            }
+                            else if(digitalCards.length > 1){
+                                var selectedYouSeecard = $("#dgCardsTable input:checked");
+                                if(selectedYouSeecard.length > 0){
+                                    //document.getElementById("{!$Component.theform.theHiddenInput}").value =selectedHardwareProduct;
+                                    if(dtvFlag==false && fcFlag==true){
+                                        bringFCChanelSelectionPage();
+                                    }
+                                    else{                 
+                                        bringDTVChanelSelectionPage();
+                                   }
+                                }
+                                else{
+                                    var errMsg = 'Please select YouSee Card.';        
+                                    $("#errorBlock").html(errMsg);
+                                    $("#errorBlock").show();
+                                }
+                            }              
+                           }
+                           
+                           else{
+                           var errMsg;
+                               errMsg = 'Kunden skal først have enten YouSee Kort eller YouSee Plus for at kunne bestille Ekstrakanaler';        
+                               $("#errorBlock").html(errMsg);
+                               $("#errorBlock").show();
+                           }
+                       }                   
+                       else{
+                          // document.getElementById("{!$Component.theform.theHiddenInput}").value =selectedHardwareProduct;
+                          //1201590 - OnDemand, 1201601-TvilingKort
+                           if(hasDTVCard!="true" && ( (selectedHardwareProduct=='1201601') || (selectedHardwareProduct=='1201590') || (selectedHardwareProduct == '1203021') ) ){
+                                if((selectedHardwareProduct=='1201601') || (selectedHardwareProduct=='1201590') )
+                                    {
+                                        var errMsg = 'Kunden skal først have enten YouSee Kort eller YouSee Plus for at kunne bestille Ekstrakanaler';        
+                                        $("#errorBlock").html(errMsg);
+                                        $("#errorBlock").show();
+                                    }
+                                
+                                if(selectedHardwareProduct == '1203021')
+                                {
+                                        var errMsg = 'Kunden skal først have YouSee Kort for at kunne bestille YouSee Lejeboks';        
+                                        $("#errorBlock").html(errMsg);
+                                        $("#errorBlock").show();
+                                }
+                            }
+                            else{
+                            
+                            //If the selected product is Yousee Plus(Bundled Product) then we are sending href for calling Product service of bundled product
+                             if(selectedHardwareProduct == '1201504'){
+                             if(myJSONObject['dtv-ga-valg'] != undefined){
+                              var json = myJSONObject['dtv-ga-valg'].varer;            
+                              if(json != undefined){
+                                $.each(json,function(i,varerNode){
+                                  if(varerNode.varenr==selectedHardwareProduct){
+                                    $.each(varerNode.links,function(j,linksNode){
+                                       
+                                        if(linksNode.rel == 'produktinfo'){
+                                           produktUrl = linksNode.href;
+                                           document.getElementById('hiddenProduckturl').value=produktUrl;
+                                            
+                                         }else if(linksNode.rel == ''){
+                                           var errMsg = 'Error in Kasia';        
+                                           $("#errorBlock").html(errMsg);
+                                           $("#errorBlock").show();
+                                         }
+                                      
+                                    });
+                                  }
+                                });
+                              }
+                              }
+                              }
+                            document.getElementById('hiddenSelectedAbonnementerAftalenr').value= selectedAbonnementerAftalenr;
+                           // alert('produktUrl***'+produktUrl+'***selectedAbonnementerAftalenr***'+selectedAbonnementerAftalenr);
+                            bringSerialNumberEntryPage(produktUrl,selectedAbonnementerAftalenr);
+                        
+                            /*if(selectedHardwareProduct=='1201590'){}
+                            else{
+                                bringSerialNumberEntryPage();
+                            }*/
+                           }
+                       }
+                    }else{
+                        //Add message blandSelv is in Basket and Kort is not either and existing product or choosen along with BS.
+                        var errMsg = '{!$Label.Bland_Selv_Kort_validation_message}';       
+                            $("#errorBlock").html(errMsg);
+                            $("#errorBlock").show();
+                    }
+               }else if((hasBlandSelvInBasket && numberOfYouseeKorts > 1) ==true){
+                    nextFlow();
+               }else{ 
+                       var errMsg = 'Du skal vælge et af produkterne fra listen, før du går “Videre”.';        
+                       $("#errorBlock").html(errMsg);
+                       $("#errorBlock").show();
+               }
+           }catch(err){
+                 alert("Error: in bringSmartCards method: "+err.description);
+          }
+           
+        }
+        
+      function callKasia(varenrAndUrl){
+            try {    
+                var tempSelectionArray =  varenrAndUrl.split("Â¶");
+                selectedvarnr=tempSelectionArray[0];
+                if(selectedvarnr == "1218385")
+                {
+                    overlay();
+                } 
+                             
+                if(selectedvarnr!="existingDTVCard" && selectedvarnr!=''){
+                    //1201590 - OnDemand, 1201601-TvilingKort
+                    if(hasDTVCard!="true" && ( (selectedvarnr=='1201601') || (selectedvarnr=='1201590') ) ){
+                        var errMsg = 'Kunden skal først have enten YouSee Kort eller YouSee Plus for at kunne bestille Ekstrakanaler';        
+                        $("#errorBlock").html(errMsg);
+                        $("#errorBlock").show();
+                    }
+                    else {
+                        var kundeData = JSON.stringify(myJSONObject['kunde-data']);
+                        var arrayInit = myJSONObject['array-init'];
+                        var etag = myJSONObject['ETag'];    
+                        var url='';
+                        jQuery.each(hardwareSelections, function() {
+                            if((this.href!=undefined) && (this.href.indexOf('slet') != -1)){
+                                url=this.href;
+                                return false;
+                            }                       
+                        });
+                        if(url!=''){
+                            callToKasia(url, etag, kundeData, arrayInit); 
+                        }
+                        url=tempSelectionArray[1];
+                       callToKasia(url, etag, kundeData, arrayInit);                        
+                    }
+                }
+            }
+            catch(err){
+                 alert("Error: in callKasia method: "+err.description);
+            }  
+        }  
+      //Display Smart Cards
+      // var dgCard="";
+       //var smartCardsDisplayed="";  && smartCardsDisplayed!="true"
+       function displaySmartCards(){  
+            try{                   
+                  if(hasDTVCard=="true"){
+                      var basicHeader = [" "," "," ", " "];                     
+                      if(digitalCards.length > 0) {
+                          $("#dgCardsTable").replaceWith('<table id=\"dgCardsTable\" class=\"zebra\" width=\"100%\" border=\"1\" ></table>');
+                          if(digitalCards.length > 1) {                               
+                              $("#dgCardNumbersTemplate").tmpl(digitalCards).appendTo(createHeaders(basicHeader,"#dgCardsTable"));
+                          }
+                          else{                               
+                              $("#dgCardNumbersTemplateForSingleRecord").tmpl(digitalCards).appendTo(createHeaders(basicHeader,"#dgCardsTable"));
+                          }
+                          //smartCardsDisplayed="true";
+                      } 
+                      else{
+                           $("#divSmartCards").html();                            
+                      }
+                   }
+            }
+            catch(err){
+                 alert("Error: in displaySmartCards method: "+err.description);
+            }
+        }
+        
+        function callKasiaForCardSelection(numberAndAftalenr){
+            try {
+                var tempSelectionArray =  numberAndAftalenr.split("Â¶");
+                var selectedAftalenr=tempSelectionArray[1];
+                var url='';
+                if(myJSONObject['links'] != undefined){
+                    $.each(myJSONObject['links'],function(i,linksNodeMember){
+                        if(linksNodeMember.href.indexOf(selectedAftalenr)!=-1){
+                            url=linksNodeMember.href;
+                            return false; 
+                        }
+                    });
+                    
+                    if(url!=''){
+                        document.getElementById("{!$Component.theform.hiddenSmartCardNumber}").value =tempSelectionArray[0];                    
+                        var kundeData = JSON.stringify(myJSONObject['kunde-data']);
+                        var arrayInit = myJSONObject['array-init'];
+                        var etag = myJSONObject['ETag'];
+                        callToKasia(url, etag, kundeData, arrayInit); 
+                    }
+                    else{
+                        displaySmartCards();
+                    }
+                }
+                else{
+                    displaySmartCards();
+                }               
+            }
+            catch(err){
+                 //alert("Error: in callKasia method: "+err.description);
+                 displaySmartCards();
+            }  
+        }     
+   
+    function callPopup(varenrAndUrl,navn)
+    {
+        var tempSelectionArray =  varenrAndUrl.split("Â¶");
+        selectedvarnr=tempSelectionArray[0];
+        selectedvarnrValue = selectedvarnr;
+        document.getElementById("{!$Component.theform.theHiddenInput}").value =selectedvarnr;
+         document.getElementById("{!$Component.theform.theHiddenInputname}").value = tempSelectionArray[2];
+        if(digitalCards.length==1 && selectedvarnr=='existingDTVCard'){
+            document.getElementById("{!$Component.theform.hiddenSmartCardNumber}").value =digitalCards[0].Number;
+        }     
+        /*if(selectedvarnr == "1218385")
+        {
+       // alert('inside callpopup selectedvarnr'+selectedvarnr);
+            overlay();
+        }*/
+    }
+    
+    function overlay() {
+        el = document.getElementById("overlay");
+        el.style.visibility = (el.style.visibility == "visible") ? "hidden" : "visible";
+    }
+    // This code is added for auto selecting the Kort radio button if Bland Selv is in Basket and there is no existing kort.
+    /**
+    $( document ).ready(function() {
+        var hasBlandSelvInBasketFlag = false;
+        if(myJSONObject['kunde-data'] != undefined){
+            hasBlandSelvInBasket = isBlandSelvInBasket(myJSONObject['kunde-data']);
+            hasBlandSelvInBasketFlag = isProductInBasket(selectedvarnr,myJSONObject['kunde-data']['valgNode']);
+              if(hasBlandSelvInBasketFlag ==true){
+                if(myJSONObject['kunde-data']['aftaler'] != undefined){
+                    hasKortOrBoxInExistingproducts = isKortOrBoxInExistingproducts(myJSONObject['kunde-data']['aftaler']);
+                }
+                var selectKortRadio = false;
+                if((hasBlandSelvInBasket == "true")==true){
+                    if((hasKortOrBoxInExistingproducts == false)== true){
+                        selectKortRadio = true;
+                    }
+                }
+                
+                if(selectKortRadio == true){
+                    if(document.getElementById("YouSee Kort").disabled == false){
+                        document.getElementById("YouSee Kort").checked = true;
+                    }           
+                }
+            }
+        }
+    });
+    */
+    </script>       
+    <style type="text/css">
+         .errorMessage {color: red; font-weight: bold;}
+         
+         #overlay {
+             visibility: hidden;
+             position: absolute;
+             left: 1px;
+             top: 1px;
+             width:100%;
+             height:100%;
+             text-align:center;
+             z-index: 1000;               
+             vertical-align: middle; background-color: #dcdcdc; opacity:1.0;filter:alpha(opacity=100);       
+        }
+        
+        .mailError{
+                color: red; 
+                border-bottom: #000000 1px solid; 
+                border-left: #000000 1px solid; 
+                padding-bottom: 1px; 
+                background-color: #f1f1f1; 
+                padding-left: 4px; 
+                padding-right: 4px; 
+                font-family: Verdana; 
+                font-size: 9pt; border-top: #000000 1px solid; 
+                border-right: #000000 1px solid; 
+                padding-top: 1px; 
+            }
+        #overlay div {
+             width:500px;
+             margin: 100px auto;
+             background-color: white;
+             border:1px solid #000;
+             padding:15px;
+             text-align:left;
+             font-size:11pt;
+        }
+        .leftContent21{float:left;width:560px;overflow:visible;min-height: 500px;height: auto !important;height:800px;max-height:1100px;}
+        .rightContent21{float:left;width:365px;overflow:visible;min-height: 540px;height: auto !important;height:840px;max-height:1100px;}
+    </style> 
+    <body> 
+         <div id="overlay">              
+                    <div>
+                        <img src="{!$Resource.closeIcon}" onclick='overlay()' align= "right" style="background-position: right 8px; height:15;width:15px; position:right; top: 15px;" ></img>
+                        <p><b>Hvad med en digital Ekstrapakke?</b><br/><br/>
+                        Alle vores digitale Ekstrapakker vises ikke, da du har valgt for kunden: "Digitalmodtager uden abonnement på digital Ekstrapakke". Er det det rigtige valg?<br/><br/>
+                        Du kan nemt gå baglæns i flowet og i stedet for vælge: "Digitalmodtager med abonnement på digital tv-pakke". Så vil alle vores digitale tv-pakker blive vist.<br/><br/>
+                        <b>Flere rigtig gode tilbud, fx</b><br/><br/>
+                        4 valgfrie Favoritkanaler for kun 48 kr./md<br></br>
+                        HD-pakken for kun 79 kr./md.
+                        </p>
+                            <center><input type="button" value="OK" class="nextBtnCls" onclick='overlay()' align= "center" /></center>                                                                                    
+                    </div>
+         </div>
+        <apex:form id="theform" styleClass="fontVerdana">
+            <apex:outputPanel >
+            <table>
+             <!--  <tr>
+                  <td colspan="2" style="font-family:verdana">
+                    <b> {!$Label.DtvHardwareSelectionPage_Top}
+                   </b></td>
+             </tr>-->
+              <tr>
+                  <td colspan="2" style="font-family:verdana">
+                    <b> <apex:outputText value="{!salesFlowObj.messages[0]}" escape="false" />
+                   </b></td>
+             </tr>
+            </table>
+        </apex:outputPanel> 
+            <apex:inputHidden value="{!hardwareSelection}" id="theHiddenInput" />
+            <apex:inputHidden value="{!hardwareSelectionName}" id="theHiddenInputname"/>
+            <apex:inputHidden value="{!smartCardNumber}" id="hiddenSmartCardNumber"/>   
+            <apex:outputPanel id="errorMessage" >
+                <apex:messages globalOnly="true"  styleClass="mailError"/>
+            </apex:outputPanel>
+            <div id="errorBlock" class="errorMessage" style="display:block"></div>
+            <apex:panelGrid columns="2" columnClasses="leftContent21,rightContent21" width="100%">
+               <!-- <apex:panelGroup id="columnA"> -->
+               <apex:outputPanel styleClass="leftContent21" >           
+                 <apex:pageBlock id="dtvHardwareSelectionPB">
+                    <apex:outputPanel rendered="{!hasCustomerYouSeeCard}">                        
+                        <apex:pageBlockSection title="Kundens nuværende YouSee Kort" collapsible="false" columns="1" >
+                            <table>
+                                <!-- <tr><td><b>Nuværende tekst erstattes med følgende:</b></td></tr>   -->                           
+                                <tr><td>Har kunden et YouSee Kort og ønsker Ekstra Kanaler/Ekstra Kort sættes de på nuværende kort.</td></tr>
+                                <tr><td>&nbsp;</td></tr>
+                                                         
+                            </table> 
+                            <table id="dgCardsTable" class="zebra" width="100%" border="1" ></table>
+                             
+                        </apex:pageBlockSection>               
+                        <hr></hr>
+                    </apex:outputPanel>
+                    <apex:pageBlockSection title="Vælg produktet, som kunden ønsker og klik 'Videre'" collapsible="false" columns="1">
+                        <apex:outputPanel rendered="{!hasCustomerYouSeeCard}">
+                        <table>
+                            <tr><td><b>Har kunden et YouSee Kort og ønsker Ekstra Kanaler/Ekstra Kort sættes de på nuværende kort.</b> </td></tr>                         </table>   
+                         </apex:outputPanel>
+                        <table id="hardwareSelTable" class="zebra" width="100%" border="1" ></table>
+                        <table><tr><td style="font-size:11px;">* uden leje af YouSee Kort</td></tr></table>                 
+                    </apex:pageBlockSection>  
+                    <apex:pageBlockButtons location="bottom">
+                        <apex:commandButton action="{!cancel}"  value="Annuller" style="margin-right:270px;"/>
+                        <apex:commandButton action="{!backFlow}" value="Tilbage"/>                      
+                        <input type="button" value="Videre" onclick="bringNextPageAfterHarwardwareSelection();" class="videreBtnCls"/>
+                    </apex:pageBlockButtons>
+                 </apex:pageBlock>
+                 </apex:outputPanel>
+                <!-- </apex:panelGroup>
+                <apex:panelGroup id="columnB"> -->
+                <apex:outputPanel styleClass="rightContent21">
+                 <c:CustomerAndProductComponent isNewKunde="{!isNewCustomer}" kundeNumber="{!cCustInstAdd.customerNumber}"
+                    kundeName="{!cCustInstAdd.firstName} {!cCustInstAdd.lastName}" Adresse="{!cCustInstAdd.addr1}"
+                    Postnummer="{!cCustInstAdd.addr2}"></c:CustomerAndProductComponent>
+                </apex:outputPanel>
+               <!-- </apex:panelGroup> -->      
+            </apex:panelGrid>
+            <apex:actionFunction name="bringDTVChanelSelectionPage" action="{!RedirectToDTVChannelSelection}"></apex:actionFunction>
+            
+            <apex:actionFunction name="bringSerialNumberEntryPage" action="{!RedirectToSerialNumberEntryPage}">
+                <apex:param name="produktUrl" value=""/>
+                <apex:param name="selectedAbonnementerAftalenr" assignTo="{!selectedAbonnementerAftalenr}" value=""/>
+                <apex:param name="theHiddenInput" assignTo="{!hrdSeltion}" value=""/>
+            </apex:actionFunction>
+            <apex:actionFunction name="nextFlow" action="{!nextFlow}"></apex:actionFunction>
+            <input type="hidden" id="hiddenProduckturl" name = "produktUrl" value="" />
+            <input type="hidden" id="hiddenSelectedAbonnementerAftalenr" name = "selectedAbonnementerAftalenr" value="" />
+            
+            <apex:actionFunction name="bringFCChanelSelectionPage" action="{!RedirectToFreeChoiceChannelSelectionPage}"></apex:actionFunction>
+            <apex:actionFunction action="{!callToKasia}" name="callToKasia" reRender="jsonPanel,dtvHardwareSelectionPB,jspanel,errorMessage" status="queryStatus">
+                <apex:param name="url" assignTo="{!url}" value=""/>
+                <apex:param name="etag" assignTo="{!etag}" value=""/>
+                <apex:param name="kundeData" assignTo="{!kundeData}" value=""/>
+                <apex:param name="arrayInit" assignTo="{!arrayInit}" value="" /> 
+            </apex:actionFunction>
+    <apex:outputPanel id="jspanel" >
+            <script type="text/javascript">
+                     var hasDTVCard=hasCustomerDTVCard(); 
+                     displaySmartCards();  
+                     getDTVData();                      
+                     var basicHeader = [" "," "," ", " "];   
+                     if(dtvHardwareProducts != ''){
+                        $("#hardwareSelTable").replaceWith('<table id=\"hardwareSelTable\" class=\"zebra\" width=\"100%\" border=\"1\" ></table>');
+                        dtvHardwareProducts.appendTo(createHeaders(basicHeader,"#hardwareSelTable"));
+                     }
+                     var serialNumber = {!dummySerialNo};
+                     displayBasket();
+            </script>
+    </apex:outputPanel>
+    <apex:actionStatus id="queryStatus"> 
+                        <apex:facet name="start">
+                        <c:loadingComponent BackColor="#efefef" borderColor="#336699"
+                         borderSize="3" height="50px" width="120px" 
+                         ImageUrl="{!$Resource.Loading}" Message="Loading..." 
+                         messageStyle="color:darkred;font-size:11pt;font-weight:bold;"/>
+                        </apex:facet>         
+            </apex:actionStatus>             
+    </apex:form>        
+    </body>
+   <script type="text/javascript">printContentAreaEnd();</script>
+    <script type="text/javascript">printFooter();</script>
+    </html>
+</apex:page>

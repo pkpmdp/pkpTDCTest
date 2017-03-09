@@ -1,0 +1,55 @@
+<apex:page standardController="Applied_Credit__c" tabStyle="Invoice_Usage__c" extensions="CarrieAppliedCreditController" sidebar="false" showHeader="false">
+    <script type="text/javascript">   
+        function displayTilbage() {
+        	if(document.referrer.indexOf('CarrieBillingBatchPage') != -1 ){ 
+                document.getElementById('tilbage').style.display = "none";
+            }else if(document.referrer.length==0 ){
+                document.getElementById('tilbage').style.display = "none";  
+            }    
+        } 
+        function goBack(){
+            window.history.go(-1);
+        }
+    </script>
+    <style type="text/css">
+    .bPageBlock .pbHeader .pbButton {
+            display: none;
+        }
+    </style>
+    <apex:pageBlock >
+        <div></div><div></div>
+        <div align="center"><h1 style="font-size:12pt"><i> Tilknyttet kreditering </i></h1></div>
+        <br/>
+        <apex:pageBlock >
+            <apex:form >
+                <div align="right">
+                    <input id="tilbage" type="button" value="Tilbage" onClick="goBack()" class="btn" />
+<!--                     <apex:commandButton value="Tilbage til oversigt" action="{!redirectHomePage}"/> -->
+                </div>
+                <script>
+                     displayTilbage();
+                </script>               
+            <apex:inputHidden value="{!Applied_Credit__c.Aria_Account__c}" id="theHiddenInput"/>
+            <apex:inputHidden value="{!Applied_Credit__c.Aria_Account__r.Aria_Plan_Name__c}" id="theHiddenPlan"/>
+       
+            </apex:form>
+            <apex:pageBlockSection title="Tilknyttet kreditering" >
+                <apex:outputField value="{!Applied_Credit__c.Account__c}" label="Kundenavn"/>
+                <apex:outputField value="{!Applied_Credit__c.Account__r.Customer_No__c}" label="Kundenummer" />
+                <apex:outputField value="{!Applied_Credit__c.Name}"/>
+                <apex:outputField value="{!Applied_Credit__c.Date__c}" />
+                <apex:outputField value="{!Applied_Credit__c.Credit_Reason__c}" />
+                <apex:outputField value="{!Applied_Credit__c.CommentsLong__c}" />
+                <apex:outputField value="{!Applied_Credit__c.credit_type__c}" /> 
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+        <apex:pageBlock title="Fakturaer"  rendered="{!showForbrug}"> 
+            <apex:pageBlockTable value="{!serviceCreditList}" var="item">
+                <apex:column value="{!item.Faktura__c}"/> 
+                <apex:column value="{!item.Faktura__r.Datoforudskrift__c}"/>
+                <apex:column value="{!item.Faktura__r.Momspligtigt_bel_b__c}" styleClass="dataCell  CurrencyElement" headerClass="CurrencyElement zen-deemphasize"/>
+                <apex:column value="{!item.Amount__c}"  styleClass="dataCell  CurrencyElement" headerClass="CurrencyElement zen-deemphasize"/>
+            </apex:pageBlockTable>
+        </apex:pageBlock>
+    </apex:pageBlock>
+</apex:page>

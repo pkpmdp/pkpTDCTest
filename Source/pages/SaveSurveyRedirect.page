@@ -1,0 +1,3 @@
+<apex:page standardController="SAVE_Survey__c" extensions="SaveSurveyExtension" action="{!redirectToSave}">
+ <apex:message />
+</apex:page>

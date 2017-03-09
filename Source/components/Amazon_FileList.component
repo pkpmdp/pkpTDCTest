@@ -1,0 +1,98 @@
+<apex:component controller="Amazon_FileList_CT" allowDML="true">
+	<apex:includeScript value="https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"/> 
+	<apex:stylesheet value="{!URLFOR($Resource.Amazon_File_Icons, 'sprite/css/sprite.css')}"/> 
+    <apex:pageMessages ></apex:pageMessages>
+    <style>
+        .mycontainer{ overflow-x:hidden;overflow-y:auto; height:210px; width:100%; } 
+        .container2{ overflow-x:hidden;overflow-y:auto; height:230px; width:133%; }      
+    </style>
+    <apex:pageBlock rendered="{!rendrd}">
+        <apex:commandButton value="{!$Label.Doc_Upload_New_document}" onclick="parent.location.href = '/apex/Amazon_DocUpload?relatedTo={!$CurrentPage.parameters.id}';return false;"/>
+        &nbsp;&nbsp;&nbsp;
+        <apex:commandButton value="{!$Label.Doc_Move_File}" action="{!moveSelected}" rendered="{!movable == True}" disabled="{!DocList.size == 0}"/>        
+        <div style="overflow-x:auto;overflow-y:auto; height:240px;  width:100%;" >
+            <!--<apex:pageBlockSection columns="1">-->
+                
+                <apex:outputPanel styleClass="mycontainer">
+                    <apex:pageBlockTable value="{!DocList}" var="cloudFile">
+                        <apex:column >
+                            <apex:facet name="header">
+                                <apex:inputCheckbox onclick="checkAll(this)" rendered="{!movable == True}" disabled="{!DocList.size == 0}" id="cb"/>
+                            </apex:facet>
+                            <apex:inputCheckbox value="{!cloudFile.selected}" id="selectLine1" rendered="{!IF(cloudFile.KISSType == Null && movable == True,True,False)}"/>
+                        </apex:column>
+                        <apex:column headerValue="{!$Label.Doc_Action}" width="10%">
+                            <table cellpadding="0" cellspacing="0" style="border:none">
+                            <tr> 
+                                <td style="border:none">                               
+                                <a href = "/{!cloudFile.id1}" target = "_top"><img src="{!$Resource.Amazon_Edit_Icon}" title="Edit"/></a>
+                                </td>
+                                <td style="border:none">
+                                <!-- <a href = "/apex/Amazon_ViewFile?id={!cloudFile.id1}" target = "_blank"><img src="{!$Resource.Amazon_View_Icon}" title="View File"/></a>--> 
+                                <a href = "/apex/Amazon_ViewFile?id={!cloudFile.id1}" target = "_blank" title="View File"><div class="{!cloudFile.fileType}"/></a>
+                                </td>
+                                <!-- <apex:outputText rendered="{!IF(cloudFile.KISSType == Null && movable == True,True,False)}">|</apex:outputText> --> 
+                                <td style="border:none">
+                                <apex:outputLink value="/apex/Amazon_MoveFile?id={!cloudFile.id1}" target="_top" rendered="{!IF(cloudFile.KISSType == Null && movable == True,True,False)}" onclick="checkFile()" title="Move File">
+                                    <apex:image value="{!$Resource.Amazon_MoveFile_Icon}"/>                                    
+                                </apex:outputLink> 
+                                </td>
+                                <td style="border:none">                                                                     
+                                <apex:commandLink action="{!DeletFile}" id="theCommandLink" onclick="return confirm('Er du sikker?');" rendered="{!IF(cloudFile.isDeleted == False || cloudFile.isDocTypeNull,False,True)}" type="image/png" title="Delete">
+                                    <apex:image value="{!$Resource.Amazon_Delete_Icon}"/>
+                                    <apex:param value="{!cloudFile.id1}" name="fileId"/>
+                                </apex:commandLink>
+                                </td>
+                            </tr>
+                            </table>
+                        </apex:column>
+                        <apex:column headerValue="{!$Label.Doc_Title}">                        
+                            <apex:outputLink value="/{!cloudFile.id1}" target="_blank">{!cloudFile.Title}</apex:outputLink>
+                        </apex:column>
+                        <apex:column value="{!cloudFile.Description}" headerValue="{!$Label.Doc_Description}"/>
+                        <apex:column headerValue="{!$Label.Doc_CreatedDate}" value="{!cloudFile.CreatedDate}"/>
+                        <apex:column value="{!cloudFile.createdBy}" headerValue="{!$Label.Doc_Created_By}"/>                           
+                        <apex:column headerValue="{!$Label.Doc_Modified_Date}" value="{!cloudFile.LastModifiedDate}"/>
+                        <apex:column value="{!cloudFile.lastModifiedBy}" headerValue="{!$Label.Doc_Modified_By}"/>
+                        <apex:column value="{!cloudFile.Category}" headerValue="{!$Label.Doc_Category}" />
+                        <apex:column value="{!cloudFile.DocType}" headerValue="{!$Label.Doc_Document_Type}" />
+                        <apex:column value="{!cloudFile.CaseNum}" headerValue="{!$Label.Doc_Case_Number}"/>
+                        <!--<apex:facet name="footer">-->
+                            <apex:outputPanel rendered="{!DocList.size == 0}">
+                                 {!$Label.Doc_No_files_found}.                     
+                            </apex:outputPanel> 
+                        <!--</apex:facet>-->
+                    </apex:pageBlockTable>
+                </apex:outputPanel>
+            <!--</apex:pageBlockSection>-->
+        </div>
+    </apex:pageBlock>  
+    
+    <apex:pageBlock rendered="{!rendrd1}">
+        <div style="overflow-x:auto;overflow-y:auto; height:240px;  width:100%;" >
+            <h2 class="maintitle">{!$Label.Doc_Cable_Unit_Number}&nbsp;&nbsp;</h2>
+            <apex:inputText id="searchCU" value="{!cuNo}" maxlength="10"/> <br/><br/>
+            
+            <h2>{!$Label.Doc_Selected_Files}</h2><br/>
+            <apex:dataTable value="{!selectedFiles3}" var="s" border="1" cellpadding="4" id="Selected_PBS">
+                <apex:column headerValue="{!$Label.Doc_Title}" value="{!s.Cloud_file_Title__c}"/>            
+            </apex:dataTable> 
+            <br/>           
+            <apex:commandButton id="submit" value="{!$Label.Doc_Move_Files}" action="{!MoveFile}" onclick="return confirm('Er du sikker på, du ønsker at flytte filen (r)?');"/>
+            &nbsp;&nbsp;&nbsp;
+            <apex:commandButton value="{!$Label.Doc_Cancel}" action="{!Cancel}"/>
+        </div>
+    </apex:pageBlock>  
+    
+    <!-- Javascript function to check all rows in the table -->
+    <script>
+        function checkAll(cb){
+            var inputElem = document.getElementsByTagName("input");
+            for(var i=0;i<inputElem.length;i++){
+                if(inputElem[i].id.indexOf("selectLine1")!=-1)
+                    inputElem[i].checked = cb.checked;
+            }
+        }
+    </script>
+    <!-- End of Javascript function -->
+</apex:component>

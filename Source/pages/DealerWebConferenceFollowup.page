@@ -1,0 +1,167 @@
+<apex:page controller="DealerWebConferenceFollowUp" >
+<style>
+#LoadingDiv{
+  background-color: grey;
+  filter:alpha(opacity=50); /* IE */
+  opacity: 0.5; /* Safari, Opera */
+  -moz-opacity:0.50; /* FireFox */
+  z-index: 9999;
+  height: 100%;
+  width: 100%;
+  background-repeat:no-repeat;
+  background-position:center;
+  position:absolute;
+  top: 0px;
+  left: 0px;
+  background-image: url('/img/loading.gif');
+}
+</style>
+<body >
+<apex:form id="formId" >   
+    <apex:actionFunction name="setPageSize" rerender="notArrivedSection" status="loading" action="{!displayNotArrivedList}">
+        <apex:param name="size" value="" assignTo="{!pageSize}" />
+    </apex:actionFunction> 
+<br/>
+<div align="center"><h1 style="font-size:12pt"><i>YouSee Live 13 Conference</i></h1></div>
+<br/>
+<div style="display:none;" id="blankInputs">
+    <apex:pageMessage summary="{!$Label.enterMobileOrTicketNumber}" severity="error" strength="3"/>
+</div>
+<apex:pageMessages id="error"/>
+<apex:pageBlock id="formPageBlockId">
+    <apex:pageBlockSection title="Registreringsoplysninger" id="regSection" columns="1" collapsible="false" >
+        <b><apex:outputLabel value="{!$Label.enterMobileOrTicketNumber}" style="font-weight:bold;" /></b>       
+        <apex:pageBlockSectionItem labelStyle="text-align:left;">
+            <apex:outputLabel value=" Mobilnummer" />
+            <apex:inputText value="{!mobileNumber}" maxlength="8" id="MobilePhoneId"/> 
+        </apex:pageBlockSectionItem>
+        <apex:pageBlockSectionItem labelStyle="text-align:left" >
+            <apex:outputLabel value=" Ticketnummer" />
+            <apex:inputText value="{!ticketNumber}" id="TicketnoId"/> 
+        </apex:pageBlockSectionItem>   
+    </apex:pageBlockSection>
+    <apex:commandButton style="position: relative; left:12%;" action="{!searchContact}" value="Søg" rerender="error,confirmSection,partSection,transportSection,notArrivedSection" status="loading" />
+    <apex:commandButton style="position: relative; left:13%;" action="{!clearInputs}" value="Ryd" rerender="error,confirmSection,regSection" status="loading" />
+    <br/>
+    <apex:outputPanel id="confirmSection" >
+        <apex:pageBlockSection columns="1" collapsible="false" rendered="{!If(AND(resultContact !=null,resultContact.size> 0),true,false)}" >
+            <apex:pageBlockSectionItem labelStyle="text-align:left">
+                <apex:outputLabel value=" Fornavn" />
+                <apex:outputLabel value="{!resultContact[0].firstName}" /> 
+            </apex:pageBlockSectionItem>
+            <apex:pageBlockSectionItem labelStyle="text-align:left">
+                <apex:outputLabel value=" Efternavn" />
+                <apex:outputLabel value="{!resultContact[0].lastName}" /> 
+            </apex:pageBlockSectionItem>
+            <apex:pageBlockSectionItem labelStyle="text-align:left">
+                <apex:outputLabel value=" Mobilenummber" />
+                <apex:outputLabel value="{!resultContact[0].Conference_Mobile_Phone__c}" /> 
+            </apex:pageBlockSectionItem>
+            <apex:pageBlockSectionItem labelStyle="text-align:left">
+                <apex:outputLabel value=" Ticketnummer" />
+                <apex:outputLabel value="{!resultContact[0].Ticket_Number__c}" /> 
+            </apex:pageBlockSectionItem>
+        </apex:pageBlockSection>      
+    <apex:commandButton style="position: relative; left:12%;" rendered="{!If(AND(resultContact !=null,resultContact.size> 0),true,false)}" action="{!registerParticipant}" value="Registerer" rerender="regSection,partSection,error,transportSection,notArrivedSection,confirmSection,arrivedSection" status="loading" />                  
+   </apex:outputPanel>
+    <br/>      
+    <apex:pageBlockSection id="partSection" columns="1" title="Deltagere til konference">
+        <apex:outputText value="{!totalRegisteredContacts.size}" label="Antal deltager i alt"/>   
+        <apex:outputText value="{!TEXT(arrivedContacts)}" label="Antal ankommet"/>
+        <apex:outputText value="{!TEXT(notArrivedContacts)}" label="Ej ankommet"/>          
+    </apex:pageBlockSection>
+    
+    
+    <apex:pageBlockSection id="transportSection" columns="1" title="Transport">
+        <apex:selectList size="1" value="{!valgRute}" id="selectList" label="Fordeling på busruter"> 
+            <apex:actionSupport event="onchange" action="{!getCountForRoute}" reRender="transportId,notArrivedSection" status="loading" />                   
+            <apex:selectOptions value="{!Routes}" id="selOpts"></apex:selectOptions>
+        </apex:selectList>
+        <apex:outputPanel id="transportId" >
+        <apex:pageBlockTable value="{!countTransportList}" var="con" rendered="{!countTransportList.size>0}" >
+            <apex:column value="{!con.pickupPoint}" headerValue="Afhentning punkt" /> 
+            <apex:column value="{!con.totalCount}" headerValue="Total" />
+            <apex:column headerValue="Antal ankommet">
+            <apex:commandLink value="{!con.arrivedCount}" action="{!displayNotArrivedList}" reRender="notArrivedSection" status="loading" rendered="{!con.arrivedCount != 0}">
+                <apex:param name="pickup" value="{!con.pickupPoint}" assignTo="{!pickup}" />
+                <apex:param name="countType" value="arrived" assignTo="{!countType}" />
+            </apex:commandLink>
+            <apex:outputText value="{!con.arrivedCount}" rendered="{!con.arrivedCount = 0}" />
+            </apex:column> 
+            <apex:column headerValue="Ej ankommet">
+            <apex:commandLink value="{!con.notArrivedCount}" action="{!displayNotArrivedList}" reRender="notArrivedSection" status="loading" rendered="{!con.notArrivedCount != 0}">
+                <apex:param name="pickup" value="{!con.pickupPoint}" assignTo="{!pickup}" />
+                <apex:param name="countType" value="notArrived" assignTo="{!countType}" />
+            </apex:commandLink>
+            <apex:outputText value="{!con.notArrivedCount}" rendered="{!con.notArrivedCount = 0}" />
+            </apex:column>
+            <apex:column value="{!con.status}" headerValue="Status"/>
+        </apex:pageBlockTable>
+        </apex:outputPanel>
+    </apex:pageBlockSection>
+    <br/>
+           
+    <apex:outputPanel id="notArrivedSection">
+        <apex:pageBlockSection rendered="{!notArrivedList.size>0}"  columns="1" title="{!IF(countType='arrived','Ankommet deltagere','Deltagere Ej ankommet')}">
+            <apex:outputPanel >
+                <table width="100%">
+                    <tr>
+                        <td style="text-align: left;" width="40%">{!currentPageInfo}</td>
+                        <td width="30%">
+                            <apex:commandLink action="{!showFirst}" rendered="{!showPrevious}" status="loading" rerender="notArrivedSection" style="text-align:center;">Første</apex:commandlink>&nbsp;&nbsp;
+                            <apex:commandLink action="{!showPrevious}" rendered="{!showPrevious}" status="loading" rerender="notArrivedSection" style="text-align:center;">Forrige</apex:commandlink>&nbsp;&nbsp;
+                            <apex:commandLink action="{!showNext}" rendered="{!showNext}" status="loading" rerender="notArrivedSection" style="text-align:center;">Næste</apex:commandlink>&nbsp;&nbsp;
+                            <apex:commandLink action="{!showLast}" rendered="{!showNext}" status="loading" rerender="notArrivedSection" style="text-align:center;">Sidste</apex:commandlink>
+                        </td>
+                        <td width="30%" >
+                            Vis <apex:selectList value="{!pageSize}" onchange="setPageSize(this.value);" size="1"> linier per side
+                                <apex:selectOption itemValue="10" itemLabel="10" />
+                                <apex:selectOption itemValue="25" itemLabel="25" />
+                                <apex:selectOption itemValue="50" itemLabel="50" />
+                                <apex:selectOption itemValue="100" itemLabel="100" />
+                                <apex:selectOption itemValue="200" itemLabel="200" />
+                            </apex:selectList>
+                        </td>
+                    </tr>
+                </table>
+            </apex:outputPanel>
+            <apex:pageBlockTable value="{!notArrivedList}" var="con" first="{!currentPage}" rows="{!pageSize}">
+                <apex:column value="{!con.FirstName}" headerValue="Fornavn" id="FnameId"/>
+                <apex:column value="{!con.LastName}" headerValue="Efternavn"/>
+                <apex:column value="{!con.Conference_Mobile_Phone__c}" headerValue="Mobilnummer"/>
+                <apex:column value="{!con.Ticket_Number__c}" headerValue="Ticketnummer"/>
+            </apex:pageBlockTable>
+            <apex:outputPanel >
+                <table width="100%">
+                    <tr>
+                        <td style="text-align: left;" width="40%">{!currentPageInfo}</td>
+                        <td width="30%">
+                            <apex:commandLink action="{!showFirst}" rendered="{!showPrevious}" status="loading" rerender="notArrivedSection" style="text-align:center;">Første</apex:commandlink>&nbsp;&nbsp;
+                            <apex:commandLink action="{!showPrevious}" rendered="{!showPrevious}" status="loading" rerender="notArrivedSection" style="text-align:center;">Forrige</apex:commandlink>&nbsp;&nbsp;
+                            <apex:commandLink action="{!showNext}" rendered="{!showNext}" status="loading" rerender="notArrivedSection" style="text-align:center;">Næste</apex:commandlink>&nbsp;&nbsp;
+                            <apex:commandLink action="{!showLast}" rendered="{!showNext}" status="loading" rerender="notArrivedSection" style="text-align:center;">Sidste</apex:commandlink>
+                        </td>
+                        <td width="30%">
+                            Vis <apex:selectList value="{!pageSize}" onchange="setPageSize(this.value);" size="1"> linier per side
+                                <apex:selectOption itemValue="10" itemLabel="10" />
+                                <apex:selectOption itemValue="25" itemLabel="25" />
+                                <apex:selectOption itemValue="50" itemLabel="50" />
+                                <apex:selectOption itemValue="100" itemLabel="100" />
+                                <apex:selectOption itemValue="200" itemLabel="200" />
+                            </apex:selectList>
+                        </td>
+                    </tr>
+                </table>
+            </apex:outputPanel>
+        </apex:pageBlockSection>
+    </apex:outputPanel>         
+    
+</apex:pageBlock> 
+<apex:actionStatus id="loading" >
+    <apex:facet name="start">
+      <div id="LoadingDiv" ></div>
+    </apex:facet>
+</apex:actionStatus>
+</apex:form>
+</body>
+</apex:page>

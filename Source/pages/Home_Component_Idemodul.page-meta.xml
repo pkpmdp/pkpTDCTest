@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ApexPage xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>33.0</apiVersion>
+    <availableInTouch>false</availableInTouch>
+    <confirmationTokenRequired>false</confirmationTokenRequired>
+    <description>replacement of &apos;Idémodul&apos; home page component - summer&apos;15 changes</description>
+    <label>Home_Component_Idemodul</label>
+</ApexPage>

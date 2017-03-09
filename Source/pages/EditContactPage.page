@@ -1,0 +1,626 @@
+<apex:page id="pageId" showHeader="false" sidebar="false" controller="EditContactController" applyHtmlTag="false">
+    <html class="cvi2015">
+<script type="text/javascript" src="{!siteCoreUrl}/sitecore/content/data/export/export.aspx?itemguid={25D3B7CA-F6FA-46D6-A787-1A34AF420196}&functions=true"></script>
+<body id="servicepage">
+<style>
+            .validationStyle = {border-size:2px; border-color:red;border-style:solid}
+            .headerStyle {
+                   font-family: Arial, Helvetica, sans-serif;
+                   font-size:12px;
+                   font-weight:bold;
+            }
+            .iButton{
+                   background-image: url(bgButton.gif);
+                   PADDING-BOTTOM: 0px;
+                   border-right-width: 0px;
+                   text-transform: none;
+                   padding-left: 15px;
+                   padding-right: 15px;
+                   border-top-width: 0px;
+                   border-bottom-width: 0px;
+                   height: 20px;
+                   border-left-width: 0px;
+                   font-weight: bold;
+                   padding-top: 0px;
+            }
+            .nirajbutton {
+                   background-image: url("bgButton.gif") ;
+                   height: 20px;
+                   border-width:0px;
+                   background-repeat:no-repeat font: 13px Arial, Helvetica, sans-serif;
+                   font-weight: bold;
+                   padding: 0 15px;
+                   text-transform :none;
+           }
+            .inputButtonStyle {
+                      background-image: url("bg_button_span_orange.png") ;
+                      border-width: 0;
+                      padding: 0 15px;
+                      text-transform: capitalize;
+                      margin: 0 2px;
+                      background-position: left top;
+                      background-repeat: repeat-x;
+                      border-color: -moz-use-text-color #FF4500;
+                      border-right: 1px solid #FF4500;
+                      border-style: none solid solid none;
+                      display: inline;font-family: 'Verdana','Geneva',sans-serif;
+                      font-size: 80%;color: #FFFFFF;
+                      font-weight: bold;
+                      height: 20px;
+                      width:76px;
+                      background-color: #C35617;
+            }
+            .labelStyle
+            {
+                      font-family: Arial, Helvetica, sans-serif;
+                      font-size:12px;
+                      font-weight:bold;
+                      text-align:center;
+            }
+            .colstyle {
+                       width:100%
+            }
+</style>
+
+<script type="text/javascript">printHeader();</script>
+<script type="text/javascript">printTopMenu();</script>
+<script type="text/javascript">printContentAreaBegin();</script>
+<script type="text/javascript">
+   var antalId = '', antalKopierId= '';
+   var portalBrugerRole = '{!portalBrugerRole}';
+   
+   function acceptNumerics(event){
+               var keyValue = window.event.keyCode || event.keyCode;
+               if ((keyValue >= 48 && keyValue <= 57)|| (keyValue==40||keyValue==41||keyValue==45)) {
+                   return true;
+               }
+               else{
+                   return false;
+               }
+           }
+
+           function noCopyMouse(e) {
+               var isRight = (e.button) ? (e.button == 2) : (e.which == 3);
+               if(isRight) {
+                   return false;
+               }
+               return true;
+           }
+
+               function validationFunction(){
+                       var mobileNumber = document.getElementById("pageId:theform:contactDetailsPB:contactDetailsPBS:mobilePhone").value;
+                       var homePhoneNo = document.getElementById("pageId:theform:contactDetailsPB:contactDetailsPBS:homePhone").value;
+                       var phoneNo = document.getElementById("pageId:theform:contactDetailsPB:contactDetailsPBS:phone").value;
+                       //Commented For SF-1599 remove validation for First name on contact
+                       //var fname = document.getElementById("pageId:theform:contactDetailsPB:contactDetailsPBS:firstName").value;
+                       var lname = document.getElementById("pageId:theform:contactDetailsPB:contactDetailsPBS:lastName").value;
+                       var streetI = document.getElementById("pageId:theform:addressDetailPB:addressDetailsPBS:addressDetailsPBSI:streetI").value;
+                       var indbliksadresseRoleCheck = '{!$Label.SC_IndbliksadresseRoleCheck}';
+                       var secndlist = document.getElementById("{!$Component.list2}");
+                       var selectedValue = document.getElementById('{!$Component.theform.blk2.hdnSelectedItems}').value;
+                       var selectedId = document.getElementById('{!$Component.theform.blk2.hdnSelectedItemsIds}').value;
+				   //Commented For SF-1599 remove validation for First name on contact
+                   //if(fname.length != 0 && lname.length != 0 && streetI.length != 0)
+                   
+                   if(lname.length != 0 && streetI.length != 0){
+                           if(mobileNumber.length == 0 && homePhoneNo.length == 0 && phoneNo.length == 0){
+									   document.getElementById('roleValidationMsg').style.display ='none';
+                                       document.getElementById('phoneLengthMsg').style.display ='none';
+                                       document.getElementById('phoneValidationMsg').style.display ='block';
+                                       return false;
+                           }else if(mobileNumber.length > 20 || homePhoneNo.length > 20 || phoneNo.length > 20){
+									   document.getElementById('roleValidationMsg').style.display ='none';
+                                       document.getElementById('phoneValidationMsg').style.display ='none';
+                                       document.getElementById('phoneLengthMsg').style.display ='block';
+                                       return false;
+                           }else if(selectedValue.length != 0){
+                                       var arrSelectedValue=selectedValue.split(",");
+                                       var arrSelectedId   =selectedId.split(",");
+                                       if(arrSelectedValue == 'undefined'){
+                                               document.getElementById('phoneValidationMsg').style.display ='none';
+                                               document.getElementById('phoneLengthMsg').style.display ='none';
+                                               document.getElementById('roleValidationMsg').style.display ='block';
+                                               return false;
+                                       }
+                               }
+                 }
+                 return true;
+        }
+
+                function addOption(theSel, theText, theValue){
+                    var newOpt = new Option(theText, theValue);
+                    var selLength = theSel.length;
+                    theSel.options[selLength] = newOpt;
+                }
+
+        function moveToRightList(list1, list2){
+               var indbliksadresseRoleCheck = '{!$Label.SC_IndbliksadresseRoleCheck}';
+               var firstlist=document.getElementById(list1);
+               var secndlist= document.getElementById(list2);
+               var listCount = firstlist.length;
+               var secndListCount = secndlist.length;
+               var selectedText = new Array();
+               var selectedValues = new Array();
+               var selectedCount = 0;
+               for(i = listCount-1; i>0; i--){
+                        if( firstlist[i].selected){
+                           selectedText[selectedCount] = firstlist[i].text;
+                           selectedValues[selectedCount] = firstlist[i].value;
+                           if(secndListCount > 0){
+                                 firstlist[i] = null;
+                           }
+                           selectedCount++;
+                        }
+               }
+               for(i = selectedCount-1; i>=0; i--){
+                       addOption(secndlist, selectedText[i], selectedValues[i]);
+                       if(selectedText[i] == indbliksadresseRoleCheck){
+                            document.getElementById(antalId).style.visibility ="visible";
+                            document.getElementById(antalKopierId).style.visibility ="visible";
+                            //document.getElementById(antalKopierId).value= "";
+                         }
+                 }
+          }
+
+       function moveToLeftList(list1, list2){
+              var indbliksadresseRoleCheck = '{!$Label.SC_IndbliksadresseRoleCheck}';
+              var firstlist=document.getElementById(list1);
+              var secndlist= document.getElementById(list2);
+              var listCount = firstlist.length;
+              var secListCount = secndlist.length;
+              var selectedText = new Array();
+              var selectedValues = new Array();
+              var selectedCount = 0;
+              for(i = secListCount-1; i >= 0; i--){
+                       if( secndlist[i].selected){
+                               if(secndlist[i].text != '----------- Vælg -------------'){
+                                   selectedText[selectedCount] = secndlist[i].text;
+                                   selectedValues[selectedCount] = secndlist[i].value;
+
+                                   if(listCount > 0){
+                                         secndlist[i] = null;
+                                   }
+                                   selectedCount++;
+                               }
+                       }
+               }
+               for(i = selectedCount-1; i>=0; i--){
+                        addOption( firstlist, selectedText[i], selectedValues[i]);
+                        if(selectedText[i] == indbliksadresseRoleCheck){
+                            document.getElementById(antalId).style.visibility ='hidden';
+                            document.getElementById(antalKopierId).style.visibility ='hidden';
+                            //document.getElementById(antalKopierId).value= "";
+
+                         }
+               }
+
+               secndlist= document.getElementById(list2);
+               var selectedValue = '';
+               var selectedIds = '';
+               for(var i=1; i<secndlist.length; i++){
+                       if(selectedValue == ''){
+                            selectedValue  = secndlist[i].text;
+                            selectedIds    = secndlist[i].value;
+                        }
+                        else{
+                            selectedValue  = selectedValue +','+secndlist[i].text;
+                            selectedIds    = selectedIds + ',' + secndlist[i].value;
+                        }
+               }
+               document.getElementById('{!$Component.theform.blk2.hdnSelectedItems}').value=selectedValue;
+               document.getElementById('{!$Component.theform.blk2.hdnSelectedItemsIds}').value=selectedIds;
+       }
+
+        function selectAllSelected(){
+                  var isSuccessfull = validationFunction();
+                  if(isSuccessfull==true){
+                      var firstlist=document.getElementById('{!$Component.theform.blk2.list1}');
+                      var secndlist = document.getElementById('{!$Component.theform.blk2.list2}');
+                      if(secndlist.length > 1){
+                              var selectedValue;
+                              var selectedIds;
+                              for(var i=1; i< secndlist.length; i++){
+                                        secndlist[i].selected = true;
+                                        if(selectedValue == null){
+                                            selectedValue  = secndlist[i].text;
+                                            selectedIds    = secndlist[i].value;
+                                        }
+                                        else{
+                                            selectedValue  = selectedValue +','+secndlist[i].text;
+                                            selectedIds    = selectedIds + ',' + secndlist[i].value;
+                                        }
+                              }
+                              document.getElementById('{!$Component.theform.blk2.hdnSelectedItems}').value=selectedValue;
+                              document.getElementById('{!$Component.theform.blk2.hdnSelectedItemsIds}').value=selectedIds;
+                              saveContacts();
+                          }
+                          else{
+                                document.getElementById('roleValidationMsg').style.display = "block";
+                                return false;
+                          }
+                 }
+        }
+
+        function noCopyKey(e) {
+                       var forbiddenKeys = new Array('c','x','v');
+                       var keyCode = (e.keyCode) ? e.keyCode : e.which;
+                       var isCtrl;
+
+                       if(window.event)
+                           isCtrl = e.ctrlKey
+                       else
+                           isCtrl = (window.Event) ? ((e.modifiers & Event.CTRL_MASK) == Event.CTRL_MASK) : false;
+
+                       if(isCtrl) {
+                           for(i = 0; i < forbiddenKeys.length; i++) {
+                               if(forbiddenKeys[i] == String.fromCharCode(keyCode).toLowerCase()) {
+                                   return false;
+                               }
+                           }
+                       }
+                       return true;
+                   }
+       function openLookup(baseURL, width, modified, searchParam){
+            var originalbaseURL = baseURL;
+            var originalwidth = width;
+            var originalmodified = modified;
+            var originalsearchParam = searchParam;
+            var lookupType = baseURL.substr(baseURL.length-3, 3);
+            if (modified == '1') 
+                baseURL = baseURL + searchParam;
+         
+            var isCustomLookup = false;
+         
+            // Following "001" is the lookup type for Account object so change this as per your standard or custom object
+           // if(lookupType == "001"){
+                var urlArr = baseURL.split("&");
+                var txtId = '';
+                if(urlArr.length > 2) {
+                    urlArr = urlArr[1].split('=');
+                    txtId = urlArr[1];
+                }
+                
+                //alert('txtId: '+txtId);
+                
+                // Following is the url of Custom Lookup page. You need to change that accordingly
+                baseURL = "{!$Site.Prefix}/apex/CustomAddressLookup?txt=" + txtId;
+         
+                // Following is the id of apex:form control "theform". You need to change that ac-cordingly
+                baseURL = baseURL + "&frm=" + escapeUTF("{!$Component.theform}");
+                if (modified == '1') {
+                    baseURL = baseURL + "&lksearch=" + searchParam;
+                  }
+         
+                  // Following is the ID of inputField that is the lookup to be customized as custom lookup
+                if(txtId.indexOf('streetI') > -1 ){
+                    isCustomLookup = true;
+                }
+           // }
+         
+         
+            if(isCustomLookup == true){
+              openPopup(baseURL, "lookup", 350, 480, "width="+800+",height=580,toolbar=no,status=no,directories=no,menubar=no,resizable=yes,scrollable=yes", true);
+            }
+            else {
+              if (modified == '1') 
+                originalbaseURL = originalbaseURL + originalsearchParam;
+              openPopup(originalbaseURL, "lookup", 350, 480, "width="+originalwidth+",height=480,toolbar=no,status=no,directories=no,menubar=no,resizable=yes,scrollable=yes", true);
+            } 
+        }
+</script>
+<apex:stylesheet value="{!URLFOR($Resource.scStyleCss,'myStyle/myStyle.css')}"/>
+<c:SCLinksComponent CableUnitName="{!cableUnitName}" PortalBrugerRole="{!portalBrugerRole}" />
+<apex:form id="theform">
+
+               <apex:messages globalOnly="true" styleClass="mailError" rendered="{!errorFlag == true}"/>
+               <apex:messages globalOnly="true"  styleClass="successClass" rendered="{!successFlag == true}"/>
+               <apex:messages globalOnly="true"  styleClass="warningError" rendered="{!warningFlag == true}"/>
+               <apex:outputPanel layout="block" styleClass="warningError" rendered="{!emailFlag == 'false' }" >
+               <apex:outputText value="{!$Label.SC_C5}" />
+               </apex:outputPanel>
+               <apex:outputPanel styleClass="warningError" rendered="{!isContactVisible}" >
+               Du har fors?gt at oprette en kontakt, som benytter et telefon-nr. som allerede benyttes af eksisterende kontakter hos YouSee. Gennemse venligst nedenst?ende liste og tjek, at din kontakt ikke allerede er oprettet. Hvis kontakten ikke eksisterer, kan du ignorere advarslen og oprette kontakten alligevel. Dette g?res ved at klikke p? knappen?Ignorer advarsel og opret kontakt? forneden.
+               </apex:outputPanel>
+               <apex:outputPanel id="panelKopierNumber" styleClass="mailError" style="visibility:hidden" >
+               Entered one is not number
+               </apex:outputPanel>
+    <apex:pageBlock rendered="{!renderSection}">
+           <apex:pageBlock rendered="{!isContactVisible}">
+                <apex:pageBlockTable value="{!filteredContacts}" var="list"   columns="4" border="3" width="100%"  columnsWidth="2" frame="box" >
+                    <apex:column headervalue="Navn" value="{!list.contactName}"  width="25%" headerClass="headerStyle"/>
+                    <apex:column headervalue="E-mail" value="{!list.email}" width="20%" headerClass="headerStyle" />
+                    <apex:column headervalue="Kontaktroller" width="35%" headerClass="headerStyle">
+                        <apex:outputPanel id="popupId" style="visibility:hidden;" styleClass="customPopup" >
+                           <label id="{!list.contactName}" for="View Roles"></label>
+                        </apex:outputPanel>
+                        <apex:outputLabel value="View Roles.." onmouseout="hideObject('{!$Component.popupId}');"  onmouseover="popup('{!list.RoleName}','{!$Component.popupId}', '{!list.contactName}');" style="color:DarkOrange"  id="labelRole"></apex:outputLabel>
+                    </apex:column>
+                    <apex:column headerValue="Handling" width="15%" headerClass="headerStyle">
+                        <apex:outputlink value="{!$Site.Prefix}/apex/ViewContactPage" title="Click to View" styleclass="btnViewIcon">
+                             <apex:param name="cableunitnumber" value="{!list.cUId}"/>
+                             <apex:param name="accountId" value="{!list.accountId}"/>
+                             <apex:param name="contactId" value="{!list.contactId}" />
+                             <apex:param name="dataSyncLogId" value="{!$CurrentPage.parameters.dataSyncLogId}" />
+                        </apex:outputlink>
+                        {!list.space}
+                        <apex:outputlink value="{!$Site.Prefix}/apex/EditContactPage" title="Click to Edit" styleclass="btneditIcon">
+                               <apex:param name="cableunitnumber" value="{!list.cUId}"/>
+                               <apex:param name="contactId" value="{!list.contactId}"/>
+                               <apex:param name="accountId" value="{!list.accountId}"/>
+                               <apex:param name="loggedInaccountId" value="{!AccountId}"/>
+                               <apex:param name="dataSyncLogId" value="{!$CurrentPage.parameters.dataSyncLogId}" />
+                               <apex:param name="emailUnique" value="true" />
+                        </apex:outputlink>
+                    </apex:column>
+                </apex:pageBlockTable>
+       </apex:pageBlock>
+    
+       <div id="phoneValidationMsg" style="display:none;height: 21px;padding-left: 50px;padding-top: 18px;border-color: red;color: grey;" class="mailError">
+               <apex:outputText id="Msg1" value="{!$Label.SC_PhoneValidation}"/>
+       </div>
+       <div id="roleValidationMsg" style="display:none;height: 21px;padding-left: 50px;padding-top: 18px;border-color: red;color: grey;" class="mailError">
+               <apex:outputText id="Msg2" value="{!$Label.SC_RoleValidation}"/>
+       </div>
+       <div id="phoneLengthMsg" style="display:none;height: 21px;padding-left: 50px;padding-top: 18px;border-color: red;color: grey;" class="mailError">
+               <apex:outputText id="Msg3" value="{!$Label.SC_PhoneLengthValidation}"/>
+       </div>
+       <apex:outputPanel >
+       <div class="bullets">
+       <ul>
+        <li><apex:outputText value="{!$Label.SC_EditContactPageHeaderLabel}"/> </li>
+       </ul>
+       </div>
+       </apex:outputPanel>
+      
+       <apex:PageBlock mode="edit" id="contactDetailsPB">
+           <apex:PageBlockSection title="Rediger Kontakt" collapsible="false" columns="2" id="contactDetailsPBS">
+           		 <!--Commented For SF-1599 
+           		 <apex:inputField id="firstName" value="{!contact.FirstName}"  required="true" style="width:150px"></apex:inputField>  -->
+           		 
+                 <apex:inputField id="firstName" value="{!contact.FirstName}" style="width:150px"></apex:inputField>
+                 <apex:inputField id="lastName" value="{!contact.LastName}" style="width:150px"></apex:inputField>
+                 <apex:inputField id="email" value="{!contact.Email}" style="width:150px"></apex:inputField>
+                 <apex:inputField value="{!contact.AlternateEmail__c}" id="alternateEmail" style="width:150px"></apex:inputField>
+                 <apex:inputField id="phone" value="{!contact.Phone}" style="width:150px" ></apex:inputField>
+                 <apex:inputField value="{!contact.MobilePhone}" id="mobilePhone" style="width:150px"></apex:inputField>
+                 <apex:inputField id="homePhone" value="{!contact.HomePhone}" style="width:150px"></apex:inputField>
+                <script>
+                           document.getElementById('{!$Component.firstName}').disabled = {!isContactVisible};
+                           document.getElementById('{!$Component.lastName}').disabled = {!isContactVisible};
+                           document.getElementById('{!$Component.email}').disabled = {!isContactVisible};
+                           document.getElementById('{!$Component.phone}').disabled = {!isContactVisible};
+                           document.getElementById('{!$Component.mobilePhone}').disabled = {!isContactVisible};
+                           document.getElementById('{!$Component.homePhone}').disabled = {!isContactVisible};
+                           if(true=={!isContactVisible}){
+                               document.getElementById('{!$Component.streetO}').disabled = {!isContactVisible};
+                           }
+                 </script>
+           </apex:PageBlockSection>
+       </apex:PageBlock>
+       
+    <apex:pageBlock id="addressDetailPB">   
+        <apex:PageBlockSection id="addressDetailsPBS" title="Adresse information" collapsible="false" columns="2" rendered="{!isContactVisible=false}">
+                  
+                 <apex:pageBlockSectionItem labelStyleClass="labelStyle" id="addressDetailsPBSI">
+                   		 <apex:outputLabel styleClass="headerStyle">Søg adresse</apex:outputLabel>
+                   		 	<apex:actionRegion >  
+			                    <apex:inputField value="{!contact.Street_P__c}" id="streetI" required="true" >
+			                        <apex:actionSupport event="onchange" action="{!fetchAddressDetails}" rerender="addressDetails" status="refreshStatus"/>
+			                    </apex:inputField>
+                  				<apex:actionStatus id="refreshStatus" startText="Søgning..." >
+			                        <apex:facet name="start" ><img src="{!URLFOR($Resource.Loading)}" border="0" height="18px" width="18px" style="color:red;"/> </apex:facet>
+			                        <apex:facet name="stop" ></apex:facet>
+                   				</apex:actionStatus>
+                     	  </apex:actionRegion> 
+                 </apex:pageBlockSectionItem>   	  
+               <apex:outputPanel rendered="{!isContactVisible=true}">
+                    <apex:outputField value="{!contact.Street_P__c}" id="streetO" styleClass="headerStyle"></apex:outputField>
+               </apex:outputPanel>
+       
+    </apex:pageBlockSection>
+        
+        <apex:outputPanel id="addressDetails">
+        
+               <apex:pageBlockSection rendered="{!displayAddressInfo}" collapsible="false" columns="2" id="addressDetailsPBS1">
+               
+                    <apex:pageBlockSectionItem labelStyleClass="labelStyle" >
+                              <apex:outputLabel value="Gade" for="Gadenavn"/>
+                              <apex:outputField value="{!address.Street__c}"></apex:outputField>  
+                      </apex:pageBlockSectionItem>
+                      <apex:pageBlockSectionItem >
+                              <apex:outputLabel value="Husnr." for="Husnr"/>
+                              <apex:outputField value="{!address.HouseNumber__c}"></apex:outputField>  
+                      </apex:pageBlockSectionItem>
+                     <apex:pageBlockSectionItem >
+                              <apex:outputLabel value="Opgang" for="Opgang"/>
+                              <apex:outputField value="{!address.Entrance__c}"></apex:outputField>
+                      </apex:pageBlockSectionItem>
+                      <apex:pageBlockSectionItem >
+                              <apex:outputLabel value="Side/dørnr" for="Dør"/>
+                              <apex:outputField value="{!address.Door_No__c}"></apex:outputField> 
+                      </apex:pageBlockSectionItem>
+                      <apex:pageBlockSectionItem >
+                              <apex:outputLabel value="Etage" for="Etage"/>
+                              <apex:outputField value="{!address.Floor__c}"></apex:outputField> 
+                      </apex:pageBlockSectionItem>
+                      <!-- <apex:pageBlockSectionItem >
+                              <apex:outputLabel value="Side" for="Side"/>
+                              <apex:outputField value="{!address.Side__c}"></apex:outputField>
+                      </apex:pageBlockSectionItem> -->
+                      <apex:pageBlockSectionItem >
+                              <apex:outputLabel value="Postnr" for="Postnr"/>
+                              <apex:outputField value="{!address.Postcode__c}"></apex:outputField>      
+                      </apex:pageBlockSectionItem>
+                      <apex:pageBlockSectionItem >
+                              <apex:outputLabel value="By" for="By"/>
+                              <apex:outputField value="{!address.Town__c}"></apex:outputField> 
+                      </apex:pageBlockSectionItem>
+                 </apex:PageBlockSection>
+            </apex:outputPanel>     
+  </apex:pageBlock>
+  
+    <apex:PageBlock mode="edit" id="blk2">
+        <apex:PageBlockSection title="Rediger Roller" collapsible="false"></apex:PageBlockSection>
+           <table border="5" width="60%" align="Center">
+                   <tr>
+                        <td width="45%" class="headerStyle">Tilgængelige Roller</td>
+                        <td width="10%">&nbsp;&nbsp;</td>
+                        <td width="45%" class="headerStyle">Valgte Roller</td>
+                   </tr>
+                   <tr id='rolesDisplay'>
+                       <td width="45%">
+                           <apex:selectList value="{!availableItems}" id="list1" multiselect="true" size="5" disabled="{!isContactVisible}" style="width:150px;">
+                               <apex:selectOptions value="{!items}"/>
+                           </apex:selectList>
+                       </td>
+                       <td width="10%" >
+                            <input type="button" value=">>" onclick="moveToRightList('{!$Component.list1}', '{!$Component.list2}')" id="btnMoveRight" />
+                            <input type="button" value="<<" onclick="moveToLeftList('{!$Component.list1}', '{!$Component.list2}')" id="btnMoveLeft"/>
+                       </td>
+                       <td width="45%">
+                           <apex:selectList value="{!assignedItems}" id="list2" multiselect="true" size="5" disabled="{!isContactVisible}" style="width:150px;">
+                               <apex:selectOptions value="{!items}"/>
+                           </apex:selectList>
+                       </td>
+                  </tr>
+                  <tr> <td colspan="3"> &nbsp; </td></tr>
+           </table>
+           <table border="5" width="60%" align="Center">
+                   <tr>
+                           <td><apex:outputLabel id="AntalId" value="Antal Kopier" style="visibility:hidden;"/></td>
+                           <td><apex:inputText id="AntalkopierId" value="{!acrContact.Total_Insight__c}" style="visibility:hidden" onMouseDown="return noCopyMouse(event);" onKeyDown="return noCopyKey(event);" onkeypress="return acceptNumerics(event);" maxlength="5" ></apex:inputText></td>
+                   </tr>
+                  
+           </table>
+           <apex:inputHidden value="{!roleSelected}" id="list3"/>
+           <apex:inputHidden value="{!roleSelectedId}" id="list4"/>
+           <apex:inputHidden value="{!accountId}" />
+           <apex:inputHidden id="hdnSelectedItems" value="{!selectedRoleValues}"/>
+           <apex:inputHidden id="hdnSelectedItemsIds" value="{!selectedRoleIds}"/>
+                <script>
+                     window.onload = function(){
+                            var indbliksadresseRoleCheck = '{!$Label.SC_IndbliksadresseRoleCheck}';
+                            antalId = '{!$Component.AntalId}';
+                            antalKopierId= '{!$Component.AntalkopierId}';
+
+                            var secndlist = document.getElementById("{!$Component.list2}");
+                            var firstlist = document.getElementById("{!$Component.list1}");
+
+                           var len =  secndlist.length;
+
+                           for(var i=len-1;i >= 0;i--) {
+                              //alert('secndlist---' + secndlist[i].text);
+                               secndlist.remove(i);
+                           }
+                           //alert('document.getElementById("{!$Component.list3}")---' + document.getElementById("{!$Component.list3}"));
+                           var selectedValue = document.getElementById("{!$Component.list3}").value;
+                           //alert('selectedValue---' + selectedValue);
+                           // alert('#'+'{!selectedRoleValues}'+'#');
+                           var selectedId = document.getElementById("{!$Component.list4}").value;
+                          // alert('selectedId---' + selectedId);
+                           var currentTagTokens = selectedValue.split(",");
+
+                           var currentTagTokensId = selectedId.split(",");
+                           var existingTags = "";
+                           secndlist.add(new Option('----------- Vælg -------------', '----------- Vælg -------------'), undefined);
+
+                           if('{!selectedRoleValues}' == null || '{!selectedRoleValues}'=='' || '{!selectedRoleValues}'==' '){
+                              for(var i = 1; i < currentTagTokens.length; i++ ){
+                                       // alert('currentTagTokensId[i]---' + currentTagTokensId[i]);
+                                        secndlist.add(new Option(currentTagTokens[i],currentTagTokensId[i]), undefined);
+                                        if(currentTagTokens[i]== indbliksadresseRoleCheck){
+                                           document.getElementById('{!$Component.AntalId}').style.visibility ="visible";
+                                           document.getElementById('{!$Component.AntalkopierId}').style.visibility ="visible";
+                                        }
+                               }
+
+                               var j;
+                               var firstListText = new Array();
+                               var firstListValues = new Array();
+                               var selectedCount = 0;
+
+                               for(j = firstlist.length-1; j>0; j--){
+                                 firstListText[selectedCount] = firstlist[j].text;
+                                 if(currentTagTokens.length > 0){
+                                  for ( var i = 1; i < currentTagTokens.length; i++ ){
+                                          if(firstListText[valueCount] != 'undefined'){
+                                                  if(firstListText[selectedCount] == currentTagTokens[i]){
+                                                         firstlist[j] = null;
+                                                  }
+                                          }
+                                   }
+                                 }//end of if condtn
+                                 selectedCount++;
+                               }
+                            }else{ //Changes done for SPOC 113 when selectedRoleValues is not null while checking for validation of roles
+                               // alert('inside else');
+                               var hiddenSelectedItems = '{!selectedRoleValues}';
+                               var hiddenSelectedIds = '{!selectedRoleIds}';
+                               //alert('hiddenSelectedItems: ' + hiddenSelectedItems);
+                               //alert('hiddenSelectedIds: ' + hiddenSelectedIds);
+                               for(var i=len-1;i >= 0;i--) {
+                                      //alert('secndlist---' + secndlist[i].text);
+                                       secndlist.remove(i);
+                                   }
+                                   secndlist.add(new Option('----------- Vælg -------------', '----------- Vælg -------------'), undefined);
+                                   var arrSelectedValue = hiddenSelectedItems.split(",");
+                                       var arrSelectedId  = hiddenSelectedIds.split(",");
+                                       if(arrSelectedValue.length > 0){
+                                                 for(var valueCount = 0 ; valueCount < arrSelectedValue.length ; valueCount++) {
+                                                        secndlist.add(new Option(arrSelectedValue[valueCount],arrSelectedId[valueCount]),undefined);
+                                                        if(arrSelectedValue[valueCount]== indbliksadresseRoleCheck){
+                                                               document.getElementById('{!$Component.AntalId}').style.visibility ="visible";
+                                                               document.getElementById('{!$Component.AntalkopierId}').style.visibility ="visible";
+                                                            }
+                                                 }
+                                       }
+                                      // alert('firstlist.length: '+firstlist.length);
+                                       for(j = firstlist.length-1; j>0; j--){
+                                                //alert('firstlist[j].text: ' + firstlist[j].text);
+                                                for(var valueCount = 0 ; valueCount < arrSelectedValue.length ; valueCount++) {
+                                                       // alert('arrSelectedValue[valueCount]: ' + arrSelectedValue[valueCount]);
+                                                        if(firstlist[j].text == arrSelectedValue[valueCount]){
+                                                                //alert('There is match.');
+                                                                firstlist[j]=null;
+                                                                break;
+                                                        }
+                                                }
+                                       }
+                               }//end of else part
+                               }//End of onload
+                   document.getElementById('btnMoveRight').disabled = {!isContactVisible};
+                   document.getElementById('btnMoveLeft').disabled = {!isContactVisible};
+                   if(true=={!isContactVisible}){
+                       document.getElementById('{!$Component.btnSave}').value = 'Ignorer advarsel og opret kontakt';
+                       document.getElementById('{!$Component.btnCancel}').value = 'Annuller';
+                   }
+              </script>
+       </apex:PageBlock>
+       <!-- <input type="button" value="ABC" onclick="check();" id="ABC" />
+       <input type="button" value="XYZ" onclick="selectAllSelected('{!$Component.list1}', '{!$Component.list2}');" id="XYZ" />
+       <apex:commandButton id="btnSave" action="{!saveContacts}" value="{!$Label.SC_EditContactPage_Save}" title="Klik for at gemme kontakt" onclick="selectAllSelected('{!$Component.list1}', '{!$Component.list2}');return validationFunction();"> </apex:commandButton>
+       <apex:commandButton id="btnSave" action="{!saveContacts}" value="{!$Label.SC_EditContactPage_Save}" title="Klik for at gemme kontakt" onclick="selectAllSelected();"> </apex:commandButton>
+       -->
+       <apex:actionFunction action="{!saveContacts}" name="saveContacts" > </apex:actionFunction>
+       <table border="5" width="60%" align="Center">
+               <tr>
+                       <td colSpan="3">
+                        <!-- <apex:commandButton onclick="selectAllSelected();" id="btnSave" value="{!$Label.SC_EditContactPage_Save}"  title="Klik for at gemme kontakt" immediate="true" />-->            
+                               <input type="button" value="{!$Label.SC_EditContactPage_Save}" onclick="selectAllSelected();" id="btnSave" title="Klik for at gemme kontakt" class="dialogbutton_orange" style="height: 18px; border-width: 0px;font-weight: bold;padding: 0 15px;text-transform: none;font-size:11px;"/>
+                       &nbsp; &nbsp; &nbsp;
+                       <apex:commandButton action="{!cancel}" id="btnCancel" value="{!$Label.SC_EditContactPage_Cancel}"  title="Klik for at annullere" immediate="true" styleClass="dialogbutton_grey"/>
+                   </td>
+               </tr>
+       </table>
+        </apex:pageBlock>
+    <apex:pageMessage detail="{!$Label.CableUnitNotMatched}" rendered="{!!renderSection}" severity="error"></apex:pageMessage>
+<script type="text/javascript">
+
+	document.getElementById('{!$Component.theform:addressDetailPB:addressDetailsPBS:addressDetailsPBSI:streetI}').readOnly = true;          
+</script>
+<script type="text/javascript">printContentAreaEnd();</script>
+<script type="text/javascript">printFooter();</script>
+</apex:form>
+</body>
+</html>
+</apex:page>

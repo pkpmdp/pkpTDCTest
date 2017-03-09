@@ -1,0 +1,80 @@
+<apex:component controller="ConsoleKundeLog_CT" allowDML="true"> 
+    <apex:includeScript value="{!URLFOR($Resource.jQuery160)}"/>
+    <apex:includeScript value="/support/console/28.0/integration.js"/>
+    <apex:attribute name="currentId" description="This is the Account Id for displaying Acccount Notes" type="String" required="true" assignTo="{!currentId}"/>
+    
+    <apex:form >
+    <body>
+    
+        <fieldset id="formid">
+            <legend style="color:#B8B8B8;font-family:Calibri,sans-serif;font-size:15px;">Kundelog</legend>
+            <div style="width:220px;float:left;height:100%;position:relative;">
+                <apex:inputTextArea value="{!strNotes}" style="width:160px;float:left;height:59px;margin-left:5px;margin-bottom:2px" id="notes"/>
+                
+                <apex:commandButton value="Gem" style="margin-left: 3%;float:left;bottom:0px;position:absolute;" oncomplete="refresh(event);" action="{!btnSave}" id="cmdGem"/><!--  rerender="op" oncomplete="reload();" oncomplete="refresh(event);" action="{!btnSave}"  />-->
+    <!--            <div style="height:30px;"></div>  -->
+            </div>
+        </fieldset>
+    
+    </body>
+    <apex:outputpanel id="op"></apex:outputpanel>
+    <script>
+        var j$ = jQuery.noConflict();
+        
+        function refresh(event){
+            if (sforce.console.isInConsole()){
+                sforce.console.getEnclosingTabId(function (success){
+                        sforce.console.getEnclosingPrimaryTabId(function (PrimaryId){                                                       
+                            sforce.console.refreshPrimaryTabById(PrimaryId.id,false);                           
+                    });
+                })      
+            }
+        }
+        
+   
+        
+    var nVer = navigator.appVersion;
+    var nAgt = navigator.userAgent;
+    var browserName  = navigator.appName;
+    var fullVersion  = ''+parseFloat(navigator.appVersion); 
+    var majorVersion = parseInt(navigator.appVersion,10);
+    var nameOffset,verOffset,ix;
+    
+    // In Opera, the true version is after "Opera" or after "Version"
+    if ((verOffset=nAgt.indexOf("Opera"))!=-1) {
+        
+    }
+    // In MSIE, the true version is after "MSIE" in userAgent
+    else if ((verOffset=nAgt.indexOf("MSIE"))!=-1) {
+        
+    }
+    // In Chrome, the true version is after "Chrome" 
+    else if ((verOffset=nAgt.indexOf("Chrome"))!=-1) {
+         //var formid1 = document.getElementById('form');
+         //var btnSave = document.getElementById('{!$Component.cmdGem}');   
+         //formid1.style.width= "102%";
+
+    }
+    // In Safari, the true version is after "Safari" or after "Version" 
+    else if ((verOffset=nAgt.indexOf("Safari"))!=-1) {
+        
+    }
+    // In Firefox, the true version is after "Firefox" 
+     else if ((verOffset=nAgt.indexOf("Firefox"))!=-1) {
+        
+     }
+    // In most other browsers, "name/version" is at the end of userAgent 
+     else if ( (nameOffset=nAgt.lastIndexOf(' ')+1) < (verOffset=nAgt.lastIndexOf('/')) ) 
+     {
+         browserName = nAgt.substring(nameOffset,verOffset);
+         fullVersion = nAgt.substring(verOffset+1);
+         if (browserName.toLowerCase()==browserName.toUpperCase()) {
+             browserName = navigator.appName;
+         }
+     }
+     
+    
+    </script>
+    
+    </apex:form> 
+</apex:component>

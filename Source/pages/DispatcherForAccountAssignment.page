@@ -1,0 +1,2 @@
+<apex:page standardController="Contact" extensions="DispatcherForAccountAssignmentController" action="{!redirectEditPage}" sidebar="true"  showHeader="true">
+</apex:page>

@@ -1,0 +1,181 @@
+<apex:page standardController="Account" extensions="DealerUpdateController" >
+<style>
+ .panelStyle{ 
+    padding-top: 0px;
+    padding-right: 0px;
+    padding-bottom: 13px;
+    padding-left: 81px;
+    font-family:verdana;
+}
+.fontVerdana{ font-family: 'Verdana'; } 
+</style>
+<apex:form id="theform">
+<apex:messages styleClass="exceptionText" globalOnly="true"/>
+<apex:stylesheet value="{!URLFOR($Resource.styleCss,'myStyle/myStyle.css')}"/> 
+
+<apex:outputPanel layout="block" styleclass="container">
+
+<apex:PageBlock >
+<apex:pageBlockSection title="Forhandler Information" >
+   <apex:pageBlockSectionItem >
+     <apex:outputLabel value="Dealer Number" for="dnumber" styleClass="fontVerdana"></apex:outputLabel>
+          <apex:outputText styleClass="fontVerdana" value="{!ViewAccount.Name}"   />
+     </apex:pageBlockSectionItem>
+     <apex:pageBlockSectionItem >
+                    <apex:outputLabel styleClass="fontVerdana" value="Debitor Number" for="dnumber"></apex:outputLabel>
+                    <apex:outputText styleClass="fontVerdana" value="{!ViewAccount.Debitor_Number__c}"  />
+     </apex:pageBlockSectionItem>
+     <apex:pageBlockSectionItem >
+                    <apex:outputLabel styleClass="fontVerdana" value="Dealer Name" for="dnumber"></apex:outputLabel>
+                    <apex:outputText styleClass="fontVerdana" value="{!ViewAccount.Name}" />
+            </apex:pageBlockSectionItem>
+             <apex:pageBlockSectionItem >
+                    <apex:outputLabel styleClass="fontVerdana" value="YouSee Tv-signal i butik" for="dnumber"></apex:outputLabel>
+                    <apex:outputField styleClass="fontVerdana" value="{!ViewAccount.Basis__c}"  />
+            </apex:pageBlockSectionItem>
+            <apex:pageBlockSectionItem >
+                    <apex:outputLabel styleClass="fontVerdana" value="Dealer Kategori" for="kategori"></apex:outputLabel>
+                    <apex:outputText styleClass="fontVerdana" value="{!ViewAccount.Category__c}" />
+            </apex:pageBlockSectionItem>
+            <apex:pageBlockSectionItem >
+                     <apex:outputLabel styleClass="fontVerdana" value="POS" for="pos"></apex:outputLabel>
+                    <apex:outputField styleClass="fontVerdana" value="{!ViewAccount.POS__c}"  />
+             </apex:pageBlockSectionItem>
+             <apex:pageBlockSectionItem >
+                    <apex:outputLabel styleClass="fontVerdana" value="Dealer Group" for="group"></apex:outputLabel>
+                    <apex:outputText styleClass="fontVerdana" value="{!ViewAccount.DealerGroup__c}" />
+            </apex:pageBlockSectionItem>
+            <apex:pageBlockSectionItem >
+                    <apex:outputLabel styleClass="fontVerdana" value="Sales Consultant" for="consultant"></apex:outputLabel>
+                    <apex:outputText styleClass="fontVerdana" value="{!ViewAccount.sales_consultant__c}"  />
+            </apex:pageBlockSectionItem>
+            <apex:pageBlockSectionItem >
+                    <apex:outputLabel styleClass="fontVerdana" value="Afregnes" for="afregnes"></apex:outputLabel>
+                    <apex:outputText styleClass="fontVerdana" value="{!ViewAccount.Afregnes__c}"  />
+            </apex:pageBlockSectionItem>
+            <apex:pageBlockSectionItem >
+                    <apex:outputLabel styleClass="fontVerdana" value="Dealer Products" for="dprdoucts"></apex:outputLabel>
+                    <apex:outputField styleClass="fontVerdana" value="{!ViewAccount.selectedProduct__c}"  />
+            </apex:pageBlockSectionItem>
+             <apex:pageBlockSectionItem >
+                    <apex:outputLabel styleClass="fontVerdana" value="Email" for="Email"></apex:outputLabel>
+                    <apex:outputText styleClass="fontVerdana" value="{!ViewAccount.Email__c}"  />
+            </apex:pageBlockSectionItem>
+            <apex:pageBlockSectionItem >
+                    <apex:outputLabel styleClass="fontVerdana" value="Phone" for="Phone"></apex:outputLabel>
+                    <apex:outputText styleClass="fontVerdana" value="{!ViewAccount.Phone}" />
+            </apex:pageBlockSectionItem>
+            <apex:pageBlockSectionItem >
+                     <apex:outputLabel styleClass="fontVerdana" value="Fax" for="Fax"></apex:outputLabel>
+                     <apex:outputText styleClass="fontVerdana" value="{!ViewAccount.Fax}" />
+            </apex:pageBlockSectionItem>
+            <apex:pageBlockSectionItem >
+                    <apex:outputLabel styleClass="fontVerdana" value="Street" for="Street"></apex:outputLabel>
+                    <apex:outputText styleClass="fontVerdana" value="{!Street}"  />
+            </apex:pageBlockSectionItem>
+              <apex:pageBlockSectionItem >
+                    <apex:outputLabel styleClass="fontVerdana" value="Address" for="address"></apex:outputLabel>
+                    <apex:outputText styleClass="fontVerdana" value="{!houseNumber}" />
+            </apex:pageBlockSectionItem>
+               <apex:pageBlockSectionItem >
+                    <apex:outputLabel styleClass="fontVerdana" value="Post code" for="postcode"></apex:outputLabel>
+                    <apex:outputText styleClass="fontVerdana" value="{!postcode}"  />
+            </apex:pageBlockSectionItem>
+            <apex:pageBlockSectionItem >
+                    <apex:outputLabel styleClass="fontVerdana" value="Town" for="town"></apex:outputLabel>
+                    <apex:outputText styleClass="fontVerdana" value="{!town}" />
+            </apex:pageBlockSectionItem>
+          
+</apex:pageBlockSection>
+
+                <apex:PageBlockSection title="Manager" collapsible="true"  id="managerPanel" rendered="{!IF(ViewManager.LastName=null,false,true)}">
+                 <apex:pageBlockSectionItem >
+                    <apex:outputLabel styleClass="fontVerdana" value="Name" for="Name"></apex:outputLabel>
+                    <apex:outputText styleClass="fontVerdana" value="{!ViewManager.LastName}"  />
+                </apex:pageBlockSectionItem>  
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel styleClass="fontVerdana" value="Email" for="Email"></apex:outputLabel>
+                    <apex:outputText styleClass="fontVerdana" value="{!ViewManager.email}"  />
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel styleClass="fontVerdana" value="Mobile" for="Mobile"></apex:outputLabel>
+                    <apex:outputText styleClass="fontVerdana" value="{!ViewManager.Phone}"  />
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel styleClass="fontVerdana" value="street" for="street"></apex:outputLabel>
+                    <apex:outputText styleClass="fontVerdana" value="{!ViewManager.Street_P__r.name}"  />
+                </apex:pageBlockSectionItem> 
+                 <apex:pageBlockSectionItem >
+                    <apex:outputLabel styleClass="fontVerdana" value="Address" for="Address"></apex:outputLabel>
+                    <apex:outputText styleClass="fontVerdana" value="{!ViewManager.house_address__c}"  />
+                </apex:pageBlockSectionItem> 
+                 <apex:pageBlockSectionItem >
+                    <apex:outputLabel styleClass="fontVerdana" value="Post Code" for="postcode"></apex:outputLabel>
+                    <apex:outputText styleClass="fontVerdana" value="{!ViewManager.Street_P__r.Postcode__c}"  />
+                </apex:pageBlockSectionItem> 
+                 <apex:pageBlockSectionItem >
+                    <apex:outputLabel styleClass="fontVerdana" value="Town" for="town"></apex:outputLabel>
+                    <apex:outputText styleClass="fontVerdana" value="{!ViewManager.Street_P__r.Town__c}"  />
+                </apex:pageBlockSectionItem>                  
+        </apex:PageBlockSection> 
+        <apex:PageBlockSection title="Ambassador" collapsible="true"  id="ambassadorPanel" columns="2" rendered="{!IF(ViewAmbassadorList.size>0,true,false)}">
+           <apex:outputPanel >
+                     <apex:dataTable value="{!ViewAmbassadorList}" var="item">                       
+                         <apex:column styleClass="panelStyle">
+                           <apex:outputLabel value="Ambassador" style="font-weight:bold"/>
+                         </apex:column>
+                         <apex:column breakBefore="true" styleClass="panelStyle">
+                           <apex:outputLabel value="Name" for="NameText"/>
+                         </apex:column>
+                         <apex:column styleClass="panelStyle">
+                           <apex:outputText id="NameText" value="{!item.LastName}"/>
+                         </apex:column><br/>
+                         <apex:column styleClass="panelStyle">
+                           <apex:outputLabel value="Email" for="EmailText"/>
+                         </apex:column>
+                         <apex:column styleClass="panelStyle">
+                           <apex:outputText id="EmailText" value="{!item.Email}"/>
+                         </apex:column><br/>
+                      
+                         <apex:column breakBefore="true" styleClass="panelStyle">
+                           <apex:outputLabel value="Mobile" for="MobileText"/>
+                         </apex:column>
+                         <apex:column styleClass="panelStyle">
+                           <apex:outputText id="MobileText" value="{!item.phone}"/>
+                         </apex:column><br/>
+                         
+                         <apex:column styleClass="panelStyle">
+                           <apex:outputLabel value="Street" for="AddressText"/>
+                         </apex:column>
+                         <apex:column styleClass="panelStyle">
+                           <apex:outputText id="AddressText" value="{!item.Street_P__r.name}"/>
+                         </apex:column><br/>
+                        
+                         <apex:column breakBefore="true" styleClass="panelStyle">
+                           <apex:outputLabel value="Address" for="HouseText"/>
+                         </apex:column>
+                         <apex:column styleClass="panelStyle" width="20%">
+                           <apex:outputText id="HouseText" value="{!item.house_address__c}"/>
+                         </apex:column><br/>
+                         
+                     <apex:column styleClass="panelStyle">
+                           <apex:outputLabel value="Post code" for="PostCodeText"/>
+                         </apex:column>
+                         <apex:column styleClass="panelStyle">
+                           <apex:outputText styleClass="fontVerdana" id="PostCodeText" value="{!item.Street_P__r.Postcode__c}"/>
+                         </apex:column><br/>
+                         
+                         <apex:column breakBefore="true" styleClass="panelStyle">
+                           <apex:outputLabel styleClass="fontVerdana" value="Town" for="TownText"/>
+                         </apex:column>
+                         <apex:column styleClass="panelStyle">
+                           <apex:outputText styleClass="fontVerdana" id="TownText" value="{!item.Street_P__r.Town__c}"/>
+                         </apex:column><br/>
+                    
+                     </apex:dataTable>                     
+               </apex:outputPanel>
+          </apex:PageBlockSection> 
+</apex:PageBlock>
+</apex:outputPanel>        
+</apex:form>
+</apex:page>

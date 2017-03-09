@@ -1,0 +1,71 @@
+<apex:page standardController="Contact" extensions="DealerWebConferenceRegisterController" sidebar="false"  showHeader="false" id="registrationPage" action="{!sendEmail}" applyHtmlTag="false"> 
+<html class="cvi2015"><!--SPOC 2206-->
+<head> 
+    <meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+</head>
+<style> 
+    .fontVerdana{ font-family: 'Verdana'; }
+</style>
+ 
+<script type="text/javascript" src="https://yousee.dk/sitecore/content/data/export/export.aspx?itemguid={F545894B-61F9-4C9D-BC1C-833B7DB0853F}&functions=true" > </script> 
+<!-- Added for DW 750 -->
+<c:TopMenuComponent ></c:TopMenuComponent>
+<script type="text/javascript" language="javascript">printHeader();</script>
+    <script type="text/javascript">printTopMenu();</script>
+<script type="text/javascript">printContentAreaBegin();</script>
+
+<apex:messages />    
+<apex:form >    
+<apex:pageBlock rendered="{!lstInsertedContacts.size>0}" > 
+<br/>
+<apex:outputLabel >
+Tak for tilmelding til YouSee13 - din kvittering på tilmelding kommer med det samme på din indtastede e-mail-adresse. Kvitteringen er din indgangsbillet, så den skal du printe og tage med på dagen. <br/>
+Vi glæder os utroligt meget til at se dig og håber, vi får en fantastisk dag sammen.<br/>
+Har du spørgsmål, er du velkommen til at kontakte din forhandlerkonsulent eller Forhandlersupport.<br/><br/>
+
+Venlig hilsen<br/>
+YouSee Forhandlersalg<br/> 
+</apex:outputLabel>
+</apex:pageBlock>
+<br/>
+
+<apex:pageBlock rendered="{!lstInsertedContacts.size>0}" title="Registrering blev gennemført">  
+    <table id="claims" class="list" border="0" cellspacing="0" cellpadding="0">
+        <tr>
+          <th>Fornavn</th>
+          <th>Efternavn</th>
+          <th>Mobilnummer</th>    
+          <th>E-mail-adresse</th>       
+        </tr>  
+        <apex:repeat var="c" value="{!lstInsertedContacts}">   
+            <tr>                  
+               <td><apex:outputText value="{!c.FirstName}" /></td>              
+               <td><apex:outputText value="{!c.LastName}" /></td>
+               <td><apex:outputText value="{!c.Conference_Mobile_Phone__c}" /></td>
+               <td><apex:outputText value="{!c.Email}" /></td>
+            </tr>  
+        </apex:repeat> 
+    </table><br/> 
+</apex:pageBlock>  
+<apex:pageBlock rendered="{!lstFailedContacts.size>0}" title="Registrering blev ikke gennemført">
+    <table id="claims" class="list" border="0" cellspacing="0" cellpadding="0">
+        <tr>
+          <th>Fornavn</th>
+          <th>Efternavn</th>
+          <th>Mobilnummer</th>    
+          <th>E-mail-adresse</th>       
+        </tr>  
+        <apex:repeat var="c" value="{!lstFailedContacts}">   
+            <tr>                  
+               <td><apex:outputText value="{!c.FirstName}" /></td>              
+               <td><apex:outputText value="{!c.LastName}" /></td>
+               <td><apex:outputText value="{!c.Conference_Mobile_Phone__c}" /></td>
+               <td><apex:outputText value="{!c.Email}" /></td>
+            </tr>  
+        </apex:repeat> 
+    </table><br/> 
+</apex:pageBlock>    
+<center><apex:commandButton action="{!redirectToHome}" value="Tilbage til forside" id="backBtn"/></center>
+</apex:form>
+</html>
+</apex:page>

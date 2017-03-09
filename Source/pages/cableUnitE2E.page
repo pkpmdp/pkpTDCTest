@@ -1,0 +1,36 @@
+<apex:page cache="true" standardStylesheets="false" contentType="application/vnd.ms-excel#CableUnits.xls" controller="ViewCableUnitsController" showheader="false">
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+    <style>
+        headerStyleLeft{align:left;font-weight:bold;}
+    </style>
+</head>
+<apex:pageBlock >
+<table border="1">
+    <thead>
+        <tr>
+          <th style="text-align:left;">Kundenr</th>
+          <th style="text-align:left;">Kundenavn</th>
+          <th style="text-align:left;">Løsning</th>
+         <!--  <th style="text-align:left;">Status</th> -->
+          <th style="text-align:left;">YouSee Clear</th>
+          <th style="text-align:left;">Bredbånd</th>
+          <th style="text-align:left;">Telefoni</th>
+        </tr>
+    </thead>
+    <tbody> 
+        <apex:repeat value="{!cUList}" var="cuList1">
+             <tr>
+                <td style="text-align:left;width:150px">{!cuList1.cableUnitNumber}</td>
+                <td style="text-align:left;width:150px">{!cuList1.CableUnitName}</td>
+                <td style="text-align:left;width:150px">{!cuList1.Solution}</td>
+             <!-- <td style="text-align:left;">{!cuList1.cableUnitStatus}</td> -->
+                <td style="text-align:left;">{!cuList1.TVService}</td>
+                <td style="text-align:left;">{!cuList1.BroadBandService}</td>
+                <td style="text-align:left;">{!cuList1.TelephonyService}</td>
+            </tr>         
+      </apex:repeat>            
+    </tbody>
+   </table>
+</apex:pageBlock>
+</apex:page>

@@ -1,0 +1,53 @@
+<apex:page controller="clsCallBackAdminController" tabStyle="CB_Schedule_Template__c" cache="true" title="{!$Label.CB_Admin_page_title}">
+<!--apex:page standardController="CB_Schedule_Template__c" extensions="clsCallBackAdminController" tabStyle="CB_Schedule_Template__c" cache="true"-->
+<apex:sectionHeader title="{!$Label.CB_Admin_Title}" subtitle="{!$Label.CB_Admin_Subtitle}"/>
+<apex:pageMessages id="pageMessagesId"/>
+<apex:form >
+<apex:pageBlock title="{!$Label.CB_Admin_Default_settings}" id="DefaultSettings">
+    <apex:pageBlockButtons location="top">
+        <apex:commandbutton action="{!URLFOR($Action.CB_Schedule_Template__c.New, $ObjectType.CB_Schedule_Template__c)}" value="{!$Label.CB_Admin_New_Template_Button}" title="{!$Label.CB_Admin_New_Template_Button}"> </apex:commandbutton>
+    </apex:pageBlockButtons>
+
+    <apex:pageBlockTable value="{!templates}" var="item" id="idTemplateTable" >
+        <apex:column headerValue="{!$Label.CB_Admin_Action_column}" width="50">
+          <apex:commandLink value="{!$Label.CB_Admin_Edit_Action}" action="{!editTemplate}">
+            <apex:param name="templateId" value="{!item.item.Id}"/>
+          </apex:commandLink>
+          <apex:outputText > |&nbsp;</apex:outputText>
+          <apex:commandLink value="{!$Label.CB_Admin_Delete_Action}" action="{!deleteTemplate}" reRender="idTemplateTable,pageMessagesId">
+            <apex:param name="templateId" value="{!item.item.Id}"/>
+          </apex:commandLink>
+        </apex:column>
+        
+        <apex:column headerValue="{!$ObjectType.CB_Schedule_Template__c.fields.Name.label}">
+            <apex:outputLink value="/{!item.item.Id}" style="{!item.itemStyle}">{!item.item.Name}</apex:outputLink>
+        </apex:column>
+        
+        <apex:column value="{!item.item.Valid_from__c}"/>
+        <apex:column value="{!item.item.CB_type__c}"/>
+    </apex:pageBlockTable>
+</apex:pageBlock>
+
+<apex:pageBlock title="{!$Label.CB_Admin_Manual_settings}" id="ManualSettings">
+    <apex:pageBlockButtons location="top">
+        <!--apex:commandbutton action="{!URLFOR($Action.CB_Custom_Schedule__c.New, $ObjectType.CB_Custom_Schedule__c)}" title="{!$Label.CB_Admin_New_Manual_Value_Button}" value="{!$Label.CB_Admin_New_Manual_Value_Button}"> </apex:commandbutton-->
+        <apex:commandbutton action="{!URLFOR($Page.CB_SchedCustValsNew+'?retURL=/apex/CallBackAdminPage')}" title="{!$Label.CB_Admin_New_Manual_Value_Button}" value="{!$Label.CB_Admin_New_Manual_Value_Button}"> </apex:commandbutton>
+    </apex:pageBlockButtons>
+    <apex:pageBlockTable value="{!custVals}" var="citem" id="idCustomTable">
+        <apex:column headerValue="{!$Label.CB_Admin_Action_column}" width="50">
+          <apex:commandLink value="{!$Label.CB_Admin_Delete_Action}" action="{!deleteCustomDay}" reRender="idCustomTable,pageMessagesId">
+            <apex:param name="date" value="{!citem.urlFormatedDay}"/>
+            <apex:param name="type" value="{!citem.CB_type}"/>
+          </apex:commandLink>
+        </apex:column>
+        <apex:column headerValue="{!$ObjectType.CB_Custom_Schedule__c.fields.CB_date__c.label}">
+            <apex:outputLink value="/apex/CB_SchedCustVals?date={!citem.urlFormatedDay}&type={!citem.CB_type}&retURL=/apex/CallBackAdminPage">
+               <apex:outputText value="{!citem.formatedDay}"/>
+            </apex:outputLink>
+        </apex:column>
+        <apex:column headerValue="{!$ObjectType.CB_Custom_Schedule__c.fields.CB_type__c.label}" value="{!citem.CB_type}"/>
+        <apex:column headerValue="{!$Label.CB_Admin_Intervals_and_Slots}" value="{!citem.intervalsAndSlots}"/>
+    </apex:pageBlockTable>
+</apex:pageBlock>
+</apex:form> 
+</apex:page>

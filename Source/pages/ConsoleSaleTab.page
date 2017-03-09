@@ -1,0 +1,99 @@
+<apex:page standardController="Account" extensions="clsConsoleSaleTabController" action="{!pageAction}" showHeader="true" sidebar="false" cache="true">
+  <apex:includeScript value="/support/console/25.0/integration.js" />
+  <script>
+      function openUrlInTab(url, tabLabel, tabName) {
+          var idPrimaryTab;
+          var getPrimaryTabId = function(result) {
+              idPrimaryTab = result.id;
+              sforce.console.focusSubtabByNameAndPrimaryTabId(tabName, idPrimaryTab, isAddressOpen);
+              //isAddressOpen();
+          };
+
+          function isAddressOpen(result) {
+              if (result.success != true) {
+                  sforce.console.openSubtab(idPrimaryTab, url, true,
+                      tabLabel, null, null, tabName);
+              }
+          }
+
+          if (sforce.console.isInConsole()) {
+              sforce.console.getEnclosingPrimaryTabId(getPrimaryTabId);
+              return false;
+          } else {
+              return true;
+          }
+      }
+  </script>
+
+  <apex:pageMessages />
+  <apex:form id="form">
+    <apex:pageBlock id="productPageBlock">
+      <apex:inputHidden value="{!Account.Customer_No__c}" />
+      <apex:inputHidden value="{!Account.Currency_Format__c}" />
+      <apex:outputField value="{!Account.Street_YK__r.External_Id__c}" rendered="false" />
+
+      <apex:pageBlockSection columns="1" title="{!$Label.Product_Offers}">
+
+        <apex:outputText rendered="{!displayNoOffers}" value="{!$Label.AccountHasNoProducts}" />
+        <apex:pageBlockTable rendered="{!displayOvernight}" value="{!overnightProducts}" var="overnightProduct" id="overnightProductsTable" columns="5" columnsWidth="16%,13%,62%,9%">
+          <apex:column headerValue="{!$Label.Name}" value="{!overnightProduct.Campaign_Name__c}" />
+          <apex:column headerValue="{!$Label.Street}" value="{!overnightProduct.Street_Name__c}" />
+          <apex:column headerValue="{!$Label.Description}" value="{!overnightProduct.Description__c}" />
+          <apex:column headerValue="{!$Label.Response}">
+            <apex:repeat value="{!Items}" var="item">
+              <apex:commandLink action="{!saveStatus}" value="{!item.Label}" rendered="{!AND(item.Value != StatusNone, item.Value != overnightProduct.Customer_Response__c)}" style="display:block;"
+                reRender="productPageBlock" styleClass="statusLink" onclick="window.document.body.className='updating';this.parentNode.className='updating'"
+                oncomplete="window.document.body.className='';this.parentNode.className=''">
+                <apex:param name="op_type" value="{!item.Value}" />
+                <apex:param name="op_id" value="{!overnightProduct.ID}" />
+              </apex:commandLink>
+            </apex:repeat>
+          </apex:column>
+        </apex:pageBlockTable>
+        <apex:pageBlockTable rendered="{!displaySAS}" value="{!sasProducts}" var="product" id="sasProductsTable" columns="6" columnsWidth="16%,11%,13%,51%,9%">
+          <apex:column headerValue="{!$Label.Name}" value="{!product.offerName}" />
+          <apex:column headerValue="{!$Label.Subscription}" value="{!product.subscription}" />
+          <apex:column headerValue="{!$Label.Street}" value="{!product.Street}" />
+          <apex:column headerValue="{!$Label.Description}" value="{!product.description}" />
+          <apex:column headerValue="{!$Label.Response}">
+            <apex:repeat value="{!Items}" var="item">
+              <apex:commandLink action="{!saveSASResponse}" value="{!item.Label}" rendered="{!AND(item.Value != StatusNone, item.Value != product.response)}" style="display:block;"
+                reRender="productPageBlock" styleClass="statusLink" onclick="window.document.body.className='updating';this.parentNode.className='updating'"
+                oncomplete="window.document.body.className='';this.parentNode.className=''">
+                <apex:param name="op_type" value="{!item.Value}" />
+                <apex:param name="op_id" value="{!product.Index}" />
+              </apex:commandLink>
+            </apex:repeat>
+          </apex:column>
+        </apex:pageBlockTable>
+      </apex:pageBlockSection>
+
+      <apex:pageBlockSection columns="1" title="{!$Label.CO_RelatedAddresses}">
+        <apex:pageBlockTable value="{!addresses}" var="item" id="idAddressesTable">
+          <apex:column headerValue="{!$Label.Customer_Address_Type_Label}" value="{!item.addressType}" />
+          <apex:column headerValue="{!$ObjectType.Address__c.fields.Name.label}">
+            <apex:outputLink value="{!URLFOR($Action.Address__c.View, item.address.id)}">
+              <!-- onclick="return openUrlInTab('{!URLFOR($Action.Address__c.View, item.address.id)}', '{!item.address.Name}', '{!item.address.id}');" target="_top"> -->
+                {!item.address.Full_Address__c}
+            </apex:outputLink>
+          </apex:column>
+          <!-- Change for SF-1478 Installation Merge
+          <apex:column headerValue="{!$ObjectType.Installation__c.Fields.Cable_Unit_no__c.Label}"> -->
+          <apex:column headerValue="{!$ObjectType.Net_Installations__c.Fields.Cable_Unit_No__c.Label}">
+            <apex:outputLink value="/apex/CableUnitRedirect?CableUnitNo={!item.cableUnitNo}" styleClass="viewLink">
+              <!-- <onclick="return openUrlInTab('/apex/CableUnitRedirect?CableUnitNo={!item.cableUnitNo}', 'Cable Unit ' + '{!item.cableUnitNo}', '{!item.cableUnitNo}');"> -->
+                {!item.cableUnitNo}
+            </apex:outputLink>
+          </apex:column>
+          <apex:column headerValue="{!$ObjectType.Customer_Related_Address__c.fields.Installations_Status__c.label}">
+            <apex:outputText value="{!item.installationsStatus}">&nbsp;</apex:outputText>
+          </apex:column>
+          <apex:column headerValue="{!$ObjectType.Customer_Related_Address__c.fields.Cable_Type__c.label}">
+            <apex:outputText value="{!item.cableType}">&nbsp;</apex:outputText>
+          </apex:column>
+        </apex:pageBlockTable>
+      </apex:pageBlockSection>
+
+    </apex:pageBlock>
+  </apex:form>
+</apex:page>

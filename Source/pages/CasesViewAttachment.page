@@ -1,0 +1,11 @@
+<apex:page standardController="Case" extensions="clsCasesViewAttachment" cache="true" >
+    <apex:outputText value="{!$Label.MoreThanOneFileAttached}" rendered="{!renderMoreThanOneF}" /> 
+    <br/><br/>
+
+    <apex:iframe src="/servlet/servlet.FileDownload?file={!attachment.Id}" scrolling="true" rendered="{!render}" />
+    <!--apex:iframe src="{!URLFOR($Action.Attachment.Download, attachmentId)}" scrolling="true" rendered="{!render}" /-->
+
+    <apex:outputLink value="{!URLFOR($Action.Attachment.Download,attachment.Id)}" style="color:red" rendered="{!renderLink}" target="_blank">
+        <apex:outputText value="{!$Label.UnsupportedAttachmentToDisplay}" />
+    </apex:outputLink>
+</apex:page>

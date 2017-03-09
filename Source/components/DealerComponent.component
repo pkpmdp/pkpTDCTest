@@ -1,0 +1,864 @@
+<apex:component >
+    <script src="{!$Resource.json}"></script>
+    <script src="{!$Resource.jQuery}"></script>
+    <script src="{!$Resource.JQuery_tmpl}"></script>
+    <apex:stylesheet value="{!URLFOR($Resource.styleCss,'myStyle/myStyle.css')}"/>
+    <style>
+        .nextBtnCls {
+            background-color:orangeRed;
+            color:#FFFFFF;
+            font-weight:bold;
+            height:26px;
+        }
+        
+        body button, body .x-btn, body .btn, body .btnDisabled, body .btnCancel, body .menuButton .menuButtonButton {
+            background-color:#585858;
+            color:#FFFFFF;
+            background:#585858;
+            font-weight:bold;
+            height:26px;
+        }   
+        .verticalSpacingCls {
+            margin-right:300px;
+        }
+        .bPageBlock .pbTitle {
+            color: #222;
+            font-size: 0%;
+            width:0%;
+        }
+        .linkCls {
+            color: orangeRed;
+            font-weight: bold;
+        }
+        
+    </style>
+    
+    <script type="text/javascript">
+    var existingProducts = new Array();
+    var packageList = new Array();
+    var clearSelected = '';
+    var isDeleted = false;
+    function getPrice(product,productNumber){
+       // alert('In get price method.'+productNumber+product.ProductName);
+        try{
+        //console.log('productNumber***'+productNumber+'*****product****'+product);
+            var varenr2 = new String(productNumber);
+            var pris = "";
+            //alert('myJSONObject[varenr2]: '+ myJSONObject[varenr2]);
+            if(myJSONObject[varenr2] != undefined){
+                //alert('myJSONObject[varenr2].totalpris: '+ myJSONObject[varenr2].totalpris);
+                if(myJSONObject[varenr2].totalpris!=undefined || myJSONObject[varenr2].betalingsperiode!=undefined ){               
+                    product.pris = myJSONObject[varenr2].totalpris;           
+                    product.betalingsperiode = myJSONObject[varenr2].betalingsperiode; 
+                }
+                else{
+                    //alert('Price not present for product - '+varenr2);
+                }
+           } 
+        }
+        catch(err){
+             alert("Error: in getPrice method: "+err.description);
+        }           
+    }
+    
+     //DW-871 : for kraevet page
+      function getValgtNodeProduct(varetype, aftaletype){
+        var productArr = new Array();
+          if(myJSONObject['kunde-data'] != undefined){  
+              $.each(myJSONObject['kunde-data'].valgt , function(index, valgt){
+             if(valgt.aftaletype == aftaletype){
+                productArr = $.grep(valgt.varer,function(element,index){
+                            return (element.varetype == varetype);
+                    });
+                   $.each(productArr, function(i,prod){
+                   if (myJSONObject[prod.varenr]!=undefined){
+                        prod.price= myJSONObject[prod.varenr].totalpris;
+                        prod.priceSuffix = 'kr.';
+                         if (myJSONObject[prod.varenr].betalingsperiode=="maaned"){
+                            prod.priceSuffix = ' kr. pr. md.';
+                         }
+                    }
+                   
+                    });
+                      
+                }
+            });
+            }
+          return productArr;
+      } 
+    var outputs = new Array();
+    function createHeaders(headers,tableId){
+                var trth = '<tr>'
+                $.each(headers,function(index,header){
+                    trth = trth + '<th bgcolor="#A4A4A4">'+header+'</th>';
+                });
+                trth = trth + '</tr>';
+        $(trth).appendTo($(tableId));
+        return $(tableId);
+    }
+    
+    function trimNumber(s) {
+      while (s.substr(0,1) == '0' && s.length>1) { s = s.substr(1,9999); }
+      return s;
+    }
+    
+    function fetchClearProducts(selectedClearProduct){
+        var clearProductNavn = '';
+        var clearProductVarenr = '';
+        packageList = new Array();
+        try{
+          if(selectedClearProduct == ''){
+            if(myJSONObject['kunde-data'].aftaler != undefined){
+                $.each(myJSONObject['kunde-data'].aftaler, function(i, aftalerNode){
+                 if(aftalerNode.aftaletype == 'clear' && aftalerNode.kundetype == 'I'){    
+                  $.each(aftalerNode.abonnementer, function(j, abonnementerNode){
+                        clearProductNavn = abonnementerNode.kortnavn;
+                        clearProductVarenr = abonnementerNode.varenr;
+                  });
+                 }  
+               });  
+            }
+            if(clearProductNavn == 'LT'){
+                clearProductNavn = 'MP';
+            }else if(clearProductVarenr == '1101005'){
+                clearProductNavn = 'MP-BS';
+            }else if(clearProductVarenr == '1101006'){
+                clearProductNavn = 'FP-BS';
+            }else if(clearProductNavn == 'TP' || clearProductNavn == 'ST'){
+                clearProductNavn = 'FP';
+            }
+            if(myJSONObject[clearProductNavn] != undefined && myJSONObject[clearProductNavn].programmer != undefined){
+                packageList =  myJSONObject[clearProductNavn].programmer;
+            }
+          }else{
+              if(selectedClearProduct == 'LT'){
+                 selectedClearProduct = 'MP';
+               }else if(clearProductVarenr == '1101005'){
+                clearProductNavn = 'MP-BS';
+               }else if(clearProductVarenr == '1101006'){
+                    clearProductNavn = 'FP-BS';
+               }else if(selectedClearProduct == 'TP' || selectedClearProduct == 'ST'){
+                 selectedClearProduct = 'FP';
+              }
+             if(myJSONObject[selectedClearProduct] != undefined && myJSONObject[selectedClearProduct].programmer != undefined){
+              packageList =  myJSONObject[selectedClearProduct].programmer;
+             } 
+          }
+          
+        }catch(err){
+            alert("Error: in fetchClearProducts method: "+err.description);
+        }
+    }
+    
+    function freeChoiceProducts(specString,  prefix, custFlag, selectedClearProduct, serialNumber, kundeId){
+        fetchExistingProductsForSerieNummer(serialNumber, kundeId);
+        fetchClearProducts(selectedClearProduct);
+        return createProductsData(specString, prefix, custFlag);                
+    }
+    
+    function fetchExistingProductsForSerieNummer(serialNumber, kundeId){ 
+        var responseNode = myJSONObject['kunde-data'].aftaler;
+        var count = 0;
+        if(myJSONObject['kunde-data'].aftaler != null) {
+             var existingProduct = myJSONObject['kunde-data'].aftaler;
+             $.each(existingProduct, function(i, aftalerNode){
+                if(aftalerNode.aftaletype != undefined && aftalerNode.abonnementer != undefined && aftalerNode.kundeid == kundeId && aftalerNode.aftaletype == 'dtv'){
+                    var abonne = aftalerNode.abonnementer;
+                    $.each(abonne, function(j, abonnementerNode){ 
+                        if(aftalerNode.aftaleType == 'clear'){
+                            clearSelected = abonnementerNode.varenr;
+                        }
+                        if(abonnementerNode.serienumre != undefined && abonnementerNode.serienumre[0] == serialNumber){
+                            $.each(abonne, function(j, abonnementerNode){ 
+                                if(abonnementerNode.serienumre == undefined){
+                                    existingProducts[count] = abonnementerNode.varenr;
+                                    count = count + 1;
+                                }
+                            });
+                        }                  
+                    });
+                }                   
+             });
+        }       
+        return existingProducts;        
+    }
+    var isBroadbandSubscriptionPresent='false';
+    var existingProductsOfCustomer = new Array();
+    var existingProductVarenrNumbersOfCustomer = new Array();
+    // The method existingCustomerProducts has been modified for Bland Selv. 
+    // This function will give you the list of existing products.
+    function existingCustomerProducts(KundeData){
+        //Bland Selv change starts.
+        var aftalerNodeAftaleType='';
+        existingProductsOfCustomer = new Array(); 
+        existingProductVarenrNumbersOfCustomer = new Array();
+        /* if(aftaleTypeStr =='clear-ga-valg'){
+            aftalerNodeAftaleType = 'clear';
+        }
+        if(aftaleTypeStr =='dtv-ta-valg'){
+            aftalerNodeAftaleType = 'dtv';
+        } */
+        //Bland Selv changes ends.
+        try{
+             $.each(KundeData.aftaler, function(i,aftalerNode){ 
+                 //if(aftalerNode.kundeid != undefined && kundeid == aftalerNode.kundeid && aftalerNode.aftaletype==aftalerNodeAftaleType){
+                 if(aftalerNode.kundeid != undefined && kundeid == aftalerNode.kundeid){
+                  $.each(aftalerNode.abonnementer,function(j,abonnementerNode){
+                    //Donot display the message if products status is not active.
+                    if(abonnementerNode.status == 'aktiv' || abonnementerNode.status == 'kunsignal'){
+                            existingProductsOfCustomer.push(abonnementerNode.kortnavn);
+                            existingProductVarenrNumbersOfCustomer.push(abonnementerNode.varenr);
+                        }
+                    });
+                 }
+             });
+        }
+       catch(err){ 
+           // alert("Error: in existingCustomerProducts method: "+err.description);
+       }
+    } 
+     //Get Bland Selv Channels code start.
+       var mpBlandSelvChannels = new Array();
+       var fpBlandSelvChannels = new Array();
+       var blandSelvChannels = new Array();
+       var configuredBlandSelvChannels = new Array();
+       function createBlandSelvChannelArray(){
+       //alert('freeChoiceFlag**'+freeChoiceFlag);
+           if(freeChoiceFlag==true){ 
+                if(myJSONObject['dtv-ta-valg'] != undefined && myJSONObject['dtv-ta-valg'].varer != undefined){
+                    $.each(myJSONObject['dtv-ta-valg'].varer,function(i,dtvValgNode){
+                        if(dtvValgNode['digi-info'] == 'BS'){
+                            blandSelvChannels[i] = dtvValgNode['site-service-navn'];
+                        }
+                    });
+                }
+                if(blandSelvChannels.length >0){
+                    if(myJSONObject['MP'] != undefined && myJSONObject['MP'].programmer != undefined){ 
+                      $.each(myJSONObject['MP'].programmer, function(i, programmerNode){
+                          if(programmerNode['site-service-navn'] != undefined){
+                              if(jQuery.inArray(programmerNode['site-service-navn'],blandSelvChannels != '-1')){
+                                    mpBlandSelvChannels[i] = programmerNode['site-service-navn'];
+                              }
+                          }
+                       });
+                    }
+                    if(myJSONObject['FP'] != undefined && myJSONObject['FP'].programmer != undefined){ 
+                      $.each(myJSONObject['FP'].programmer, function(i, programmerNode){
+                          if(programmerNode['site-service-navn'] != undefined){
+                              if(jQuery.inArray(programmerNode['site-service-navn'],blandSelvChannels != '-1')){
+                                    fpBlandSelvChannels[i] = programmerNode['site-service-navn'];
+                              }
+                          }
+                       });
+                    }
+                   createConfigurableBSChannelArray();
+                }
+           }
+       }
+      //Get Bland Selv Channels code ends.
+      // The below function is used to create an array of the channels configured in a Bland Selv package. 
+      function createConfigurableBSChannelArray(){
+         if(myJSONObject['kunde-data'].aftaler != undefined){
+           $.each(myJSONObject['kunde-data'].aftaler,function(i,aftalerNode){
+            if(aftalerNode.kundeid == kundeid){
+                $.each(aftalerNode.abonnementer,function(j,abonnementerNode){
+                       if(aftalerNode.aftaletype != undefined && aftalerNode.aftaletype == 'dtv') {
+                            if(abonnementerNode['digi-info'] == "BS"){
+                                configuredBlandSelvChannels[j]=abonnementerNode['site-service-navn'];                                       
+                            }
+                        }       
+                    } );  
+                }
+            }); 
+        }
+      }
+      //The below logic is used to disable the bland Selv channels if customer is heaving a bland selv as an active product.
+      function isChannelInBlandSelv(varerNode){
+           var myBSFlagValue = false;
+           if((jQuery.inArray('1101204',existingProductVarenrNumbersOfCustomer) != -1 || jQuery.inArray('1101006',existingProductVarenrNumbersOfCustomer) != -1)|| 
+            (jQuery.inArray('1101104',existingProductVarenrNumbersOfCustomer) != -1 || jQuery.inArray('1101005',existingProductVarenrNumbersOfCustomer) != -1)){
+               if(jQuery.inArray(varerNode['site-service-navn'],configuredBlandSelvChannels) !=-1){
+                        myBSFlagValue = true;
+                  }else{
+                        myBSFlagValue = false;
+                  }
+            }
+           /*
+           if((jQuery.inArray('FP-BS',existingProductsOfCustomer) != -1 || jQuery.inArray('TP-BS',existingProductsOfCustomer) != -1) && blandSelvChannels.length >0){
+                //if(jQuery.inArray(varerNode['site-service-navn'],fpBlandSelvChannels) !=-1){
+                if(jQuery.inArray(varerNode['site-service-navn'],configuredBlandSelvChannels) !=-1){
+                    myBSFlagValue = true;
+                }
+            }
+            else if((jQuery.inArray('MP-BS',existingProductsOfCustomer) != -1 || jQuery.inArray('LT-BS',existingProductsOfCustomer) != -1)&& blandSelvChannels.length >0){
+                //if(jQuery.inArray(varerNode['site-service-navn'],mpBlandSelvChannels) != -1){
+                if(jQuery.inArray(varerNode['site-service-navn'],configuredBlandSelvChannels) !=-1){ 
+                    myBSFlagValue =  true;
+                }
+            }else{
+                myBSFlagValue = false;
+            }
+            */
+          return myBSFlagValue;
+       }
+      //to disable the bland Selv channels logic ends.  
+    function createProductsData(aftaleTypeStr,  stringgify, custFlag){
+            var responseNode = myJSONObject[aftaleTypeStr];
+            // Code added for not showing the clear products already present or lower in rank than the existing products.
+            if(myJSONObject['kunde-data'] != undefined){
+                existingCustomerProducts(myJSONObject['kunde-data']);
+            }
+            createBlandSelvChannelArray();
+            var dataArray = new Array();
+            if(responseNode != undefined && responseNode != ''){
+                var selectType = "checkbox";
+                var clouddis = "disabled";
+                var disabled = "disabled";
+                var isCheckboxVisible = "showCheckbox"
+                //alert('**responseNode.max**'+responseNode.max);
+                if(responseNode.max == 1) {
+                    selectType = "radio";
+                }
+               
+                else if(( aftaleTypeStr=='bb-ta-valg' || aftaleTypeStr == 'dtv-ta-valg') && (responseNode.max == -1))
+                {
+                  selectType = "radio";
+                //  clouddis="enabled";
+                }
+                
+                try{
+                    var isExistingBSProdtChannel = false;
+                    var product = '';
+                    $.each(responseNode.varer,function(i,varerNode){
+                        
+                        product = {};
+                        product.disabled = '';
+                        product.checked = '';
+                        product.index = i;
+                        var linksPresent = '';
+                        
+                        //DW-855
+                        // UI changes to convert redio type to check box
+                       // if(varerNode.varenr == '1302003')
+                       // {
+                            //alert('selecttype in if ))))) '+selectType);
+                        //    selectType = "checkbox";
+                       // }
+                        
+                        if(varerNode.links != undefined){
+                            $.each(varerNode.links, function(j,linkNode){
+                                if(aftaleTypeStr=='dtv-ta-valg'){
+                                     //Added for disabling channels if present in existing Bland Selv.
+                                     isExistingBSProdtChannel = isChannelInBlandSelv(varerNode);
+                                     if(isExistingBSProdtChannel == true){
+                                         product.href ='Existing_BlandSelv';
+                                         linksPresent = '';
+                                      }
+                                      // DW-861
+                                      else if(linkNode.rel == 'opdater' || linkNode.rel == 'opret'){
+                                      //alert('ELSE dtv ta valg *******');
+                                         product.href = linkNode.href;
+                                         linksPresent = linkNode.href;
+                                      }
+                                }
+                                else{
+                                    if(linkNode.rel == 'opret' || linkNode.rel == 'opdater'){
+                                         product.href = linkNode.href;
+                                         linksPresent = linkNode.href;
+                                     }
+                                } 
+                                
+                                if (aftaleTypeStr=='bb-ga-valg'){
+                                  if(linkNode.rel == 'opdater'){
+                                    isBroadbandSubscriptionPresent='true';
+                                  }
+                                }
+                                //Added for 689
+                                if(aftaleTypeStr=='youbio-eng-valg'){
+                                    if(myJSONObject['kunde-data'] != undefined && myJSONObject['kunde-data'].valgt != undefined){
+                                     $.each(myJSONObject['kunde-data'].valgt,function (k,valgtNode){
+                                      if(valgtNode.aftaletype != undefined && valgtNode.aftaletype == 'youbio'){
+                                      $.each(valgtNode.varer, function(k,varerNode){
+                                        if(varerNode.navn != undefined && varerNode.navn == '{!$Label.YouBioBoxName}'){
+                                            $.each(varerNode.links, function(k, boxlinks){
+                                                product.href = boxlinks.href;
+                                                product.checked = 'checked';
+                                                linksPresent = boxlinks.href;
+                                            });
+                                        }
+                                      });
+                                      }
+                                     });
+                                    }
+                                }                           
+                            });
+                        }
+                        if(varerNode.varenr!= undefined && linksPresent == ''){
+                            linksPresent = isProductSelected(varerNode.varenr,aftaleTypeStr);
+                            //alert('linksPresent---This is for Testing --'+linksPresent);
+                            if(linksPresent != ''){
+                                product.checked = 'checked';
+                                product.href = linksPresent;
+                            }
+                            //alert('product.checked-----This is for Test----'+product);
+                            
+                        }
+                        //Disable the products who are below the rank of the current product. This logic is as per the 'Clear+Packages+Switch+Grid'  DW-812 
+                        //https://yousee.jira.com/wiki/display/PROJ/Clear+Packages+Switch+Grid
+                        if((linksPresent != '' && aftaleTypeStr == 'clear-ga-valg')&& freeChoiceFlag==true){
+                            if((jQuery.inArray('1101204',existingProductVarenrNumbersOfCustomer) != '-1') || (jQuery.inArray('1101104',existingProductVarenrNumbersOfCustomer) != '-1') || (jQuery.inArray('1101005',existingProductVarenrNumbersOfCustomer) != '-1') || (jQuery.inArray('1101006',existingProductVarenrNumbersOfCustomer) != '-1')){
+                                  linksPresent = '';
+                            }
+                        }
+                        if(linksPresent == ''){
+                            product.disabled = 'disabled';
+                        }
+                        
+                        product.siteServiceNavn = varerNode['site-service-navn'];
+                        if(varerNode.varenr!= undefined)
+                        {
+                            product.varenr = varerNode.varenr;
+                        }
+                                   if(varerNode.navn!= undefined)
+                            product.navn = varerNode.navn;
+                            product.priceSuffix = '';
+    
+                        if(myJSONObject[varerNode.varenr] != undefined){
+                            if( myJSONObject[varerNode.varenr].totalpris!= undefined)
+                                product.price = myJSONObject[varerNode.varenr].totalpris;
+                            if( myJSONObject[varerNode.varenr].betalingsperiode!= undefined){
+                                if( myJSONObject[varerNode.varenr].betalingsperiode=='maaned'){
+                                    product.priceSuffix="kr. pr. md.";
+                                }
+                                else if(myJSONObject[varerNode.varenr].betalingsperiode=='enkelt') {
+                                    product.priceSuffix="kr.";
+                                }
+                            }
+                        }
+    
+                        product.selectType = selectType;
+                        if(varerNode.sorteringsgruppe!= undefined)
+                            product.sorteringsgruppe=varerNode.sorteringsgruppe;
+                        if(varerNode.sorteringsgruppenavn!= undefined)
+                            product.sorteringsgruppenavn=varerNode.sorteringsgruppenavn;
+                        product.isSel = "";
+                        if(varerNode.vaegtning != undefined)
+                        {
+                            product.vaegtning=varerNode.vaegtning;
+                        }
+                        if(varerNode.sortering != undefined){
+                           product.sortering = varerNode.sortering;
+                           var tempSort = varerNode.sortering;
+                           // formatting the sortering field
+                           product.sortPrefix = trimNumber(tempSort.substring(tempSort.lastIndexOf("-")+1, tempSort.length)) ;
+                        }
+                        var prod = '';
+                        prod = $.grep(existingProducts, function(element,index){
+                           return (element == varerNode.varenr);
+                        });
+                        product.modSorting = '<tr class=\"freeCache\">';
+                        product.cssClass = 'class=freeCache';
+                        $.each(packageList, function(j, programNode){
+                           $.each(programNode, function(l, node1){
+                              if(product.siteServiceNavn == node1){
+                                product.modSorting = '<tr class=\"clearCache\">';
+                                product.cssClass = 'class=clearCache';
+                                product.disabled = 'disabled';
+                              }
+                           }); 
+                        });
+                            
+                        if(prod != ''){
+                            product.checked = 'checked';
+                            product.cssClass = 'existing';
+                            product.modSorting = '<tr class=\"cache\">';
+                            product.cssClass = 'class=cache';
+                            product.href = linksPresent;
+                        }
+                        //We will not show bland Selv Products on Extra channels switch cable Tv package section(Kabel-tv pakker) on free choice page.
+                        //if(product.navn.indexOf("Bland") !=-1 && freeChoiceFlag==true){
+                        if((product.varenr =='1101104' || product.varenr =='1101204' || product.varenr =='1101005' || product.varenr =='1101006') && freeChoiceFlag==true){
+                         }                  
+                        else{
+                            dataArray[i] = product;
+                        } 
+                        });
+                    }catch(err){
+                        alert("Error: DealerComponent createProductsData->> "+err.description);
+                    }
+                    dataArray.sort(compareNos);
+            }
+            return dataArray;
+    }
+            
+    function setProdObjectParam(varerNode,obj){
+        return obj;
+    }
+            
+    function getPackageNumber(aftaleTypeStr,kundeid){
+      var aftaletype = aftaleTypeStr.substring(0,aftaleTypeStr.indexOf('-'));
+      var retStr = '';
+      if(myJSONObject['kunde-data'] != undefined){
+        var json = myJSONObject['kunde-data'].aftaler;
+        if(json != undefined){
+           $.each(json,function(i,aftalerNode){
+            if(aftalerNode.kundeid == kundeid){
+                $.each(aftalerNode.abonnementer,function(j,abonnementerNode){
+                       if(aftalerNode.aftaletype != undefined && aftalerNode.aftaletype == aftaletype) {
+                          retStr = abonnementerNode.varenr;
+                          // code added for adding the status of the product.DW-804
+                           retStr = retStr +'#'+ abonnementerNode.status;
+                        }
+                    });
+               }
+            });
+          }
+      }
+      return retStr;
+    }
+            
+            
+    function compareNos(a, b) {    
+      return a.sortPrefix - b.sortPrefix;
+    }
+    //var selectedProductsStr;
+    function setSelectedProducts(childs,selectedProducts,nodeString){
+        var selectedProductsStr = '';
+        var allSelected = '';
+        $.each(childs,function(index,child){
+            $.each(selectedProducts,function(i,prod){   
+                if(prod.varenr==child.value){
+                    addProduct(prod,nodeString);
+                    return false;
+                }
+            }); 
+        });
+        $.each(outputs,function(index,output){
+            selectedProductsStr+=output+'#&#';
+        });
+        document.getElementById("selectedProds").value = selectedProductsStr;
+    }
+    
+    function addProduct(prod,nodeString){
+        var prodSelected = prod.href+'!#@'+nodeString;
+        if(jQuery.inArray(prodSelected,outputs) == '-1'){
+            outputs.push(prodSelected);
+        }
+    }
+    
+    function removeProductonSlet(url){
+        var subId = "{!$Label.YouBioSubscription}";
+        var boxId = "{!$Label.YouBioBox}";
+        var prodString = '';
+        if(url.indexOf(subId) != -1 || url.indexOf(boxId) != -1){
+            if(url.indexOf(subId) != -1){
+                $.each(outputs, function(i,out){
+                    var abc = out.substring(0,out.lastIndexOf('/') +1);
+                    prodString = abc + subId + '!#@youbio-ga-valg';
+                });
+                $.each(youbioSubs,function(i,prod){ 
+                    if(jQuery.inArray(prodString,outputs) != '-1'){
+                        outputs = jQuery.grep(outputs, function(value) {
+                            return value != prodString;
+                        });
+                    }
+                }); 
+                
+            }
+            
+            if(url.indexOf(boxId) != -1){
+                $.each(outputs, function(i,out){
+                    var abc = out.substring(0,out.lastIndexOf('/') +1);
+                    prodString = abc + boxId + '!#@youbio-eng-valg';
+                });
+                $.each(youbioBox,function(i,prod){  
+                    if(jQuery.inArray(prodString,outputs) != -1){
+                        outputs = jQuery.grep(outputs, function(value) {
+                            return value != prodString;
+                        });
+                    }
+                }); 
+            }
+            selectedProductsStr = '';
+            $.each(outputs,function(index,output){
+                selectedProductsStr+=output+'#&#';
+            });
+            document.getElementById("selectedProds").value = selectedProductsStr;
+        }
+    }
+    
+    function removeProduct(selectedProds,nodeString){
+        $.each(selectedProds,function(i,prod){  
+            var prodString = prod.href+'!#@'+nodeString;        
+            if(jQuery.inArray(prodString,outputs) != '-1'){
+                outputs = jQuery.grep(outputs, function(value) {
+                    return value != prodString;
+                });
+            }
+        }); 
+        selectedProductsStr = '';
+        $.each(outputs,function(index,output){
+            selectedProductsStr+=output+'#&#';
+        });
+        document.getElementById("selectedProds").value = selectedProductsStr;
+    }   
+        
+    function isProductInBasket(productNumber,valgNode){
+        var returnValue='';
+        try{
+              $.each(valgNode, function(i,valgtNode){       
+                $.each(valgtNode.varer, function(j,varerNode){
+                    if(varerNode.varenr == productNumber)   {
+                        returnValue='true';
+                    }
+                });
+             });
+             return returnValue;
+        }
+        catch(err){
+             alert("Error: in isProductInValgNode method: "+err.description);
+        }
+    }
+    //To find if bland Selv is in basket of the customer.
+    function isBlandSelvInBasket(kundeData){
+      var  jsonValgNode = kundeData['valgt'];
+      var returnValue = false;
+        try{
+        if(jsonValgNode != undefined){
+              $.each(jsonValgNode, function(i,valgtNode){       
+                $.each(valgtNode.varer, function(j,varerNode){
+                    //if((varerNode.kortnavn == 'MP-BS' || varerNode.kortnavn == 'FP-BS')|| (varerNode.kortnavn == 'LT-BS' || varerNode.kortnavn == 'TP-BS')){
+                    if((varerNode.varenr == '1101104' || varerNode.varenr == '1101204')|| (varerNode.varenr == '1101005' || varerNode.varenr == '1101006' || varerNode.varenr == '1206001'||varerNode.varenr == '1206002'||varerNode.varenr == '1206003')){
+                        returnValue='true';
+                    }
+                });
+             });
+             return returnValue;
+         }
+       }
+       catch(err){
+            alert("Error: in isBlandSelvInBasket method: "+err.description);
+       }
+    }
+    // To find Fp ,Gp
+    function isFpGPInBasket(jsonAftalerNode){
+    //alert('isFpGpcalled');
+    var returnValue = false;
+    
+    //alert('JsonaftalerNode' + jsonAftalerNode);
+    if(jsonAftalerNode != undefined){
+        $.each(jsonAftalerNode, function(i, aftalerNode){
+            if(aftalerNode.aftaletype=='clear'){
+                $.each(aftalerNode.abonnementer, function(j, abonnementerNode){
+                    if(abonnementerNode.varenr=='1101101' || abonnementerNode.varenr=='1101201'){
+                        returnValue= true;
+                    }
+                
+                });
+            
+            }
+        });
+    }
+    return returnValue; 
+    }
+    var numberOfYouseeKorts = 0;
+    //This function will check if the existing customer is already heaving the Kort or Box.
+    function isKortOrBoxInExistingproducts(jsonAftalerNode){
+        numberOfYouseeKorts = 0;
+        var isKortBoxPresent = false;
+        if(jsonAftalerNode != undefined){
+            $.each(jsonAftalerNode, function(i, aftalerNode){
+             if(aftalerNode.kundeid == currentKundeNumber && aftalerNode.kundetype == 'I'){    
+              $.each(aftalerNode.abonnementer, function(j, abonnementerNode){
+              //alert('abonnementerNode.kortnavn***'+abonnementerNode.kortnavn);
+                    if((abonnementerNode.kortnavn == 'YouSee Kort' || abonnementerNode.kortnavn == 'Leje YouSee Boks') && (abonnementerNode.status == 'aktiv' || abonnementerNode.status == 'kunsignal')){
+                        isKortBoxPresent = true;
+                        if(abonnementerNode.kortnavn == 'YouSee Kort'){
+                            numberOfYouseeKorts = numberOfYouseeKorts+1;
+                        }
+                    }  
+              });
+             }  
+           });  
+        }
+        //alert('***isKortBoxPresent**'+isKortBoxPresent);
+        return isKortBoxPresent;
+    }    
+    function refreshFirstJSONResponse(firstJSONResponse,secondJSONResponse){            
+        try{
+            for(var key in secondJSONResponse) {   
+                //alert(key); 
+                firstJSONResponse[key] = secondJSONResponse[key]; 
+                /*if(firstJSONResponse.hasOwnProperty(key)) {        
+                    firstJSONResponse[key] = secondJSONResponse[key];     
+                }*/ 
+             } 
+            return firstJSONResponse;
+        }
+        catch(err){
+             alert("Error: in refreshFirstJSONResponse method: "+err.description);
+        }
+    }
+    
+    function isProductSelected(productNum, aftaletype){
+        var aftale = aftaletype.substring(0,aftaletype.indexOf('-'));
+        var hrefValue = '';
+        try{
+            if(myJSONObject['kunde-data'].valgt != undefined){
+                $.each(myJSONObject['kunde-data'].valgt, function(i, valgtNode){
+                    if(valgtNode.aftaletype == aftale && valgtNode.varer != undefined){
+                        $.each(valgtNode.varer, function(j, varerNode){
+                            if(varerNode.varenr == productNum && varerNode.links != undefined){
+                                $.each(varerNode.links, function(index, linksNode){
+                                    if(linksNode.rel == 'slet'){
+                                        hrefValue = linksNode.href;
+                                        return false;
+                                    }
+                                });
+                            }
+                        });
+                    }
+                 });
+            }
+        }catch(err){
+            alert("Error: in isProductSelected method: "+err.description);
+        }
+        return hrefValue;
+    }
+    
+    
+    function getOnlyUpgradableProducts(productsArray,kundeid,custFlag,aftaleTypeStr){
+    if(custFlag == "true"){
+        // code added for allowing to buy clear products if current product status is not active.
+        //vareNumberOfProd = getPackageNumber(aftaleTypeStr,kundeid);
+        var statusOfProduct = 'available';
+        var productNumberAndProductStatus = getPackageNumber(aftaleTypeStr,kundeid);
+        productNumberAndProductStatus = productNumberAndProductStatus.split('#');
+        statusOfProduct = productNumberAndProductStatus[1];
+        // code ended here.
+        vareNumberOfProd = productNumberAndProductStatus[0];
+        
+        if(vareNumberOfProd != '' && vareNumberOfProd != '1101002')
+        {
+                             //var sortElem ='';
+                             var sortElem =0;
+                             for(var i=0; i < productsArray.length; i++)
+                             {
+                                    if(productsArray[i].varenr == vareNumberOfProd && statusOfProduct == 'aktiv')
+                                    {
+                                       sortElem = productsArray[i].sortPrefix;
+                                       //alert('sortElem----'+sortElem);
+                                       break;
+                                    }
+                             }
+                             var tempArray = new Array();
+                             // Modified for bland Selv Product DW-813
+                             for(var j=0; j < productsArray.length; j++){
+                                if(productsArray[j].sortPrefix >= sortElem){
+                                   tempArray.push(productsArray[j]);
+                                }
+                             }
+                             for(var k=0; k < productsArray.length; k++)
+                             {
+                                 if(productsArray[k].varenr == '1101601' && (jQuery.inArray(productsArray[k],tempArray) == '-1'))
+                                 {
+                                     tempArray.push(productsArray[k]);
+                                 }
+                                 else if(productsArray[k].varenr == '1101701' && (jQuery.inArray(productsArray[k],tempArray) == '-1'))
+                                 {
+                                     tempArray.push(productsArray[k]);
+                                 }
+                                 else if(productsArray[k].varenr == '1101801' && (jQuery.inArray(productsArray[k],tempArray) == '-1'))
+                                 {
+                                     tempArray.push(productsArray[k]);
+                                 }
+                             }
+                             
+                            productsArray =  tempArray;
+         }
+         else if(vareNumberOfProd != '' && vareNumberOfProd == '1101002')   
+         {
+            var vaegtningelem='';
+            for(var i=0; i < productsArray.length; i++)
+            {
+                if(productsArray[i].varenr == vareNumberOfProd && statusOfProduct == 'aktiv')
+                {
+                    vaegtningelem = productsArray[i].vaegtning;
+                    break;
+                }
+             }
+             var tempArray1 = new Array();
+             for(var j=0; j < productsArray.length; j++)
+             {
+                if(productsArray[j].vaegtning >= vaegtningelem )
+                {
+                    tempArray1.push(productsArray[j]);
+                }
+             }
+                            productsArray =  tempArray1;
+         }
+        }//Custflag true closed
+            return productsArray;
+       }
+      
+    </script>
+    <script id="productTemplate" type="text/x-jQuery-tmpl">  
+        {{html modSorting}}
+            <td width="5%"><input type="${selectType}" name="selectOneProduct" value="${varenr}" class="prodCheckbox" ${checked} ${disabled}/> </td>
+            <td width="55%" class="fontVerdana">${navn}</td>
+            <td width="10%" class="fontVerdana">${price}</td>
+            <td width="30%" class="fontVerdana">${priceSuffix}</td>
+        </tr>
+    </script>
+    <script id="freeChoiceProductTemplate" type="text/x-jQuery-tmpl">  
+        {{html modSorting}}
+        {{if modSorting != "<tr class=\"clearCache\">"}}
+            {{if href == "Existing_BlandSelv"}}
+                <td class="checkbox" width="5%"><input name="selectOneProduct" type="checkbox" disabled="disabled" checked="true" ${cssClass} value="${href}" id="${varenr}" class="prodCheckbox" ${checked} onclick="callKasia('${varenr}', '${cssClass}')"/></td>
+            {{else}}
+                <td class="checkbox" width="5%"><input name="selectOneProduct" type="checkbox" ${cssClass} value="${href}" id="${varenr}" class="prodCheckbox" ${checked} onclick="callKasia('${varenr}', '${cssClass}')"/></td>
+            {{/if}}  
+        {{else}}
+            <td width="5%">&nbsp;</td>
+        {{/if}}
+            <td width="40%" style="text-align:left"> 
+                ${navn} 
+            </td>
+            <td width="5%" style="text-align:left">${price}&nbsp;&nbsp;&nbsp;</td> 
+            <td width="15%" style="text-align:left">${priceSuffix}</td>
+            <td>${package}</td>
+        </tr>
+    </script>       
+    <script id="shoppingCardTemplate" type="text/x-jQuery-tmpl">  
+        <tr>
+            <td width="60%">${navn} &nbsp;&nbsp;</td>
+            <td>${pris}</td>
+            <td>${priceSuffix}</td>
+        </tr>
+    </script>   
+    <script id="productTemplateSingleRecord" type="text/x-jQuery-tmpl">
+        <tr> 
+            <td width="5%"><font color="white">1</font></td>        
+            <td>${navn}</td>
+            <td>${price}&nbsp;${priceSuffix}</td>   
+        </tr>
+    </script>
+    
+    <script id="productTemplateFreeChoice" type="text/x-jQuery-tmpl">  
+            {{if isSel=="sel"}}
+               <tr>
+                    <td width="5%"><input type="${selectType}" name="selectOneProduct" value="${varenr}" class="prodCheckbox" checked="checked"/> </td>
+                    <td width="70%">${navn}</td>
+                    <td width="10%">${price}</td>
+                    <td width="15%">${priceSuffix}</td> 
+               </tr>
+            {{else}}
+                <tr>
+                    <td width="5%"><input type="${selectType}" name="selectOneProduct" value="${varenr}" class="prodCheckbox"/> </td>
+                    <td width="70%">${navn}</td>
+                    <td width="10%">${price}</td>
+                    <td width="15%">${priceSuffix}</td> 
+                </tr>
+            {{/if}}                 
+    </script>       
+</apex:component>

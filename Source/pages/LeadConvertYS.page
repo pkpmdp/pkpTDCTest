@@ -1,0 +1,5 @@
+<apex:page standardController="Lead">
+<flow:interview name="ConvertLeadYousee13" finishLocation="{!URLFOR('/home/home.jsp')}">
+<apex:param name="vaLeadId" value="{!lead.Id}"/>
+</flow:interview>
+</apex:page>

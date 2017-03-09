@@ -1,0 +1,64 @@
+<apex:page standardController="Address__c" extensions="clsProductsYKController" showHeader="false" sidebar="false" cache="true">
+  <style>
+    .activeTab {background-color: #c26b96; color:white; background-image:none }
+    .inactiveTab { background-color: #D3D3D3; color:black; background-image:none }
+    .headerClass { text-align:right }
+  </style>
+  <apex:form >    
+  <apex:pageMessages />    
+    <apex:pageBlock id="pgblock">    
+    
+      <!--  <apex:inputHidden value="{!Address__c.External_Id__c}"/> -->
+      <apex:outputField value="{!Address__c.External_Id__c}" rendered="false"/>
+      
+      <apex:tabPanel switchType="client" height="200px" value="{!currentTab}" tabClass="activeTab" inactiveTabClass="inactiveTab">            
+        <apex:tab label="{!$Label.Existing_Products}" labelWidth="150px" id="existingProductsTab" status="existingProductsStatus">
+<!-- <apex:actionStatus startText="Requesting..." id="existingProductsStatus"> -->
+         <apex:commandButton id="loadButton1" value="Load Data" action="{!loadDataAction}" rendered="{!isDisableInputs}" reRender="pgblock"/> 
+              <apex:pageBlockTable value="{!existingProducts}" var="product" id="existingProductsTable" rules="rows"  rendered="{!isrenderTableext}">
+                <apex:column headerValue="{!$Label.Customer_Number}" value="{!product.customerId}"/>
+                <apex:column headerValue="{!$Label.First_Name}" value="{!product.firstName}"/>
+                <apex:column headerValue="{!$Label.Last_Name}" value="{!product.lastName}"/>
+                <apex:column headerValue="{!$Label.Business_Group}" value="{!product.businessGroup}"/>
+                <!--<apex:column headerValue="{!$Label.Subscription}" value="{!product.subscription}"/>-->
+               <apex:column headerValue="{!$Label.Subscription}">
+                       <apex:outputText value="{!product.subscription}" rendered="{! NOT(product.showLink)}" />
+                       <apex:outputLink value="{!product.linkUrl}" rendered="{! product.showLink}"  target="_blank" >{!product.subscription}</apex:outputLink>
+                       <apex:outputText value="   mbilling"  style="color:red;font-size:xx-small; vertical-align:top;" rendered="{!product.showLink}" />       
+                </apex:column> 
+                <apex:column headerValue="{!$Label.Active}" value="{!product.active}"/>
+                <apex:column headerValue="{!$Label.Billing_Start}" value="{!product.billingStart}"/>
+                <apex:column headerValue="{!$Label.Billing_End}" value="{!product.billingEnd}"/>
+                <apex:column headerValue="Kundetype" value="{!product.customerType}"/>
+                <apex:column headerValue="CableUnit" value="{!product.CableUnit}"/>
+                 <apex:column headerValue="Location" value="{!product.Location}"/>
+                <!-- <apex:column headerValue="{!$Label.Price}" value="{!product.account.Currency_Format__c}" headerClass="headerClass" style="text-align:right"></apex:column> -->
+              </apex:pageBlockTable>   
+ <!--  </apex:actionStatus> -->
+ </apex:tab>
+        <apex:tab label="{!$Label.Potential_Products}" labelWidth="150px" status="potentialProductsStatus" ontabenter="checkUpdatePotentialProducts()">
+          <apex:actionStatus startText="Requesting..." id="potentialProductsStatus">
+            <apex:facet name="stop">
+              <!-- <apex:iframe src="http://kenfig:7011/order/customerservice/show/all/{!Address__c.External_Id__c}"/>-->
+              <apex:pageBlockTable value="{!potentialProducts}" var="product" id="potentialProductsTable" rules="rows">
+                <apex:column headerValue="{!$Label.Business_Group}" value="{!product.businessGroup}"/>
+                <apex:column headerValue="{!$Label.Offer_Name}" value="{!product.OfferName}"/>
+                <apex:column headerValue="{!$Label.Price}" value="{!product.account.Currency_Format__c}" headerClass="headerClass" style="text-align:right"></apex:column>
+              </apex:pageBlockTable>   
+            </apex:facet>
+          </apex:actionStatus>
+        </apex:tab>
+      </apex:tabPanel>              
+    </apex:pageBlock>  
+    <apex:actionFunction name="updatePotentialProducts" action="{!updatePotentialProducts}" rerender="potentialProductsTable" status="potentialProductsStatus"/> 
+    <script> 
+      potentialProducts = false;
+      function checkUpdatePotentialProducts() {
+        if ( ! potentialProducts ) {
+          updatePotentialProducts();
+          potentialProducts = true;
+        }
+      }
+    </script>
+  </apex:form>
+</apex:page>

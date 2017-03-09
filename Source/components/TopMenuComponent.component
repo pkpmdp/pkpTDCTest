@@ -1,0 +1,35 @@
+<apex:component >
+    <style><!--alignment of top component--><!--css changes spoc 2206-->
+        .right{margin-top: -104px;}
+        .sectionimage{display: none;}
+        #topbanner .content{margin-top: 267px;margin-left: 37px;}
+        #topbanner{margin-left: 10px;margin-right: -12px;}
+        #SalesForce ul#topnavigation > li > ul.hnav{top: 122px;margin-left: 21px;}
+        html.cvi2015 #mainarea {background-color: #FFFFFF;}
+        .listAlign { margin: 0px 5px; display: block; }
+        .profileDisplay{display: none;}
+        .topAlign {  margin:2px 0px 1px 2px; display: block;}
+        .parenttopAlign {  margin:1px 0px 1px 2px; display: block;} 
+        .list .headerRow TH{background-color:#c2e4fe;color:#ffffff;text-align:left;font-weight:bold;!important;}
+        .list .headerStyleLeft TH{background-color:#676767;color:#ffffff;text-align:left;font-weight:bold;!important;}
+        .list .headerStyleCenter TH{background-color:#676767;color:#ffffff;text-align:center;font-weight:bold;!important;}     
+        .container{ overflow-x:hidden;overflow-y:auto; height:210px; width:133%; } 
+        .container2{ overflow-x:hidden;overflow-y:auto; height:230px; width:133%; } 
+    </style>
+    <apex:stylesheet value="{!URLFOR($Resource.styleCss,'myStyle/myStyle.css')}"/>
+     <script type="text/javascript">
+        var topMenuPrinted = false;
+        
+        function printHeader()
+        {
+            document.write('<!--headerstart begin--> <div id="header"> <div class="wrapper"> <a href="/apex/forhandlerhomepage" id="logo">YouSee</a> <!--headerstart end-->');
+            headerPrinted = true;
+        }
+        function printTopMenu(){ 
+            document.write('<!--topnavigation begin--><div id="SalesForce"> <ul id="topnavigation"><li><ul class="hnav dotted"><li><a title="Salg" href="/apex/DealerCustomerSearch">Salg</a></li><!--<li><a title="Ombytning af lejeboks" href="/apex/DealerExchangeInShopSearchPage">Ombyt lejeboks</a></li>--><li><a title="Spærrede kunder" href="/apex/BlackListedCustomersPage?pageType=BlacklistedCustomers">Spærrede kunder</a></li><li><a title="Blanketter" href="/apex/ManualFormsPage">Blanketter</a></li><li><a title="Hjælp og support" href="/apex/HelpSupportPage?pageType=HelpSupport">Hjælp og support</a></li><li ><a title="Bestil varer" href="/apex/DealerProductPage">Bestil varer</a></li><li ><a title="Nyttig info" href="/apex/NyttigInfoPage?pageType=NyttigInfo">Nyttig info</a></li></ul></li></ul> </div> <!--topnavigation end-->');
+            document.write('<!--toparea begin--><br><br><br><br><br><br><div class="right textAlignRight"><a class="dialogbutton_orange Right" href="/secur/logout.jsp" style="position: relative; left: -15px;"><span>Log ud</span></a></div><br><div class="right textAlignRight"> <p class="standardlink"><a href="/apex/ChangePasswordPage" style="display: block;margin: 10px 14px 10px 10px; color: #3CB84D;">Skift password</a></p></br></div></br></br></br></br></br></br><!--toparea end-->');
+            topMenuPrinted = true;
+        }
+        
+    </script>
+</apex:component>

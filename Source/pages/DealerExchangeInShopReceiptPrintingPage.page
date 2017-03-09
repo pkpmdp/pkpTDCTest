@@ -1,0 +1,119 @@
+<apex:page cache="true" showHeader="false" renderAs="PDF" sidebar="false"  controller="DealerExchangeInShop" standardStyleSheets="false" applyHtmlTag="false">
+<html class="cvi2015"> <!--spoc 2206-->
+<title> Ombyt lejeboks </title> 
+<apex:form >    
+
+    <body>              
+        <apex:pageblock id="pbblk">   
+            <apex:pageMessages rendered="true" id="msg2"/>             
+                         
+            <apex:pageBlockSection title="Exchange of YouSee Rental Box - Customer Receipt" columns="1" collapsible="false">                                                                                               
+             <!--     <apex:pageBlockSection title="Kundeoplysninger" columns="1" collapsible="false">
+                    <apex:pageBlockSectionItem LabelStyle="width:33%">                   
+                        <apex:outputLabel value="{!cCustInstAdd.Name}" id="Name" /> 
+                    </apex:pageBlockSectionItem>
+         
+        <apex:pageBlockSectionItem >            
+            <apex:outputLabel value="Gade/Nr./Etage/Side/DÃ¸r:" />
+            <apex:outputLabel value="{!cCustInstAdd.addr1}" /> 
+        </apex:pageBlockSectionItem>
+        
+        <apex:pageBlockSectionItem >        
+            <apex:outputLabel value="Postnr./By : "  />
+            <apex:outputLabel value="{!cCustInstAdd.addr2}" /> 
+        </apex:pageBlockSectionItem>
+        </apex:pageBlockSection> --> 
+            
+     <apex:pageBlockSection title="Kunde Information" columns="1"  collapsible="false">                   
+                   <apex:pageBlockSectionItem >                   
+                        <apex:outputLabel value="Kunde Nr:" />
+                        <apex:outputLabel value="{!cCustInstAdd.customerNumber}" />
+                    </apex:pageBlockSectionItem>    
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="Kunde Navn:" />
+                        <apex:outputLabel value="{!cCustInstAdd.Name}" />
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="Adresse:" />
+                        <apex:outputLabel value="{!cCustInstAdd.addr1}" />
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="Postnummer:" />
+                        <apex:outputLabel value="{!cCustInstAdd.addr2}" />
+                    </apex:pageBlockSectionItem>
+                </apex:pageBlockSection>
+     
+            <apex:pageBlockSection title=" "  columns="1" collapsible="false">
+               
+              <!-- commented as per mail from Isabelle 
+              <apex:pageBlockSectionItem LabelStyle="width:40%" >
+                        <apex:outputLabel value="Kontrakt nummer:" /> 
+                         <apex:outputLabel value=" "    />                       
+                      </apex:pageBlockSectionItem> -->
+                      
+                <apex:pageBlockSectionItem LabelStyle="width:30%"> 
+                        <apex:outputLabel value="Dato for ombytning:" /> 
+                        <apex:outputLabel value="{!ExchangeDate}" />                      
+                 </apex:pageBlockSectionItem>
+            </apex:pageBlockSection>   
+                  
+           <apex:pageBlockSection title=" "  columns="1" collapsible="false">                                                    
+                
+                <table width="100%" id="tableFormat"  border="0" cellpadding="0" cellspacing="5">
+             <tr>
+                 <td>               
+                    <apex:outputLabel value="Serienr. på kundens defekte boks : "  style="font-weight:bold; font-size:10pt;" />
+                    <apex:outputLabel id="SerialNo" value="{!SerialNo}"   /> 
+                </td>
+                </tr>               
+              <tr>
+                <td>            
+                    <apex:outputLabel value="Tilstand boksen er modtaget i : "   style="font-weight:bold; font-size:10pt;" />  
+                    Boksen var {!returnBoxCond}                      
+                    <apex:OutputText id="comment" value="{!damageComment}" rendered="{!IF(returnBoxCond == 'beskadiget',true,false)}" style="width :500px"/> <!-- rendered="{!showComment}" -->
+                </td>
+            </tr>                                                                                       
+            <tr>
+                <td>
+                    <apex:OutputText id="errmsg" value="{!ErrorValue}" rendered="{!ErrorValue != ''}" />
+                    <apex:outputLabel value="Serienr. på den nye udleverede boks: " style="font-weight:bold; font-size:10pt;"  rendered="{!DisplayNewSerialNumber}" />                  
+                    <apex:OutputText id="newSerialNo" value="{!newSerialNo}"  rendered="{!DisplayNewSerialNumber}" />
+                </td>
+            </tr>
+         <tr>
+            <td>
+                <apex:outputLabel value="Ombyttet hos : "   style="font-weight:bold; font-size:10pt;" /> 
+                <apex:OutputText value="{!Address1}" style="font-size:10pt;" />
+                 <apex:OutputText value="{!Address2}" style="font-size:10pt;" />     
+            </td>
+        </tr>       
+        <tr>
+            <td>
+                 <apex:outputpanel >    
+                    <apex:outputLabel value="Forhandlernummer : "   style="font-weight:bold; font-size:10pt;" /> &nbsp; 
+                        <apex:outputLabel value="{!AgentNumber}"    /> 
+                </apex:outputpanel>  
+            </td>
+        </tr>
+        <tr>
+            <td>
+            <!--  <apex:pageBlockSectionItem rendered="{!SellerNumber != ''}"> -->
+                <apex:outputpanel rendered="{!SellerNumber != ''}" >
+                    <apex:outputLabel value="sælger nummer "   style="font-weight:bold; font-size:10pt;"  /> &nbsp;             
+                    <apex:OutputText id="SellerNo" value="{!SellerNumber}" rendered="{!SellerNumber != ''}"/>
+                </apex:outputpanel>   
+            </td>
+         </tr>        
+        <tr>
+        <td>
+            <apex:OutputText id="textArea4" value="{!ToptextArea4}" style="width :500px; background: #DEFDB0" />                                                            
+        </td>
+    </tr>           
+   </table>
+  </apex:pageBlockSection>
+ </apex:pageBlockSection>  
+ </apex:pageblock>   
+    </body>
+</apex:form>
+</html>
+</apex:page>

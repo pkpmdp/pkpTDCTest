@@ -1,0 +1,61 @@
+<apex:page standardController="Address__c" extensions="CableUnitLink" showHeader="false" sidebar="false">
+     <script src="/support/console/30.0/integration.js" type="text/javascript"></script>
+    <apex:includeScript value="/soap/ajax/33.0/connection.js" />
+<apex:includeScript value="/support/console/33.0/integration.js" />  
+    <apex:includeScript value="{!URLFOR($Resource.DynaTree_JS,'jquery/jquery.js')}"/>
+      <script>
+        
+        var url,label,name,openimmediately;
+        function openSubTabCableUnit(label,name,openimmediately,url) {
+        this.url = url;
+        this.label = label;
+        this.name = name;
+        this.openimmediately = openimmediately;
+        if(sforce.console.isInConsole()){
+             sforce.console.getFocusedPrimaryTabId(openSub);    
+        }
+    }
+    var openSub = function openSub(result){
+        //alert('url '+url+' label '+label+' name '+name+' openimmediately '+openimmediately+' result '+result);
+        console.log(result);
+        var primaryTabId = result.id;
+        //   alert('primaryTabId '+primaryTabId);
+            sforce.console.openSubtab(primaryTabId , url, openimmediately, label, null, null, name);
+          };
+  </script>
+     <div id="detailPage">
+     <apex:variable var="ListSizevar" value="{!listSize}"/>
+     <apex:repeat value="{!CableUnitList}" var="c" rendered="{!ExistLink}">
+         <apex:variable var="ListSizevar" value="{!ListSizevar-1}"/>
+         <apex:outputLink style="font-family: Arial, Helvetica, sans-serif; font-size: 12px" target="_blank" 
+                          value="/{!c.ID}" id="cableLinkId">{!c.Cable_Unit_No__c}</apex:outputLink>
+         <apex:outputText rendered="{!ListSizevar != 0}">,</apex:outputText>
+       
+     </apex:repeat>
+    <!-- <apex:outputLink style="font-family: Arial, Helvetica, sans-serif; font-size: 12px" target="_blank" 
+        rendered="{!ExistLink}" value="{!link}"  
+        id="cableLinkId">{!Address__c.Cableunit_number__c}</apex:outputLink> --> 
+         
+
+         
+    <apex:outputText rendered="{!NOT(ExistLink)}"></apex:outputText>
+     </div>
+    <div id="consolePage">
+        <apex:variable var="ListSizevar" value="{!listSize}"/>
+     <apex:repeat value="{!CableUnitList}" var="c" rendered="{!ExistLink}">
+         <apex:variable var="ListSizevar" value="{!ListSizevar-1}"/>
+         <apex:outputLink value="#" onclick="openSubTabCableUnit('{!c.Cable_Unit_No__c}','{!c.Cable_Unit_No__c}',true,'/{!c.ID}');return false;" style="font-family: Arial, Helvetica, sans-serif; font-size: 12px">{!c.Cable_Unit_No__c}&nbsp;&nbsp;</apex:outputLink>
+      <apex:outputText rendered="{!ListSizevar != 0}">,</apex:outputText>  
+     </apex:repeat>
+        </div>
+      <script>
+      if(sforce.console.isInConsole()){
+        $("#detailPage").hide();
+        $("#consolePage").show();
+      }
+      else{
+        $("#detailPage").show();
+        $("#consolePage").hide();
+      }
+  </script>
+</apex:page>

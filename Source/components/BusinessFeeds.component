@@ -1,0 +1,28 @@
+<apex:component >
+    <apex:attribute name="businessGroupId" type="string" required="true" description="specifies the department" />
+    <style>
+        .feedSortMenu{
+            display: none;
+        }
+        
+        .feedSearch{
+            display: none;
+        }
+        
+        .feedcontainer .feeditemlinkpost {
+            display: none;
+        }
+        .feedcontainer .feeditem{word-break: break-all;}
+    </style>
+                
+        <apex:form >
+            <apex:actionPoller interval="120"  oncomplete="location.reload();"/> 
+        </apex:form>
+        <apex:pageBlock tabStyle="YO_OperationConsultant__c" id="pb1">            
+            <apex:PageBlockSection title="Business Feeds" columns="1" collapsible="false">
+                <apex:outputLink value="/{!businessGroupId}" target="_blank" style="color: #54A7EB; font-weight: bold; float: left;">Create New Post</apex:outputLink>
+                <chatter:feed entityId="{!businessGroupId}" id="posts" showPublisher="false"/>
+            </apex:PageBlockSection>    
+        </apex:pageBlock>
+     
+</apex:component>

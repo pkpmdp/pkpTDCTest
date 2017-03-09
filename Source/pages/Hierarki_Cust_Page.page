@@ -1,0 +1,50 @@
+<apex:page controller="Hierarki_Cust" tabStyle="Account" sidebar="false" showHeader="false" readOnly="true"> 
+<apex:SectionHeader subTitle="Account"/>
+     <script>      
+         function populateParent(obj)
+         {
+             var trNode = obj.parentNode.parentNode;
+             var tdNodes = trNode.getElementsByTagName('td');
+             var AccId= (tdNodes[0].getElementsByTagName('span')[0]).innerHTML;
+             var AccNameName = (tdNodes[1].getElementsByTagName('a')[0]).innerHTML;            
+             top.window.opener.setSelectedHierAccDetails(AccId , AccNameName);            
+             return false;
+         }        
+     </script>
+     <apex:form >
+         <apex:outputPanel id="main" >
+            <apex:outputPanel rendered="{!NOT(showSearch)}">
+                <div style="text-align:center; font-weight:bold; color:red">There are no Hierarki Customers.</div>  
+            </apex:outputPanel>
+             <!--<apex:outputPanel rendered="{!showSearch}"> 
+                 <table id="tblSearch">
+                     <tr>
+                         <td><B>Search</B></td>
+                         <td><apex:InputText value="{!likeString}"/></td>
+                         <td><apex:CommandButton value="Go!" action="{!findOwners}" reRender="detail"/></td>
+                     </tr>
+                 </table>
+             </apex:outputPanel>-->
+             <br/>
+             <br/>
+             <apex:outputPanel id="detail" >
+                 <apex:pageBlock title="Choose Account" rendered="{!showSearch}" >
+                    <apex:pageBlockTable value="{!lstAccPage}" var="rec">
+                        <apex:column >
+                           <span style="display: none" width="0">{!rec.Id}</span>
+                        </apex:column>
+                        <apex:column headerValue="Name">
+                            <apex:outputLink value="" onClick="return populateParent(this)">{!rec.Name} </apex:outputLink>
+                        </apex:column>  
+                        <apex:column headerValue="Kundenummer">
+                            <apex:outputfield value="{!rec.Customer_No__c}"/> 
+                        </apex:column> 
+                        <apex:column headerValue="Type">
+                            <apex:outputfield value="{!rec.Type}"/> 
+                        </apex:column>                                 
+                    </apex:pageBlockTable> 
+                </apex:pageBlock>
+              </apex:outputPanel> 
+        </apex:outputPanel>
+    </apex:form> 
+</apex:page>

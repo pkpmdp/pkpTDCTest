@@ -1,0 +1,89 @@
+<apex:page controller="DealerGoodsReceiptController" sidebar="false"  showHeader="false" id="pageId" applyHtmlTag="false">
+<html class="cvi2015"> <!--spoc 2206-->
+<script type="text/javascript" src="https://yousee.dk/sitecore/content/data/export/export.aspx?itemguid={0B93668E-7DA6-482D-B811-1C03BCEF8083}&functions=true"></script>
+<!-- Added for DW 750 -->
+<c:TopMenuComponent ></c:TopMenuComponent>
+<script type="text/javascript">printHeader();</script>
+<script type="text/javascript">printTopMenu();</script>
+<script type="text/javascript">printContentAreaBegin();</script>
+<script type="text/javascript">
+    var errorMsgForNumber = '';
+    var flag = true;
+    function approvalAction(){
+        if(flag){
+        document.getElementById('receivedOrderedProducts').value='{!receivedOrderedProducts}';
+        document.getElementById('defectiveOrderedProducts').value='{!defectiveOrderedProducts}';
+        document.getElementById('notReceivedOrderedProducts').value='{!notReceivedOrderedProducts}';
+        document.getElementById('defectiveOrMissing').value='{!defectiveOrMissingProducts}';
+        nextPage();
+        }
+        
+    }
+    
+    
+    function callBlurNumber(){
+         var numberText = document.getElementById("UserNumberDiv").firstChild.value;
+         if(numberText !=''){
+            if(numberText.trim().length != 8 || isNaN(numberText.trim())){
+            flag = false;
+            errorMsgForNumber='Indtast validt telefonnummer';
+            $("#errorBlock").html(errorMsgForNumber);
+             $("#errorBlock").show();
+            }else{
+            flag = true;
+             $("#errorBlock").hide();
+            }
+         }else{
+            flag = true;
+             $("#errorBlock").hide();
+            }
+    } 
+    
+    
+        
+</script>
+<style>
+.videreBtnCls {border-width: 0;padding: 0 15px;text-transform: capitalize;margin: 0 2px;background-position: left top;background-repeat: repeat-x;border-color: -moz-use-text-color #FF4500;border-right: 1px solid #FF4500;border-style: none solid solid none;display: inline;font-family: 'Verdana','Geneva',sans-serif;font-size: 80%;color: #FFFFFF;font-weight: bold;height: 26px;width:76px;background-color: #FF4500;margin-height: 20px;}
+</style>
+<div id="errorBlock" style="color:red;"/>
+<apex:form id="formId">
+
+    <input type="hidden" id="defectiveOrMissing" name="defectiveOrMissing" value="" />
+    <input type="hidden" id="defectiveOrderedProducts" name="defectiveOrderedProducts" value="" />
+    <input type="hidden" id="notReceivedOrderedProducts" name="notReceivedOrderedProducts" value="" />
+    <input type="hidden" id="receivedOrderedProducts" name="receivedOrderedProducts" value="" />
+    
+    <apex:pageBlock id="blockId">
+    <apex:pageBlockSection title="Serienummer på modtaget hardware" columns="1" rendered="{!receivedProducts}" collapsible="true"> 
+        <apex:repeat value="{!receivedProductsList}" var="received" id="theRepeat">
+        <apex:pageBlockSectionItem >
+                    <apex:outputText value="{!received}"/>
+        </apex:pageBlockSectionItem>
+        </apex:repeat> 
+    </apex:pageBlockSection> 
+    <apex:pageBlockSection title="Serienummer på defekt hardware" columns="1"  rendered="{!defectiveProducts}" collapsible="true"> 
+         <apex:repeat value="{!defectiveProductsList}" var="defective" id="theRepeat">
+            <apex:pageBlockSectionItem >
+                    <apex:outputText value="{!defective}"/>
+            </apex:pageBlockSectionItem>
+        </apex:repeat> 
+    </apex:pageBlockSection>
+    <apex:pageBlockSection title="Serienummer på hardware som mangler" columns="1"  rendered="{!notReceivedProducts}" collapsible="true">
+         <apex:repeat value="{!NotReceivedProductsList}" var="notReceived" id="theRepeat">
+            <apex:pageBlockSectionItem >
+                    <apex:outputText value="{!notReceived}"/>
+            </apex:pageBlockSectionItem>
+        </apex:repeat> 
+    </apex:pageBlockSection> 
+    
+    
+    </apex:pageBlock>
+    <apex:actionFunction name="nextPage" action="{!updateApprovalStatus}" />
+    <div id="approveButton" align="center">
+    <apex:commandButton action="{!backToVaremodtagelsePage}"  value="Tilbage" styleClass="videreBtnCls" />
+    <input type="button" value="Godkend" onclick="approvalAction()" class="videreBtnCls" style="height: 20px;"/>
+    </div>
+</apex:form>
+<script type="text/javascript">printContentAreaEnd();</script>
+</html>
+</apex:page>

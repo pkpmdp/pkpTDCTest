@@ -1,0 +1,56 @@
+<apex:page showHeader="false" sidebar="false" controller="youbioIdeasController" cache="false" standardStylesheets="false"><!--controller="youbioIdeasController"-->
+    <apex:composition template="youbioIdeasTemplate">    
+    <apex:define name="MainPanel">
+                        <script type="text/javascript">
+ function postIdea(loggedin) {
+ 	if(loggedin)
+ 		window.location = '/apex/youbioPostIdea';
+ 	else
+ 		alert('Du skal først logge ind');
+ }
+</script>               
+                        <div class="grid_3 alpha">
+                            <div class="content_box">
+                                <h3>Nyeste ide</h3>
+                                <c:YoubioHighlightIdea DeveloperName="IdeaDetail" IdRecord="{!latestIdeaID}"></c:YoubioHighlightIdea>                                
+                            </div>
+                        </div>
+                        <div class="grid_3">
+                            <div class="content_box">
+                                <h3>Mest populære ide</h3>
+                                <!--span>20.4.2013</span>
+                                <h2>Hvornår kommer der en app til min android mobil?</h2>
+                                <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh</p>
+                                <div class="share_box">
+                                    <span><i class="icon icon_comment"></i>14</span>
+                                    <span><i class="icon icon_like is-liked"></i>12.000</span>
+                                </div-->
+                                 <c:YoubioHighlightMP DeveloperName="HighlightMPIdeaDetail" IdRecord="{!mostPopIdeaID}"></c:YoubioHighlightMP>                             
+                            </div>
+                        </div>
+                        <div class="grid_3 omega">
+                            <div class="cta_box">
+                                <h2>
+                                    <apex:image url="{!$Resource.youbio_cta_top}" alt=""/>                                   
+                                    Send os din ide og se den blive til virkelighed!</h2>
+                                <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh</p>
+                                <a href="#" onclick="postIdea({!$ObjectType.Idea.createable});" class="btn">Skriv din idé</a>
+                            </div>
+                        </div>
+                        
+                        <div class="container_2">
+                            <div class="custom_grid_1">
+                                <h3>Seneste ideér</h3> 
+                                 <c:YoubioIdeaListView DeveloperName="LatestNewsList"></c:YoubioIdeaListView>
+                            </div>
+                            <div class="custom_grid_1">
+                                <h3>Mest populære idéer</h3>         
+                                <c:YoubioIdeaListByLikes DeveloperName="PopularIdeasList"></c:YoubioIdeaListByLikes>                                                         
+                            </div>           
+                       </div>
+                            
+          
+    </apex:define>
+    </apex:composition>
+  
+</apex:page>

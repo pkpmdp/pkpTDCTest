@@ -1,0 +1,38 @@
+<apex:page controller="DealerGoodsReceiptController" sidebar="false"  showHeader="false" id="pageId" applyHtmlTag="false">
+<html class="cvi2015"> <!--spoc 2206--> 
+<script type="text/javascript" src="https://yousee.dk/sitecore/content/data/export/export.aspx?itemguid={0B93668E-7DA6-482D-B811-1C03BCEF8083}&functions=true"></script>
+<!-- Added for DW 750 -->
+<c:TopMenuComponent ></c:TopMenuComponent>
+<script type="text/javascript">printHeader();</script>
+<script type="text/javascript">printTopMenu();</script>
+<script type="text/javascript">printContentAreaBegin();</script>
+
+<apex:form >
+ <apex:pageBlock >
+    <apex:pageBlockSection title="Serienummer på modtaget hardware" columns="1" rendered="{!receivedProducts}"> 
+        <apex:repeat value="{!receivedProductsList}" var="received" id="theRepeat">
+            <apex:pageBlockSectionItem >
+                    <apex:outputText value="{!received}"/>
+            </apex:pageBlockSectionItem>
+        </apex:repeat> 
+    </apex:pageBlockSection>
+    <apex:pageBlockSection title="Serienummer på defekt hardware" columns="1"  rendered="{!defectiveProducts}"> 
+         <apex:repeat value="{!defectiveProductsList}" var="defective" id="theRepeat">
+            <apex:pageBlockSectionItem >
+                    <apex:outputText value="{!defective}"/>
+            </apex:pageBlockSectionItem>
+        </apex:repeat> 
+    </apex:pageBlockSection>
+    <apex:pageBlockSection title="Serienummer på hardware som mangler" columns="1"  rendered="{!notReceivedProducts}">
+         <apex:repeat value="{!NotReceivedProductsList}" var="notReceived" id="theRepeat">
+            <apex:pageBlockSectionItem >
+                    <apex:outputText value="{!notReceived}"/>
+            </apex:pageBlockSectionItem>
+        </apex:repeat> 
+    </apex:pageBlockSection> 
+ </apex:pageBlock>
+    
+</apex:form>
+<script type="text/javascript">printContentAreaEnd();</script>
+</html>
+</apex:page>

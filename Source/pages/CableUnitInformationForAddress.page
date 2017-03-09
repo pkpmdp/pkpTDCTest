@@ -1,0 +1,187 @@
+<apex:page standardController="Address__c" extensions="CableUnitInformationForAddressController" action="{!getCableUnitInformation}">
+    <!-- SPOC-2272-->
+    <apex:includeScript value="/soap/ajax/33.0/connection.js" />
+    <apex:includeScript value="/support/console/33.0/integration.js" />
+    
+    <script>
+    
+    var url,label,name,openimmediately;
+    function openSubTabCableUnit(label,name,openimmediately,url) {
+        
+        this.url = url;
+        this.label = label;
+        this.name = name;
+        this.openimmediately = openimmediately;
+        //    alert('url '+url+' label '+label+' name '+name+' openimmediately '+openimmediately);
+        if(sforce.console.isInConsole()){
+            sforce.console.getFocusedPrimaryTabId(openSub);    
+        }
+        else{
+            // alert('url '+url);
+            window.open(url);
+        }
+    }
+    var openSub = function openSub(result){
+        //alert('url '+url+' label '+label+' name '+name+' openimmediately '+openimmediately+' result '+result);
+        console.log(result);
+        var primaryTabId = result.id;
+        //   alert('primaryTabId '+primaryTabId);
+        sforce.console.openSubtab(primaryTabId , url, openimmediately, label, null, null, name);
+    };
+    </script>
+    <apex:pageBlock >
+        <table class="list" border="1" cellpadding="0" cellspacing="0">
+            <tr>
+                <apex:outputPanel rendered="{!ListSize == 1}">
+                    <th style="width: 6%;position: relative;"></th>
+                </apex:outputPanel>
+                <apex:outputPanel rendered="{!ListSize != 1}">
+                    <th style="width: 10%;position: relative;"></th>
+                </apex:outputPanel>
+                <apex:repeat value="{!netInstList}" var="inst">
+                    <th><apex:outputText value="{!$Label.Cable_unit_Name} {!inst.Cable_Unit_No__c}"></apex:outputText></th>
+                </apex:repeat>
+                
+            </tr>
+            <!--<tr>
+                <th style="width: 180px;position: relative;">
+                    <apex:outputText value="{!$Label.Locked_Status}"></apex:outputText>
+                </th>
+                <apex:repeat value="{!netInstList}" var="inst" >
+                    <apex:outputPanel >
+                        <td><div>
+                            <!-- code commented for  SPOC 2272  <apex:outputField value="{!inst.Cable_Unit__r.Cabel_Unit_lock__c}" ></apex:outputField> -->
+                         <!--   </div></td>
+                    </apex:outputPanel>
+                </apex:repeat>
+                
+            </tr>-->
+            <tr>
+                <th style="width: 180px;position: relative;">
+                    <apex:outputText value="{!$Label.Lock_Date}"></apex:outputText>
+                </th>
+                <apex:repeat value="{!netInstList}" var="inst">
+                    <apex:outputPanel >
+                        <td><div>
+                            <apex:outputField value="{!inst.Cable_Unit__r.Cabel_Unit_lock__c}" id="CableUnitLock">
+                                <script>
+                                //document.getElementById('{!$Component.CableUnitLock}').innerHTML = 'Hello,pramod,';
+                                // code added for  SPOC 2272
+                                var str = document.getElementById('{!$Component.CableUnitLock}').innerHTML ;
+                                
+                                var str_array = str.split(',');                                    
+                                var finalString;
+                                for(var i = 0; i < str_array.length; i++) {
+                                    if(i== 0){
+                                        finalString = str_array[i];
+                                    }
+                                    
+                                    if(i < str_array[i].length && i>0)
+                                    {
+                                        
+                                        finalString = finalString +',' + '<br>'+str_array[i] ;
+                                    }
+                                }
+                                document.getElementById('{!$Component.CableUnitLock}').innerHTML =finalString;
+                                </script>
+                            </apex:outputField>
+                            <!--<apex:outputLabel value="  –  " rendered="{!inst.Cable_Unit__r.Lock_Date__c != null || inst.Cable_Unit__r.Cableunit_UnLockDate__c != null}"></apex:outputLabel>
+                            <apex:outputField value="{!inst.Cable_Unit__r.Cableunit_UnLockDate__c}"/>--->
+                            </div>
+                        </td>
+                    </apex:outputPanel>
+                </apex:repeat>
+            </tr>
+            <tr>
+                <th style="width: 180px;position: relative;">
+                    <apex:outputText value="{!$Label.Cable_Types}"></apex:outputText>
+                </th>
+                <apex:repeat value="{!netInstList}" var="inst">
+                    <apex:outputPanel >
+                        <td><div><apex:outputText value="{!inst.Cable_Unit__r.Cable_Type__c}"></apex:outputText></div></td>
+                    </apex:outputPanel> 
+                </apex:repeat>
+            </tr>
+            <tr>
+                <th style="width: 180px;position: relative;">
+                    <apex:outputText value="{!$Label.Cable_unit_number}"></apex:outputText>
+                </th>
+                <apex:variable var="ListSizevar" value="{!listSize}"/>
+                <apex:repeat value="{!netInstList}" var="inst">
+                    <apex:outputPanel rendered="{!ListSizevar == 1}">
+                        <td><div><apex:outputLink target="_blank" onclick="openSubTabCableUnit('{!inst.Cable_Unit__r.Cable_Unit_No__c}','{!inst.Cable_Unit__r.Cable_Unit_No__c}',true,'/{!inst.Cable_Unit__c}');return false;">{!inst.Cable_Unit__r.Cable_Unit_No__c}</apex:outputLink></div></td>
+                    </apex:outputPanel>
+                    <apex:outputPanel rendered="{!ListSizevar != 1}">
+                        <td><div><apex:outputLink target="_blank" onclick="openSubTabCableUnit('{!inst.Cable_Unit__r.Cable_Unit_No__c}','{!inst.Cable_Unit__r.Cable_Unit_No__c}',true,'/{!inst.Cable_Unit__c}');return false;">{!inst.Cable_Unit__r.Cable_Unit_No__c}</apex:outputLink></div></td>
+                    </apex:outputPanel> 
+                    <apex:variable var="ListSizevar" value="{!listSize-1}"/>
+                    <!-- <apex:outputPanel >
+<td style="width:250px;position: relative;"><apex:outputLink target="_blank" onclick="openSubTabCableUnit('{!inst.Cable_Unit__r.Cable_Unit_No__c}','{!inst.Cable_Unit__r.Cable_Unit_No__c}',true,'/{!inst.Cable_Unit__c}');return false;">{!inst.Cable_Unit__r.Cable_Unit_No__c}</apex:outputLink></td>
+</apex:outputPanel>-->
+                </apex:repeat>
+            </tr>
+            <tr>
+                <th style="width: 180px;position: relative;">
+                    <apex:outputText value="{!$Label.Package_Choice}"></apex:outputText>
+                </th>
+                <apex:repeat value="{!netInstList}" var="inst">
+                    <apex:outputPanel >
+                        <td><div><apex:outputText value="{!inst.Cable_Unit__r.Package_Choice__c}" escape="false"></apex:outputText></div></td>
+                    </apex:outputPanel>
+                </apex:repeat>
+            </tr>
+            <tr>
+                <th style="width: 180px;position: relative;">
+                    <apex:outputText value="{!$Label.Package_choice_ends}"></apex:outputText>
+                </th>
+                <apex:repeat value="{!netInstList}" var="inst">
+                    <apex:outputPanel >
+                        <td><div><apex:outputField value="{!inst.Cable_Unit__r.Package_Selection_Enddate__c}"></apex:outputField></div></td>
+                    </apex:outputPanel>
+                </apex:repeat>
+            </tr>
+            <tr>
+                <th style="width: 180px;position: relative;">
+                    <apex:outputText value="{!$Label.Special_Bland_Selv_rules}"></apex:outputText> 
+                </th>
+                <!--  <apex:repeat value="{!linkList}"  > -->
+                <apex:repeat value="{!netInstList}" var="cbUnit" >
+                    <td>
+                        <apex:repeat value="{!cbleUnitLinkMap[cbUnit.Cable_Unit__c]}" var="links" rendered="{!errorflag}">
+                            <apex:outputPanel rendered="{!links!=null}">
+                                <apex:outputField value="{!links.URL__c}"></apex:outputField><br/>
+                            </apex:outputPanel>
+                        </apex:repeat>
+                    </td>
+                </apex:repeat>
+                
+                <!--    </apex:repeat> --->
+            </tr>   
+            <tr>
+                <th style="width: 180px;position: relative;">
+                    <apex:outputText value="{!$Label.Preinstalled_equipment}"></apex:outputText>
+                </th>
+                <!--apex:variable used for remove unwanted spaces from column-->
+                <apex:variable var="ListSizevar" value="{!listSize}"/>
+                <apex:repeat value="{!netInstList}" var="inst">
+                    <apex:outputPanel rendered="{!ListSizevar == 1}">
+                        <td Style="width: 40%;"><div style="width: 50%;text-align: justify;">
+                            <apex:outputText value="{!inst.Cable_Unit__r.Pr_installeret_udstyr_p_anl_g__c}"></apex:outputText>
+                            </div></td>
+                    </apex:outputPanel>
+                    <apex:outputPanel rendered="{!ListSizevar == 2}">
+                        <td style="width: 25%;"><div  style="width: 100%;text-align: justify;">
+                            <apex:outputText value="{!inst.Cable_Unit__r.Pr_installeret_udstyr_p_anl_g__c}" style="vertical-align: middle;"></apex:outputText>
+                            </div></td>
+                    </apex:outputPanel>
+                    <apex:outputPanel rendered="{!ListSizevar > 2}">
+                        <td style="width: 20%;"><div  style="width: 100%;text-align: justify;">
+                            <apex:outputText value="{!inst.Cable_Unit__r.Pr_installeret_udstyr_p_anl_g__c}" style="vertical-align: middle;"></apex:outputText>
+                            </div></td>
+                    </apex:outputPanel>
+                    
+                </apex:repeat>
+            </tr>
+        </table>
+    </apex:pageBlock>
+</apex:page>

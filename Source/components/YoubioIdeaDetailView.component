@@ -1,0 +1,140 @@
+<apex:component controller="IWLDetailViewWidgetController" layout="none" allowDml="true">
+
+    <apex:attribute name="DeveloperName" type="String" required="true" description="The Developer Name of the Widget record that will be loaded by this widget" assignTo="{!widgetDeveloperName}" />
+    <apex:attribute name="Widget" type="IWLWidget__c" required="false" description="A Pre-loaded widget record to be used as the source of information for this widget" assignTo="{!widgetRecord}" />
+    <apex:attribute name="IdRecord" type="String" required="true" description="The Developer Name of the Widget record that will be loaded by this widget"  assignTo="{!IdRecords}" />
+    
+    <apex:form styleClass="" id="detailPageForm">
+        <script type="text/javascript">           
+             function showSection(){                     
+                document.getElementById('{!$Component.CommentPanel}').style.display = 'block';
+                document.getElementById('{!$Component.closeButton}').style.display = 'block';
+                document.getElementById('{!$Component.writeButton}').style.display = 'none';
+             }            
+             function hideSection(){
+                document.getElementById('{!$Component.CommentPanel}').style.display = 'none';
+                document.getElementById('{!$Component.closeButton}').style.display = 'none';
+                document.getElementById('{!$Component.writeButton}').style.display = 'block';
+             }
+ 
+             function loginInfoSingleIdea() {            
+                alert('Du skal først logge ind');
+             }
+             
+             
+             
+        </script>
+            
+        <apex:outputPanel id="jspanelSingleIdea"> 
+            <script>  
+            function onControllerReturn1() {
+                alert('{!detailViewMessage }');
+            }
+            </script>
+        </apex:outputPanel>
+     
+        <apex:outputPanel layout="block" id="IWLdetailView" rendered="{!loadWidget}">
+        </apex:outputPanel>     
+                          
+        <apex:outputPanel layout="block" id="ideaDetailSingleIdea" styleclass="list_item comment is_active">
+                 <div class="media">
+                     <!--img src="https://cs7.salesforce.com/resource/1366117969000/youbio_comment_image" class="img"/-->
+                     <img src="{!visualData.authorImage.value}" class="img"/>                                
+                     <div class="bd">
+                         <div class="table_object">
+                             <div class="to_cell">
+                                 Af {!visualData.authorName.value} <br />
+                                 {!visualData.activityDate.value} 
+                             </div>
+                         </div>
+                     </div>
+                 </div>
+                 
+                 <div class="headgroup">
+                     <div class="table_object">
+                         <div class="to_cell">
+                             <h1>{!visualData.title.value}</h1>
+                         </div>
+                         <div class="to_cell">
+                             <div class="repel_object">
+                                 <div class="ro_left">
+                                     <a href="{!facebookShareLink}"><i class="icon icon_facebook"></i></a>
+                                 </div>
+                                 <div class="ro_right">
+                                   <!-- a href=""><i class="icon icon_twitter"></i></a-->
+                                   <a href="https://twitter.com/share" data-text="youbio" data-lang="da"><i class="icon icon_twitter"></i></a>
+										<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+                                 </div>
+                             </div>
+                         </div>
+                         <div class="to_cell">
+                             <div class="social_box">
+                                 <!--span>{!visualData.likes.value}<i class="icon icon_like"></i></span-->
+                                 <!--  apex:commandButton onclick="voteJS1('{!JSENCODE(visualData.recordId.value)}');" reRender="jspanel, ideaDetail, information" styleClass="{!IF(visualData.canVote,'icon icon_like','icon icon_like is-liked')}" rendered="{!$ObjectType.Idea.createable}"/>
+                                 <apex:commandButton onclick="loginInfo();" reRender="ideaDetail, information" styleClass="icon icon_like" rendered="{!!$ObjectType.Idea.createable}"/-->
+                                 
+                                 <apex:outputPanel layout="inline" onclick="voteJSSingleIdea('{!JSENCODE(visualData.recordId.value)}');" styleClass="" rendered="{!$ObjectType.Idea.createable}">{!visualData.likes.value}<i class="{!IF(visualData.canVote,'icon icon_like','icon icon_like is-liked')}"></i></apex:outputPanel>           
+                                 <apex:outputPanel layout="inline" onclick="loginInfoSingleIdea();" styleClass="" rendered="{!!$ObjectType.Idea.createable}">{!visualData.likes.value}<i class="icon icon_like"></i></apex:outputPanel>
+                             </div>
+                         </div>
+                     </div>
+                 </div>
+                 
+                 <apex:outputtext value="{!visualData.content.value}" escape="false" styleClass="text_object"/>
+                 
+                 <div class="comment_action">                                
+                     <!--
+                     TODO 
+                         her skal indsættes editor fra yousee, 
+                         der skal laves lidt om i denne når dette er gjort
+                     -->
+                     <div class="repel_object">
+                       <div class="ro_left">
+                           <div class="social_box">
+                               <span><i class="icon icon_comment large"></i>Kommentar {!visualData.feedSize.value}</span> 
+                           </div>
+                       </div>
+                       <div class="ro_right">
+                           <!-- a href="" class="btn">Skriv kommentar</a-->
+                           <apex:commandButton onclick="loginInfoSingleIdea()" rerender="ideaDetail" value="Skriv kommentar" styleclass="btn" rendered="{!!$ObjectType.Idea.createable}"/>
+                           <apex:commandButton oncomplete="showSection()" reRender="information" value="Skriv kommentar" styleclass="btn" id="writeButton" rendered="{!$ObjectType.Idea.createable}"/>
+                           <apex:commandButton oncomplete="hideSection()" reRender="information" value="x" styleclass="btn" style="display:none; padding:8px 10px;" id="closeButton"/>
+                       </div>
+                     </div>
+                 </div>
+                            
+            </apex:outputPanel>
+            
+            <apex:outputPanel layout="block" id="relatedComment">
+                <apex:repeat value="{!visualData.feedItems}" var="relatedItem" id="IWLRelatedItem">
+                 <div class="list_item comment">
+                     <div class="media">
+                         <img src="{!relatedItem.authorImage.value}" class="img"/>                                
+                         <div class="bd">
+                             <span class="date">Af {!relatedItem.authorName.value} - {!relatedItem.creationDate.value}</span>
+                             <!--div class="text_object"-->    
+                                     <apex:outputText value="{!relatedItem.content.value}" escape="false" styleClass="text_object"/>
+                                 <!--/div-->
+                         </div>
+                     </div>
+                 </div>
+                </apex:repeat>
+            </apex:outputPanel>
+            
+            <apex:outputPanel layout="block" id="CommentPanel" Style="display:none">
+                <apex:inputTextarea richText="true" id="newDesc" value="{!comment}" />
+                <apex:commandButton value="Skriv Kommentar" action="{!IWLDetailViewComment}" oncomplete="hideSection()" rerender="relatedComment, information" /><!-- jQuery('.IWLDetailViewCommentBox').val(''); -->
+            </apex:outputPanel>
+            
+            <apex:outputPanel id="information"><apex:messages styleClass="error"/></apex:outputPanel>
+            
+            <apex:outputLink value="{!$Page.youbioIdeas}" style="position: relative;top: 10px; color:#000;">&larr; Back to All {!$ObjectType.Idea.LabelPlural}</apex:outputLink>
+                                
+            <apex:actionstatus id="voteStatusSingleIdea" onStop="onControllerReturn1();">
+            </apex:actionstatus>
+            <apex:actionFunction action="{!IWLDetailViewVote}" name="voteJSSingleIdea" rerender="jspanelSingleIdea, ideaDetailSingleIdea" status="voteStatusSingleIdea">
+                <apex:param name="IdeaId" assignTo="{!voteIdeaId}" value="" />               
+            </apex:actionFunction>             
+      </apex:form> 
+         
+</apex:component>

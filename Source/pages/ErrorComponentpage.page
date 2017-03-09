@@ -1,0 +1,7 @@
+<apex:page >
+<br/>
+<br/>
+<ul>
+ <li> Der findes desværre ingen kunder med dette Kundenr i Salesforce </li>
+</ul>
+</apex:page>

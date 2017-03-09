@@ -1,0 +1,3 @@
+<apex:component access="global" controller="Login_SiteController">
+<apex:outputText value="{!siteUrl}"></apex:outputText>
+</apex:component>

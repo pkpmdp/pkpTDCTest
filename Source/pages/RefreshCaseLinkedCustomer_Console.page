@@ -1,0 +1,31 @@
+<apex:page standardController="Case" extensions="clsCasesSearchCustomerController" showHeader="false" sidebar="false">
+
+<apex:includeScript value="{!URLFOR($Resource.jQuery160)}"/>
+<apex:includeScript value="/support/console/26.0/integration.js"/>
+
+<script type="text/javascript">
+
+    var j$ = jQuery.noConflict();
+    if (sforce.console.isInConsole()){
+        
+        j$(document).ready(function() { 
+              
+            //sforce.console.getEnclosingPrimaryTabId(showTabId);
+            //parent.location.href = "/ui/support/servicedesk/ServiceDeskPage#";
+            sforce.console.getEnclosingPrimaryTabId(showTabId);             
+        });
+    } else {
+        parent.location.href = "/{!ctrlCase.Id}";
+    }
+
+
+    var showTabId = function showTabId(result) {
+        var tabId = result.id;        
+        sforce.console.openPrimaryTab(null, '/{!ctrlCase.Id}', true,'{!ctrlCase.caseNumber}', null, null);
+        sforce.console.closeTab(tabId);
+    };
+    
+            
+</script>
+
+</apex:page>

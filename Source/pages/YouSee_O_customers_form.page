@@ -1,0 +1,90 @@
+<apex:page controller="Yousee_View_o_customers" title="Alle medlemmer" showHeader="false" standardStyleSheets="true" readOnly="true" >
+<apex:includescript value="https://code.jquery.com/jquery-1.11.1.min.js" />
+    <apex:includescript value="https://cdn.datatables.net/1.10.4/js/jquery.dataTables.min.js" />
+    <apex:stylesheet value="https://cdn.datatables.net/1.10.4/css/jquery.dataTables.css" />
+    <style>
+    .headerRow {
+         background-color: #676767;
+        }
+        .bPageBlock .list .last>td{
+            border-bottom-width: 1px;
+        }
+    </style>
+    <body id ="OCustomers" >
+    <script>
+     j$ = jQuery.noConflict();
+              var customerTable;
+            j$(document).ready( function () {
+             leadTable = j$('[id$="customertable"]').DataTable({     
+                 "order": [[ 0, "asc" ]],
+                 "language": {
+                    "paginate": {
+                         "next": "Næste",
+                         "previous": "Forrige"
+                        },
+                     "info": "Vis _START_ til _END_ af _TOTAL_ poster",
+                     "infoEmpty": "Vis 0 til 0 af 0 poster",
+                     "search": "Søg",
+                    "infoFiltered":   "(filtreret fra _MAX_ poster )",
+                    "loadingRecords": "Henter...",
+                    "search":         "Søg",
+                    "zeroRecords":    "Ingen poster fundet",
+                     "emptyTable": "Ingen data fundet",
+                     "lengthMenu":  'Vis <select>'+
+                                    '<option value="10">10</option>'+
+                                    '<option value="25">25</option>'+
+                                    '<option value="50">50</option>'+
+                                    '<option value="100">100</option>'+
+                                    '<option value="500">500</option>'+
+                                    '<option value="-1">Alle</option>'+
+                                    '</select> poster'
+                     
+                     }
+                    });
+                });
+    </script>
+    <script type ="text/javascript" src="{!siteCoreUrl}/sitecore/content/data/export/export.aspx?itemguid={CF15C80E-3F14-4842-AC94-2E1EED1206BE}&functions=true"></script>
+        
+      <script type="text/javascript">printHeader();</script>
+      <script type="text/javascript">printTopMenu();</script>
+      <script type="text/javascript">printContentAreaBegin();</script>
+      
+       <apex:form >
+           
+       <c:SCLinksComponent CableUnitName="{!cableUnitName}" PortalBrugerRole="{!portalBrugerRole}" />
+           <div class="bullets">
+             <ul>
+               <li>
+                    Denne liste viser de medlemmer i din forening, som er oprettet hos YouSee. Herunder de medlemmer, der har gennemført et registreringsforløb.
+               </li>
+             </ul>
+           </div>
+        <apex:pageBlock >
+            <apex:pageBlockTable value="{!oCustomers}" id="customertable" columns="5" var="customer">
+                <apex:column headerValue="Adresse">
+                    <apex:outputText value="{!customer.address}" />
+                </apex:column>
+                <apex:column headerValue="Navn">
+                    <apex:outputText value="{!customer.firstName}" />
+                </apex:column>
+               <!-- <apex:column headerValue="Efternavn">
+                    <apex:outputText value="{!customer.lastName}" />
+                </apex:column>-->
+                <apex:column headerValue="Mobil">
+                    <apex:outputText value="{!customer.phone}" />
+                </apex:column>
+                <apex:column headerValue="Email">
+                    <apex:outputText value="{!customer.email}" />
+                </apex:column>
+                
+                <!-- <apex:column headerValue="">
+                    <apex:outputText value="" />
+                </apex:column> -->
+            </apex:pageBlockTable>
+       </apex:pageBlock>
+       
+       </apex:form>
+       
+      
+    </body>
+</apex:page>

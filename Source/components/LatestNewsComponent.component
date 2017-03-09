@@ -1,0 +1,116 @@
+<apex:component controller="LatestNews">
+<!-- <apex:pageBlock rendered="{!IF($Profile.Name == 'YouSee YO Super User',True,False)}" tabStyle="YO_OperationConsultant__c">  -->
+<apex:includeScript value="{!URLFOR($Resource.jQueryUI192, '/jquery-ui-1.9.2.custom/js/jquery-1.8.3.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.jQueryUI192, '/jquery-ui-1.9.2.custom/js/jquery-ui-1.9.2.custom.min.js')}"/>
+<apex:stylesheet value="{!URLFOR($Resource.jQueryUI192, '/jquery-ui-1.9.2.custom/css/ui-lightness/jquery-ui-1.9.2.custom.min.css')}"/>
+
+<script>
+  $(function() {
+        $( document ).tooltip();
+    
+        // function added to get the view port size of browser and call action method of controller;
+         $(document).ready(function(){
+        var viewportwidth;
+         var viewportheight;
+          
+         // the more standards compliant browsers (mozilla/netscape/opera/IE7) use window.innerWidth and window.innerHeight
+          
+         if (typeof window.innerWidth != 'undefined')
+         {
+              viewportwidth = window.innerWidth,
+              viewportheight = window.innerHeight
+         }
+          // IE6 in standards compliant mode (i.e. with a valid doctype as the first line in the document)
+         
+         else if (typeof document.documentElement != 'undefined'
+             && typeof document.documentElement.clientWidth !=
+             'undefined' && document.documentElement.clientWidth != 0)
+         {
+               viewportwidth = document.documentElement.clientWidth,
+               viewportheight = document.documentElement.clientHeight
+         }
+          // older versions of IE
+          
+         else
+         {
+               viewportwidth = document.getElementsByTagName('body')[0].clientWidth,
+               viewportheight = document.getElementsByTagName('body')[0].clientHeight
+         }
+          
+       //  if(viewportwidth > 1200){
+       //      alert('ViewPort**'+viewportheight)
+               callNewsArticle(viewportheight);
+      //   }
+        
+           }); 
+          });
+          
+          
+          function turnColor(id) {
+             var myPara = document.getElementById(id);
+             //  alert(myPara);
+             myPara.style.color = "purple";
+         }
+  </script>
+  <style>
+  label {
+    display: inline-block;
+    width: 5em;
+  }
+  </style> 
+
+
+<apex:form >        
+        <apex:actionPoller action="{!getNewsArticles}" reRender="pbs,pg2" interval="120" />
+        <!--  Action function called when viewport size is larger  -->
+        <apex:actionFunction action="{!getNewsArticles}" name="callNewsArticle" rerender="pb1" >
+                    <apex:param name="firstParam" assignTo="{!viewPortHeight}" value="" />
+        </apex:actionFunction> 
+        <apex:pageBlock tabStyle="YO_OperationConsultant__c" id="pb1">              
+            <!-- YO News-->
+            <apex:pageBlockSection title="{!IF(ShouldDisplay, 'YO News', 'YK News')}" columns="2" collapsible="false" id="pbs">
+                 <apex:repeat value="{!listAllNews}" var="lstnws"> 
+                     <apex:panelGrid id="pg1">                         
+                           <apex:outputPanel >
+                             <!-- <a href = "/{!lstnws.id}" target = "_blank" style="color: #54A7EB; font-weight: bold;" onhover"">
+                                     {!lstnws.Name}                                  
+                                 </a> -->    
+                                
+                              <!-- <apex:outputLink value="/{!lstnws.id}" 
+                                               title="{!lstnws.Article__c}" 
+                                               target="_blank" 
+                                               style="color: #54A7EB; font-weight: bold;">{!lstnws.Name}  </apex:outputLink> -->
+                                               
+                                               
+                               <apex:outputLink value="/{!lstnws.id}" 
+                                               title="{!lstnws.Article__c}" 
+                                               target="_blank"                                                
+                                               style="color: #0d5b85; font-weight: bold;" id="check" onclick="turnColor('{!$Component.check}')">{!lstnws.Name}
+                                                   
+                                               <!-- style="color: #54A7EB; font-weight: bold;">{!lstnws.Name} -->            
+
+                               </apex:outputLink>
+                              
+                              
+                               <!--  <apex:outputLink value="/{!lstnws.id}" title="{!categoryArticle}" target="_blank" style="color: #54A7EB; font-weight: bold;">{!lstnws.Name}  </apex:outputLink> -->
+                                 <apex:outputText value="New" 
+                                                  style="color:red;font-size:xx-small; vertical-align:top;"
+                                                  rendered="{!(TODAY() - lstnws.Start_Featuring__c) * 24 * 60 <= 60}" />
+    <!--                                   rendered="{!DATEVALUE(lstnws.CreatedDate) == TODAY()}" />-->
+                           </apex:outputPanel>                                                
+                                                                 
+                           <apex:outputText style="font-weight: normal;" value="{!lstnws.Teaser__c}"></apex:outputText>
+                           <apex:outputPanel >
+                             <apex:outputField value="{!lstnws.Start_Featuring__c}"></apex:outputField>                             
+                           </apex:outputPanel>
+                     </apex:panelGrid> 
+                 </apex:repeat>   
+                <apex:panelGrid id="pg2"> 
+                    <apex:outputLink rendered="{!shouldDisplay == TRUE}" target="_blank" style="color:green;text-align:right;" value="{!viewId}">See All</apex:outputLink> 
+                    <apex:outputLink rendered="{!shouldDisplay == False}" target="_blank" style="color:green;text-align:right;" value="{!YKviewId}" >See All</apex:outputLink> 
+                <!-- <apex:outputLink rendered="{!shouldDisplay == False}" target="_blank" value="/{!topLinksKeyPrefix}/o">Top systemlinks / Sager</apex:outputLink>   -->    
+                </apex:panelGrid> 
+            </apex:pageBlockSection>    
+        </apex:pageBlock>
+    </apex:form>
+</apex:component>

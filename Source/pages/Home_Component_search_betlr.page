@@ -1,0 +1,54 @@
+<apex:page controller="CarrieAriaSearchController">
+    <style>
+           #DIV_Container{padding: 0; margin: 0; background-color: #CBECF5;}
+        .hasMotif {
+            margin: 4px 0px;
+        }
+    </style>
+    
+    <div id="DIV_Container">
+        <apex:form id="frm">
+        <apex:Messages />
+        Betaler ID:<apex:inputText id="ariano" value="{!ariaNumber}" onkeypress="return enterSearch(event)"/>
+        <apex:commandButton value="Søg" onclick="search()" reRender="frm" />
+            <apex:actionFunction name="callfun" action="{!redirectToPage}" oncomplete="redirect('{!arnum}')"/>
+        </apex:form>
+    </div>
+    <script>
+    function  enterSearch(event){
+              //alert('Inside enter search');
+              //alert(window.event.keyCode);
+              if(window.event && window.event.keyCode == 13 || event.which == 13){
+                //  alert('Inside if');
+                  search();
+                  //alert(document.getElemenById("searchb"));
+                  //var eleId = document.getElemenById("searchb");
+                  
+                  //eleId.click();
+                  return false;
+              }
+              else{
+                  //alert('Inside else');
+                  true;
+              }    
+          }
+     function search()
+    {
+            callfun();
+    }
+      function redirect(ariaNumber)
+      {
+          var url1 = document.referrer;
+          var index = url1.indexOf(".com");
+          var strurl =url1.substring(0,index+5);
+          var str = 'apex/CarrieAriaSearchPage?AriaNumber=';
+          var strurl1 = strurl+str+ariaNumber;
+          window.open(strurl1,'_top');
+      }
+   /* function setFocusOnLoad() { 
+document.getElementById('ariano').focus(); 
+} 
+onload=setFocusOnLoad; */
+function setFocusOnLoad() {} 
+    </script>
+</apex:page>

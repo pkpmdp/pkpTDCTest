@@ -1,0 +1,706 @@
+<apex:page controller="EditPortalUserController" sidebar="false" showHeader="false" ID="page1" applyHtmlTag="false">
+<html class="cvi2015">
+<apex:includeScript value="{!URLFOR($Resource.DynaTree,'/DynaTree/jquery/jquery.js')}"/>
+<script>var $j15 = jQuery.noConflict(true);</script>
+<apex:includeScript value="{!URLFOR($Resource.DynaTree,'/DynaTree/jquery/jquery-ui.custom.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.DynaTree,'/DynaTree/jquery/jquery.cookie.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.DynaTree,'/DynaTree/src/jquery.dynatree.js')}"/>
+<apex:stylesheet value="{!URLFOR($Resource.DynaTree,'/DynaTree/src/skin/ui.dynatree.css')}"/>
+<apex:stylesheet value="{!URLFOR($Resource.scStyleCss,'myStyle/myStyle.css')}"/> 
+<script type="text/javascript" src="{!siteCoreUrl}/sitecore/content/data/export/export.aspx?itemguid={934A91A8-0EDD-4035-8DA9-E386D8112557}&functions=true"></script>
+<body id="servicepage">
+
+<style>
+.listAlign {  margin:2px 0px 1px 2px; display: block;} 
+.profileDisplay{display: none;}
+.headerRow .headerStyle{background-color:#638658;color:#FFFFFF}
+.container{ overflow-x:hidden;overflow-y:auto; width:133%; } 
+.parenttopAlign {  margin:1px 0px 1px 2px; display: block;} 
+.disableByProfle{  background-color: #dcdcdc; cursor: default;}  
+.headerStyle {   font-family: Arial, Helvetica, sans-serif;font-size:12px; font-weight:bold;}
+.saveBtn {border-width: 0;padding: 0 15px;text-transform: capitalize;margin: 0 2px;background-position: left top;background-repeat: repeat-x;border-color: -moz-use-text-color #FF4500;border-right: 1px solid #FF4500;border-style: none solid solid none;display: inline;font-family: 'Verdana','Geneva',sans-serif;font-size: 80%;color: #FFFFFF;font-weight: bold;height: 26px;width:90px;background-color: #EF6118;}
+.ui-dynatree-disabled ul.dynatree-container {opacity: 1;}
+</style>
+<apex:stylesheet value="{!URLFOR($Resource.scStyleCss,'myStyle/myStyle.css')}"/>
+<script type="text/javascript">printHeader();</script>
+<script type="text/javascript">printTopMenu();</script>
+<script type="text/javascript">printContentAreaBegin();</script>
+<apex:outputPanel id="Panel1">
+<script>
+     function reloadContactLayout(){
+     
+    var rdUrl = '{!pageName}';
+     //   alert('Status'+status);
+    if(rdUrl != null && rdUrl.length > 0){
+    document.getElementById("errorMsg123").style.display = "none";
+        window.top.location= '{!$Site.Prefix}' + rdUrl;
+    }
+  }
+  document.onload = reloadContactLayout();
+</script>
+</apex:outputPanel>
+<script type="text/javascript">
+//  document.write('jsonresponse: '+JSON.stringify(rootTreeObj));
+var selectedIds='';
+ var  gstr = '';
+ var rootNode;
+ var parentId='';
+
+ $j15(document).ready(function(){
+ var jsonArr ={!objectStrListJson};
+                var objMap = {}; 
+                var rootTreeObj = {};
+                $j15.each(jsonArr, function(index,jsn){
+                                if(jsn.pos.nodeType == "start"){
+                                                rootTreeObj.title = jsn.pos.account.Name;
+                                                rootTreeObj.children = new Array();
+                                                rootTreeObj.accountType = jsn.pos.account.Type;
+                                                rootTreeObj.icon = "star16.png";
+                                                if(jsn.selected == true)
+                                                rootTreeObj.select=true;
+                                                else
+                                                rootTreeObj.select=false;
+                                                rootTreeObj.id=jsn.pos.account.Id;
+                                                rootTreeObj.key=jsn.pos.account.Id;
+                                                objMap[jsn.pos.account.Id] = rootTreeObj;
+                                }else if(jsn.pos.account.Type == "Hierarki"){
+                                                var parentObj = objMap[jsn.pos.account.ParentId];
+                                                TreeObj = {};
+                                                TreeObj.title = jsn.pos.account.Name;
+                                                TreeObj.children = new Array();
+                                                TreeObj.accountType = jsn.pos.account.Type;
+                                                TreeObj.icon = "factory16.png";
+                                                if(jsn.selected == true)
+                                                TreeObj.select=true;
+                                                else
+                                                TreeObj.select=false;
+                                                TreeObj.id=jsn.pos.account.Id;
+                                                TreeObj.key=jsn.pos.account.Id;
+                                                parentObj.children.push(TreeObj);
+                                                objMap[jsn.pos.account.Id] = TreeObj;
+                                }else if(jsn.pos.account.Type == "Kunde"){
+                                                var parentObj = objMap[jsn.pos.account.ParentId];
+                                                TreeObj = {};
+                                                TreeObj.title = jsn.pos.account.Cable_Unit__r.Name+' '+jsn.pos.account.Anlaeg_No__c;
+                                                TreeObj.icon = "desk16.png";
+                                                if(jsn.selected == true)
+                                                TreeObj.select=true;
+                                                else
+                                                TreeObj.select=false;
+                                                TreeObj.id=jsn.pos.account.Id;
+                                                TreeObj.key=jsn.pos.account.Id;
+                                                parentObj.children.push(TreeObj);
+                                }
+                
+                });
+// $j = jQuery.noConflict();
+ //$j.ui.dynatree.nodedatadefaults["icon"] = false;
+ $j15("#tree1").dynatree({
+            checkbox: true,
+            autoCollapse: false,
+            selectMode: 3,
+            fx: { height: "toggle", duration: 400 },
+            keyPathSeparator: "/",
+            children:rootTreeObj,
+            strings: {
+        loading: "Loading…",
+        loadError: "Load error!"
+            },            
+            classNames: {
+        container: "dynatree-container",
+        expanded: "dynatree-expanded"},
+        onSelect: function(select, node) {
+         
+    /*     if(node.hasChildren()){     
+           if(node.isSelected()){
+            node.visit(function(node){
+             node.select(true); 
+             });
+           }else{        
+            node.visit(function(node){
+             node.select(false); 
+            });        
+          }
+        }*/
+         
+        // Get a list of all selected nodes, and convert to a key array:
+        var selKeys = $j15.map(node.tree.getSelectedNodes(), function(node){
+          return node.data.key;
+        });
+     selectedIds = selKeys;
+     $j15('#selectedIds').html(''+selectedIds);
+    }
+    });
+       
+        
+        $j15("#tree1").dynatree("getRoot").visit(function(node){
+        node.expand(true); 
+        });
+
+ rootNode = $j15("#tree1").dynatree("getRoot");
+ 
+ if(('{!contact.UserProfile__c}').indexOf("Admin")!=-1){
+     $j15("#tree1").dynatree("disable");
+    }
+ 
+   var selectedNodesObj = $j15("#tree1").dynatree("getSelectedNodes");
+ 
+    var   selKeys = $j15.map(selectedNodesObj, function(node){
+          return node.data.key;
+        });
+
+  selectedIds = selKeys;
+  $j15('#selectedIds').html(''+selectedIds);
+ //alert('Selected: '+selectedIds); 
+});
+
+/*
+function updateHierarchy(){
+                 
+            var tmpselectobj = document.getElementsByTagName("select");
+            var allChkBoxes = document.getElementsByTagName("input");
+            for(var i =0;i<tmpselectobj.length;i++ ){
+                if((tmpselectobj[i].id).toString().indexOf("UserProfileId")!=-1){
+                profilComponent = tmpselectobj[i];
+                
+                }
+            } 
+            if(profilComponent.selectedIndex == '1'){
+            
+            $j15("#tree1").dynatree("getRoot").visit(function(node){
+              node.select(true);
+             }); 
+
+             $j15("#tree1").dynatree("disable");
+              
+            }else{
+            
+            $j15("#tree1").dynatree("getRoot").visit(function(node){
+              node.select(false);
+             });
+             
+             $j15("#tree1").dynatree("enable")
+              
+            }
+        }
+
+ 
+ 
+ function makeItDisabled(selectObject){
+           var checkObj = document.getElementById(selectObject);
+           var  selectComponent;
+           var selectobj = document.getElementsByTagName("select");
+           for(var i =0;i<selectobj.length;i++ ){
+               if((selectobj[i].id).toString().indexOf("UserProfileId")!=-1){
+                  selectComponent = selectobj[i];
+               }
+           }
+           if(checkObj.checked){
+              selectComponent.disabled=false;
+           }else{
+              selectComponent.disabled=true; 
+           }  
+             updateHierarchy();                
+*/
+ </script>
+<script type="text/javascript">
+    function openLookup(baseURL, width, modified, searchParam){
+          //    alert('baseURL: '+baseURL);
+          //    alert('width: '+width);
+          //    alert('modified: '+modified);
+          //    alert('searchParam: '+searchParam);
+            
+            var originalbaseURL = baseURL;
+            var originalwidth = width;
+            var originalmodified = modified;
+            var originalsearchParam = searchParam;
+         
+            var lookupType = baseURL.substr(baseURL.length-3, 3);
+           // alert('lookupType: '+lookupType);
+            if (modified == '1') 
+                baseURL = baseURL + searchParam;
+         
+            var isCustomLookup = false;
+         
+            // Following "001" is the lookup type for Account object so change this as per your standard or custom object
+           // if(lookupType == "001"){
+                var urlArr = baseURL.split("&");
+                var txtId = '';
+                if(urlArr.length > 2) {
+                    urlArr = urlArr[1].split('=');
+                    txtId = urlArr[1];
+                }
+                
+                //alert('txtId: '+txtId);
+                
+                // Following is the url of Custom Lookup page. You need to change that accordingly
+                baseURL = "{!$Site.Prefix}/apex/CustomAddressLookup?txt=" + txtId;
+         
+                // Following is the id of apex:form control "theform". You need to change that ac-cordingly
+                baseURL = baseURL + "&frm=" + escapeUTF("{!$Component.theform}");
+                if (modified == '1') {
+                    baseURL = baseURL + "&lksearch=" + searchParam;
+                  }
+         
+                  // Following is the ID of inputField that is the lookup to be customized as custom lookup
+                if(txtId.indexOf('streetI') > -1 ){
+                    isCustomLookup = true;
+                }
+           // }
+         
+         
+            if(isCustomLookup == true){
+              openPopup(baseURL, "lookup", 350, 480, "width="+800+",height=480,toolbar=no,status=no,directories=no,menubar=no,resizable=yes,scrollable=yes", true);
+            }
+            else {
+              if (modified == '1') 
+                originalbaseURL = originalbaseURL + originalsearchParam;
+              openPopup(originalbaseURL, "lookup", 350, 480, "width="+originalwidth+",height=480,toolbar=no,status=no,directories=no,menubar=no,resizable=yes,scrollable=yes", true);
+            } 
+        }
+    var userProfile  = '{!$Profile.Name}';
+    var portalAdminUserProfile = '{!portalAdminUser}';
+    var portalBrugerRole = '{!portalBrugerRole}';
+    var contactRoleName = '{!$CurrentPage.parameters.loggedInUserRoleName}';
+    //added sc-429
+    var portalAdminRole = '{!portalAdminRole}';
+
+   /* function validationFunction(){
+            //alert('Inside validateFunction');
+            var mobileNumber = document.getElementById("page1:theform:contactDetailsPB:pageBlockSectionID:Id5").value;
+            var homePhoneNo = document.getElementById("page1:theform:contactDetailsPB:pageBlockSectionID:Id6").value;
+            var phoneNo = document.getElementById("page1:theform:contactDetailsPB:pageBlockSectionID:phoneId").value;
+            
+            var fname = document.getElementById("page1:theform:contactDetailsPB:pageBlockSectionID:Id1").value;
+            var lname = document.getElementById("page1:theform:contactDetailsPB:pageBlockSectionID:Id2").value;
+            var streetI = document.getElementById("page1:theform:addressDetailPB:addressDetailsPBS:addressDetailPBSI:streetI").value;
+            if(fname.length != 0 && lname.length != 0 && streetI.length != 0){
+                if(mobileNumber.length == 0 && homePhoneNo.length == 0 && phoneNo.length == 0){
+                    document.getElementById('phoneLengthMsg').style.display ='none';
+                    document.getElementById('phoneValidationMsg').style.display ='block';
+                    //alert('Empty');
+                    return false;
+                }else if(mobileNumber.length > 20 || homePhoneNo.length > 20 || phoneNo.length > 20){
+                    document.getElementById('phoneValidationMsg').style.display ='none';
+                    document.getElementById('phoneLengthMsg').style.display ='block';
+                    //alert('Save');
+                    return false;
+                }
+          }
+        return true;
+         }*/
+    
+    /*function whichButton(event){
+        if (event.button==2)//RIGHT CLICK
+        {
+            alert("Not Allow Right Click!");
+            //return false;
+        }
+
+    }
+    
+    function noCTRL(e){
+        var charCode = (e.which) ? e.which : event.keyCode
+        var code = (document.all) ? event.keyCode:e.which;
+        var msg = "Sorry, this functionality is disabled.";
+        if (parseInt(code)==17) //CTRL
+        {
+            //alert(msg);
+            window.event.returnValue = false;
+        }
+        if (charCode > 31 && (charCode < 48 || charCode > 57)){
+                    //if((charCode >= 48 && charCode <= 57)|| (charCode==40||charCode==41||charCode==45)){
+                    return false;
+        }
+            
+    }
+        
+  function acceptNumerics(event){
+      var keyValue = window.event.keyCode || event.keyCode;
+      //alert('key value is-->'+keyValue);
+      if ((keyValue >= 48 && keyValue <= 57)|| (keyValue==40||keyValue==41||keyValue==45)) {
+          return true;
+      }   
+      else{
+          return false;
+      }
+   }
+
+   function isNumberKey(evt){
+        var charCode = (evt.which) ? evt.which : event.keyCode
+        if (charCode > 31 && (charCode < 48 || charCode > 57) && charCode != 16 && charCode != 17){
+        return false;
+        }
+        return true;
+    }
+   function noCopyMouse(e) {
+        var isRight = (e.button) ? (e.button == 2) : (e.which == 3);
+        if(isRight) {
+            alert('You are prompted to type this twice for a reason!');
+            return false;
+        }
+        return true;
+    }
+    function noCopyKey(e) {
+        var forbiddenKeys = new Array('c','x','v');
+        var keyCode = (e.keyCode) ? e.keyCode : e.which;
+        var isCtrl;
+
+        if(window.event)
+            isCtrl = e.ctrlKey
+        else
+            isCtrl = (window.Event) ? ((e.modifiers & Event.CTRL_MASK) == Event.CTRL_MASK) : false;
+    
+        if(isCtrl) {
+            for(i = 0; i < forbiddenKeys.length; i++) {
+                if(forbiddenKeys[i] == String.fromCharCode(keyCode).toLowerCase()) {
+                    alert('You are prompted to type this twice for a reason!');
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+    
+    function validate(key){
+        var keycode = (key.which) ? key.which : key.keyCode;
+        var phn = document.getElementById('theform:contactDetailsPB:pageBlockSectionID:Id5');
+        if ((keycode < 48 || keycode > 57)){
+            return false;
+        }else{
+          if (phn.value.length < 10 ){
+            return true;
+          }else{
+            return false;
+          }
+        }
+    }
+    function validate1(key){
+        var keycode = (key.which) ? key.which : key.keyCode;
+        var phn1 = document.getElementById('theform:contactDetailsPB:pageBlockSectionID:Id6');
+        if ((keycode < 48 || keycode > 57)){
+                return false;
+        }else{
+           if (phn1.value.length < 10 ){
+             return true;
+           }else{
+             return false;
+           }
+        }
+    }
+    function validate2(key){
+        var keycode = (key.which) ? key.which : key.keyCode;
+        var phn2 = document.getElementById('theform:contactDetailsPB:pageBlockSectionID:phoneId');
+        if ((keycode < 48 || keycode > 57)){
+            return false;
+        }else{
+           if (phn2.value.length < 10 ){
+                return true;
+           }else{
+             return false;
+           }
+        }
+    } */
+
+        
+    function confirm_changes(){
+        document.getElementById("errorMsg123").style.display = "none";
+        document.getElementById("page1:theform:MessageId").style.display ="none";
+        //SC-429 Changes
+        var answer = confirm('Du er ved at opdatere en eksisterende portalbruger. Er du sikker?');
+        document.getElementById('confMsg').style.display ='block';
+        if (answer){
+            var mobileNumber = document.getElementById("page1:theform:contactDetailsPB:pageBlockSectionID:Id5").value;
+            var homePhoneNo = document.getElementById("page1:theform:contactDetailsPB:pageBlockSectionID:Id6").value;
+            var phoneNo = document.getElementById("page1:theform:contactDetailsPB:pageBlockSectionID:phoneId").value;
+            // Commented For SF-1599 remove validation for First name on contact
+            //var fname = document.getElementById("page1:theform:contactDetailsPB:pageBlockSectionID:Id1").value;
+            var lname = document.getElementById("page1:theform:contactDetailsPB:pageBlockSectionID:Id2").value;
+            var streetI = document.getElementById("page1:theform:addressDetailPB:addressDetailsPBS:addressDetailPBSI:streetI").value;
+            var email = document.getElementById("page1:theform:contactDetailsPB:pageBlockSectionID:Id3").value;
+            
+        /* // Commented For SF-1599 remove validation for First name on contact
+        if(fname.length <= 0){
+        document.getElementById("errorMsg123").innerHTML = "Fornavn: Du skal angive en værdi";
+        document.getElementById("errorMsg123").style.display = "block";
+        return false;
+        }*/
+        if(lname.length <= 0){
+                document.getElementById("errorMsg123").innerHTML = "Efternavn: Du skal angive en værdi";
+                document.getElementById("errorMsg123").style.display = "block";
+                return false;
+        }
+        if(email.length <= 0){
+        
+                document.getElementById("errorMsg123").innerHTML = "E-mail: Du skal angive en værdi";
+                document.getElementById("errorMsg123").style.display = "block";
+                return false;
+        }
+        if(mobileNumber.length == 0 && homePhoneNo.length == 0 && phoneNo.length == 0){
+                //alert('enter atleast one phone number');
+                document.getElementById('errorMsg123').innerHTML = "{!$Label.SC_PhoneValidation}";
+                document.getElementById('errorMsg123').style.display ='block';
+                return false;
+        }else if(mobileNumber.length > 20 || homePhoneNo.length > 20 || phoneNo.length > 20){
+                       // alert('phone number is gt 20');
+                document.getElementById('errorMsg123').innerHTML = "{!$Label.SC_PhoneLengthValidation}";
+                document.getElementById('errorMsg123').style.display ='block';
+                return false;
+         }
+        if(streetI.length == 0){
+                document.getElementById("errorMsg123").innerHTML = "Søg adresse: Du skal angive en værdi.";
+                document.getElementById("errorMsg123").style.display = "block";
+                return false;
+            
+        }
+        
+        if(email.length > 0){
+            if(!validateEmailAddress(email)) {
+              document.getElementById("errorMsg123").innerHTML = "Ugyldig e-mail-adresse.."
+              document.getElementById("errorMsg123").style.display = "block";
+              return false;
+            }      
+        }
+      //  alert('Validation');
+       var tmpIds = 'A,'+selectedIds + ',b';
+                  selectedIds = tmpIds;
+                  saveUser(selectedIds);
+                  return true;
+               
+               }else{
+       // cancelUpdates();
+        return false;
+      }
+   
+}
+        
+ function validateEmailAddress(email) {
+       var reg = /^[a-z0-9]+(?:[-\._]?[a-z0-9]+)*@(?:[a-z0-9]+(?:-?[a-z0-9]+)*\.)+[a-z]+$/;
+       if(reg.test(email)) {
+          return true;
+       } else {
+          return false;         
+       } 
+}
+            
+ /* function confirm_changes(){
+    //SC-429 Changes
+     var answer = confirm('Du er ved at opdatere en eksisterende portalbruger. Er du sikker?');
+     document.getElementById('confMsg').style.display ='block';
+     if (answer){
+            var mobileNumber = document.getElementById("page1:theform:contactDetailsPB:pageBlockSectionID:Id5").value;
+            var homePhoneNo = document.getElementById("page1:theform:contactDetailsPB:pageBlockSectionID:Id6").value;
+            var phoneNo = document.getElementById("page1:theform:contactDetailsPB:pageBlockSectionID:phoneId").value;
+            var fname = document.getElementById("page1:theform:contactDetailsPB:pageBlockSectionID:Id1").value;
+            var lname = document.getElementById("page1:theform:contactDetailsPB:pageBlockSectionID:Id2").value;
+            var streetI = document.getElementById("page1:theform:addressDetailPB:addressDetailsPBS:addressDetailPBSI:streetI").value;
+        //  if(fname.length != 0 && lname.length != 0 && streetI.length != 0){
+                if(mobileNumber.length == 0 && homePhoneNo.length == 0 && phoneNo.length == 0){
+                    document.getElementById('phoneLengthMsg').style.display ='none';
+                    document.getElementById('phoneValidationMsg').style.display ='block';
+                    return false;
+                }else if(mobileNumber.length > 20 || homePhoneNo.length > 20 || phoneNo.length > 20){
+                    document.getElementById('phoneValidationMsg').style.display ='none';
+                    document.getElementById('phoneLengthMsg').style.display ='block';
+                    return false;
+                }else{
+            //    alert('$$selectedIds$'+selectedIds);
+                  var tmpIds = 'A,'+selectedIds + ',b';
+                  selectedIds = tmpIds;
+                  saveUser(selectedIds);
+                  return true;
+                }
+            
+          //}
+      }else{
+       // cancelUpdates();
+        return false;
+      }
+   
+ } */
+</script>
+<c:SCParentLinkComponent PortalBrugerRole="{!portalBrugerRole}" />
+<apex:form id="theform">
+<apex:inputHidden id="hdnCntProfile" value="{!contactProfile}"></apex:inputHidden>
+<div class ="bullets">
+ <ul>
+     <li>
+       Her har du mulighed for at redigere oplysninger og de kunde brugeren skal have adgang til.
+     </li>
+ </ul>
+ </div>
+  <div id="errorMsg123" style="display:none;height: 21px;padding-left: 50px;padding-top: 18px;border-color: red;color: grey;" class="mailError">
+    </div>
+    
+ <!-- <div id="phoneLengthMsg" style="display:none;height: 21px;padding-left: 50px;padding-top: 18px;border-color: red;color: grey;" class="mailError">
+      <apex:outputText id="Msg3" value="{!$Label.SC_PhoneLengthValidation}"/>
+    </div>  -->   
+    <div id="confMsg" style="display:none;">
+    </div>
+    <apex:outputPanel id="MessageId">
+        <apex:messages id="warningmsg" globalOnly="true"  styleClass="warningError" rendered="{!warningFlag == true}"/>
+        <apex:messages id="errormsg" globalOnly="true" styleClass="mailError" rendered="{!errorFlag == true}"/>
+    </apex:outputPanel>
+<!-- <apex:outputPanel layout="block" styleClass="warningError" rendered="{!OR((checkInActive == 'true'),(historyEntryFlag == 'true'),(freeFlyingChk == 'true'),(userExistFreeFlyChk == 'true'))}">
+     <apex:outputText value="{!$Label.SC_P2}" />
+</apex:outputPanel> -->
+ <!--
+<apex:outputPanel layout="block" styleClass="warningError" rendered="{!OR((checkInActive == 'true'),(historyEntryFlag == 'true'))}">
+     <apex:outputText value="{!$Label.SC_P2}" />
+</apex:outputPanel>
+   <apex:outputPanel layout="block" styleClass="warningError" rendered="{!OR((freeFlyingContact == 'true'),(userExistsAsFreeFly == 'true'))}" >
+     <apex:outputText value="{!$Label.SC_P4}" />
+</apex:outputPanel>-->
+ <apex:outputPanel layout="block" styleClass="warningError" rendered="{!OR((checkInActiveFlag == 'true'),(freeFlyingChk == 'true'),(userExistFreeFlyChk == 'true'))}" >
+     <apex:outputText value="{!$Label.SC_P2}" />
+</apex:outputPanel> 
+
+<apex:outputText id="errorText" style="font-style:italic;color: red;font-weight:bold"/>
+<!-- <apex:outputPanel layout="block" styleclass="container" id="OPanelId"> -->
+
+
+    <apex:PageBlock id="contactDetailsPB">
+     
+    <apex:PageBlockSection Title="Rediger kontakt information" collapsible="false" columns="2" id="pageBlockSectionID">
+    <!--Commented For SF-1599 
+        <apex:inputField value="{!contact.FirstName}" id="Id1" required="true" style="width:150px"> </apex:inputField> -->
+        
+        <apex:inputField value="{!contact.FirstName}" id="Id1" style="width:150px"> </apex:inputField>
+        <apex:inputField value="{!contact.LastName}" id="Id2" style="width:150px"></apex:inputField>
+        <apex:inputField value="{!contact.Email}" id="Id3" required="true" style="width:150px"></apex:inputField>
+        <apex:inputField value="{!contact.Phone}" id="phoneId" style="width:150px"></apex:inputField>
+        <apex:inputField value="{!contact.MobilePhone}" id="Id5" style="width:150px"></apex:inputField>
+        <apex:inputField value="{!contact.HomePhone}" id="Id6" style="width:150px"></apex:inputField>
+    </apex:PageBlockSection>
+    </apex:pageBlock> 
+   
+    
+    <apex:pageBlock id="addressDetailPB">
+   
+     
+    <apex:PageBlockSection id="addressDetailsPBS" title="Adresse information" collapsible="false" columns="2">
+                
+                    <apex:pageBlockSectionItem labelStyleClass="labelStyle" id="addressDetailPBSI">
+                            <apex:outputLabel styleClass="headerStyle">Søg adresse</apex:outputLabel>
+                        <apex:actionRegion > 
+                                <apex:inputField value="{!contact.Street_P__c}" id="streetI" required="true" >
+                                        <apex:actionSupport event="onchange" action="{!fetchAddressDetails}" rerender="addressDetails" status="refreshStatus"/>
+                                </apex:inputField>
+                                <apex:actionStatus id="refreshStatus" >
+                                        <apex:facet name="start" ><apex:image id="TestImage" url="/resource/1324980953000/Loading" width="16" height="16"/></apex:facet>
+                                        <apex:facet name="stop" ></apex:facet>
+                                </apex:actionStatus>
+                        </apex:actionRegion>
+                </apex:pageBlockSectionItem>
+                
+              
+        </apex:pageBlockSection>
+        <apex:outputPanel id="addressDetails">
+        
+               <apex:pageBlockSection rendered="{!displayAddressInfo}" collapsible="false" columns="2" id="addressDetailsPBS1">
+               
+                    <apex:pageBlockSectionItem labelStyleClass="labelStyle" >
+                              <apex:outputLabel value="Gade" for="Gadenavn"/>
+                              <apex:outputField value="{!address.Street__c}"></apex:outputField>  
+                      </apex:pageBlockSectionItem>
+                      <apex:pageBlockSectionItem >
+                              <apex:outputLabel value="Husnr." for="Husnr"/>
+                              <apex:outputField value="{!address.House_No__c}"></apex:outputField>  
+                      </apex:pageBlockSectionItem>
+                     <apex:pageBlockSectionItem >
+                              <apex:outputLabel value="Opgang" for="Opgang"/>
+                              <apex:outputField value="{!address.Entrance__c}"></apex:outputField>
+                      </apex:pageBlockSectionItem>
+                      <apex:pageBlockSectionItem >
+                              <apex:outputLabel value="Side/dørnr" for="Dør"/>
+                              <apex:outputField value="{!address.Door_No__c}"></apex:outputField> 
+                      </apex:pageBlockSectionItem>
+                      <apex:pageBlockSectionItem >
+                              <apex:outputLabel value="Etage" for="Etage"/>
+                              <apex:outputField value="{!address.Floor__c}"></apex:outputField> 
+                      </apex:pageBlockSectionItem>
+                      <!-- <apex:pageBlockSectionItem >
+                              <apex:outputLabel value="Side" for="Side"/>
+                              <apex:outputField value="{!address.Side__c}"></apex:outputField>
+                      </apex:pageBlockSectionItem> -->
+                      <apex:pageBlockSectionItem >
+                              <apex:outputLabel value="Postnr" for="Postnr"/>
+                              <apex:outputField value="{!address.Postcode__c}"></apex:outputField>      
+                      </apex:pageBlockSectionItem>
+                      <apex:pageBlockSectionItem >
+                              <apex:outputLabel value="By" for="By"/>
+                              <apex:outputField value="{!address.Town__c}"></apex:outputField> 
+                      </apex:pageBlockSectionItem>
+                 </apex:PageBlockSection>
+                 </apex:outputPanel>
+     </apex:pageBlock>
+    <!-- 
+    <apex:PageBlock id="addressDetailsPB" mode="edit">
+       <apex:PageBlockSection title="Adresse information" collapsible="false" columns="1" id="addressDetailsPBS">
+        <apex:PageBlockSectionItem >
+         <apex:outputLabel >Gadenavn</apex:outputLabel>
+         <apex:actionRegion >
+         <apex:inputField value="{!contact.Street_P__c}" id="streetI" required="true" style="width:150px">
+             <apex:actionSupport event="onchange" action="{!fetchAddressDetails}" rerender="addressDetails" status="refreshStatus"/>
+              <apex:actionStatus id="refreshStatus" startText="Søgning..." >
+              <apex:facet name="start" ><apex:image id="TestImage" url="/resource/1324980953000/Loading" width="16" height="16"/></apex:facet>
+              <apex:facet name="stop" ></apex:facet>
+           </apex:actionStatus>
+            </apex:inputField>
+            </apex:actionRegion>
+           </apex:PageBlockSectionItem>
+           <apex:outputPanel id="addressDetails"><br/>
+                <apex:PageBlockSection rendered="{!displayAddressInfo}">
+                  <apex:outputField value="{!address.Street__c}"></apex:outputField>
+                  <apex:outputField value="{!address.HouseNumber__c}"></apex:outputField>
+                  <apex:outputField value="{!address.Entrance__c}" ></apex:outputField>
+                  <apex:outputField value="{!address.Door_No__c}" ></apex:outputField>
+                  <apex:outputField value="{!address.Floor__c}" ></apex:outputField>
+                  <apex:outputField value="{!address.Side__c}" ></apex:outputField>
+                  <apex:outputField value="{!address.Postcode__c}" ></apex:outputField>
+                  <apex:outputField value="{!address.Town__c}" ></apex:outputField>
+             </apex:pageBlockSection>   
+            </apex:outputPanel> 
+       </apex:PageBlockSection>
+    </apex:PageBlock> -->
+                 
+     <apex:pageBlock id="Pb1"> 
+        <apex:PageBlockSection title="Tildel Kunde" collapsible="true" columns="1" id="pbs1"> 
+             <div id="tree1" style="width: 850px;"></div><br/>
+        </apex:PageBlockSection>
+          
+  <apex:pageBlockButtons location="bottom" id="pblockId">
+  <!--  <apex:commandButton value="{!$Label.SC_EditContactPage_Save}" id="saveId" onclick="confirm_changes();" styleClass="dialogbutton_orange"></apex:commandButton>&nbsp;&nbsp;&nbsp;&nbsp; -->   
+         <input type="button" value="{!$Label.SC_EditContactPage_Save}" class="saveBtn" style="height:21px;" onclick="return confirm_changes();" />&nbsp;&nbsp;&nbsp;&nbsp;
+        <apex:commandButton action="{!cancel}" value="{!$Label.SC_EditContactPage_Cancel}" id="calcelId" styleClass="dialogbutton_grey"></apex:commandButton>
+</apex:pageBlockButtons>
+ <apex:actionFunction name="saveUser" action="{!save}" reRender="MessageId,Panel1" status="queryStatus" > 
+    <apex:param name="selectedIds" assignTo="{!selectNodeIds1}" value=""/> 
+ </apex:actionFunction>
+ 
+</apex:PageBlock>
+<script>
+    document.getElementById('{!$Component.theform:addressDetailPB:addressDetailsPBS:addressDetailPBSI:streetI}').readOnly = true;
+    var isAdmin = {!isPortalAdmin};
+    if(isAdmin == true){
+        var allChkBoxes = document.getElementsByTagName("input");
+         for(var i =0;i<allChkBoxes.length;i++ ){
+            if(allChkBoxes[i].type == "checkbox"){
+                allChkBoxes[i].disabled = true;
+            }
+         }
+     }  
+</script>
+
+<!-- </apex:outputPanel> -->
+<script type="text/javascript">printContentAreaEnd();</script>
+<script type="text/javascript">printFooter();</script>
+</apex:form>
+</body>
+<apex:actionStatus id="queryStatus">  
+                <apex:facet name="start">
+                     <c:CarrieHenterData BackColor="#efefef" borderColor="#336699" borderSize="3" height="50px" width="180px" ImageUrl="{!$Resource.CarrieLoading}" Message="Henter Data..." messageStyle="color:darkred;font-size:11pt;font-weight:bold;"/> 
+                </apex:facet>
+</apex:actionStatus>
+</html>
+</apex:page>

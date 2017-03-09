@@ -1,0 +1,228 @@
+<apex:page standardController="Address__c" extensions="clsProductsYKController_Admin" showHeader="false" sidebar="false">
+    <apex:includeScript value="{!URLFOR($Resource.DataTables, '/jquery-datatables-column-filter-master/media/js/jquery-1.5.1.min.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.DataTables, '/jquery-datatables-column-filter-master/media/js/jquery-ui.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.DataTables, '/jquery-datatables-column-filter-master/media/js/jquery.dataTables.columnFilter.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.DataTables, '/jquery-datatables-column-filter-master/media/js/jquery.dataTables.js')}"/>
+    
+    <apex:stylesheet value="{!URLFOR($Resource.DataTables, '/jquery-datatables-column-filter-master/media/css/demo_page.css')}" />
+    <apex:stylesheet value="{!URLFOR($Resource.DataTables, '/jquery-datatables-column-filter-master/media/css/demo_table.css')}" />
+    <apex:stylesheet value="{!URLFOR($Resource.DataTables, '/jquery-datatables-column-filter-master/media/css/themes/base/jquery-ui.css')}" />
+    <apex:stylesheet value="{!URLFOR($Resource.DataTables, '/jquery-datatables-column-filter-master/media/css/themes/smoothness/jquery-ui-1.7.2.custom.css')}" />
+    <style type="text/css">
+        
+        .toggle-check {
+        overflow: auto; 
+        clear: both; 
+        bottom:10%;
+        left:0;
+        text-align: left;
+        position: absolute; 
+        z-index: 99997;
+        }
+        th.totalRow {
+        display: none;}
+    </style>
+    
+    <style>
+        
+        .activeTab {background-color: #1797C0; color:white; background-image:none;-webkit-border-radius:10px; -moz-border-radius:10px; padding:5px;}
+        .inactiveTab { background-color: #D6ECF3; color:black; background-image:none; -webkit-border-radius:10px; -moz-border-radius:10px; padding:5px;}
+        .headerClass { text-align:center;}
+        .viewLink {font-size: 8pt; font-weight:bold}
+        .UsageGrid td {vertical-align:top}
+        .search_init {color: #000000;}
+        tr.even td.sorting_1{background-color: #FFFFFF;}
+        tr.odd td.sorting_1 {background-color: #FFFFFF;}
+        tr.odd {background-color: #FFFFFF;}
+        
+        .pbBody table.list tr td {border: 1px solid #D2D1D1;}
+        table.list tr.headerRow th {border-color: #D2D1D1;}
+        .sorting_asc {
+        background: url("/resource/1472553063000/DataTables/jquery-datatables-column-filter-master/media/images/sort_asc.png") no-repeat scroll right center transparent !important;
+        }
+        .sorting_desc {
+        background: url("/resource/1472553063000/DataTables/jquery-datatables-column-filter-master/media/images/sort_desc.png") no-repeat scroll right center transparent !important;
+        }
+        .sorting {
+        background: url("/resource/1472553063000/DataTables/jquery-datatables-column-filter-master/media/images/sort_both.png") no-repeat scroll right center transparent !important;
+        }
+        .sorting_asc_disabled {
+        background: url("/resource/1472553063000/DataTables/jquery-datatables-column-filter-master/media/images/sort_asc_disabled.png") no-repeat scroll right center transparent !important;
+        }
+        .sorting_desc_disabled {
+        background: url("/resource/1472553063000/DataTables/jquery-datatables-column-filter-master/media/images/sort_desc_disabled.png") no-repeat scroll right center transparent !important;
+        }
+    </style>
+    <script type="text/javascript">
+    j$ = jQuery.noConflict();
+    var product;
+    var product1;
+    
+    j$(document).ready( function () {
+        var arr = {!arrPage};
+        product= j$('[id$="existingProductsTable"]').dataTable().columnFilter({ sPlaceHolder: "tfoot", aoColumns: [
+            {},{},{},{},{},{sSelector:"#isActive",type:"checkbox",values:arr},{},{},{},{},{},{},{},{},{sSelector:"#CableType",type:"select",values:null},{sSelector:"#ProductType", type: "checkbox", values:null },{},{},{sSelector:"#SubType", type: "checkbox", values:null}]});
+        
+        
+        product1 = j$('[id$="potentialProductsTable"]').dataTable().columnFilter({ sPlaceHolder: "tfoot", aoColumns: [
+            {},{},{},{},{sSelector:"#cbltyp",type:"select",values:null},{sSelector:"#prdtyp", type: "checkbox", values:null },{sSelector:"#subtyp", type: "checkbox", values:null}]});
+        var idInputchk = document.getElementById("j_id0:j_id10:pgblock:potentialProductsTableSubscriptionType_cb_Grund").checked = true;
+    var localLabel = document.getElementById("j_id0:j_id10:pgblock:potentialProductsTableSubscriptionType_cb_Grund").value;
+    //console.log('localLabel***'+localLabel);
+        var r = '<input class="search_init checkbox_filter btn btn-default" type="checkbox" id="j_id0:j_id10:pgblock:potentialProductsTableSubscriptionType_cb_Grund" name="SubscriptionType" value="Grund">';
+        var checkbox = j$(r);
+        var search = '';
+                    var or = '|'; //var for select checks in 'or' into the regex
+                    var resSize = j$('input:checkbox[value="' + localLabel + '"]:checked').size();
+                    //console.log('resSize***'+resSize);
+                    j$('input:checkbox[value="' + localLabel + '"]:checked').each(function (index) {
+
+                        //search = search + ' ' + $(this).val();
+                        //concatenation for selected checks in or
+                        if ((index == 0 && resSize == 1)
+                                || (index != 0 && index == resSize - 1)) {
+                            or = '';
+                        }
+                        //trim
+                        search = search.replace(/^\s+|\s+$/g, "");
+                        search = search + j$(this).val() + or;
+                        or = '|';
+
+                    });
+
+                    //console.log('search****'+search);
+                    if (search != "") {
+                        j$('input:checkbox[name="' + localLabel + '"]').removeClass("search_init");
+                    } else {
+                        j$('input:checkbox[name="' + localLabel + '"]').addClass("search_init");
+                    }
+                    //execute search
+                    product1.fnFilter(search, 6, true, false);
+                    fnOnFiltered();
+    });
+    var idInputchk = document.getElementById("j_id0:j_id10:pgblock:existingProductsTable_cb_Yes");
+    alert(idInputchk.parentNode.getAttribute("data-element"));
+    
+    </script>
+    
+    
+    
+    
+    <apex:form >    
+        <apex:pageMessages />    
+        <apex:pageBlock id="pgblock" >    
+            
+            <!--  <apex:inputHidden value="{!Address__c.External_Id__c}"/> -->
+            <apex:outputField value="{!Address__c.External_Id__c}" rendered="false"/>
+            
+            <apex:tabPanel switchType="client" height="200px" value="{!currentTab}" tabClass="activeTab" inactiveTabClass="inactiveTab">            
+                
+                <!--## TAB 1 ##-->
+                <apex:tab label="{!$Label.Existing_Products}" labelWidth="150px" id="existingProductsTab" status="existingProductsStatus">
+                    <!-- <apex:actionStatus startText="Requesting..." id="existingProductsStatus"> -->
+                    
+                    <apex:commandButton id="loadButton1" value="Load Data" action="{!loadDataAction}" rendered="{!isDisableInputs}"/> 
+                    
+                    <!--  <apex:commandButton id="loadButton1" value="Load Data" action="{!loadDataAction}" rendered="false"/>-->
+                    <apex:pageBlock id="fromPageBlock" rendered="{!existingProductsTableFilter}">
+                        
+                        
+                        <apex:pageBlockSection columns="2" >
+                            <apex:pageblockSectionItem >   
+                                <apex:outputlabel value="{!$Label.Cable_Type}"/> 
+                                <p id="CableType" style="margin-top: 0px;"></p>
+                            </apex:pageblockSectionItem>
+                            <apex:pageblockSectionItem >
+                                <apex:outputlabel value="{!$Label.Active_products}"/> 
+                                <p id="isActive" style="margin-top: 0px;"></p>
+                            </apex:pageblockSectionItem>
+                            <apex:pageblockSectionItem >
+                                <apex:outputlabel value="{!$Label.Product_Type}"/> 
+                                <p id="ProductType" style="margin-top:0px;"></p>
+                                <p id="MobileBB" style="margin-top:0px;"></p>
+                            </apex:pageblockSectionItem>
+                            <apex:pageblockSectionItem > 
+                                <apex:outputlabel value="{!$Label.Subscription_type}"/> 
+                                <p id="SubType" style="margin-top:0px;"></p>
+                            </apex:pageblockSectionItem>
+                        </apex:pageBlockSection>       
+                        
+                    </apex:pageBlock>
+                    <apex:pageBlockTable value="{!existingProducts}" var="product" id="existingProductsTable" rules="rows" rendered="{!isrenderTableext}">
+                        <!-- <apex:pageBlockTable value="{!existingProducts}" var="product" id="existingProductsTable" rules="rows" rendered="true"> -->  
+                        <apex:column headerValue="{!$Label.Customer_Number}" value="{!product.customerId}"/>
+                        <apex:column headerValue="{!$Label.First_Name}" value="{!product.firstName}" footerValue="{!$Label.First_Name}"/>
+                        <apex:column headerValue="{!$Label.Last_Name}" value="{!product.lastName}"/>
+                        <apex:column headerValue="{!$Label.Business_Group}" value="{!product.businessGroup}" id="businessgrp"/>
+                        <apex:column headerValue="{!$Label.Subscription}" value="{!product.subscription}"/>
+                        <!--
+<apex:column headerValue="{!$Label.Subscription}">
+<apex:outputText value="{!product.subscription}" rendered="{! NOT(product.showLink)}" />
+<apex:outputLink value="{!product.linkUrl}" rendered="{! product.showLink}"  target="_blank" >{!product.subscription}</apex:outputLink>
+<apex:outputText value="   mbilling"  style="color:red;font-size:xx-small; vertical-align:top;" rendered="{!product.showLink}" />       
+</apex:column>
+-->  
+                        <apex:column headerValue="{!$Label.Active}" value="{!product.active}"/>
+                        <apex:column headerValue="{!$Label.Open}" value="{!product.productStart}" style="text-align:right" ></apex:column>
+                        <apex:column headerValue="{!$Label.Closed}" value="{!product.productEnd}" style="text-align:right" ></apex:column>
+                        <apex:column headerValue="{!$Label.Billing_Start}" value="{!product.billingStart}"/>
+                        <apex:column headerValue="{!$Label.Billing_End}" value="{!product.billingEnd}"/>
+                        <apex:column headerValue="{!$Label.Price}" value="{!product.account.Currency_Format__c}" headerClass="headerClass" style="text-align:right"></apex:column>
+                        <apex:column headerValue="Kundetype" value="{!product.customerType}"/>
+                        <apex:column headerValue="CableUnit" value="{!product.CableUnit}"/>
+                        <apex:column headerValue="Location" value="{!product.Location}"/>
+                        <apex:column headerValue="Kabeltype" value="{!product.cableType}" headerClass="headerClass" style="text-align:right" footerValue="Kabeltype"></apex:column>
+                        <apex:column headerValue="ProductType" value="{!product.productType}" headerClass="headerClass" style="text-align:right" footerValue="ProductType"></apex:column>
+                        <!--<apex:column headerValue="ProductStart" value="{!product.productStart}" headerClass="headerClass" style="text-align:right" footerValue="ProductStart"></apex:column>
+                        <apex:column headerValue="ProductEnd" value="{!product.productEnd}" headerClass="headerClass" style="text-align:right" footerValue="ProductEnd"></apex:column>
+                        --><apex:column headerValue="Subscription Type" value="{!product.subscriptionType}" headerClass="headerClass" style="text-align:right" footerValue="Subscription Type"></apex:column>
+                    </apex:pageBlockTable>
+                </apex:tab>
+                
+                <!--## TAB 2 ##-->
+                <apex:tab label="{!$Label.Potential_Products}" labelWidth="150px" status="potentialProductsStatus" id="potentialProductsTab">
+                    <apex:commandButton id="loadButton2" value="Load Data" action="{!updatePotentialProducts}" rendered="{!isDisableProductOfferButton}"/> 
+                    
+                    <apex:pageBlock rendered="{!potentialProductsTableFilter}">             
+                        <apex:pageBlockSection columns="2" >
+                            <apex:pageblockSectionItem >                    
+                                <apex:outputlabel value="{!$Label.Cable_Type}"/> 
+                                <p id="cbltyp" style="margin-top: 0px;"></p>
+                            </apex:pageblockSectionItem>
+                            <apex:pageblockSectionItem >                    
+                                <apex:outputlabel value="{!$Label.Product_Type}"/> 
+                                <p id="prdtyp" style="margin-top: 0px;"></p>
+                            </apex:pageblockSectionItem>
+                            <apex:pageblockSectionItem >                    
+                                <apex:outputlabel value="{!$Label.Subscription_type}"/> 
+                                <p id="subtyp" style="margin-top: 0px;"></p>
+                            </apex:pageblockSectionItem>
+                            <apex:pageblockSectionItem >
+                                <apex:outputlabel value="{!$Label.Broadband_Without_TV}" for="broadBandcheck"/> 
+                                <apex:inputCheckbox id="broadBandcheck" value="{!broadbandWOTv}" disabled="true"  style="margin: 1px;" />
+                            </apex:pageblockSectionItem>
+                        </apex:pageBlockSection>  
+                        <apex:pageBlockSection columns="1">
+                            <apex:outputPanel >
+                                <p>
+                                    <b><apex:outputlabel value="{!finalCuList}"   /></b>
+                                </p>
+                            </apex:outputPanel>
+                        </apex:pageBlockSection>
+                    </apex:pageBlock>
+                    <apex:pageBlockTable value="{!potentialProducts}" var="product" id="potentialProductsTable" rules="rows" rendered="{!potentialProductsTableFilter}">           
+                        <apex:column headerValue="{!$Label.Business_Group}" value="{!product.businessGroup}" footerValue="{!$Label.Business_Group}"/>
+                        <apex:column headerValue="Product Number" value="{!product.productKey}" footerValue="Product Number" id="pn" /> 
+                        <apex:column headerValue="{!$Label.Offer_Name}" value="{!product.OfferName}" footerValue="{!$Label.Offer_Name}"/>
+                        <apex:column headerValue="{!$Label.Price}" value="{!product.account.Currency_Format__c}" headerClass="headerClass" style="text-align:right"></apex:column>
+                        <apex:column headerValue="Kabeltype" value="{!product.cableType}" footerValue="Kabeltype" headerClass="headerClass" style="text-align:center"/>
+                        <apex:column headerValue="Product Type" value="{!product.ProductType}" footerValue="Product Type" style="text-align:left" rendered="true" />
+                        <apex:column headerValue="SubscriptionType" value="{!product.SubscriptionType}" footerValue="Subscription Type" style="text-align:left" rendered="true" />
+                    </apex:pageBlockTable>   
+                </apex:tab>
+            </apex:tabPanel>              
+        </apex:pageBlock>
+        <apex:inputHidden value="{!Address__c.Cableunit_number__c}"/>
+        <apex:inputHidden value="{!Address__c.Cable_type__c}"/>
+    </apex:form>
+</apex:page>

@@ -1,0 +1,68 @@
+<apex:page standardController="Account"  extensions="customerExtenstion">
+<apex:form >
+<apex:stylesheet value="{!URLFOR($Resource.styleCss,'myStyle/myStyle.css')}"/>
+ <apex:pageBlock >
+ <div align="left">
+ <apex:commandButton title="Click to Create New Account" value="New Forhandler" action="{!newDealer}">
+</apex:commandButton>
+<apex:commandButton title="Export to Excel" value="Export to Excel" action="{!exportToExcel}">
+</apex:commandButton>
+
+</div>
+<apex:Messages />
+<br></br>
+   <apex:pageBlockTable value="{!ExcelList}" var="obj" rules="all" border="1"  columns="39" columnsWidth="100px,100px">
+    
+     <apex:column headerValue="Handling"  > 
+         
+      <apex:outputlink value="/apex/ViewDealerDetailsPage" title="Click to View" styleclass="btnViewIcon"> 
+           <apex:param name="accountId" value="{!obj.excelAccount.id}"/> 
+      </apex:outputlink>
+
+     <apex:outputlink value="/apex/EditCustPage" title="Click to Edit" styleclass="btneditIcon"> 
+           <apex:param name="accountId" value="{!obj.excelAccount.id}"/> 
+     </apex:outputlink>
+     <apex:commandLink title="Click to Delete"  styleclass="btndeleteIcon" action="{!deleteAccount}" onclick=" confirm_entry();" >
+            <apex:param name="accountId" value="{!obj.excelAccount.id}"/> 
+     </apex:commandLink>
+  </apex:column>
+     
+     <apex:column value="{!obj.excelAccount.Dealer_Number__c}" headerValue="Dealer No." />
+     <apex:column value="{!obj.excelAccount.name}" headerValue="Dealer Name" />
+     <apex:column value="{!obj.excelAccount.Debitor_Number__c}" headerValue="Debitor No." />
+     <apex:column value="{!obj.excelAccount.Category__c}" headerValue="Kategori"/>
+     <apex:column value="{!obj.excelAccount.DealerGroup__c}" headerValue="Group" />
+     <apex:column value="{!obj.excelAccount.sales_consultant__c}" headerValue="Consultant"/>
+     <apex:column value="{!obj.excelAccount.Basis__c}" headerValue="YouSee Tv-signal i butik"/>
+     <apex:column value="{!obj.excelAccount.POS__c}" headerValue="Pos"/>
+     <apex:column value="{!obj.excelAccount.Afregnes__c}" headerValue="Afregnes"/>
+     <apex:column value="{!obj.excelAccount.selectedProduct__c}" headerValue="Products"/>
+     <apex:column value="{!obj.excelAccount.Street_YK__r.Name}" headerValue="Street"/>
+     <apex:column value="{!obj.excelAccount.address_value__c}" headerValue="Address"/>
+     <apex:column value="{!obj.excelAccount.Street_YK__r.Postcode__c}" headerValue="Post Code"/>
+     <apex:column value="{!obj.excelAccount.Street_YK__r.Town__c}" headerValue="Town"/>
+    
+     
+    </apex:pageBlockTable>
+<script language="JavaScript">
+//To confirm deletion of contact
+   function confirm_entry()
+    {
+    
+       input_box=confirm("Are you sure you want to delete this account?");
+       if (input_box == true)
+       {
+        
+        // document.getElementById('{!$Component.hdnAccountId}').value = 'true';
+         return true;
+       }
+       else
+       {
+       // document.getElementById('{!$Component.hdnAccountId}').value ='false';
+        return false;
+       }
+   }
+</script>
+ </apex:pageBlock>
+ </apex:form>
+</apex:page>

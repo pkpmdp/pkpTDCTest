@@ -1,0 +1,380 @@
+<apex:page standardcontroller="Aria_Account__c" extensions="CarrieCustomerBillingController" id="apexPage" sidebar="False"  showHeader="False"  tabStyle="Invoice_Usage__c">
+    <div id="toBottom" >
+        <img src="{!$Resource.CarrieBackToBottom}" title="Back to Bottom" width="15px" height="15px"/>
+    </div>
+    <apex:includeScript value="{!URLFOR($Resource.DynaTree_JS,'jquery/jquery.js')}"/>
+    <script type="text/javascript">
+        //window.onload = function(){ window.resizeTo( 1000,1000); }
+        window.resizeTo( 1000,1000);
+        var previouseSelectedAccount='';
+        var previouseSelectedId='';
+        function linkToTriple() {
+       //   var url = 'http://darton:40202/?customerId=' + {!Aria_Account__c.Customer_No__c}
+         var url =  'http://pico4.int.yousee.dk:40002/?customerId=' + {!Aria_Account__c.Customer_No__c}
+            window.open(url, 'triple');
+        }
+        function linkToCasper() {
+            callToCasper();
+        } 
+        
+        function radioClick(){
+        this.blur();
+        this.focus();
+        }
+        
+        function switchToProduct(name){
+            var id = "";
+            for (i = 0; i < document.getElementsByName(name).length; i++) {
+                if (document.getElementsByName(name)[i].checked) {
+                    id = document.getElementsByName(name)[i].value;
+                }
+            }        
+        
+            // Get the current page
+            var curr_page = window.location.href,
+            next_page = "";
+            // If current page has a query string, append action to the end of the query string, else
+            // create our query string
+       
+            if(curr_page.indexOf("?") > -1) {
+                next_page = curr_page.substring(0,curr_page.indexOf("?")+1)+"id="+id;
+            } else {
+                next_page = curr_page+"?id="+id;
+            }
+ 
+            // Redirect to next page
+            window.location = next_page;
+            /*var cnf = confirm("Du forlader nu siden?");
+            if(cnf==true){
+                window.location = next_page;
+                return true; 
+            }
+            else{
+                //alert('previouseSelectedId '+previouseSelectedId);
+                document.getElementById(previouseSelectedId).checked=true;
+                return null;
+            }*/
+        } 
+        
+        //start of carrie-1116
+        function displayTilbage() {
+            //alert(window.history.length);
+            if(document.referrer.indexOf('CarrieAccountSelectPage')!=-1 && window.history.length > 1){ 
+                $('#tilbage').show();
+            }/*else if(document.referrer.length==0 ){
+                //   $('#tilbage').show();  
+            } */   
+        } 
+        function goBack(){
+            window.history.go(-1);
+        }
+        
+        //end of carrie-1116
+    </script>
+    <style type="text/css">
+        .actionColumn {display:none; visibility:hidden} 
+        .numericalColumn {display:none; visibility:hidden}
+        .myprocess {width: 30%;margin-left:auto;margin-right:auto;}
+        div.pShowMore a:nth-child(2){
+            display:none;
+        }
+        #toTop {
+            bottom: 40px;
+            color: #333333;
+            cursor: pointer;
+            display: none;
+            font-family: verdana;
+            font-size: 11px;
+            position: fixed;
+            right: 5px;
+            text-align: right;
+            width: 100px;
+        }
+        #toBottom {
+            top: 40px;
+            color: #333333;
+            cursor: pointer;
+            display: none;
+            font-family: verdana;
+            font-size: 11px;
+            position: fixed;
+            right: 5px;
+            text-align: right;
+            width: 100px;
+        }
+        .bPageBlock .pbHeader .pbButton {
+            display: none;
+        }
+    </style>
+    <apex:pageBlock id="apexPageBlock">
+        <div></div> 
+        <div></div>
+        <div align="center"> <h1 style="font-size:12pt" ><i>Fakturerings Oplysninger</i></h1></div>
+        <apex:outputPanel id="error"> 
+            <apex:pageMessages />
+        </apex:outputPanel>
+        <apex:form >
+        <apex:inputHidden value="{!Aria_Account__c.Aria_Account_No__c}" id="theHiddenInput"/>
+            <apex:actionFunction name="getBillingDetails" action="{!getBillingDetails}" rerender="displayDetails,error,script" status="myStatus"/>
+            <apex:actionFunction action="{!callToCasper}" name="callToCasper" reRender="displayDetails,error">
+                <apex:param name="accountID" assignTo="{!accountID}" value="" />
+            </apex:actionFunction>  
+        </apex:form>
+        <br/>
+        <script>window.setTimeout(getBillingDetails,500)</script> 
+        <apex:outputPanel id="displayDetails"> 
+            <apex:actionStatus id="myStatus">
+                <apex:facet name="start">
+                     <c:CarrieHenterData BackColor="#efefef" borderColor="#336699" borderSize="3" height="50px" width="180px" ImageUrl="{!$Resource.CarrieLoading}" Message="Henter Data..." messageStyle="color:darkred;font-size:11pt;font-weight:bold;"/> 
+                </apex:facet>
+                <apex:facet name="stop"> 
+                    <apex:outputPanel >
+                        <apex:pageBlock id="accountPageBlock" > 
+                            <apex:form > 
+                                <apex:selectRadio value="{!selectAccount}" label="Products" id="selectAccountRadio"  onclick="radioClick()"  onchange="switchToProduct('{!$Component.selectAccountRadio}')" rendered="true"   >
+                                <apex:selectOptions value="{!SelectAccounts}" />
+                                </apex:selectRadio>
+                                <script>
+                                
+                                previouseSelectedAccount ="{!$Component.selectAccountRadio}";
+                                var length1 = {!SelectAccounts.size};
+                                if(length1 > 1){
+                                 for (i = 0; i < document.getElementsByName(previouseSelectedAccount).length; i++) {
+                                        if (document.getElementsByName(previouseSelectedAccount)[i].checked) {
+                                           previouseSelectedId = document.getElementsByName(previouseSelectedAccount)[i].id;
+                                                                                 }
+                            
+                                    } 
+                                }
+                                 </script>
+                                <div align="right">
+                                    <apex:commandButton value="Vis Transaktioner" action="{!redirectTransaction}"/>
+                                    <apex:commandButton value="Vis Forbrug" action="{!redirectUsage}" rendered="{!showForbrug}" />
+                                    <input type="button" value="Triple" onClick="linkToTriple()" class="btn" />
+                                    <input type="button" value="Casper" onClick="linkToCasper()" class="btn" />
+                                    <input id="tilbage" type="button" value="Tilbage" onClick="goBack()" class="btn"/> <!-- carrie-1116 -->
+                                    <c:CarrieCloseButton ></c:CarrieCloseButton>
+                                </div>
+                                <!-- start of carrie-1116 -->
+                                <script>
+                                $('#tilbage').hide();
+                                    displayTilbage();
+                                </script>
+                                <!--end of Carrie-1116 -->
+                            </apex:form>  
+                            <apex:pageBlockSection title="Regningsstatus" id="Regningsstatus" > 
+                                <apex:outputField value="{!Aria_Account__c.Account__r.name}" label="Kundenavn"/>
+                                <apex:outputField value="{!Aria_Account__c.Account__r.Customer_No__c}" label="Kundenummer/Juridisk" />
+                                <apex:outputField value="{!Aria_Account__c.Name}" label="Betaler ID" /> 
+                               <!-- start of carrie-1116 <apex:outputField value="{!customer.Betaler__c}" />-->
+                                <apex:pageBlockSectionItem >
+                                <apex:outputLabel value="Betaler" for="nsBetaler"/>
+                                <apex:outputPanel >
+                                <span style="{!if(Aria_Account__c.Account__r.Customer_No__c==customer.Betaler__c,'','color:red; font-weight: bold')}">
+                                <apex:outputField value="{!customer.Betaler__c}" id="nsBetaler"/>
+                                </span></apex:outputPanel></apex:pageBlockSectionItem> <!-- end of carrie-1116 -->
+                                <apex:outputField id="accountRegningsstatus" value="{!customer.Regningsstatus__c}"/>
+                           <!--     <apex:repeat value="{!$ObjectType.Aria_Account__c.FieldSets.Carrie}" var="field">
+                                    <apex:outputField value="{!Aria_Account__c[field]}" />
+                                </apex:repeat>    -->                           
+                                
+                                <apex:outputField value="{!customer.Rykkerstatus__c}"/> 
+              <!-- CARRIE-920   <apex:outputField value="{!customer.Faktureret1__c}" rendered="{!showForbrug}"/> -->
+                                <apex:outputField value="{!customer.Faktureret1__c}"/>
+                                <apex:outputField value="{!customer.Rykkerdato__c}"/>
+                                <apex:outputField value="{!customer.Indbetalt__c}"/>                                
+                                <apex:outputField value="{!customer.Days_in_Dunning__c}"/> 
+                                <apex:outputField value="{!customer.Aria_Pay_Method__c}"/> 
+               <!-- CARRIE-920  <apex:outputField value="{!customer.CurrentSaldo__c}" rendered="{!showForbrug}"/>  -->
+                                <apex:outputField value="{!customer.CurrentSaldo__c}"/>
+                            </apex:pageBlockSection>
+                        </apex:pageBlock>
+                    </apex:outputPanel>
+                </apex:facet>
+            </apex:actionStatus><br/><br/> 
+<!--             Begin Carrie-1255 -->
+<apex:form >
+            <apex:pageBlock title="Fakturaer">
+                <apex:pageBlockTable value="{!telephonyInvoiceList}" var="item" rendered="{!(telephonyInvoiceList.size >0)}">
+                    <apex:column value="{!item.Invoice_Statement__c}" style="{!if(item.isVoid__c=='Voided','background-color:#FCE3E3','')}"/>
+                    <apex:column value="{!item.Faktura__c}" style="{!if(item.isVoid__c=='Voided','background-color:#FCE3E3','')}"/>
+                    <apex:column value="{!item.Datoforudskrift__c}"  styleClass="dataCell  CurrencyElement" headerClass="CurrencyElement zen-deemphasize" style="{!if(item.isVoid__c=='Voided','background-color:#FCE3E3','')}"/>
+                    <apex:column value="{!item.Betalingsfrist__c}" style="{!if(item.isVoid__c=='Voided','background-color:#FCE3E3','')}" />
+                    <apex:column value="{!item.Fakturabelob__c}" style="{!if(item.isVoid__c=='Voided','background-color:#FCE3E3','')}"/>
+                    <apex:column value="{!item.Service_Credit__c}" style="{!if(item.isVoid__c=='Voided','background-color:#FCE3E3','')}"/>
+                    <apex:column value="{!item.Amount_Applied__c}" styleClass="dataCell  CurrencyElement" headerClass="CurrencyElement zen-deemphasize" style="{!if(item.isVoid__c=='Voided','background-color:#FCE3E3','')}"/>
+                    <apex:column value="{!item.Balance__c}" styleClass="dataCell  CurrencyElement" headerClass="CurrencyElement zen-deemphasize" style="{!if(item.isVoid__c=='Voided','background-color:#FCE3E3','')}"/>
+                    <apex:column headerValue="Saldo" styleClass="dataCell  CurrencyElement" headerClass="CurrencyElement zen-deemphasize" style="{!if(item.isVoid__c=='Voided','background-color:#FCE3E3','')}">
+                        <apex:outputField value="{!item.Saldo__c}" rendered="{!item.isVoid__c != 'Voided'}" styleClass="dataCell  CurrencyElement zen-deemphasize"/>
+                        <apex:outputLabel rendered="{!item.isVoid__c == 'Voided'}" ></apex:outputLabel>
+                    </apex:column>   
+                    <apex:column value="{!item.isVoid__c}" headerValue="" style="{!if(item.isVoid__c=='Voided','background-color:#FCE3E3','')}"/>
+                 </apex:pageBlockTable>
+                 <apex:outputLabel value="Ingen registreringer at vise" rendered="{!(telephonyInvoiceList.size ==0)}" styleClass="noRowsHeader"></apex:outputLabel>  
+             </apex:pageBlock> 
+             </apex:form>
+<!--              End Carrie-1255 -->
+<!--            <apex:relatedList list="Invoice_Payments__r" pageSize="5" title="Fakturaer"/><br/><br/> -->
+          <!--  <apex:pageBlock title="Indbetalinger" rendered="{!if(showForbrug=='false','true','false')}"> 
+                <apex:pageBlockTable value="{!youbioPaymentList}" var="item"> -->
+                <!--     <apex:column value="{!item.Name}" style="{!if(item.isVoid__c=='Voided','background-color:#FCE3E3','')}"/>
+                CARRIE-789 --> 
+             <!--   <apex:column value="{!item.YouBioPymLink__c}" style="{!if(item.isVoid__c=='Voided','background-color:#FCE3E3','')}"/>
+                    <apex:column value="{!item.Payment_Date__c}" style="{!if(item.isVoid__c=='Voided','background-color:#FCE3E3','')}"/>
+                    <apex:column value="{!item.Payment_Type__c}" style="{!if(item.isVoid__c=='Voided','background-color:#FCE3E3','')}" />
+                    <apex:column value="{!item.Amount__c}"  styleClass="dataCell  CurrencyElement" headerClass="CurrencyElement zen-deemphasize" style="{!if(item.isVoid__c=='Voided','background-color:#FCE3E3','')}"/>
+                    <apex:column value="{!item.isVoid__c}" headerValue="" style="{!if(item.isVoid__c=='Voided','background-color:#FCE3E3','')}"/>
+                </apex:pageBlockTable>
+                <apex:outputLabel value="Ingen registreringer at vise" rendered="{!(youbioPaymentList.size ==0)}" styleClass="noRowsHeader"></apex:outputLabel>  
+             </apex:pageBlock>  --> 
+             <!--   
+             <apex:relatedList list="Invoice_Payments__r" title="Fakturaer" rendered="{!showForbrug}" /><br/><br/>
+             @jira CARRIE 753 -->   
+            
+           <!--   <apex:relatedList list="Payment_Invoices__r" title="Indbetalinger" rendered="{!showForbrug}"/><br/><br/>
+            @jira CARRIE 789 -->
+            <apex:pageBlock title="Indbetalinger">
+                <apex:pageBlockTable value="{!telefonyPaymentList}" var="item" rendered="{!(telefonyPaymentList.size >0)}">
+                    <apex:column value="{!item.Payment__c}" style="{!if(item.isVoid__c=='Voided','background-color:#FCE3E3','')}"/>
+                    <apex:column value="{!item.Payment_Date__c}" style="{!if(item.isVoid__c=='Voided','background-color:#FCE3E3','')}"/>
+                    <apex:column value="{!item.Amount__c}"  styleClass="dataCell  CurrencyElement" headerClass="CurrencyElement zen-deemphasize" style="{!if(item.isVoid__c=='Voided','background-color:#FCE3E3','')}"/>
+                    <apex:column value="{!item.Payment_Type__c}" style="{!if(item.isVoid__c=='Voided','background-color:#FCE3E3','')}" />
+                    <apex:column value="{!item.Fakturanummer__c}" style="{!if(item.isVoid__c=='Voided','background-color:#FCE3E3','')}"/>
+                    <apex:column value="{!item.Amount_Applied__c}" styleClass="dataCell  CurrencyElement" headerClass="CurrencyElement zen-deemphasize" style="{!if(item.isVoid__c=='Voided','background-color:#FCE3E3','')}"/>
+                    <apex:column value="{!item.isVoid__c}" headerValue="" style="{!if(item.isVoid__c=='Voided','background-color:#FCE3E3','')}"/>
+                 </apex:pageBlockTable>
+                 <apex:outputLabel value="Ingen registreringer at vise" rendered="{!(telefonyPaymentList.size ==0)}" styleClass="noRowsHeader"></apex:outputLabel>  
+             </apex:pageBlock> 
+
+            <apex:form >
+                <div style="overflow: hidden;">
+                    <div align="left" style="padding-left:10px;float:left;"> 
+                        <h1 style="font-size:12pt" ><i>Kreditering</i></h1>
+                    </div> 
+                    <div align="right"> 
+                        <div id="showCreditButton"  style="padding-right:10px;padding-bottom:5px;overflow: hidden"> 
+                            <apex:commandButton action="{!redirectCreateCredit}" value="Ny Kreditering"></apex:commandButton>
+                        </div>
+                        <!-- <div id="disableCreditButton"  style="padding-right:10px;padding-bottom:5px;overflow: hidden"> 
+                            <span id="accountMessage" style="color:#FF0000;;font-size:10pt"></span>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            <apex:commandButton action="{!redirectCreateCredit}" value="Ny Kreditering" disabled="true"></apex:commandButton>
+                        </div> 
+                        -->
+                    </div>
+                </div>
+            </apex:form>
+            <apex:relatedList list="Kreditering_ej_tilknyttet__r" pageSize="5" rendered="{!showForbrug}"/>
+            <apex:relatedList list="Tilknyttet_kreditering__r" pageSize="5" rendered="{!showForbrug}"/>
+           
+            <apex:pageBlock title="Krediteringer"  rendered="{!showForbrug = 'false'}"> 
+                <apex:pageBlockTable value="{!creditpymList}" var="item" rendered="{!(creditpymList.size >0)}"> 
+                    <apex:column value="{!item.YouBioLink__c}"/> 
+                    <apex:column value="{!item.Payment_Date__c}" headerValue="Dato"/>
+                    <apex:column value="{!item.youbioCredit__c}" headerValue="Type"/>
+                    <!-- CARRIE-657 <apex:column headerValue="Årsag"/> --> 
+                    <apex:column value="{!item.Credit_Reason__c}" headerValue="Årsag"/>
+                    <apex:column value="{!item.Comments__c}" headerValue="Bemærkning" width="20%"/>                                
+                <!--    <apex:column value="{!item.Amount__c}" headerValue="Krediteret beløb" styleClass="dataCell  CurrencyElement" headerClass="CurrencyElement zen-deemphasize"/>
+                  -->
+                 <apex:column value="{!item.Amount__c}" headerValue="Beløb" styleClass="dataCell  CurrencyElement" headerClass="CurrencyElement zen-deemphasize"/>
+                </apex:pageBlockTable>
+                <apex:outputLabel value="Ingen registreringer at vise" rendered="{!(creditpymList.size ==0)}" styleClass="noRowsHeader"></apex:outputLabel>
+            </apex:pageBlock>
+             <!-- <apex:relatedList list="Refunds__r" pageSize="5"/> -->
+     <!--       <style>
+                div.pShowMore a:nth-child(2){
+                    display:none;
+                }
+            </style> -->
+        </apex:outputPanel>
+    </apex:pageBlock>
+    <div id="toTop" >
+        <img src="{!$Resource.CarrieBackToTop}" title="Back to Top" width="15px" height="15px"/>
+    </div>
+    <script type="text/javascript">
+    $(".pShowMore").each(function(i){
+    $(this).children("a:eq(1)").remove();
+});
+        var scrollBottom = $(document).height() - $(window).height() - $(window).scrollTop();
+        scroll();
+        function scroll(){
+            if($(window).scrollTop()==0){
+                $('#toBottom').fadeIn();
+            }
+            $(window).scroll(function() {
+                if($(this).scrollTop() == 0) {
+                    $('#toTop').fadeOut();
+                    $('#toBottom').fadeIn();
+                }else if($(this).scrollTop() == scrollBottom) {
+                    $('#toBottom').fadeOut(); 
+                    $('#toTop').fadeIn(); 
+                }
+            });
+            $('#toTop').click(function() {
+                $('body,html').animate({scrollTop:0},800);
+            });
+            $('#toBottom').click(function() {
+                scrollBottom = $(document).height() - $(window).height() - $(window).scrollTop();
+                $('body,html').animate({scrollTop:scrollBottom},800);
+            });
+        }
+    </script>
+    <apex:outputPanel id="script">
+        <script>
+           $(".pShowMore").each(function(i){
+    $(this).children("a:eq(1)").remove();
+});
+
+      /*    document.getElementById('showCreditButton').style.display="block";
+            document.getElementById('disableCreditButton').style.display="none";
+            var Regningsstatus = document.getElementById('{!$Component.apexPage.apexPageBlock.accountPageBlock.Regningsstatus.accountRegningsstatus}').innerHTML;
+            if(Regningsstatus=='TERMINATED'){
+                document.getElementById('disableCreditButton').style.display="block";
+                document.getElementById('showCreditButton').style.display="none";
+                document.getElementById('accountMessage').innerHTML='ACCOUNT TERMINATED';
+            }else{
+                document.getElementById('showCreditButton').style.display="block";
+                document.getElementById('disableCreditButton').style.display="none";
+            } */
+       /*     var lookupHoverArray = {!lookupHoverList};
+                $("body").delegate("div.pShowMore > a", "click", function(){
+                    var hrefString = $(this).attr('href');
+                    if(hrefString.indexOf('function(){')==-1 && hrefString.indexOf('javascript')!=-1){
+                        var newHrefString = 'javascript:(function(){'+hrefString.substring(hrefString.indexOf(':')+1,hrefString.length);
+                        newHrefString = newHrefString+'window.setTimeout(populateFaktura,3000);})();';
+                        $(this).attr('href',newHrefString);
+                    }
+                });
+                populateFaktura();
+                function populateFaktura(){
+                    jQuery.each(lookupHoverArray, function() {   
+                    $("a:contains('"+this+"')").wrap(function(index) {
+                        if($(this).parent().get(0).tagName=='SPAN'){
+                            return; 
+                        }else{
+                            var link = $(this).attr("href");
+                            var idlink = link.substring(link.lastIndexOf('/')+1,link.length);
+                            var id = idlink+'_'+index;
+                            return "<span id='"+id+"' onblur=\"LookupHoverDetail.getHover('"+id+"').hide();\" onfocus=\"LookupHoverDetail.getHover('"+id+"', '/"+idlink+"/m?retURL=%2F"+idlink+"&isAjaxRequest=1').show();\" onmouseout=\"LookupHoverDetail.getHover('"+id+"').hide();\" onmouseover=\"LookupHoverDetail.getHover('"+id+"', '/"+idlink+"/m?retURL=%2F"+idlink+"&isAjaxRequest=1').show();\"  />";
+                        } 
+                    });
+                });   
+            }*/
+            //Carrie-979
+            function populateVoided(){
+        //alert($("td:contains('voided')").attr('class'));
+        $("td:contains('voided')").parents("tr").css("background-color","#FCE3E3");
+        
+        
+        }
+
+
+        $("body").delegate("div.pShowMore > a", "click", function(){
+                    window.setTimeout(populateVoided,6000);
+                });
+                populateVoided();
+        </script>
+    </apex:outputPanel>
+    <div></div> 
+</apex:page>

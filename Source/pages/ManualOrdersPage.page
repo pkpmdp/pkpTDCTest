@@ -1,0 +1,118 @@
+<apex:page controller="ManualOrderingDocController" sidebar="false" showHeader="false" applyHtmlTag="false">
+<html class="cvi2015"> <!--spoc 2206-->
+<header>
+    <title>Blanketter</title>
+</header> 
+<head>
+     <script type="text/javascript" src="https://yousee.dk/sitecore/content/data/export/export.aspx?itemguid={E8D8D815-5C17-44A5-9B46-364B89821372}&functions=true"></script>
+     <!-- Added for DW 750 -->
+     <c:TopMenuComponent ></c:TopMenuComponent>
+     <script type="text/javascript">printHeader();</script>
+     <script type="text/javascript">printTopMenu();</script>
+    <script type="text/javascript">printContentAreaBegin();</script>
+</head>
+<apex:form >
+<body>
+
+<style> 
+    .exceptionText { font-style:italic;    font-weight:bold;   color:red;   }
+    .textHeader {    font-weight:bold;    font-size:16px;    color:green ;width:70px;  font-family:verdana;  }
+    .textSectionHeader {    font-weight:bold;    font-size:12px;    color:green;font-family:verdana;   }
+    .textRed {    font-size:12px;    color:red; font-family:verdana;    }  
+    .textRight {    align:right;     color:red; font-family:verdana;    }
+    .textSmall {    font-size:11px;    font-style:italic; font-family:verdana;   }
+    .labelClass{padding-right:40px; font-family:verdana;}
+    .cursor {cursor: pointer}
+    .customPopup{ background-color: white;border-style: solid;border-width: 2px;padding:10px;position: static;left: 85%;width: 80%;margin-left: -150px;font-family:verdana;}
+    .fontVerdana{ font-family:verdana; }
+    .sendBtnCls {border-width: 0;padding: 0 15px;text-transform: capitalize;margin: 0 2px;background-position: left top;background-repeat: repeat-x;border-color: -moz-use-text-color #FF4500;border-right: 1px solid #FF4500;border-style: none solid solid none;display: inline;font-family: 'Verdana','Geneva',sans-serif;font-size: 80%;color: #FFFFFF;font-weight: bold;height: 26px;background-color: #FF4500;}
+    .TilbagetilBtnCls{border-width: 0;padding: 0 15px;text-transform: capitalize;margin: 0 2px;background-position: left top;background-repeat: repeat-x;border-color: -moz-use-text-color #FF4500;border-right: 1px solid #FF4500;border-style: none solid solid none;display: inline;font-family: 'Verdana','Geneva',sans-serif;font-size: 80%;color: #FFFFFF;font-weight: bold;height: 26px;background-color: #FF4500;}
+    body button, body .x-btn, body .btn, body .btnDisabled, body .btnCancel, body .menuButton .menuButtonButton {background-color:#585858;color:#FFFFFF;background:#585858;font-weight:bold;height:26px;}   
+       
+</style>
+
+<apex:stylesheet value="{!URLFOR($Resource.CalendarControl, 'CalendarControl/CalendarControl.css')}"/>
+<apex:includeScript value="{!URLFOR($Resource.CalendarControl, 'CalendarControl/CalendarControl.js')}"/> 
+<apex:inputHidden value="{!documentURL}" id="documentsURL"/>
+<apex:inputHidden value="{!printURL}" id="printURL"/>
+<apex:inputHidden value="{!DocumentID}" id="controllerCall"/>
+<apex:inputHidden value="{!printFlag}" id="printFlag"/>
+<script>
+function showDoc(docURL){
+    var documentValue = document.getElementById(docURL); 
+    //alert(documentValue.value);
+    window.open(documentValue.value,replace="true");
+    
+}
+
+ window.onload = function(){  
+ if(document.getElementById('{!$Component.controllerCall}').value != null){
+     var docURL = '/servlet/servlet.FileDownload?file=' +document.getElementById('{!$Component.controllerCall}').value;
+     window.open(docURL,'_self',replace="true",'menubar=no,width=680,height=692,toolbar=no,scrollbars=yes')
+  }
+}
+</script>
+<script type="text/javascript">
+    function sendMail(){
+        sendEmail();
+    }
+</script>
+
+
+
+<div class="fontVerdana">
+<apex:pageMessages />
+</div>
+
+
+<apex:pageBlock >
+    <apex:actionFunction name="sendEmail" action="{!savePdf}"/>
+    <apex:pageBlockSection >
+        <apex:pageBlockSectionItem labelStyle="width:100%" >
+            <apex:outputText value="{!formHeader}" styleClass="textHeader"/>  
+            <apex:image id="theImage" rendered="{!manualDoc.size > 0}" value="{!$Resource.MsWordIcon}" style="width:70px;height: 50px; align:right;padding-top:6px;" onclick="showDoc('{!$Component.documentsURL}')" OnMouseOver="this.className='cursor';"/>
+        </apex:pageBlockSectionItem>
+    </apex:pageBlockSection>
+
+    <br></br>
+    <apex:outputLabel value="Forhandlernavn: {!dealerName}" styleClass="fontVerdana"/> 
+    <apex:outputLabel value="Forhandlernummer: {!dealerNumber}" styleClass="fontVerdana"/> 
+    <apex:outputLabel value="Dato : {!longDate}" styleClass="fontVerdana"/>
+<br> </br>
+<p></p><p></p>
+<apex:dataTable value="{!customOrderingList}" var="list" width="100%"  frame="box" columns="4" border="2" columnsWidth="40px,30px,40px">
+   <apex:column rendered="{!(list.document.FieldType__c == 'TextBox')}"> 
+       <apex:outputText value="{!list.document.Description__c}"  style="{!list.document.FontStyling__c}" styleClass="labelClass"/> 
+        
+   </apex:column> 
+    <apex:column rendered="{!(list.document.FieldType__c == 'TextBox')}">
+       <apex:inputText value="{!list.document.FieldValue__c}" style="{!list.document.FontStyling__c}" />
+       <apex:outputText value="*"  style="color:red;" rendered="{!(list.document.Required__c == true)}"/>  
+   </apex:column> 
+    <apex:column rendered="{!(list.document.FieldType__c == 'RadioButton')}" > 
+       <apex:selectRadio value="{!list.document.FieldValue__c}" layout="pageDirection"> 
+        <apex:selectOptions value="{!list.optionItems}"/>
+       </apex:selectRadio>
+   </apex:column>  
+   <apex:column rendered="{!(list.document.FieldType__c == 'CheckBox')}" colspan="2"> 
+       <apex:inputCheckbox value="{!list.document.FieldValue__c}" style="{!list.document.FontStyling__c}" />
+       <apex:outputText value="{!list.document.Description__c}"  style="{!list.document.FontStyling__c}" />
+   </apex:column> 
+   <apex:column rendered="{!(list.document.FieldType__c == 'Text')}" colspan="2"> 
+      <apex:outputText value="{!list.document.Description__c}"  style="{!list.document.FontStyling__c}" /> 
+   </apex:column> 
+</apex:dataTable>       
+
+<apex:pageBlockButtons location="bottom">
+ <input type="button" value="Send" rendered="{!docFlag != 'false'}" class="sendBtnCls" onclick="sendMail();"/>
+ <!-- <apex:commandButton action="{!savePdf}"  value="Send" rendered="{!docFlag != 'false'}" /> --> &nbsp; &nbsp; 
+ <apex:commandButton action="{!back}"  value="Tilbage" rendered="{!docFlag != 'false'}" id="pgBlockButtonId"/>
+</apex:pageBlockButtons>
+</apex:pageBlock>
+<script type="text/javascript">printContentAreaEnd();</script>
+<script type="text/javascript">printFooter();</script>
+
+</body>
+</apex:form>
+</html>
+</apex:page>

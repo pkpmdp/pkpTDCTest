@@ -1,0 +1,25 @@
+<apex:page standardcontroller="Case" extensions="clsCaseOwnedByOtherUserWarningController" action="{!checkOwner}">
+<style type="text/css">
+
+body{
+font-family:Arial, Helvetica, sans-serif; 
+font-size:13px;
+}
+
+.warning {
+color: #9F6000;
+background-color: #FEEFB3;
+background-image: url('warning.png');
+border: 1px solid;
+background-repeat: no-repeat;
+background-position: 10px center;
+}
+
+
+</style>
+	
+	<apex:form >
+		<apex:Messages styleclass="warning" />
+	</apex:form>
+	
+</apex:page>

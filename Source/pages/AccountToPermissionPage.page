@@ -1,0 +1,4 @@
+<apex:page standardController="Account" action="{!Redirect}" extensions="clsPermissionHistory" sidebar="false"> 
+<apex:pageMessages />
+
+</apex:page>

@@ -1,0 +1,54 @@
+<apex:page cache="false" sidebar="false" showHeader="false" controller="FacebookLoginController" action="{!login}">
+<title>Skriv til os!</title>
+<meta name="description" content="Udfyld denne formular, og vi svarer dig tilbage hurtigst muligt." />
+<apex:stylesheet value="https://yousee.dk/css/reset.css"/>
+<apex:stylesheet value="https://yousee.dk/css/master.css?201322616"/>
+<link rel="image_src" href="{!$Resource.YouSeeLogo}" />
+
+    <div id="IdentityOverlay" class="dialog dialogwide" style="width: 520px; left: 50%; margin-left:-260px; margin-bottom: 81px; position: relative; z-index: 9999; top: 41.1px; display: block;"><a class="close" href="#" onclick="javascript:closeWindow();"></a>
+        <div class="contentWrap">
+
+<div class="Clear dialogequalheight">
+
+<style type="text/css">
+    .validationErrorLabel
+    {
+        display: none;
+    }
+    input.input-validation-error, textarea.input-validation-error, select.input-validation-error
+    {
+        border: 0 !important;
+    }
+
+</style>
+<script type = "text/javascript"> 
+
+   function closeWindow(){ 
+        window.open('','_self',''); 
+        window.close(); 
+   } 
+
+</script> 
+<div class="dialogbox CallMeDialog">
+    <div class="dialogheader">
+        <h1>
+            {!$Label.FB_confirmation_title}
+        </h1>
+    </div>
+    <div class="dialogcontent">
+     
+            <div id="content_0_dialogcontent_0_AddressLogin">
+            <fieldset>
+                    <p>{!$Label.FB_confirmation_message}</p>
+                </fieldset>
+
+            </div>
+    </div>
+</div>
+
+    
+</div>
+</div>
+    </div>
+
+</apex:page>

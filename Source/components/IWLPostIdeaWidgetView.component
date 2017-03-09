@@ -1,0 +1,184 @@
+<apex:component controller="IWLPostIdeaWidgetController" allowDml="true" layout="none" id="IWLPostIdeaWidgetView">
+	
+	<apex:attribute name="DeveloperName" type="String" required="true" description="The DeveloperName__c of the IWLWidget record that will be loaded by this widget" assignTo="{!widgetDeveloperName}" />
+	<apex:attribute name="Widget" type="IWLWidget__c" required="false" description="A Pre-loaded widget record to be used as the source of information for this widget" assignTo="{!widgetRecord}" />
+	<apex:attribute name="ThemeId" type="String" required="false" description="The Id of IdeaTheme" assignTo="{!ThemeId}" />
+
+	<apex:outputPanel layout="block" rendered="{!loadWidget}" styleClass="yui3-cssreset IWLPostIdeaWidgetView IWLPostIdeaWidgetView{!DeveloperName}" >
+		<!-- This panel renders when the widget has been correctly loaded -->		
+		
+		<!-- WIDGET STYLING BEGINS -->
+						
+		<apex:outputPanel layout="none" rendered="{!widgetRecord.CSSFileUrl__c != null}" >
+			<!-- Custom CSS file -->
+			<link href="{!widgetRecord.CSSFileUrl__c}" rel="stylesheet" type="text/css" />
+		</apex:outputPanel>
+		
+		<apex:outputPanel layout="none" rendered="{!widgetRecord.overrideCSS__c}">
+			<!-- CSS override rules -->
+			<style type="text/css">
+				.IWLPostIdeaWidgetView{!DeveloperName} {
+					width:{!widgetRecord.width__c}px;
+					min-height:{!widgetRecord.height__c}px;
+					background-color: #{!widgetRecord.backgroundColor__c};
+                    color: #{!widgetRecord.fontColor__c};
+                    font-family: {!widgetRecord.FontFamily__c};
+				}
+				
+				.IWLPostIdeaWidgetView{!DeveloperName} .IWLPostIdeaWidgetTitle {
+					color: #{!widgetRecord.titleColor__c};
+				}
+				
+			</style>
+		</apex:outputPanel>
+		
+		<!-- END OF WIDGET STYLING -->
+		<apex:outputPanel layout="none" rendered="{!!widgetRecord.twoStepIdea__c}">
+			<!-- Javascript code to show the complete widget upon load when the user has chosen to see the one-step version of the widget -->
+			<script type="text/javascript">
+				jQuery(document).ready(function(){
+					IWLPostIdea_showCompletePostIdeaPanel('{!JSENCODE(DeveloperName)}', 0);
+					jQuery('.postIdeaForm').keypress(function(e){
+						if ( e.which == 13 ) return false;
+						if ( e.which == 13 ) e.preventDefault();
+					});
+				});
+			</script>
+		</apex:outputPanel>
+		<apex:outputPanel layout="none" rendered="{!widgetRecord.twoStepIdea__c}">
+			<!-- Javascript code to hide the complete widget upon load when the user has chosen to see the two-step version of the widget -->
+			<script type="text/javascript">
+				jQuery(document).ready(function(){
+					IWLPostIdea_hideCompletePostIdeaPanel('{!JSENCODE(DeveloperName)}');
+					jQuery('.postIdeaForm').keypress(function(e){
+						if ( e.which == 13 ) return false;
+						if ( e.which == 13 ) e.preventDefault();
+					});
+				});
+			</script>
+		</apex:outputPanel>
+		
+		
+		<!-- Begins widget content -->
+		<apex:outputPanel layout="block" styleclass="IWLPostIdeaError" rendered="{!!$ObjectType.Idea.createable}">
+			<!-- This is an error message for when the user can't publish new ideas -->
+        	{!$Label.IWL_NOT_ACCESS_CREATE}
+        </apex:outputPanel>
+
+		<apex:outputPanel layout="block" styleclass="IWLPostIdeaPostSection" rendered="{!$ObjectType.Idea.createable}">
+			<!-- This is the actual component to post the new idea -->
+			<apex:form id="postIdeaForm" styleClass="postIdeaForm" >
+			
+				<!-- This render's the widget's title -->
+				<apex:outputPanel layout="block" styleClass="IWLPostIdeaWidgetTitle">{!HTMLENCODE(widgetRecord.Title__c)}</apex:outputPanel>
+				<!-- This panel is here for re-rendering purposes, it shows a message upon saving an idea, and refreshes some parts of the widget -->
+				<apex:outputPanel id="IWLPostIdeaSaveResult" styleClass="IWLPostIdeaSaveResult">
+				
+					<c:IWLStatusRenderer StatusMessagesWrap="{!statusMessagesWrap}" />
+					<!-- This panel is used when the user has configured a two-steps widget -->
+					<script type="text/javascript">
+						IWLCommons_removeLoadingPanel('.IWLPostIdeaWidgetView{!JSENCODE(DeveloperName)}');
+					</script>
+					<apex:outputPanel id="IWLPostIdeaRichTextAreaCleaner" rendered="{!reRenderIdeaBody}">
+						<script type="text/javascript">
+							IWLPostIdea_reRenderIdeaBody('{!JSENCODE(DeveloperName)}');
+						</script>
+					</apex:outputPanel>
+
+
+					<apex:outputPanel layout="none" rendered="{!widgetRecord.twoStepIdea__c && postSuccess}">
+						<script type="text/javascript">
+						/*This panel is used when the user has configured a two-steps widget*/
+					
+						IWLPostIdea_hideCompletePostIdeaPanel('{!JSENCODE(DeveloperName)}');
+						</script>
+					</apex:outputPanel>
+
+				</apex:outputPanel>
+				
+				
+				<!-- Idea Title -->
+				<apex:outputPanel layout="block" id="IWLPostIdeaIdeaTitleContainer" styleClass="IWLPostIdeaIdeaTitleContainer">
+					
+					<apex:outputPanel layout="block" styleClass="IWLPostIdeaIdeaTitleLabel">{!$Label.IWL_TITLE}</apex:outputPanel>
+					
+					<apex:inputField required="false" value="{!newIdea.Title}" id="IWLPostIdeaIdeaTitle" styleClass="IWLPostIdeaIdeaTitle" 
+					onFocus="if(jQuery(this).attr('value') == '{!defaultTitle}') jQuery(this).attr('value', '');" 
+					onBlur="if(jQuery(this).attr('value') == '') jQuery(this).attr('value', '{!defaultTitle}');"  
+					onchange="javascriptLoadSimilar();" />
+					
+					<apex:outputPanel layout="none" rendered="{!ISNULL(newIdea.Title)}">
+						<script type="text/javascript">
+                                  jQuery('.IWLPostIdeaWidgetView{!JSENCODE(DeveloperName)} .IWLPostIdeaIdeaTitle').val('{!defaultTitle}');
+                            </script>
+					</apex:outputPanel>
+					<apex:outputPanel id="IWLPostIdeaNextButtonContainer" rendered="{!widgetRecord.twoStepIdea__c}" layout="none">
+						<!-- The 'next' button is rendered only if the user chooses to use a two-steps widget -->
+						<apex:outputPanel layout="block" styleClass="IWLPrimaryButton IWLPostIdeaNextButton" onclick="IWLPostIdea_showCompletePostIdeaPanel('{!JSENCODE(DeveloperName)}', {!JSENCODE(TEXT(transitionInterval))});"><div class="IWLPostIdeaNextButtonLabel">{!$Label.IWL_NEXT}</div></apex:outputPanel>
+						<script type="text/javascript">
+							IWLPostIdea_addNextButtonIcon('{!JSENCODE(DeveloperName)}');
+						</script>
+					</apex:outputPanel>
+				
+				</apex:outputPanel>
+
+					<!-- this action function loads similar results, but is not being used right now -->
+					<apex:actionFunction action="{!loadSimilar}" name="javascriptLoadSimilar" rerender="similarResults" status="myStatus" />
+	
+					<!-- This is a panel to show information about similar ideas, but this will not be used by now -->
+					<apex:outputPanel layout="block" id="similarResults" styleClass="IWLPostIdeaSimilarResults">
+					
+	    				<apex:actionStatus startText="{!$Label.IWL_POSTIDEA_SEARCHING}" id="myStatus"></apex:actionStatus>
+	    
+						<apex:outputPanel layout="none" rendered="{!hasSimilarIdeas}">
+	                          {!$Label.IWL_POSTIDEA_SIMILAR}
+	                          <apex:dataList value="{!similarIdeas}" var="similarIdea">
+								<span class="IWLPostIdeaSimilarIdeaContainer">
+									<a href="{!widgetRecord.detailPageUrl__c}?id={!similarIdea.id}" target="_BLANK">{!similarIdea.title}</a>
+								</span>
+							</apex:dataList>
+						</apex:outputPanel>
+						
+					</apex:outputPanel>
+
+				<div class="IWLPostIdeaCompleteContent">
+					<!-- TODO: Idea Communities -->
+
+					<!-- Idea Body -->
+					<apex:outputPanel layout="block" id="IWLPostIdeaIdeaBodyContainer" styleClass="IWLPostIdeaIdeaBodyContainer">
+						<apex:outputPanel layout="block" styleClass="IWLPostIdeaIdeaBodyLabel">{!$Label.IWL_DESCRIBE_YOUR_IDEA}</apex:outputPanel>
+						<apex:outputPanel layout="block" styleClass="IWLPostIdeaIdeaBodyContainer">
+							<apex:inputField id="IWLPostIdeaIdeaBody" value="{!newIdea.Body}" styleClass="IWLPostIdeaIdeaBody"/>
+							
+						</apex:outputPanel>
+					</apex:outputPanel>
+	
+					<!-- Categories -->
+					<apex:outputPanel layout="block" id="IWLPostIdeaIdeaCategoriesContainer" styleClass="IWLPostIdeaIdeaCategoriesContainer">
+						<apex:outputPanel layout="block" styleClass="IWLPostIdeaCategoryLabel" >{!$Label.IWL_CHOOSE_CATEGORIES}</apex:outputPanel>
+						<apex:outputPanel layout="block" styleClass="IWLPostIdeaCategoriesContainer" >
+							<apex:repeat value="{!categoryOptions}" var="o">
+								<apex:selectCheckboxes id="IWLPostIdeaIdeaCategories" layout="lineDirection" value="{!categoriesForIdea}" styleClass="IWLPostIdeaIdeaCategoryItemBox">
+									<apex:selectOption itemValue="{!o.value}" itemLabel="{!o.label}" />
+								</apex:selectCheckboxes>
+							</apex:repeat>
+						</apex:outputPanel>
+					</apex:outputPanel>
+					<!-- Submit Buttons -->
+					<apex:outputPanel layout="block" styleClass="IWLPostIdeaSubmitButtons">
+						<!-- Cancel button for the two-steps widget -->
+						<apex:commandButton action="{!cancel}" rendered="{!widgetRecord.twoStepIdea__c}" styleClass="IWLSecondaryButton IWLPostIdeaCancelPostButton" onclick="IWLPostIdea_hideCompletePostIdeaPanel('{!JSENCODE(DeveloperName)}');IWLPostIdea_reRenderIdeaBody('{!JSENCODE(DeveloperName)}');" value="{!$Label.IWL_CANCEL}" title="{!$Label.IWL_CANCEL}" reRender="IWLPostIdeaIdeaCategoriesContainer,IWLPostIdeaIdeaTitle"/>
+						<!-- Cancel button for the one-step widget -->
+						<apex:commandButton action="{!cancel}" rendered="{!!widgetRecord.twoStepIdea__c}" styleClass="IWLSecondaryButton IWLPostIdeaCancelPostButton" onclick="IWLPostIdea_reRenderIdeaBody('{!JSENCODE(DeveloperName)}');" value="{!$Label.IWL_CANCEL}" title="{!$Label.IWL_CANCEL}" reRender="IWLPostIdeaIdeaCategoriesContainer,IWLPostIdeaIdeaTitleContainer"/>
+						<apex:commandButton action="{!save}" title="{!$Label.IWL_POST}" styleClass="IWLPrimaryButton IWLPostIdeaPostIdeaButton" reRender="IWLPostIdeaIdeaCategoriesContainer,IWLPostIdeaIdeaTitleContainer,IWLPostIdeaSaveResult" value="{!$Label.IWL_POST}" onclick="IWLCommons_showLoadingPanel('PostIdea', '.IWLPostIdeaWidgetView{!JSENCODE(DeveloperName)}', '/resource/IWLResources/styles/images/ajax-loader.gif');"/>
+						
+					</apex:outputPanel>
+				</div>
+			</apex:form>
+		</apex:outputPanel>
+	
+	</apex:outputPanel> 
+	<apex:outputPanel rendered="{!!loadWidget}" styleClass="IWLLoadErrorMessage IWLPostIdeaLoadErrorMessage IWLPostIdeaLoadErrorMessage{!DeveloperName}">
+		<c:IWLStatusRenderer StatusMessagesWrap="{!statusMessagesWrap}" />
+	</apex:outputPanel>
+</apex:component>

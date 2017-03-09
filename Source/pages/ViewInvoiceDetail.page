@@ -1,0 +1,336 @@
+<apex:page controller="InvoiceDetailController" action="{!fetchInvoiceXMLHttpCallout}" showHeader="false" sidebar="false" applyHtmlTag="false" >
+ <html class="cvi2015">
+    <apex:messages />
+    <script type="text/javascript">
+     // SPOC-2091 START
+    if('{!flag}'== 'false')
+    {
+        var nVer = navigator.appVersion;
+        var nAgt = navigator.userAgent;
+        var browserName  = navigator.appName;
+        var fullVersion  = ''+parseFloat(navigator.appVersion); 
+        var majorVersion = parseInt(navigator.appVersion,10);
+        var nameOffset,verOffset,ix;
+    
+        // In MSIE, the true version is after "MSIE" in userAgent
+       if (nVer.indexOf('MSIE') != -1 || nVer.indexOf('Trident') != -1 || nVer.indexOf('Edge') != -1) {
+            if('{!str}'!=''){
+               window.location.href = "/servlet/servlet.FileDownload?file={!str}";   
+            }       
+        }
+        else{
+            if('{!invData}'!='')
+                   //alert('{!invData}');
+                     var s =  "data:application/pdf;base64,{!invData}";
+            //  alert(s);   
+                window.location.href= s;
+        }
+        //alert(window.location.href);
+    }
+    </script>
+    <body style="font-size:smaller;" id="servicepage">
+<script>
+
+    function getNextInvoice(pageNum){
+      var pageNo = document.getElementById('invoicePageNum');
+      pageNo.value=pageNum;
+      jumpNextPage();
+    }
+
+</script>
+<apex:pageMessage detail="{!$Label.CableUnitNotMatched}" rendered="{!!renderSection}" severity="error"></apex:pageMessage>
+<apex:outputPanel rendered="{!flag && renderSection}">  <!--SPOC-2091 END-->
+<apex:form >
+<apex:outputPanel >
+    <input type="button" value="Print" onClick="window.print()"/>
+    Vælg faktura side :
+    <apex:repeat value="{!paging}" var="pg" >
+        &nbsp;
+        <apex:outputPanel rendered="{!NOT(pg == $CurrentPage.parameters.pageNum)}">
+            <a href="#" onclick="getNextInvoice('{!pg}');" >{!pg}</a>
+        </apex:outputPanel>
+        <apex:outputLabel value="{!pg}" rendered="{!pg == $CurrentPage.parameters.pageNum}" ></apex:outputLabel>
+    </apex:repeat>
+</apex:outputPanel>
+<input type="hidden" name="pageNum" id="invoicePageNum"/>
+<apex:actionFunction name="jumpNextPage" action="{!jumpNextPage}">
+    <!--<apex:param name="pageNum" value="" assignTo="{!pageNumber}"></apex:param> -->
+</apex:actionFunction>
+<apex:variable var="inv" value="{!invoiceDetailStore}"></apex:variable>
+ <table bgcolor="#F4F7FB" border="0" border-collapse="0" cellpadding="0" cellspacing="0" width="650">
+  <tbody>
+   <tr>
+    <td style="font-family:Courier New; font-size:12; " width="10px">&#160;</td>
+    <td style="font-family:Courier New; font-size:12; " colspan="3">
+     <table border="0" border-collapse="0" cellpadding="0" cellspacing="0" width="100%">
+      <tbody>
+       <tr>
+        <td colspan="3" width="397">&#160;</td>
+        <td colspan="2" width="200px">
+         <span style="font-family:Arial; font-size:12; font-weight:bold;">
+         {!inv.invoiceType}
+         </span>
+        </td>
+       </tr>
+       <tr>
+        <td align="center" colspan="3" rowspan="3" valign="top" width="397">
+         <img border="0" src="{!$Resource.InvoiceDetailYouSee_Logo}"/>
+        </td>
+        <td colspan="2" width="200px">
+         <span style="font-family:Arial; font-size:12; font-weight:bold; ">
+         {!inv.fakturaPeriode} 
+         </span>
+        </td>
+       </tr>
+       <tr>
+        <td width="70px">&#160;</td>
+        <td width="130px"/>
+       </tr>
+       <tr>
+        <td width="70px">&#160;</td>
+        <td width="130px"/>
+       </tr>
+       <tr>
+        <td colspan="3" height="14" width="397"/>
+        <td height="14" width="90px">
+         <span style="font-family:Arial; font-size:11; ">Betalingsfrist</span>
+         <span style="font-family:Arial; font-size:10; ">:</span>
+        </td>
+        <td height="14" width="130px">
+         <span style="font-family:Courier New; font-size:11; ">
+         {!inv.betalingsFrist}
+         </span>
+        </td> 
+       </tr>
+       <tr>
+        <td colspan="3" width="397"/>
+        <td bgcolor="#90EE90" width="70px">
+         <span style="font-family:Arial; font-size:11; ">Kontonr</span>
+         <span style="font-family:Arial; font-size:10; ">:</span>
+        </td>
+        <td bgcolor="#90EE90" width="130px">
+         <span style="font-family:Courier New; font-size:11; ">
+         {!inv.kontonr}
+         </span>
+        </td> 
+       </tr>
+       <tr>
+        <td colspan="3" width="397">
+         <span style="font-family:Courier New; font-size:12; text-transform:uppercase; ">
+         {!inv.navn}
+         </span>
+        </td>
+        <td bgcolor="#90EE90" width="70px"/>
+        <td bgcolor="#90EE90" width="130px">
+         <span style="font-size:smaller;">bedes oplyst ved henvendelse </span>
+        </td>
+       </tr>
+       <tr>
+        <td colspan="3" width="397">
+         <span style="font-family:Courier New; font-size:12; text-transform:uppercase; ">
+         {!inv.gade} 
+         </span>
+        </td>
+        <td width="70px">
+         <span style="font-family:Arial; font-size:11; ">Girokonto:</span>
+        </td>
+        <td width="130px">
+         <span style="font-family:Courier New; font-size:11; ">
+         {!inv.girokonto} 
+         </span>
+        </td>
+       </tr>
+       <tr>
+        <td height="16" width="260">
+         <apex:outputPanel style="font-family:Courier New; font-size:12; text-transform:uppercase;" rendered="{!NOT(inv.checkSted)}">
+         {!inv.sted}
+         </apex:outputPanel>
+         <apex:outputPanel style="font-family:Courier New; font-size:12; text-transform:uppercase;" rendered="{!inv.checkSted}">
+         {!inv.byOgPostnr}
+         </apex:outputPanel>
+        </td>
+        <td height="16" rowspan="3" valign="top">
+         <img border="0" src = "{!$Resource.InvoiceDetailKopi}" />
+        </td>
+        <td height="16">&#160;</td>
+        <td height="16" width="70px">
+         <span style="font-family:Arial; font-size:11; ">Fakturadato:</span>
+        </td>
+        <td height="16" width="130px">
+         <span style="font-family:Courier New; font-size:11; ">
+         {!inv.fakturaDato}
+         </span>
+        </td>
+       </tr>
+       <tr>
+        <td height="8" width="260">
+         <apex:outputPanel style="font-family:Courier New; font-size:12; text-transform:uppercase;" rendered="{!NOT(inv.checkSted)}">
+         {!inv.byOgPostnr}
+         </apex:outputPanel>
+        </td>
+        <td height="8">&#160;</td>
+        <td height="8" width="70px">
+         <span style="font-family:Arial; font-size:11; ">Fakturanr.:</span>
+        </td>
+        <td height="8" width="130px">
+         <span style="font-family:Courier New; font-size:11; ">
+          {!inv.fakturanr}
+         </span>
+        </td>
+       </tr>
+       <tr>
+        <td height="14" width="260"/>
+        <td height="14">&#160;</td>
+        <td height="14" width="70px">
+         <span style="font-family:Arial; font-size:11; ">Side:</span>
+        </td>
+        <td height="14" width="130px">
+         <span style="font-family:Courier New; font-size:11; ">
+          {!inv.side}
+         </span>
+        </td>
+       </tr>
+      </tbody>
+     </table>
+    </td>
+   </tr>
+   <tr>
+    <td style="font-family:Courier New; font-size:12; " align="center" colspan="4" height="15" valign="top"/>
+   </tr>
+   <tr>
+    <td style="font-family:Courier New; font-size:12; " height="80" width="10px"/>
+    <td style="font-family:Courier New; font-size:12; " colspan="3" height="80">
+     <table border="0" border-collapse="0" cellpadding="0" cellspacing="0" width="610">
+      <thead>
+       <tr>
+        <td style="border-top-color:black;border:1px; border-top-style:solid; border-top-width:1; font-size:5; " height="8" width="390">&#160;</td>
+        <td style="border-left-color:black;border:1px;  border-left-style:solid; border-left-width:1; border-top-color:black; border-top-style:solid; border-top-width:1; font-family:Arial; font-size:9; " height="8" width="110">Fakturabeløb</td>
+        <td style="border-right-color:black;border:1px;  border-right-style:solid; border-right-width:1; border-top-color:black; border-top-style:solid; border-top-width:1; font-family:Arial; font-size:5; " height="8" width="10">&#160;</td>
+        <td style="border-top-color:black; border:1px; border-top-style:solid; border-top-width:1; font-family:Arial; font-size:9; " height="8" width="90">Saldo</td>
+        <td style="border-top-color:black; border:1px; border-top-style:solid; border-top-width:1; " height="8" width="10">
+         <span style="font-size:5; ">&#160;</span>
+        </td> 
+       </tr>
+      </thead>
+      <tbody>
+       <apex:repeat value="{!inv.invoiceRows}" var="row">
+       
+     <tr>
+         <td style="font-family:Courier New; font-size:11; " height="9" valign="top" width="410">
+          <apex:outputPanel rendered="{!row.invoiceRowtype == 'tom'}">&#160;</apex:outputPanel>
+          <apex:outputPanel rendered="{!row.invoiceRowtype == 'streg'}">
+           <table border="0" border-collapse="0" cellpadding="0" cellspacing="0" width="100%">
+            <tbody>
+             <tr>
+              <td style="border-top-color:black; border:1px; border-top-style:solid; border-top-width:1; font-size:11; ">&#160;</td>
+             </tr>
+            </tbody>
+           </table>
+          </apex:outputPanel>
+          <apex:outputPanel rendered="{!row.invoiceRowtype == 'tekst'}">
+                <apex:outputText value="{!row.tekst}" style="white-space: pre; line-height: 125%;"></apex:outputText> 
+           </apex:outputPanel>
+         </td>
+          <td style="border-left-color:black; border:1px; border-left-style:solid; border-left-width:1; font-family:Courier New; font-size:11; " align="right" height="9" valign="top" width="90">
+          <apex:outputPanel rendered="{!row.invoiceRowtype == 'streg'}">
+           <table border="0" border-collapse="0" cellpadding="0" cellspacing="0" width="100%">
+            <tbody>
+             <tr>
+              <td style="border-top-color:black; border:1px;  border-top-style:solid; border-top-width:1; font-size:11; ">
+               <span style="font-size:5; ">&#160;</span>
+              </td>
+             </tr>
+            </tbody>
+           </table>
+          </apex:outputPanel>
+          <apex:outputPanel rendered="{!row.fakturaBeloeb == 'image'}">
+           <img border="0" src = "{!$Resource.double_underline}" />
+          </apex:outputPanel>
+          <apex:outputPanel rendered="{!row.invoiceRowtype == 'tom'}">&#160;</apex:outputPanel>
+          <apex:outputPanel rendered="{!row.invoiceRowtype == ''}">&#160;</apex:outputPanel>
+          <apex:outputPanel rendered="{!NOT(row.fakturaBeloeb == 'image')}" style="white-space:nowrap;">
+          {!row.fakturaBeloeb} 
+          </apex:outputPanel>
+         </td>
+         <td style="border-right-color:black; border:1px; border-right-style:solid; border-right-width:1; " height="9" valign="top" width="10">
+          <apex:outputPanel rendered="{!row.invoiceRowtype == 'streg'}">
+           <table border="0" border-collapse="0" cellpadding="0" cellspacing="0" width="100%">
+            <tbody>
+             <tr>
+              <td style="border-top-color:black; border:1px; border-top-style:solid; border-top-width:1; font-size:5; ">
+               <span style="font-size:5; ">&#160;</span>
+              </td>
+             </tr>
+            </tbody>
+           </table>
+          </apex:outputPanel>
+          <apex:outputPanel rendered="{!NOT(row.invoiceRowtype == 'streg')}">
+          &#160;
+          </apex:outputPanel>
+         </td>
+         <td style="font-family:Courier New; font-size:11; " align="right" height="9" valign="top" width="90">
+          <apex:outputPanel rendered="{!row.invoiceRowtype == 'tom'}">&#160;</apex:outputPanel>
+          <apex:outputPanel rendered="{!row.invoiceRowtype == 'streg'}">
+           <table border="0" border-collapse="0" cellpadding="0" cellspacing="0" width="100%">
+            <tbody>
+             <tr>
+              <td style="border-top-color:black; border:1px; border-top-style:solid; border-top-width:1; font-size:11; ">&#160;</td>
+             </tr>
+            </tbody>
+           </table>
+          </apex:outputPanel>
+          <apex:outputPanel >
+          {!row.saldo} 
+          </apex:outputPanel>
+         </td>
+         <td height="9" valign="top" width="10">
+          <apex:outputPanel rendered="{!row.invoiceRowtype == 'streg'}">
+           <table border="0" border-collapse="0" cellpadding="0" cellspacing="0" width="100%">
+            <tbody>
+             <tr>
+              <td style="border-top-color:black; border:1px; border-top-style:solid; border-top-width:1; font-size:5; ">&#160;</td>
+             </tr>
+            </tbody>
+           </table>
+          </apex:outputPanel>
+         </td>
+        </tr>
+       </apex:repeat>
+      </tbody>
+     </table>
+    </td>
+   </tr>
+    <tr>
+    <td style="font-family:Courier New; font-size:12; " bgcolor="white" colspan="6" height="15" valign="top" width="420">
+     <table border="0" width="620">
+      <tbody>
+       <tr>
+        <td style="font-family:Arial; font-size:8; " valign="top" width="5">&#160;</td>
+        <td style="font-family:Arial; font-size:8; " valign="top" width="100">&#160;</td>
+        <td style="font-family:Arial; font-size:8; " valign="top" width="150">&#160;</td>
+        <td style="font-family:Arial; font-size:8; " valign="top" width="100">&#160;</td>
+        <td style="font-family:Arial; font-size:8; " valign="top" width="108">&#160;</td>
+        <td style="font-family:Arial; font-size:8; " valign="top" width ="152">&#160;</td>
+        <td valign="top" width="5">&#160;</td>
+       </tr>
+       <tr>
+        <td style="font-size:smaller; font-size:8;font-family:Arial;" valign="top" width="5">&#160;</td>
+        <td style="font-size:smaller; font-size:8; font-family:Arial; " valign="top" width="100">YouSee<br/>Amager Strandvej 108<br/>0900 København C</td>
+        <td style="font-size:smaller; font-size:8; font-family:Arial;" valign="top" width="150">Henv. vedr. regning<br/>Tlf. 70 70 40 44<br/>Fax 32 63 80 64</td>
+        <td style="font-size:smaller;font-size:8; font-family:Arial;" valign="top" width="100">Postindbetalingsadr.<br/>TDC<br/>Betalingsservice<br/>Postboks 35<br/>8310 Tranbjerg J</td>
+        <td style="font-size:smaller; font-size:8; font-family:Arial;" valign="top" width="108">YouSee A/S<br/>København <br/>CVR-nr. 25 76 75 78<br/>Eksport momsnr.<br/>11 89 75 25<br/>
+        </td>
+        <td style="font-size:smaller;; font-size:8; font-family:Arial;" valign="top" width ="152">Ved for betaling opkræves<br/>et gebyr på 100 kr. samt mora-<br/>renter (med den sats renteloven <br/>fastsætter) fra betalingsfristens <br/>udløb og indtil betalinger sker. </td>
+        <td valign="top" width="5">&#160;</td>
+       </tr>
+      </tbody>
+     </table>
+    </td>
+   </tr>
+  </tbody>
+ </table>
+</apex:form>
+</apex:outputPanel>
+</body>
+    </html>
+</apex:page>

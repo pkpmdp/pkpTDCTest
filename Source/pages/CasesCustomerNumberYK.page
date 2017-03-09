@@ -1,0 +1,12 @@
+<apex:page standardController="Case" extensions="clsCustomerNumberYKController" showHeader="false" sidebar="false" cache="true">
+  <apex:panelGrid id="panel" bgcolor="#F5F5F5" width="100%" border="0" cellpadding="0" cellspacing="0" columns="3">
+    <apex:form >
+      <apex:inputHidden value="{!case.AccountId}"/>
+      <apex:outputText value="{!account.Customer_No__c}" id="customerNo"/>
+      <apex:actionPoller action="{!checkCustomerNumber}" rerender="customerNo" interval="5" enabled="{!pollerEnabled}"/>
+      <apex:CommandButton value="Casper" action="{!sendToCasper}"/>
+      <apex:CommandButton value="Triple" rerender="panel" onclick="window.open('http://kenfig:40002/rest.jsp?customerId={!account.Customer_No__c}')"/>
+      <apex:CommandButton value="RAS" onclick="javascript:sendCTIMessage('http://localhost:7332/RAS_INTEGRATION?customer_no={!account.Customer_No__c}')"/>      
+    </apex:form>
+  </apex:panelGrid>
+</apex:page>

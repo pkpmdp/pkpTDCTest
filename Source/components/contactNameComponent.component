@@ -1,0 +1,9 @@
+<apex:component controller="WriteToYourConsultantController" access="global">
+<form>
+<apex:outputPanel >
+<br/>
+<apex:outputText value="Hej"/>&nbsp;
+<apex:outputText value="{!contact.FirstName}"/>,
+</apex:outputPanel>
+</form>
+</apex:component>

@@ -1,0 +1,36 @@
+<apex:page standardController="CampaignMember" extensions="Yousee13DeltageController" showHeader="false" sidebar="false" cache="false">
+
+    <apex:composition template="PermissionSiteTemplate">
+    <apex:define name="body">   
+     <apex:form >
+       <br></br>
+       <div class="k_mf_progress" style="width: 85%;margin:0 auto;">        
+            <div class="k_mf_progress_bg">            
+                <div class="k_mf_progress_indicator" style="width:100%"> </div>
+            </div>    
+       </div>    
+       <ul class="k_mf_progress_list_3" style="width: 85%;margin:0 auto;">        
+              <li>Kontaktpersoner registreret hos YouSee </li>        
+              <li>Nye kontaktpersoner</li>        
+              <li>Ledsager til kontaktpersoner</li>  
+              <li  class="k_current">Kvittering</li>  
+       </ul>
+       
+       <br></br> <br></br>
+       <apex:outputText value="{!emailBody}" escape="false"></apex:outputText>
+       <!--Tak for din tilmelding til YouSee Live ’13, 9. marts 2013 i Bella Center. Vi har registreret din tilmelding. Du har tilmeldt følgende personer: <br></br> <br></br>
+        
+       I slutningen af februar modtager du en billet på e-mail, som du printer og medbringer i Bella Center den 9. marts. <br></br> <br></br>
+       Hvis flere er tilmeldt fra din forening/virksomhed, så modtager de deres egen billet på mail. Mailen indeholder dit eget program, praktiske oplysninger og mere information om de oplevelser, der venter dig på YouSee Live ’13. Bemærk, at du ikke får yderligere materiale tilsendt pr. brev. <br></br> <br></br> 
+
+       Du vil løbende modtage e-mail nyhedsbreve, som fortæller om nye oplevelser på YouSee LIVE ’13. På yousee.dk/13 kan du altid holde dig opdateret og se programmet for dagen, oversigt over udstillere, få mere information om fagkonferencerne og få en forsmag på, hvad du kan glæde dig til i vores fantastiske tv-show. <br></br> <br></br>    
+
+       Vi glæder os til at se dig til en forrygende dag 9. marts 2013 i Bella Center. <br></br> <br></br>   
+
+       Hvis du bliver forhindret i at deltage 9. marts på YouSee LIVE’13, så gå ind på tilmeldingssiden, hvor du kan fjerne fluebenet ud for dit navn. Så er du frameldt. Du kan også ringe på telefon 70 70 40 00 mellem kl. 9.00 og 16.00 på alle hverdage. <br></br> <br></br>
+       
+       Venlig hilsen YouSee   -->  
+     </apex:form>     
+      </apex:define>      
+    </apex:composition>  
+</apex:page>

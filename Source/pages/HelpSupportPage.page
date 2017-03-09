@@ -1,0 +1,324 @@
+<apex:page controller="DealerwebInformationController" sidebar="false" showHeader="false" applyHtmlTag="false">
+<html class="cvi2015"><!--spoc 2206-->
+<head>
+<style>
+    .descriptionCls {font-family: 'Verdana','Geneva',sans-serif;font-size: 80%;height: 26px;width:76px;link:#COCOCO;vlink:#808080;alink:#FF0000;}
+    .fontVerdana{font-family:verdana;}
+    .sogBtn {
+         border-width:0;
+         padding: 0 15px;
+         text-transform: capitalize;
+         margin: 0 2px;
+         background-position: left top;
+         background-repeat: repeat-x;
+         border-color: -moz-use-text-color #FF4500;
+         border-right: 1px solid #FF4500;
+         border-style: none solid solid none;
+         display: inline;
+         font-family: 'Verdana','Geneva',sans-serif;
+         font-size: 80%;
+         color: #FFFFFF;
+         font-weight: bold;
+         height: 26px;
+         width:80px;
+         background-color: #FF4500;
+     }
+</style>
+<apex:form rendered="{!$Label.DE_Login_Access}">
+    <center>
+    <apex:image url="{!$Resource.DW_Maintenance_Image_2}" width="400" height="400"/>
+        <br></br>
+    <apex:outputText style="color: #629E00;font-size: large;" value="{!$Label.DW_Maintenance_message}">
+        
+    </apex:outputText>
+    <br></br>
+    <a class="dialogbutton_orange Right" href="/secur/logout.jsp" style="position: relative; left: -15px;"><span>Back</span></a>
+    </center>
+</apex:form>
+
+<apex:stylesheet value="{!$Resource.InvoiceCalendarCSS}"/>
+<apex:includeScript value="{!$Resource.Calendar5Years}"/>
+<script src="{!$Resource.jQuery}"></script>
+<!--<script type="text/javascript"  src="https://yousee.dk/sitecore/content/data/export/export.aspx?itemguid={8446BAE6-144C-4DEE-91F4-2DF180F2A752}&functions=true"></script>
+ Added for DW 750 -->
+<!--<c:TopMenuComponent ></c:TopMenuComponent>
+<script type="text/javascript" language="javascript">printHead();</script>
+<script type="text/javascript">printHeader();</script>
+<script type="text/javascript">printTopMenu();</script>
+<script type="text/javascript">printContentAreaBegin();</script>-->
+
+<script type="text/javascript">
+                function setDocValue(selectedValue,selectedText){
+                    document.getElementById('{!$Component.selectedDocType}').value= selectedValue;
+                    document.getElementById('{!$Component.selectedDocTypeText}').value= selectedText;       
+                } 
+        </script>
+<script type="text/javascript">
+
+        function trim12 (str) {
+         var str = str.replace(/^\s\s*/, ''),
+         ws = /\s/,
+         i = str.length;
+         while (ws.test(str.charAt(--i)));
+         return str.slice(0, i + 1);
+       }
+       
+       function ReplaceAll(Source,stringToFind,stringToReplace){
+
+            var temp = Source;
+
+            var index = temp.indexOf(stringToFind);
+
+            while(index != -1){
+
+                temp = temp.replace(stringToFind,stringToReplace);
+
+                index = temp.indexOf(stringToFind);
+
+            }
+
+            return temp;
+
+        }
+
+       
+        
+        function setHelpLinkValue(selectedValue, flag){
+            if(flag == 'true'){
+                document.getElementById('divKvitterings').style.display = 'none';
+            }
+        }
+         
+        function validateSearchText(){ 
+            var searchDocText = document.getElementById('SearchDocumentDivId').firstChild.value;
+            searchDocText2 = ReplaceAll(searchDocText,'"','');
+            //alert('a: '+searchDocText2);
+            var searchTextTrim = trim12(searchDocText2);
+            var searchFromDate = document.getElementById('divToDate').firstChild.value;
+            //alert('a: '+searchFromDate);
+            var searchToDate = document.getElementById('divFromDate').firstChild.value;
+            
+            if((searchFromDate.length > 0 && searchToDate.length == 0)||(searchFromDate.length == 0 && searchToDate.length > 0)){
+                document.getElementById("errorMsg").innerHTML = "Indtast både “til” og “fra” dato";
+                document.getElementById("errorMsg").style.display = "block";
+                return false;
+            }
+            
+            if(searchTextTrim.length > 0 && searchTextTrim.length < 2){
+                document.getElementById("errorMsg").innerHTML = "Indtast mindst 2 karakterer eller lad søgefelt forblive tomt";
+                document.getElementById("errorMsg").style.display = "block";
+                return false;
+            }
+            
+            if(searchTextTrim.length == 0){
+                document.getElementById('SearchDocumentDivId').firstChild.value = '';
+            
+            }
+            
+            if(searchTextTrim.length == 0 && searchFromDate.length == 0 && searchToDate.length == 0){
+                document.getElementById("errorMsg").innerHTML = "Indtast mindst et søge kriterium";
+                document.getElementById("errorMsg").style.display = "block";
+                return false;
+            }
+            return true;
+        
+        }
+        function clearSearchText(){
+            document.getElementById('divToDate').firstChild.value='';
+            document.getElementById('divFromDate').firstChild.value='';
+            document.getElementById('SearchDocumentDivId').firstChild.value='';
+            document.getElementById("errorMsg").innerHTML='';
+            //document.getElementById("DateerrorMsg").innerHTML='';
+            return false;
+        }
+        
+        
+        
+        
+</script>
+
+</head>
+<script>
+    function setBlanketter(){
+    newURL = window.location.protocol + "//" + (window.location.host).replace("//","/");
+    var blanketterlist=document.getElementById('productnavigation').childNodes;
+    var bListCount=0;
+    var bURL;
+    var flag = 'false';
+    for (p= 0; p < blanketterlist.length; p++){
+     if(blanketterlist[p].innerHTML =="Blanketter"){
+        flag ='true';
+     }
+     //if(flag = 'true'){
+       if(blanketterlist[p].nodeName=="UL" ){
+                 var mU=blanketterlist[p].childNodes;
+            for (l=0; l<mU.length; l++){
+            
+                if(mU[l].nodeName == "LI" ){
+                    bListCount = bListCount + 1 ;
+                }
+                var mBLA=mU[l].childNodes;
+                for(bL =0 ; bL < mBLA.length ;bL++){
+                
+                switch(bListCount){
+                                case 1:
+                                    
+                                    bURL = newURL + '/apex/HelpSupportProductTabPage?productType=Clear';
+                                    mBLA[bL].setAttribute('href',bURL);
+                                    break;
+                                case 2:
+                                    bURL = newURL + '/apex/HelpSupportProductTabPage?productType=Broadband';
+                                    mBLA[bL].setAttribute('href',bURL);
+                                    break;
+                                case 3:
+                                    bURL = newURL + '/apex/HelpSupportProductTabPage?productType=Digital';
+                                    mBLA[bL].setAttribute('href',bURL);
+                                    break;
+                                case 4:
+                                    bURL = newURL + '/apex/HelpSupportProductTabPage?productType=Ekstrakanaler';
+                                    mBLA[bL].setAttribute('href',bURL);
+                                    break;
+                                case 5:
+                                    bURL = newURL + '/apex/HelpSupportProductTabPage?productType=Telephony';
+                                    mBLA[bL].setAttribute('href',bURL);
+                                    break;
+                            }
+                    }
+            }
+        }
+    //}
+ }
+}
+document.onload = setBlanketter();
+</script>
+
+<apex:form rendered="{! If($Label.DE_Login_Access =='False' ,true,false) }">
+<script type="text/javascript"  src="https://yousee.dk/sitecore/content/data/export/export.aspx?itemguid={8446BAE6-144C-4DEE-91F4-2DF180F2A752}&functions=true"></script>
+<c:TopMenuComponent ></c:TopMenuComponent>
+<script type="text/javascript" language="javascript">printHead();</script>
+<script type="text/javascript">printHeader();</script>
+<script type="text/javascript">printTopMenu();</script>
+<script type="text/javascript">printContentAreaBegin();</script>
+<apex:inputHidden id="selectedDocType" value="{!selectedDocType}"/>
+<div id="content">
+    <ul>
+        <apex:repeat value="{!forhInfoIds}" var="acctId">
+          <apex:outputPanel rendered="{!NOT(acctId == 'Kvitteringsarkiv')}">
+              <apex:commandLink style="width:140px; height:92px; padding-left:15px; color:black; font-family:verdana;" action="{!getProductDescription}" ><b>Vejl. {!acctId}</b>
+                        <apex:param name="groupInfo" value="{!acctId}"/>
+              </apex:commandLink> |
+          </apex:outputPanel>
+          <apex:outputPanel rendered="{!acctId == 'Kvitteringsarkiv'}">
+              <apex:commandLink style="width:140px; height:92px; padding-left:15px; color:black; font-family:verdana;" action="{!getProductDescription}" ><b>{!acctId}</b>
+                        <apex:param name="groupInfo" value="{!acctId}"/>
+              </apex:commandLink> |
+          </apex:outputPanel>
+        </apex:repeat>
+    </ul>   
+</div>  
+<br/>       
+<apex:pageBlock id="helpAndSupport" rendered="{!showPageBlock}">
+    <apex:pageBlockSection title="{!pageHeaderValue}" collapsible="false" columns="1">
+<!--        <apex:outputPanel >             -->
+            <apex:outputText value="{!subGroupDescription}" escape="false" styleclass="fontVerdana"/>
+<!--        </apex:outputPanel>-->
+    </apex:pageBlockSection>
+</apex:pageBlock>
+<div id="divKvitterings">
+<apex:outputPanel rendered="{!NOT(showPageBlock)}">             
+    <apex:outputText value="{!subGroupDescription}" escape="false" styleclass="fontVerdana"/>
+</apex:outputPanel>
+<br/>
+<apex:pageBlock id="kvitteringsInfo" rendered="{!NOT(showPageBlock)}"> 
+    
+    <apex:inputHidden value="{!fromDate}" id="fromDate"/>
+    <apex:inputHidden value="{!toDate}" id="toDate"/>
+            
+    <apex:pageBlockSection title="Find kvittering" collapsible="false" columns="2">
+        <!-- <div id="errorMsg" style="display:none; color:red; font-weight:bold; background-color:#ECECEC;"></div> -->
+        <apex:pageBlockSectionItem >
+            <div id="errorMsg" style="display:none; color:red; font-weight:bold; background-color:#ECECEC;"></div>
+        </apex:pageBlockSectionItem>
+        <br/>
+        <apex:pageBlockSectionItem labelStyleClass="labelStyle">
+            <apex:outputLabel value="Søg Dokument"/>  
+            <apex:outputPanel >
+            <div id="SearchDocumentDivId">
+            <apex:inputText value="{!SearchDocumentText}" id="SearchDocumentTextId" label="Find Document" maxlength="50" title="Please use double quotes for exact search"></apex:inputText>
+            </div>
+            
+            <p style="color:black; font-size:10px;">Brug dobbelte anførselstegn for eksempel "xyz" for eksakt match</p> 
+            <!-- <label for="SearchDocumentTextId" font=>Please use double quotes for exact search</label>  --> 
+            <!-- <font size="10" color="red">Please use double quotes for exact search</font> -->
+            
+            </apex:outputPanel> 
+        </apex:pageBlockSectionItem>
+        <!-- <p style="color:black; font-weight:bold; font-size:10px;">Please use double quotes for example "xyz" for exact match</p>  --> 
+        <br/>
+        
+        <apex:pageBlockSectionItem labelStyleClass="labelStyle">
+            <apex:outputLabel value="Fra dato"/>
+            <apex:outputPanel >
+                <div id="divFromDate">
+                <apex:inputText value="{!fromDate}" id="txtFromDate"></apex:inputText>
+                <apex:outputPanel onclick="openCalender('{!$Component.txtFromDate}','{!$Component.fromDate}');"> 
+                   <img class="datePickerIcon" alt="Vælg en dato" title="Vælg en dato" src="/s.gif"/>
+                </apex:outputPanel>
+                </div>
+             </apex:outputPanel>  
+        </apex:pageBlockSectionItem>
+        <apex:pageBlockSectionItem >
+            <apex:outputLabel value="Til dato"/>
+            <apex:outputPanel >
+                <div id="divToDate">
+                <apex:inputText value="{!toDate}" id="txtToDate"></apex:inputText>
+                <apex:outputPanel onclick="openCalender('{!$Component.txtToDate}','{!$Component.toDate}');"> 
+                   <img class="datePickerIcon" alt="Vælg en dato" title="Vælg en dato" src="/s.gif"/>
+                </apex:outputPanel> 
+                </div> 
+            </apex:outputPanel>
+        </apex:pageBlockSectionItem>
+        
+        <apex:pageBlockSectionItem >
+           <apex:outputLabel value=""/>
+           <apex:commandButton action="{!searchAllReciepts}" id="btnSearch" value="Søg" onClick="return validateSearchText();"/>
+           <!-- <input type="button" id="btnSøg" name="Søg" value="Søg" class="sogBtn" onClick="searchReciepts();"/> -->
+        </apex:pageBlockSectionItem>
+        <apex:pageBlockSectionItem >
+           <apex:outputLabel value=""/>
+           <!--<input class="btn" type="reset" value="Reset" />-->
+           <apex:commandButton id="btnReset" value="Nulstil" onClick="return clearSearchText();"/>
+           <!-- <input type="button" id="btnSøg" name="Søg" value="Søg" class="sogBtn" onClick="searchReciepts();"/> -->
+        </apex:pageBlockSectionItem>
+        
+    </apex:pageBlockSection>
+    
+    <apex:pageBlockSection id="NoRecordsMesage" columns="1" rendered="{!showNoRecordsMessage}">
+        <apex:outputLabel value="Søgning gav intet resultat" style="color:red; font-weight:bold; background-color:#ECECEC;"></apex:outputLabel>
+    </apex:pageBlockSection>
+    <apex:pageBlockSection id="jspanel" columns="1" rendered="{!showTable}">
+        <apex:pageBlockTable value="{!recieptList}" var="item" id="TableId">
+              <apex:column >
+              <apex:outputLink value="/servlet/servlet.FileDownload?file={!item.Id}" target="_blank"><apex:image url="{!$Resource.DocumentIcon}"/></apex:outputLink>
+              </apex:column>
+              
+              <apex:column headerValue="Name">
+              <apex:outputLink value="/servlet/servlet.FileDownload?file={!item.Id}" target="_blank">{!item.Name}</apex:outputLink>
+              </apex:column>                            
+              <apex:column value="{!item.CreatedById}" headerValue="CreatedBy"/>              
+              <apex:column value="{!item.CreatedDate}" headerValue="Created Date"/>
+         </apex:pageBlockTable>
+    </apex:pageBlockSection>
+</apex:pageBlock>
+</div>
+</apex:form>
+<script type="text/javascript">
+       if({!showPageBlock} == false){
+            document.getElementById('divFromDate').firstChild.readOnly = true; 
+            document.getElementById('divToDate').firstChild.readOnly = true;
+       }      
+</script>
+<script type="text/javascript">printContentAreaEnd();</script>
+       <script type="text/javascript">printFooter();</script>
+       </html>
+</apex:page>

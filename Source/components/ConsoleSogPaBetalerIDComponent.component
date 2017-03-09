@@ -1,0 +1,131 @@
+<apex:component >
+    <apex:includeScript value="/soap/ajax/25.0/connection.js" /> 
+    <apex:includeScript value="/support/console/28.0/integration.js" />
+    <apex:includeScript value="{!URLFOR($Resource.jQuery160)}"/>
+   
+
+    <style type="text/css">
+        .container {
+            padding: 0px;
+            margin: 0px;
+            width:100%;
+            height:100%;
+        }
+    </style>
+    
+    <!-- <apex:pageBlock >
+    <apex:pageBlockSection columns="1" >
+    Betaler ID: <br/>
+    <input type="text" name="AriaNumber" id="AriaNumber" />
+    <input type="button" value="Søg" onclick="searchAria()" />
+    
+    
+    <p>Vælg “Søg” for at søge kunde udfra Betaler ID.</p> 
+    </apex:pageBlockSection>
+    </apex:pageBlock> -->
+    
+    
+    <!-- <div class="container">
+    
+    <apex:toolbar style="background-color:#FFFFFF;background-image:none;"><br/>
+    <input type="text" name="AriaNumber" id="AriaNumber" />
+    <input type="button" value="Søg" onclick="searchAria()" />
+    </apex:toolbar>
+    </div> -->
+    
+    <apex:outputPanel style="background-color:#FFFFFF;background-image:none;">
+    <br/>
+    <input type="text" name="AriaNumber" id="AriaNumber" onkeypress="searchBykey(event);"/>
+    <input type="button" value="Søg" onclick="searchAria()" />
+    </apex:outputPanel>
+    
+     <script>
+           function setFocusOnLoad() {} ;
+           var text_elm=document.getElementById('AriaNumber');
+           text_elm.focus();
+          
+           j$(strText).keydown(function(event) {
+                //alert('in here keydown');
+                if(event.keyCode == 13 || event.keyCode == 10){
+                    searchAria();
+                   event.preventDefault();
+                   
+                }
+           });
+         
+           function searchBykey(event){     
+                if(event.keyCode == 13 || event.keyCode == 10){
+                   searchAria();
+                   event.preventDefault();
+                   
+                }
+           }
+        
+           
+</script>
+    
+    <script type="text/javascript">
+    var account_number='';
+    /*****SPOC 1878***********/
+     /*  function searchBykey(event){     
+        if(event.keyCode == 13 || event.keyCode == 10){
+          searchAria();
+          event.preventDefault();
+     
+        }
+       }    */
+   /****************************/
+   
+   
+   var ariaNo='';  
+   var  urlPage='';
+  function testGetFocusedPrimaryTabId() {
+            sforce.console.getFocusedPrimaryTabId(showTabId);
+        }
+        var showTabId = function showTabId(result) {
+            //Display the tab ID
+           // alert('result Id:'+result.id);
+           
+            sforce.console.openPrimaryTab(null, urlPage, true, ariaNo,null,ariaNo);
+            sforce.console.focusPrimaryTabByName(ariaNo);
+          
+        };
+    
+    function searchAria(){
+    ariaNo = document.getElementById('AriaNumber').value;
+    if(ariaNo!=null && ariaNo!=''){
+    //urlPage = 'https://cs7.salesforce.com/apex/CarrieAriaSearchPage?AriaNumber='+ariaNo;
+    urlPage='https://login.salesforce.com/apex/CarrieAriaSearchPage?AriaNumber='+ariaNo;
+  
+   // srcUp(urlPage ,ariaNo); 
+    
+    function testOpenSubtab() {
+        //First find the ID of the primary tab to put the new subtab in
+        sforce.console.getEnclosingPrimaryTabId(openSubtab);
+    }
+    
+    var openSubtab = function openSubtab(result) {
+        //Now that we have the primary tab ID, we can open a new subtab in it
+        var primaryTabId = result.id;
+        sforce.console.openSubtab(primaryTabId , urlPage, false, 
+           ariaNo  , null,openSuccess,ariaNo );
+    };
+    var openSuccess = function openSuccess(result) {
+        //Report whether we succeeded in opening the subtab
+        if (result.success == true) {
+            alert('subtab successfully opened');
+        } else {
+            alert('subtab cannot be opened');
+        }
+    };
+    
+    //sforce.console.getEnclosingPrimaryTabId(function (result) {
+             //   sforce.console.openPrimaryTab(null, urlPage, true, ariaNo);
+            //});
+    
+    }
+    //testOpenSubtab();
+    testGetFocusedPrimaryTabId();
+    }
+    </script>
+</apex:component>

@@ -1,0 +1,80 @@
+<apex:page controller="ViewAddressesForInstallationsController" showHeader="false" sidebar="false" applyHtmlTag="false">
+<html class="cvi2015">
+<body id="servicepage">
+<script type="text/javascript" src="{!siteCoreUrl}/sitecore/content/data/export/export.aspx?itemguid={59DE8AFC-9FE8-40A1-8323-9DA9602F870A}&functions=true"></script>
+<script type="text/javascript">printHeader();</script>
+<script type="text/javascript">printTopMenu();</script>
+<script type="text/javascript">printContentAreaBegin();</script>
+<c:SCLinksComponent CableUnitName="{!cableUnitName}" PortalBrugerRole="{!portalBrugerRole}"/>
+<style>
+.headerRow .headerStyle{background-color:#FFFFFF;color:#FFFFFF;text-align:center}
+.innerblockTable
+ {
+    background-color: #fff !important;
+    background-repeat: repeat-x;
+    font-family: "Arial", "Helvetica", sans-serif;
+    background-position: left top;
+    font-size:12px;
+    font-weight:bold;!important
+  }
+</style>
+<apex:form >
+    <br/>
+    <apex:outputPanel >
+        <div class="bullets">
+        <ul>
+         <li>Her har du mulighed for at se historik på hvilke tv-pakker en eller flere adresser har haft.</li>
+         <li>Ønsker du en ældre historik end siden tilbyder bedes du ringe til YouSee kundeservice på 70 70 40 44.</li>
+      <!--  <li>Her kan du se, hvilke tv-pakker, der har været på adresserne siden 1. januar 2003. Har du brug for ældre historik, kan du ringe til kundeservice på 70 70 40 44 alle hverdage fra kl. 8.15 til 16.00.</li>  -->
+          <li>Du kan også gemme alle data fra listen i dit eget Excel-ark.</li>
+       </ul>
+       </div>
+    </apex:outputPanel>
+    <br></br>   
+ <apex:PageBlock id="historyBlock">
+    <apex:pageBlockSection title="Kundedetaljer" columns="2" collapsible="false">
+     <apex:pageBlockSectionItem >
+          <apex:outputLabel value="Kundenavn: " />
+          <apex:outputLabel value="{!CableUnitName}" />
+    </apex:pageBlockSectionItem>
+    
+    <apex:pageBlockSectionItem >
+          <apex:outputLabel value="Kundenr: " />
+          <apex:outputLabel value="{!CableUnitNumber}" />
+    </apex:pageBlockSectionItem>
+   </apex:pageBlockSection>
+   
+    <apex:pageBlockSection columns="1" collapsible="false">
+         <table border = "0" width="100%"> 
+         <apex:repeat value="{!wrapperMap}" var="InstHistWrap" id="instHist">
+           <tr style="background-color:#EEEEE0;">
+             <td width="10%">&nbsp;</td>
+             <td colspan="3">{!InstHistWrap}</td>
+           </tr> 
+           <apex:repeat value="{!wrapperMap[InstHistWrap]}" var="cInstHist">
+              <apex:repeat var="d" value="{!cInstHist}">
+                <tr>  
+                 <td width="10%">&nbsp;</td>
+                 <td width="40%">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{!d.StartDate} - {!d.EndDate}</td>
+                 <td width="30%">{!d.ProductName}</td>
+                 <td width="20%"></td>
+                </tr>  
+               </apex:repeat>   
+             </apex:repeat>
+         </apex:repeat>
+         </table>
+    </apex:pageBlockSection>
+
+    <apex:facet name="footer">
+       <apex:outputPanel layout="Centre">
+         <apex:commandButton action="{!backToViewInstallation}" value="{!$Label.SC_Back}" styleClass="dialogbutton_orange"/> 
+          <!--  <apex:commandButton action="{!backToViewInstallation}" id="btnCancel" value="{!$Label.SC_EditContactPage_Cancel}"/>-->
+       </apex:outputPanel>
+    </apex:facet>
+ </apex:PageBlock> 
+</apex:form>
+<script type="text/javascript">printContentAreaEnd();</script>
+<script type="text/javascript">printFooter();</script>
+</body>
+</html>
+</apex:page>

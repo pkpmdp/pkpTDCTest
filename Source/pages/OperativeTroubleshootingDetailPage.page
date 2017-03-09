@@ -1,0 +1,12 @@
+<apex:page standardController="Operative_Troubleshooting__c" extensions="OperativeTroubleshootingLogController" tabStyle="Account">
+ <div id="ep_page">
+  <apex:detail relatedListHover="false" relatedList="true"/>
+  <apex:pageBlock mode="maindetail" id="bier_log">
+   <apex:pageBlockSection title="{!$Label.BIER_DriftInfo_Log_Section_Title}" columns="1" id="bierLogSection">
+    <apex:repeat value="{!Logs}" var="log">
+     <strong>{! log.Date__c }&nbsp;{! log.Name }</strong><br/>{! log.Comment__c }
+    </apex:repeat>   
+   </apex:pageBlockSection>
+  </apex:pageBlock>  	 
+ </div>
+</apex:page>

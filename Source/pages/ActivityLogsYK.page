@@ -1,0 +1,80 @@
+<apex:page standardController="Account" extensions="clsActivityLogsControllerYK" showHeader="true" sidebar="true" cache="true">
+  <apex:pageMessages />
+  <apex:form >        
+    <apex:sectionHeader title="Vis kundebemærkninger "/>
+    <apex:inputHidden value="{!Account.Customer_No__c}"/>
+    <apex:pageBlock >    
+      <apex:pageBlockSection >
+        <apex:pageBlockSectionItem >
+          <apex:outputLabel value="Name"/>
+          <apex:outputText value="{!Account.FirstName} {!Account.LastName}"/>
+        </apex:pageBlockSectionItem>
+        <apex:pageBlockSectionItem >
+          <apex:outputLabel value="{!$ObjectType.Account.fields.Customer_No__c.label}"/>
+          <apex:outputText value="{!account.Customer_No__c}"/>
+        </apex:pageBlockSectionItem>        
+      </apex:pageBlockSection>
+    </apex:pageBlock>
+    <apex:pageBlock id="createLog" rendered="{!viewLogs}">    
+      <apex:pageBlockButtons >
+        <apex:commandButton value="New" action="{!createLog}"/>
+        <apex:commandButton value="Back" action="{!cancel}"/>
+        <apex:commandButton value="Casper" action="{!sendToCasper}"/>
+        <apex:commandButton value="Triple" onclick="window.open('http://triple/?customerId={!account.Customer_No__c}')"/>
+      </apex:pageBlockButtons>
+      <apex:pageBlockTable value="{!existingActivityLogs}" var="log" id="existingProductsTable" rules="rows">  
+        <apex:column headerValue="{!$Label.Date}" value="{!log.logDateAccount.Permission_Updated__c}"/>
+        <apex:column headerValue="{!$Label.User_Initials}" value="{!log.user}"/>
+        <apex:column headerValue="{!$Label.Subject_Type}" value="{!log.subjectTypeDescription}"/>
+        <apex:column headerValue="{!$Label.Text}">
+          <apex:outputField value="{!log.textAccount.Serial_Numbers__c}"/>
+        </apex:column>
+        <apex:column headerValue="{!$Label.Business_Group}" value="{!log.contactType}"/>
+      </apex:pageBlockTable>
+    </apex:pageBlock>       
+    <apex:pageBlock id="viewLogs" rendered="{!createLog}">    
+      <apex:pageBlockButtons >
+        <apex:commandButton value="Save" action="{!saveLog}"/>
+        <apex:commandButton value="Cancel" action="{!viewLogs}"/>
+      </apex:pageBlockButtons>
+      <apex:pageBlockSection columns="1">
+        <apex:pageBlockSectionItem >
+          <apex:outputLabel value="Contact Type"/>
+          <apex:selectList value="{!newActivityLog.contactType}" size="1">
+            <apex:selectOption itemLabel="Telefonisk" itemValue="1"/>
+            <apex:selectOption itemLabel="Skriftlig  " itemValue="2"/>
+            <apex:selectOption itemLabel="E-mail" itemValue="3"/>
+            <apex:selectOption itemLabel="Personlig" itemValue="4"/>
+            <apex:selectOption itemLabel="Administrativ" itemValue="5"/>                        
+          </apex:selectList>
+        </apex:pageBlockSectionItem>
+        <apex:pageBlockSectionItem >
+          <apex:outputLabel value="Subject Type"/>
+          <apex:selectList value="{!newActivityLog.subjectType}" size="1">
+            <apex:selectOption itemLabel="Supplerende tekst" itemValue="0"/>
+            <apex:selectOption itemLabel="Programønske" itemValue="1"/>
+            <apex:selectOption itemLabel="Selector" itemValue="2"/>
+            <apex:selectOption itemLabel="Programudfald" itemValue="3"/>
+            <apex:selectOption itemLabel="Regningsforespørgsel" itemValue="4"/>                        
+            <apex:selectOption itemLabel="Pris/Produkt forespørgsel" itemValue="5"/>                        
+            <apex:selectOption itemLabel="Ønske om Kabel TV" itemValue="6"/>                        
+            <apex:selectOption itemLabel="Tilmelding" itemValue="7"/>                        
+            <apex:selectOption itemLabel="Afmelding" itemValue="8"/>                        
+            <apex:selectOption itemLabel="Flytning" itemValue="9"/>                        
+            <apex:selectOption itemLabel="Omkobling" itemValue="10"/>                        
+            <apex:selectOption itemLabel="Overtagelse" itemValue="11"/>                        
+            <apex:selectOption itemLabel="Rykning for udførelse" itemValue="12"/>                        
+            <apex:selectOption itemLabel="Regningsbehandling" itemValue="13"/>                        
+            <apex:selectOption itemLabel="Kabelmodem" itemValue="14"/>                        
+            <apex:selectOption itemLabel="Kampagne" itemValue="15"/>                        
+            <apex:selectOption itemLabel="Reparation" itemValue="16"/>                                                                                                                                                            
+          </apex:selectList>
+        </apex:pageBlockSectionItem>
+         <apex:pageBlockSectionItem >
+           <apex:outputLabel value="Description"/>
+           <apex:inputTextarea value="{!newActivityLog.textField}" rows="10" cols="100"/>
+         </apex:pageBlockSectionItem>
+      </apex:pageBlockSection>
+    </apex:pageBlock>       
+  </apex:form>
+</apex:page>

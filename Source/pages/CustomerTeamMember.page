@@ -1,0 +1,11 @@
+<apex:page controller="clsLookupTableListController"  showHeader="False" >
+  <apex:pageBlock title="Customer Team Members" >
+  <apex:dataTable value="{!CustomerTeamMembers}" var="aCustomerTeamMember" width="70%" >  This is your new Page
+          <apex:column >
+           <apex:facet name="header"></apex:facet>
+             {!aCustomerTeamMember.Name}
+                     </apex:column>
+        
+         </apex:dataTable>
+  </apex:pageBlock>
+</apex:page>

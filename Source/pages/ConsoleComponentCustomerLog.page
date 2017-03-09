@@ -1,0 +1,103 @@
+<apex:page standardController="Account" extensions="ConsoleCustomerLogComponent_CT" action="{!init}" showHeader="true" sidebar="false" cache="true">
+    <apex:includeScript value="/soap/ajax/25.0/connection.js" />
+<apex:includeScript value="/support/console/25.0/integration.js" />
+
+
+<style type="text/css">
+/*.container {
+    padding: 0px;
+    margin: 0px;
+    width:100%;
+    height:100%;
+}
+.objectContainer {
+    /*margin: 5px 5px 0px 5px;
+    /*border: solid 1px black;*/
+}*/
+/*.tableHeading {
+    background-color: rgb(50,140,182);
+    color: rgb(255,255,255);
+    font-weight: bold;
+    font-size: 14pt;
+    padding-left: 5px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}*/
+ table {
+    width:100%;
+    height:100%;
+}
+ trst {
+    border-bottom : 1px solid rgb(240,240,240);
+    //background-color : rgb(240,240,240);
+}
+ th {
+    /*border-bottom : 1px solid grey;*/
+    background-color : rgb(240,240,240);
+}
+ td {
+}   
+</style>
+    
+<script type="text/javascript">
+
+    function openObject(id,tabName) {
+        
+        sforce.console.getEnclosingPrimaryTabId(function (result) {
+            sforce.console.openSubtab(result.id, '/'+id, true, tabName);
+        });
+    }
+    function ViewAll(){
+        sforce.console.getFocusedPrimaryTabId(openSub);        
+    }
+    var openSub = function openSub(result){
+        var primaryTabId = result.id;
+        var accid = '{!Account.Id}';
+            var accname = '{!Account.Name}';
+            var rel = '{!strRelatedListURLId}';
+            var url = '../a1r?rlid='+rel+'&id='+accid;
+            sforce.console.openSubtab(primaryTabId, url , true, accname,null,null,accname);
+          };
+    
+    
+</script>
+        
+        <apex:repeat value="{!dataList}" var="obj">
+
+              <table style="height:100%; position:relative; width:100%;border-collapse: collapse;" cellpadding="5" cellspacing="0" >
+                    <tr>
+                        <apex:repeat value="{!obj.fieldLabels}" var="label">
+                            <apex:outputPanel rendered="{!label != 'id'}" style="height:300%; position:relative;">
+                                <th style="border-width:1px;border-right:#F0F0F0;width: 130px;">{!label}</th>
+                            </apex:outputPanel>
+                        </apex:repeat>
+                    </tr>
+                    <apex:repeat value="{!obj.dataValues}" var="valueMap">
+                        <tr>
+                            <apex:variable value="{!0}" var="index" />
+                            <apex:repeat value="{!obj.fieldNames}" var="fieldName">
+                                <apex:outputPanel rendered="{!fieldName != 'id'}" >
+                                <td style="border-width:1px;border-bottom-style:solid;border-color:#F0F0F0"><!--  style="border-width:2px;border-bottom-style:solid;border-color:#F0F0F0">-->
+                                    <apex:outputPanel rendered="{!index == 0}" >
+                                          <!-- <a href="#" onclick="openObject('{!valueMap['id']}','{!valueMap[fieldName]}')"><apex:outputText value="{!valueMap[fieldName]}" /> </a>--> 
+                                           <apex:outputText value="{!IF(LEN(valueMap[fieldName])>20, LEFT(valueMap[fieldName],20)+'...',valueMap[fieldName])}" title="{!valueMap[fieldName]}"/> 
+                                     
+                                    </apex:outputPanel>
+                                    <apex:outputPanel rendered="{!index > 0}" >
+                                        <apex:outputText value="{!valueMap[fieldName]}" />
+                                    </apex:outputPanel>
+                                    <apex:variable value="{!index + 1}" var="index" />
+                                </td>
+                                </apex:outputPanel>
+                            </apex:repeat>
+                        </tr>
+                    </apex:repeat>
+                </table>
+                
+               <span style="float:left;text-decoration:underline;font-weight:bold;cursor:pointer;visibility:{!IF(obj.dataValues.empty,'hidden','visible')};" onclick="ViewAll();"><apex:toolbar style="background-color:#F0F0F0;background-image:none;"><font color="black">{!$Label.View_All}</font></apex:toolbar></span>
+               <span style="visibility:{!IF(obj.dataValues.empty,'visible','hidden')};float:left;font-weight:bold;"><apex:toolbar style="background-color:#F0F0F0;background-image:none;"><font color="black">{!$Label.No_Kunde}</font></apex:toolbar></span>  
+        </apex:repeat>
+
+    
+
+</apex:page>

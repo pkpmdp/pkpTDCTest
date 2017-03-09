@@ -1,0 +1,239 @@
+<apex:page controller="ViewInvoicesController" showHeader="false" sidebar="false" applyHtmlTag="false">
+<html class="cvi2015">
+   <!-- <apex:includescript value="//code.jquery.com/jquery-1.12.0.min.js" />
+    <apex:includescript value="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js" />
+    <apex:stylesheet value="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.min.css" />
+   <script type="text/javascript">
+
+            j$ = jQuery.noConflict();
+            var InvoiceListId;
+            j$(document).ready(function(){
+            InvoiceListId = j$('[id$="InvoiceListId"]').DataTable({
+            "aoColumnDefs": [
+      { "aDataSort": [ 1, 7 ], "aTargets": [ 1 ] },
+      { "aDataSort": [ 7, 1], "aTargets": [ 7 ] }],
+                "ordering" : false,
+            "paging":true,
+             "info": true,
+             "pageLength": 25,
+            "language":{
+                "info": "Vis _START_ til _END_ af _TOTAL_ poster",
+                 "infoEmpty": "Vis 0 til 0 af 0 poster",
+                 "search": "Søg",
+                 "infoFiltered":   "(filtreret fra _MAX_ poster)",
+                "loadingRecords": "Henter...",
+                "zeroRecords":    "Ingen poster fundet",
+                "emptyTable": "Ingen data fundet",
+                "lengthMenu":  'Vis <select>'+
+                                    '<option value="25">25</option>'+
+                                    '<option value="50">50</option>'+
+                                    '<option value="100">100</option>'+
+                                    '<option value="500">500</option>'+
+                                    '<option value="-1">Alle</option>'+
+                                    '</select> poster'
+                }
+         });
+        });
+</script>-->
+    <script type="text/javascript" src="{!siteCoreUrl}/sitecore/content/data/export/export.aspx?itemguid={369D088D-67BD-4E5A-8B9F-798EBF71E38F}&functions=true"></script>
+<body id="servicepage">
+  
+<style>
+   .fortrydCls {
+     border-width:0;
+     padding:15px;
+     text-transform:capitalize;
+     margin:2px;
+     background-position:left top;
+     background-repeat: repeat-x;
+     border-color: -moz-use-text-color #FF4500;
+     border-right: 1px solid #FF4500;
+     border-style: none solid solid none;
+     display:inline;
+     font-family: 'Verdana','Geneva','sans-serif';
+     font-size:80%;
+     color:#E56717;
+     font-weight:bold;
+     height:26px;
+   }
+
+   .backButtonCls{
+     background-image: url("bgButton.gif");
+     border-width: 0;
+     background-color:#E56717;
+     font-family: 'Verdana','Geneva',sans-serif;
+     color:white;
+     height:16px;
+   }
+   <!-- table.dataTable tbody th, table.dataTable tbody td {padding: 0px 0px;}
+         table.dataTable thead th, table.dataTable thead td{padding: 0px 0px;}
+       .list tr.even td, .list tr.odd td {
+            border-bottom-width: 1px;
+        }
+       .bPageBlock .list .last>td{
+            border-bottom-width: 1px;
+        }
+       table.dataTable thead .sorting_asc {
+        background-color: #676767;
+       }
+       table.dataTable thead .sorting_desc{
+        background-color: #676767;
+       }
+        table.dataTable thead .sorting {
+        background-color: #676767;
+       }
+       table.dataTable tr.odd { background-color: #CAE6C4;  border:1px lightgrey;}
+    table.dataTable tr.even{ background-color: white; border:1px lightgrey; }-->
+</style>
+<script type="text/javascript">printHeader();</script>
+<script type="text/javascript">printTopMenu();</script>
+<script type="text/javascript">printContentAreaBegin();</script>
+<script type="text/javascript"> var portalBrugerRole = '{!portalBrugerRole}'; </script> 
+<apex:stylesheet value="{!URLFOR($Resource.scStyleCss,'myStyle/myStyle.css')}"/>
+<c:SCLinksComponent CableUnitName="{!cableUnitName}" PortalBrugerRole="{!portalBrugerRole}"/>
+<apex:form >
+<!--  Used for disabling invoice calendar
+<apex:stylesheet value="{!$Resource.InvoiceCalendarCSS}"/>
+<apex:includeScript value="{!$Resource.InvoiceCalendar}"/>  -->
+<apex:stylesheet value="{!URLFOR($Resource.CalendarControl, 'CalendarControl/CalendarControl.css')}"/>
+<apex:includeScript value="{!URLFOR($Resource.CalendarControl, 'CalendarControl/CalendarControl.js')}"/>
+<style>
+        .headerRow .headerStyle{background-color:#638658;color:#FFFFFF}
+</style>
+
+<!-- <h1>Vælg faktura </h1>
+<br/><br/> -->
+<apex:outputPanel rendered="{!dataListFlag}">
+    <div class="bullets">
+      <ul>
+       <li><apex:outputText value="Klik på nummeret på den faktura, du gerne vil se."/></li>
+       <li><apex:outputText value="Faktura før 2015 bliver af systemtekniske årsager vist med TDC logo."/></li>
+      </ul>
+    </div>
+</apex:outputPanel>
+<apex:pageBlock rendered="{!renderSection}">
+      <apex:pageBlock id="Vælgkonto1">
+             <apex:PageBlockSection title="Kundedetaljer" collapsible="false" columns="2">
+             <apex:pageBlockSectionItem >
+                            <apex:outputLabel value="Kundenavn : " />
+                            <apex:outputLabel value="{!cableUnitName}" />
+             </apex:pageBlockSectionItem>
+             <apex:pageBlockSectionItem labelStyle="width:25%">
+                            <apex:outputLabel value="Kundenr : " />
+                            <apex:outputLabel value="{!cableUnitNumber}" />
+             </apex:pageBlockSectionItem>
+             <apex:pageBlockSectionItem labelStyle="width:25%">
+                            <apex:outputLabel value="Juridisk kontonr:"/>
+                            <apex:outputLabel value="{!kontonNumber}"/>
+             </apex:pageBlockSectionItem>
+             <apex:pageBlockSectionItem labelStyle="width:25%">
+                            <apex:outputLabel value="Betaler kontonr:"/>
+                            <apex:outputLabel value="{!debitorNumber}"/>
+             </apex:pageBlockSectionItem>
+             
+             <!-- Existing Functionality For Displaying legalAccountNumber and payment Account Number
+             <apex:pageBlockSectionItem labelStyle="width:25%">
+                            <apex:outputLabel value="Kontonummer :" />
+                            <apex:outputLabel value="{!kontonNumber}" />
+             </apex:pageBlockSectionItem>
+             <apex:pageBlockSectionItem labelStyle="width:25%">
+                            <apex:outputLabel value="Debitornummer :" />
+                            <apex:outputLabel value="{!debitorNumber}" />
+             </apex:pageBlockSectionItem> -->
+     </apex:PageBlockSection>
+     </apex:pageBlock>
+    <apex:pageMessage detail="{!$Label.CableUnitNotMatched}" rendered="{!!renderSection}" severity="error"></apex:pageMessage>
+     <apex:stylesheet value="{!URLFOR($Resource.scrowOddEvenStyle)}"/> 
+     <apex:pageBlock id="InvoiceListBlock">
+     <apex:actionStatus id="refreshstatus" startText=" " stopText=" " >
+          <!--<apex:facet name="start">{!$Label.InvoiceListLabel} <img src="/apexpages/devmode/img/saveStatus.gif" /></apex:facet>-->
+         
+          <!-- Change For Sc-22 -->
+          <apex:facet name="start">{!$Label.InvoiceListLabel} <img src="{!$Site.Prefix}/apexpages/devmode/img/saveStatus.gif" /></apex:facet>
+         <apex:facet name="stop"></apex:facet>
+     </apex:actionStatus>
+     <apex:outputLabel value="Denne konto er tilmeldt BetalingsService/PBS." rendered="{!paymentType}"/>
+     <apex:messages globalOnly="true"  styleClass="warningError"/>
+     <apex:outputPanel id="invoiceNotPresent" rendered="{!invoiceNotPresent}">
+        <apex:outputLabel value="Der er ingen fakturaer tilknyttet kontoen.
+            Hvis du ønsker, at se en fakturaoversigt for en anden konto, skal du først vælge en ny konto. 
+            Vil du vælge en anden konto, så klik "> 
+        </apex:outputLabel>
+        <!-- Change for SC-22
+        <apex:outputLink value="/apex/ViewInvoiceGeneral" style="text-decoration: underline;">her
+         -->
+        <apex:outputLink value="{!$Site.Prefix}/apex/ViewInvoiceGeneral" style="text-decoration: underline;">
+             <apex:param name="cableunitnumber" value="{!$CurrentPage.parameters.cableunitnumber}"/>
+             <apex:param name="dataSyncLogId" value="{!$CurrentPage.parameters.dataSyncLogId}"/>
+             <apex:param name="accountId" value="{!$CurrentPage.parameters.accountId}"/>     
+        </apex:outputLink><br/>
+     </apex:outputPanel>
+     <apex:actionPoller action="{!checkOnDataSyncInvoice}" id="pollerId" rerender="InvoiceListBlock" status="refreshstatus" interval="5" enabled="{!pollChecker}"/>   
+     <apex:pageBlockSection collapsible="false"  columns="1" id="invoicesBlock"> 
+         <apex:pageBlockTable value="{!invoicelist}" var="item" id="InvoiceListId" rowClasses="even,odd" border="5px" rendered="{!dataListFlag}"  width="100%">
+            <apex:column headervalue="Dato" value="{!item.DateSorter__c}"/>
+            <apex:column headerValue="Nr."  >
+           <!-- Change for SC-22 <apex:outputLink value="#" onclick="window.open('/apex/ViewInvoiceDetail?accountNumber={!$CurrentPage.parameters.accountNumber}&InvoiceNo={!item.DisplayInvoice_No__c}','InvoiceDetails','menubar=no,width=680,height=692,toolbar=no,scrollbars=yes');return false;"> -->
+            <!-- InvoiceType Added for SPOC 2091-->
+      <!-- Added disable condition for SUPPORT-6901-->
+              <apex:outputLink value="#" disabled="{!IF((item.DisplayInvoice_No__c == '0'),true,false)}"
+              onclick="window.open('{!$Site.Prefix}/apex/ViewInvoiceDetail?accountNumber={!$CurrentPage.parameters.accountNumber}&cableunitnumber={!$CurrentPage.parameters.cableunitnumber}&InvoiceNo={!item.DisplayInvoice_No__c}&InvoiceType={!item.Type__c}','InvoiceDetails','menubar=no,width=680,height=692,toolbar=no,scrollbars=yes');return false" 
+              rendered="{!IF((item.DisplayInvoice_No__c == null),false,true)}">
+                {!item.DisplayInvoice_No__c}
+               </apex:outputLink>
+    
+                <apex:outputText value="{!item.Daekker_No__c}" rendered="{!IF((item.DisplayInvoice_No__c == null),true,false)}"/> <!--spoc 2350 --->
+            </apex:column> 
+            <!--<apex:column headervalue="Frist" value="{!item.Due_Date__c}"/>--> 
+            <apex:column headervalue="Faktura" value="{!item.Invoice_Amount__c}"/> 
+            <apex:column headervalue="Ind" value="{!item.In__c}"/> 
+            <apex:column headervalue="Ud" value="{!item.Out__c}"/>
+            <!--<apex:column headervalue="Dato" value="{!item.Payment_Date__c}"/>-->
+            <!--<apex:column headervalue="Nr."  value="{!item.Daekker_No__c}"/> -->
+            <apex:column headervalue="Saldo" value="{!item.Balance__c}"/> 
+         </apex:pageBlockTable>
+     </apex:pageBlockSection>
+     <p></p>
+     <p></p>
+     <apex:inputHidden value="{!endDate}" id="endDate"/>
+     <apex:inputHidden value="{!startDate}" id="startDate"/>
+     <apex:pageBlockSection title="Find en faktura" collapsible="false" columns="1" rendered="{!dataListFlag}">
+        <apex:pageBlockSectionItem >
+            <apex:outputLabel style="font-weight:normal" value="Fra dato " />
+            <apex:outputPanel >  
+               <apex:inputText disabled="true" id="invoiceStartDate" value="{!strDate}" />
+               <apex:outputPanel onclick="openCalender('{!$Component.invoiceStartDate}','{!$Component.startDate}');" > 
+                <img class="datePickerIcon" alt="Vælg en dato" title="Vælg en dato" src="/s.gif"/>
+               </apex:outputPanel>
+            </apex:outputPanel>
+        </apex:pageBlockSectionItem>
+        <apex:pageBlockSectionItem >
+             <apex:outputLabel style="font-weight:normal" value="Til dato " />
+             <apex:outputPanel >
+             <apex:inputText disabled="true" id="invoiceEndDate" value="{!enDate}" />
+             <apex:outputPanel onclick="openCalender('{!$Component.invoiceEndDate}','{!$Component.endDate}');"> 
+               <img class="datePickerIcon" alt="Vælg en dato" title="Vælg en dato" src="/s.gif"/>
+             </apex:outputPanel>
+             </apex:outputPanel>
+        </apex:pageBlockSectionItem>
+        <p></p> 
+        <apex:pageBlockSectionItem >
+            <apex:commandButton value="{!$Label.SC_ViewInvoices_Search}" action="{!findInvoices}" styleClass="dialogbutton_orange"/>
+              <apex:commandButton value="{!$Label.SC_ViewInvoices_Cancel}" action="{!cancel}" styleClass="dialogbutton_grey"/>
+            </apex:pageBlockSectionItem>
+     </apex:PageBlockSection>
+    <apex:outputpanel rendered="{!AND(NOT(dataListFlag),NOT(initialDataListFlag))}" >
+       <apex:commandButton styleClass="dialogbutton_grey" id="saveId" value="{!$Label.SC_EditContactPage_Cancel}" action="{!backToInvoicesPage}"/>
+    </apex:outputpanel>
+    <apex:outputpanel rendered="{!AND(NOT(dataListFlag),initialDataListFlag)}" >
+       <apex:commandButton styleClass="dialogbutton_grey" id="cancelId" value="{!$Label.SC_EditContactPage_Cancel}" action="{!cancel}"/>
+    </apex:outputpanel> 
+</apex:pageBlock>
+ </apex:pageBlock>
+ <apex:pageMessage detail="{!$Label.CableUnitNotMatched}" rendered="{!!renderSection}" severity="error"></apex:pageMessage>
+</apex:form>
+<script type="text/javascript">printContentAreaEnd();</script>
+<script type="text/javascript">printFooter();</script>
+</body>
+</html>
+</apex:page>

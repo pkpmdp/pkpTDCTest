@@ -1,0 +1,7 @@
+<apex:page standardController="Account" extensions="clsContactInfoWarningController" showHeader="false" sidebar="false" cache="true" standardStylesheets="true">
+   <!-- <apex:image url="{!URLFOR($Resource.calendar, 'excs.png')}" rendered="{!showWarning}" style="display: block; float: left; margin-left: 37%; margin-right: 10px;" />
+    <apex:outputText value="{!contactInfoWarning}" rendered="{!showWarning}" style="display: block; float: left;" />-->
+    
+    <table style="margin-left: 37%;margin-top:-3px"><tbody><tr><td><apex:image url="{!URLFOR($Resource.calendar, 'excs.png')}" rendered="{!showWarning}" style="display: block;" />
+    </td><td><apex:outputText value="{!contactInfoWarning}" rendered="{!showWarning}" style="display: block;" /></td></tr></tbody></table>
+</apex:page>

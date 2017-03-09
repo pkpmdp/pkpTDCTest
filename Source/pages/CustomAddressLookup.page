@@ -1,0 +1,215 @@
+<apex:page title="Search" showHeader="false" sideBar="false" controller="CustomAddressLookupController" applyHtmlTag="false">
+  <html class="cvi2015">
+    <script  type="text/javascript">
+        String.prototype.trim = function() {
+            return this.replace(/^\s+|\s+$/g,"");
+        }
+        
+        function doSearch(){
+            //alert('Address Name: '+document.getElementById('{!$Component.frmSearch.pbSearch.pbsSearch.pbsiAddressName.Address__name}').value.trim());
+            //alert('Street: '+document.getElementById('{!$Component.frmSearch.pbSearch.pbsSearch.pbsiStreet.street}').value.trim());
+            //if( (document.getElementById('{!$Component.frmSearch.pbSearch.pbsSearch.pbsiAddressName.Address__name}').value.trim()=='') && (document.getElementById('{!$Component.frmSearch.pbSearch.pbsSearch.pbsiStreet.street}').value.trim()=='')){
+            //alert('Matched');
+            //  if(document.getElementById('{!$Component.frmSearch.pbSearch.pbsSearch.pbsiStreet.street}').value.trim()!='')
+            //  numberOffieldsWhereValueIsPresent +=1;
+            //if(document.getElementById('{!$Component.frmSearch.pbSearch.pbsSearch.pbsiDistrict.district}').value.trim()!='')
+            //  numberOffieldsWhereValueIsPresent +=1;
+                
+            var numberOffieldsWhereValueIsPresent = 0;
+            
+            if(document.getElementById('{!$Component.frmSearch.pbSearch.pbsSearch.pbsiAddressName.Address__name}').value.trim()!='') 
+                numberOffieldsWhereValueIsPresent +=1;  
+            if(document.getElementById('{!$Component.frmSearch.pbSearch.pbsSearch.pbsiHouseNumber.houseNumber}').value.trim()!='')
+                numberOffieldsWhereValueIsPresent +=1;
+            if(document.getElementById('{!$Component.frmSearch.pbSearch.pbsSearch.pbsiEntrance.entrance}').value.trim()!='') 
+                numberOffieldsWhereValueIsPresent +=1;  
+            if(document.getElementById('{!$Component.frmSearch.pbSearch.pbsSearch.pbsiFloor.floor}').value.trim()!='')
+                numberOffieldsWhereValueIsPresent +=1;  
+            //if(document.getElementById('{!$Component.frmSearch.pbSearch.pbsSearch.pbsiSide.side}').value.trim()!='')
+            //  numberOffieldsWhereValueIsPresent +=1;  
+            if(document.getElementById('{!$Component.frmSearch.pbSearch.pbsSearch.pbsiDoorNumber.doorNumber}').value.trim()!='')
+                numberOffieldsWhereValueIsPresent +=1;
+            if(document.getElementById('{!$Component.frmSearch.pbSearch.pbsSearch.pbsiPostCode.postCode}').value.trim()!='')
+                numberOffieldsWhereValueIsPresent +=1;
+            if(document.getElementById('{!$Component.frmSearch.pbSearch.pbsSearch.pbsiTown.town}').value.trim()!='')
+                numberOffieldsWhereValueIsPresent +=1;  
+            
+            //alert('numberOffieldsWhereValueIsPresent:'+ numberOffieldsWhereValueIsPresent);   
+            if(numberOffieldsWhereValueIsPresent >=2 ){
+                document.getElementById('errorMsg').style.display = "none";
+                Search();
+            }
+            else
+                document.getElementById('errorMsg').style.display = "block";
+        }
+    </script>
+    <apex:form id="frmSearch">
+        
+        <apex:outputPanel id="page" layout="block" style="margin:5px;padding:10px;padding-top:2px;">
+            <apex:tabPanel switchType="client" selectedTab="name1" id="tabbedPanel">         
+                <!-- SEARCH TAB -->
+                <apex:tab label="Søg adresse" name="tab1" id="tabOne">  
+                    <div id="errorMsg" style="display:none;height: 33px;padding-left: 50px;padding-top: 18px;border-color: red;color: grey;" class="mailError">
+                           <apex:outputText id="Msg1" value="{!$Label.SC_CustomLookupSearchParameter}"/>
+                    </div>
+                    <apex:actionRegion >  
+                         <apex:pageBlock id="pbSearch">                             
+                              <apex:outputPanel id="top" layout="block" style="margin:5px;padding:10px;padding-top:2px;">                             
+                                  <!-- <apex:outputLabel value="Search" style="font-weight:Bold;padding-right:10px;" for="txtSearch"/>
+                                  <apex:inputText id="txtSearch" value="{!searchString}" /> 
+                                    <apex:pageBlockSectionItem id="pbsiStreet">
+                                            <apex:outputLabel value="Street" for="street"/>
+                                            <apex:inputText value="{!street}" id="street"/>  
+                                        </apex:pageBlockSectionItem>
+                                  -->
+                                  <apex:pageBlockSection columns="2" id="pbsSearch">
+                                        <apex:pageBlockSectionItem id="pbsiAddressName">
+                                            <apex:outputLabel value="Gadenavn" for="Address__name"/>
+                                            <apex:inputText value="{!addressName}" id="Address__name"/> 
+                                        </apex:pageBlockSectionItem>                                      
+                                        <apex:pageBlockSectionItem id="pbsiHouseNumber">
+                                            <apex:outputLabel value="Husnr." for="houseNumber"/>
+                                            <apex:inputText value="{!houseNumber}" id="houseNumber"/> 
+                                        </apex:pageBlockSectionItem>
+                                        <apex:pageBlockSectionItem id="pbsiEntrance">
+                                            <apex:outputLabel value="Opgang" for="entrance"/>
+                                            <apex:inputText value="{!entrance}" id="entrance"/> 
+                                        </apex:pageBlockSectionItem>
+                                        <apex:pageBlockSectionItem id="pbsiFloor">
+                                            <apex:outputLabel value="Etage" for="floor"/>
+                                            <apex:inputText value="{!floor}" id="floor"/> 
+                                        </apex:pageBlockSectionItem>
+                                        <!--<apex:pageBlockSectionItem id="pbsiSide">
+                                            <apex:outputLabel value="Side" for="side"/>
+                                            <apex:inputText value="{!side}" id="side"/> 
+                                        </apex:pageBlockSectionItem> -->
+                                        <apex:pageBlockSectionItem id="pbsiDoorNumber">
+                                            <apex:outputLabel value="Side/dørnr" for="doorNumber"/>
+                                            <apex:inputText value="{!doorNumber}" id="doorNumber"/> 
+                                        </apex:pageBlockSectionItem>
+                                        <apex:pageBlockSectionItem id="pbsiPostCode">
+                                        <apex:outputLabel value="Postnr." for="postCode"/>
+                                            <apex:inputText value="{!postCode}" id="postCode"/> 
+                                        </apex:pageBlockSectionItem>
+                                        <apex:pageBlockSectionItem id="pbsiTown">
+                                            <apex:outputLabel value="By" for="town"/>
+                                            <apex:inputText value="{!town}" id="town"/> 
+                                        </apex:pageBlockSectionItem>
+                                        <!--<apex:pageBlockSectionItem id="pbsiDistrict">
+                                            <apex:outputLabel value="Stednavn" for="district"/>
+                                            <apex:inputText value="{!district}" id="district"/> 
+                                        </apex:pageBlockSectionItem>                                                                        
+                                        <apex:inputField value="{!searchParameter.Name}" id="Address__name"/>
+                                        <apex:inputField value="{!searchParameter.House_No__c}" id="houseNumber"/>
+                                        <apex:inputField value="{!searchParameter.Door_No__c}" id="doorNumber"/> 
+                                        <apex:inputField value="{!searchParameter.Postcode__c}" id="postCode"/> 
+                                        <apex:inputField value="{!searchParameter.Town__c}" id="town"/> 
+                                        <apex:inputField value="{!searchParameter.District__c}" id="district"/>-->  
+                                  </apex:pageBlockSection>                               
+                                  <apex:actionStatus startText="(Søgning...)" stopText="" id="searchStatus"/>
+                                  <span style="padding-left:5px">
+                                    <apex:actionFunction action="{!Search}" name="Search" rerender="searchResults" status="searchStatus"> </apex:actionFunction>
+                                    <input type="button" value="Søg" onclick="doSearch();" id="btnSearch" />
+                                  <!-- submit    <apex:commandButton id="btnGo" value="Go" action="{!Search}" rerender="searchResults" status="searchStatus"></apex:commandButton> -->
+                                  </span>
+                              </apex:outputPanel>
+                         
+                              <apex:outputPanel id="pnlSearchResults" style="margin:10px;height:350px;overflow-Y:auto;" layout="block">
+                                    <apex:pageBlock id="searchResults"> 
+                                          <apex:pageBlockTable value="{!results}" var="a" id="tblResults">
+                                                <apex:column >
+                                                  <apex:facet name="header">
+                                                    <apex:outputPanel >Gadenavn</apex:outputPanel>
+                                                  </apex:facet>
+                                                   <apex:outputLink value="javascript:top.window.opener.lookupPick2('{!FormTag}','{!TextBox}_lkid','{!TextBox}','{!a.Id}','{!a.Street__c}', false)" rendered="{!NOT(ISNULL(a.Id))}">{!a.Street__c}</apex:outputLink>     
+                                                </apex:column>
+                                              <!--  <apex:column >
+                                                    <apex:facet name="header">Street</apex:facet>{!a.Street__c}
+                                                </apex:column>
+                                                <apex:column >
+                                                    <apex:facet name="header">Stednavn</apex:facet>{!a.District__c}
+                                                </apex:column>
+                                                --> 
+                                                <apex:column >
+                                                    <apex:facet name="header">Husnr.</apex:facet>{!a.House_No__c}
+                                                </apex:column>
+                                                <apex:column >
+                                                    <apex:facet name="header">Opgang</apex:facet>{!a.Entrance__c}
+                                                </apex:column>
+                                                <apex:column >
+                                                    <apex:facet name="header">Etage</apex:facet>{!a.Floor__c}
+                                                </apex:column>
+                                                <!-- <apex:column >
+                                                    <apex:facet name="header">Side</apex:facet>{!a.Side__c}
+                                                </apex:column> -->
+                                                <apex:column >
+                                                    <apex:facet name="header">Side/dørnr</apex:facet>{!a.Door_No__c}
+                                                </apex:column>
+                                                <apex:column >
+                                                    <apex:facet name="header">Postnr.</apex:facet>{!a.Postcode__c}
+                                                </apex:column>
+                                                <apex:column >
+                                                    <apex:facet name="header">By</apex:facet>{!a.Town__c}
+                                                </apex:column>                                              
+                                                <apex:column >
+                                                    <apex:facet name="header">Postboks</apex:facet>{!a.PO_Box__c}
+                                                </apex:column>
+                                          </apex:pageBlockTable>
+                                          <apex:outputPanel rendered="{!displayFlag}"><br/><br/>
+                                                  <apex:outputLabel value="{!fromRecordNumber}-{!toRecordNumber} ud af {!resultSize} Adresser" rendered="true" style="text-align:left"/><br/>                                         
+                                                  <apex:panelGrid columns="4">                                                  
+                                                        <apex:commandLink action="{!first}" >Første</apex:commandlink>
+                                                        <apex:commandLink action="{!previous}" rendered="{!hasPrevious}">Forrige</apex:commandlink>
+                                                        <apex:commandLink action="{!next}" rendered="{!hasNext}">Næste</apex:commandlink>
+                                                        <apex:commandLink action="{!last}" >Sidste</apex:commandlink>
+                                                  </apex:panelGrid>
+                                         </apex:outputPanel>
+                                    </apex:pageBlock>
+                              </apex:outputPanel>
+                         </apex:pageBlock>
+                    </apex:actionRegion>         
+              </apex:tab>
+         
+              <!-- NEW ACCOUNT TAB 
+              <apex:tab label="New Account" name="tab2" id="tabTwo">
+         
+                <apex:pageBlock id="newAccount" title="New Account" >
+         
+                  <apex:pageBlockButtons >
+                    <apex:commandButton action="{!saveAccount}" value="Save"/>
+                  </apex:pageBlockButtons>
+                  <apex:pageMessages />
+         
+                  <apex:pageBlockSection columns="2">
+                    <apex:repeat value="{!$ObjectType.Account.FieldSets.CustomAccountLookup}" var="f">
+                      <apex:inputField value="{!Account[f]}"/>
+                    </apex:repeat>
+                  </apex:pageBlockSection> 
+                </apex:pageBlock>
+         
+              </apex:tab>-->
+            </apex:tabPanel>
+        </apex:outputPanel>
+    </apex:form>
+    <script  type="text/javascript">
+        if (document.layers)
+            document.captureEvents(Event.KEYDOWN);
+        document.onkeydown =
+            function (evt) {
+                var keyCode = evt ? (evt.which ? evt.which : evt.keyCode) : event.keyCode;
+                if (keyCode == 13) { 
+                    //For enter.
+                    //Your function here.
+                    //alert('Press of enter key');
+                    doSearch();
+                }
+               /* if (keyCode == 27) { 
+                    //For escape.
+                    //Your function here.
+                }*/
+                else
+                    return true;
+            };
+    </script>
+    </html>
+</apex:page>

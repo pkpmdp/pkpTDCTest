@@ -1,0 +1,27 @@
+<apex:page standardController="Contact" extensions="ContactLoginController" cache="false" showHeader="false" sidebar="false" applyHtmlTag="false">
+<html class="cvi2015"><!--SPOC 2206 -->
+<apex:composition template="PermissionSiteTemplate">
+<apex:define name="body">
+<apex:form >
+<apex:pageMessages />
+<apex:pageBlock >
+<apex:pageBlockButtons location="bottom">
+<apex:commandButton value="Login" id="login" action="{!Login}"/>
+</apex:pageBlockButtons>
+<apex:outputText >Her taster du anlægsnr. og sikkerhedskode, som står øverst til venstre i brevet.</apex:outputText>
+<apex:pageBlockSection columns="1" >
+<apex:pageBlockSectionItem >
+<apex:outputLabel >Anlægsnr:</apex:outputLabel>
+<apex:inputText value="{!cuid}" maxlength="10"/>
+</apex:pageBlockSectionItem>
+<apex:pageBlockSectionItem >
+<apex:outputLabel >Sikkerhedskode:</apex:outputLabel>
+<apex:inputText value="{!secur}" maxlength="8"/>
+</apex:pageBlockSectionItem>
+</apex:pageBlockSection>
+</apex:pageBlock>
+</apex:form>
+</apex:define>
+</apex:composition>
+</html>
+</apex:page>

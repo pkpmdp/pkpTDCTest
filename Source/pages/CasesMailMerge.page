@@ -1,0 +1,65 @@
+<apex:page controller="clsCasesMailMerge" showheader="true" sidebar="true" tabStyle="Task" cache="true">
+  <script type="text/javascript" src="{!URLFOR($Resource.autocompletejs)}" />
+  <apex:stylesheet value="{!$Resource.autocompletecss}"/>   
+  <style>
+    .cField { width:300px; }
+  </style>
+  <script>
+    function disableautocomplete() {
+      var forms = document.getElementsByTagName('form');
+      for (var i = 0; i < forms.length; ++i) {
+        if (forms[i].setAttribute) {
+          forms[i].setAttribute('autocomplete', 'off')
+        } else {
+          forms[i].autocomplete = 'off'
+        }
+      }
+    }
+    if (window.addEventListener) {
+      window.addEventListener('load', disableautocomplete, true)
+    } else if (window.attachEvent) {
+      window.attachEvent('onload', disableautocomplete)
+    } else {
+      window.onload = disableautocomplete
+    }
+
+    function setWinRegistry() {
+        var sessionId = "{!$Api.Session_ID}";
+        var url = "{!$Api.Enterprise_Server_URL_80}" + sessionId.split("!")[0];      
+        try
+        {            
+            var xxSave =  new ActiveXObject('SFSaveActiveX.SFLogin');
+            xxSave.SaveToRegistry(url,sessionId);           
+        }
+        catch(e)
+        {
+           //alert(e);
+        }                      
+    }
+  </script>
+  <apex:pageMessages />
+  <apex:form id="VFformid">  
+    <apex:sectionHeader title="Brev" subtitle="{!$Label.Mail_Merge}" help="/help/doc/user_ed.jsp?loc=help&target=mail_sending.htm&section=Mail_Merge&showSplash=true"/>
+    <br/>
+    <apex:outputLabel value="{!$Label.Mail_Merge_Info}"/>
+    <br/><br/>
+    <!--    
+    <apex:outputLabel value="1. Choose the record to merge: "/>
+    <br/><br/>
+     -->
+    <apex:outputLabel value="{!$Label.Case_Number}: "/><apex:outputField value="{!relatedTask.WhatId}" styleClass="lookupInput"/>
+    <br/><br/>
+    <apex:outputLabel value="{!$Label.Choose_Template}: "/>    
+    <apex:inputhidden value="{!mmTemplate.Id}"/> 
+    <apex:inputField value="{!mmTemplate.Name}" id="mmname" styleClass="cField">
+      <c:autocomplete Width="300" ClassName="autocomplete" InputId="{!$Component.mmname}" AutoCompleteId="accACid" ObjectName="MailmergeTemplate" pageController="{!this}" />
+    </apex:inputField>
+    <!-- 
+    <br/>
+    <apex:outputLabel value="3. "/><apex:inputCheckbox value="{!createNewTask}"/><apex:outputLabel value="Log an activity"/>
+     -->
+    <br/>
+    <apex:commandButton onclick="setWinRegistry()" action="{!generate}" value="{!$Label.Next}" />
+    <apex:commandButton action="{!cancel}" value="{!$Label.Cancel}" immediate="true"/>
+  </apex:form>
+</apex:page>

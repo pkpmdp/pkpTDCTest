@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ApexPage xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>28.0</apiVersion>
+    <availableInTouch>false</availableInTouch>
+    <confirmationTokenRequired>false</confirmationTokenRequired>
+    <description>Backoffice Left Panel. Includes Kundelog and Permissions.</description>
+    <label>ConsoleCustomerLeftPanel_PoC_YKRB</label>
+</ApexPage>

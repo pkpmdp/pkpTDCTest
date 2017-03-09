@@ -1,0 +1,334 @@
+<apex:component >
+<style>
+.listAlign { margin: 0px 0px; display: block; } 
+.profileDisplay{display: none;}
+.topAlign {  margin:2px 0px 1px 2px; display: block;}
+.parenttopAlign {  margin:1px 0px 1px 2px; display: block;} 
+.list .headerRow TH{background-color:#676767;color:#ffffff;text-align:left;font-weight:bold;!important;}
+.list .headerStyleLeft TH{background-color:#676767;color:#ffffff;text-align:left;font-weight:bold;!important;}
+.list .headerStyleCenter TH{background-color:#676767;color:#ffffff;text-align:center;font-weight:bold;!important;}     
+.container{ overflow-x:hidden;overflow-y:auto; height:210px; width:133%; } 
+.container2{ overflow-x:hidden;overflow-y:auto; height:230px; width:133%; }
+input.btnDisabled{font-weight: normal;border-radius: 3px;font-size: 10px;font-family: 'Verdana','Geneva',sans-serif;}
+html.cvi2015 .btn{min-height: 0px;min-width: 0px;}
+
+</style>
+<apex:stylesheet value="{!URLFOR($Resource.scStyleCss,'myStyle/myStyle.css')}"/>
+
+<apex:attribute name="CableUnitName" description="This is the value for the component." type="String" required="false"/>
+
+<apex:attribute name="PortalBrugerRole" description="This is the value of Bruger Role populating from custom setting in component." type="String" required="false"/>
+
+<script type="text/javascript"> 
+var changePortalBrugerRole = '{!JSENCODE(PortalBrugerRole)}';
+var cableunitnumber = '{!$CurrentPage.parameters.cableunitnumber}';
+var accountId = '{!$CurrentPage.parameters.accountId}';
+var dataSyncLogId = '{!$CurrentPage.parameters.dataSyncLogId}';
+var userProfile  = '{!$Profile.Name}';
+var contactRoleName = '{!$CurrentPage.parameters.loggedInUserRoleName}';
+var portalAdminUser = '{!$CurrentPage.parameters.portalAdminUser}';
+
+function checkProfile(){
+   //  alert('inside checkprofile');
+  //   var newURL;
+ //    newURL = window.location.protocol + "//" + (window.location.host).replace("//","/");
+     var exURL;
+//  var newStr = 'selvbetjening';
+        var newURL = window.location.protocol + "//" + (window.location.host).replace("//","/")+'{!$Site.Prefix}';
+        //$("#leftnavigation").prepend('<div style="padding:8px;" ><b> Kundenavn</b> <br/><br/>'+cableName+'</div>');
+        //var checkUrl = window.location.href;
+        /*if(checkUrl.indexOf(newStr) != -1){
+            newURL = window.location.protocol + "//" + (window.location.host).replace("//","/") + "/selvbetjening";
+        }else{
+            newURL = window.location.protocol + "//" + (window.location.host).replace("//","/");
+        }*/
+     setParentMenu();
+     //alert('role is :#'+contactRoleName+'#');
+     var profileList=document.getElementById('productnavigation').childNodes;
+     
+     for (var p=0; p < profileList.length; p++){
+        var listcount = 0;
+        // alert('profileList[p].nodeName '+profileList[p].nodeName);
+         var parentList = profileList[p].childNodes;
+         for(var q=0; q<parentList.length; q++)
+             {
+           //  alert('parentList[q].nodeName '+parentList[q].nodeName);
+             var childList = parentList[q].childNodes;
+           //  alert('childList '+childList[0].nodeName);
+            
+        if(childList[0].nodeName=='UL'){
+                  var mUL=childList[0].childNodes;
+                  for (var i=0; i < mUL.length; i++){
+                     // alert('mUL[i].nodeName '+mUL[i].nodeName);
+                     if(mUL[i].nodeName == 'LI' ){
+                           // mUL[i].className='listAlign';
+                            if(contactRoleName != null || contactRoleName != ''){
+                                   if(userProfile  != portalAdminUser && i == 1 && contactRoleName == changePortalBrugerRole) {
+                                     //  listcount = listcount + 1;
+                                      mUL[i].className+=' profileDisplay';
+                                   }
+                                   listcount = listcount + 1;
+                                   var mA = mUL[i].childNodes;
+                                   for(a=0; a< mA.length; a++){
+                                   var mB = mA[a].childNodes;
+                                      switch(listcount){
+                                       case 1 : 
+                                              exURL = newURL + '/apex/ViewCableUnitsHomePage';
+                                              mA[a].setAttribute('href',exURL);
+                                              break;
+                                       case 2 : 
+                                             exURL = newURL + '/apex/ManagePortalUsersPage';
+                                             mA[a].setAttribute('href',exURL);
+                                             break;
+                                        case 3 : 
+                                             exURL = newURL + '/apex/EditContactDispatcherPage?loggedInUserRoleName='+ contactRoleName;
+                                             mA[a].setAttribute('href',exURL);
+                                             break;
+                                        case 4 : 
+                                             exURL = newURL + '/secur/logout.jsp';
+                                            // exURL = {!$Site.Prefix} + '/secur/logout.jsp';
+                                             mA[a].setAttribute('href',exURL);
+                                            break;   
+                                   }
+       
+                                   }
+                             }
+                       }
+               }    }
+          }
+   }
+    
+ }
+function setParentMenu(){
+    //alert('In setParentMenu');
+    //alert(document.getElementById('inunion'));
+   var myParentlist=document.getElementById('inunion');
+   if(myParentlist != null ){
+       var myChildlist = myParentlist.childNodes;
+       for (p=0; p<myChildlist.length; p++){
+             var mP=myChildlist[p].childNodes;
+            for (j=0; j<mP.length; j++){
+                var mS=mP[j].childNodes;
+                if(mP[j].nodeName=="LI"){
+                  mP[j].className='parenttopAlign ';
+                }
+            }
+        }
+        }
+}
+    //Spoc-2030
+    /*
+function insertAfter( referenceNode, newNode )
+{   //alert('Insert after called');
+    referenceNode.parentNode.insertBefore( newNode, referenceNode.nextSibling );
+    //referenceNode.parentNode.insertBefore( newNode, referenceNode.lastChild.previousElementSibling.lastChild.nextSibling );
+}*/
+//Spoc-2030 end
+function changeLink(){
+    // alert('In changeLink');
+    checkProfile();
+    
+    setParentMenu();    
+    
+    var cableName ='{!JSENCODE(CableUnitName)}';
+    //alert('cableName  '+cableName);
+    var theParent = document.getElementById('leftnavigation');
+    //alert('theparen '+theParent);
+    if(theParent != null) {
+        var mylist=document.getElementById('leftnavigation').childNodes;
+        var newURL = window.location.protocol + "//" + (window.location.host).replace("//","/") + '{!$Site.Prefix}';
+        //$("#leftnavigation").prepend('<div style="padding:8px;" ><b> Kundenavn</b> <br/><br/>'+cableName+'</div>');
+        var divIdName = document.createElement("div");
+        divIdName.style.padding = "8px"; 
+        divIdName.setAttribute("align","left");
+        divIdName.setAttribute("id","cableDiv");
+        
+         divIdName.innerHTML = '<br/><b>'+ 'Kundenavn'+ '</b><br/>'+ cableName +'<br/> Kundenr. '+cableunitnumber+'<br/>';
+
+        //divIdName.Id = 'cableDiv1';
+        // append divIdName to the end of theParent
+        theParent.appendChild(divIdName);
+        theParent.insertBefore(divIdName, theParent.firstChild);
+        //alert('**'+);
+        //Code for spoc-2030
+        /*
+        var linkDiv=document.createElement("li");
+        //var linkDiv=document.createElement("ul");
+        linkDiv.style.padding = "8px"; 
+        linkDiv.setAttribute("align","left");
+        linkDiv.setAttribute("id","formDiv");
+        //linkDiv.setAttribute("class","vnav");
+        linkDiv.setAttribute("class","listAlign");
+        linkDiv.setAttribute("height","30px");
+        //linkDiv.innerHTML='<li ><a style="text-align:left" href='+newURL+'/apex/YouSee_O_customers_W2L_form?dataSyncLogId='+dataSyncLogId+ '&loggedInUserRoleName='+contactRoleName+'&cableunitnumber='+cableunitnumber+'> Register O-end-customers </a></li>'
+        //linkDiv.innerHTML='<a id="someid" onClick=" this.style.color("black"); " style="text-align:left :link {background: black}" href='+newURL+'/apex/YouSee_O_customers_W2L_form?dataSyncLogId='+dataSyncLogId+ '&loggedInUserRoleName='+contactRoleName+'&cableunitnumber='+cableunitnumber+'><b> Registrer dine medlemmer </b></a>'
+        linkDiv.innerHTML='<a id="someid" style="text-align:left :link; color: black; " href='+newURL+'/apex/YouSee_O_customers_W2L_form?dataSyncLogId='+dataSyncLogId+ '&loggedInUserRoleName='+contactRoleName+'&cableunitnumber='+cableunitnumber+'><b> Registrer medlemmer </b></a>'
+        //linkDiv.innerHTML='<a href='+newURL+'/apex/YouSee_O_customers_W2L_form?cableunitnumber='+cableunitnumber+ '&loggedInUserRoleName='+contactRoleName '> Form Link </a>
+        theParent.appendChild(linkDiv);
+        
+        insertAfter(theParent.lastChild, linkDiv); 
+        //Code ends for sppoc-2030 
+        
+        //Code starts for spoc- 2104
+        var linkSubmittedLeads=document.createElement("li");
+        linkSubmittedLeads.style.padding = "8px"; 
+        linkSubmittedLeads.setAttribute("align","left");
+        linkSubmittedLeads.setAttribute("id","submittedLeadsDiv");
+        linkSubmittedLeads.setAttribute("class","listAlign");
+        linkSubmittedLeads.setAttribute("height","30px");
+        //linkSubmittedLeads.innerHTML='<a id="submittedLeadsid" onClick=" this.style.color("black"); " style="text-align:left :link {background: black}" href='+newURL+'/apex/YouSee_O_customers_submitted_leads_form?dataSyncLogId='+dataSyncLogId+ '&loggedInUserRoleName='+contactRoleName+'&cableunitnumber='+cableunitnumber+'><b> View Submitted Leads </b></a>'
+        linkSubmittedLeads.innerHTML='<a id="submittedLeadsid"  style="text-align:left :link; color: black;" href='+newURL+'/apex/YouSee_O_customers_submitted_leads_form?dataSyncLogId='+dataSyncLogId+ '&loggedInUserRoleName='+contactRoleName+'&cableunitnumber='+cableunitnumber+'><b> Medlemmer under registrering </b></a>'
+        theParent.appendChild(linkSubmittedLeads);
+        
+        insertAfter(theParent.lastChild, linkSubmittedLeads); 
+        //Code ends for spoc- 2104
+        
+        //Code starts for spoc- 2104
+        var linkOCustomers=document.createElement("li");
+        linkOCustomers.style.padding = "8px"; 
+        linkOCustomers.setAttribute("align","left");
+        linkOCustomers.setAttribute("id","oCustomersDiv");
+        linkOCustomers.setAttribute("class","listAlign");
+        linkOCustomers.setAttribute("height","30px");
+        //linkSubmittedLeads.innerHTML='<a id="submittedLeadsid" onClick=" this.style.color("black"); " style="text-align:left :link {background: black}" href='+newURL+'/apex/YouSee_O_customers_submitted_leads_form?dataSyncLogId='+dataSyncLogId+ '&loggedInUserRoleName='+contactRoleName+'&cableunitnumber='+cableunitnumber+'><b> View Submitted Leads </b></a>'
+        linkOCustomers.innerHTML='<a id="oCustomersid"  style="text-align:left :link; color: black;" href='+newURL+'/apex/YouSee_O_customers_form?dataSyncLogId='+dataSyncLogId+ '&loggedInUserRoleName='+contactRoleName+'&cableunitnumber='+cableunitnumber+'><b> Alle medlemmer </b></a>'
+        theParent.appendChild(linkSubmittedLeads);
+        
+        insertAfter(theParent.lastChild, linkOCustomers); */
+        //Code ends for spoc- 2104
+        //Code for spoc-2124
+     /*   function insertAfter( referenceNode, newNode )
+        {   //alert('Insert after called');
+            referenceNode.parentNode.insertBefore( newNode, referenceNode.nextSibling );
+            //referenceNode.parentNode.insertBefore( newNode, referenceNode.lastChild.previousElementSibling.lastChild.nextSibling );
+        }
+        
+        var linkDiv=document.createElement("li");
+        //var linkDiv=document.createElement("ul");
+        linkDiv.style.padding = "8px"; 
+        linkDiv.setAttribute("align","left");
+        linkDiv.setAttribute("id","formDiv");
+        //linkDiv.setAttribute("class","vnav");
+        linkDiv.setAttribute("class","listAlign");
+        linkDiv.setAttribute("height","30px");
+        //linkDiv.innerHTML='<li ><a style="text-align:left" href='+newURL+'/apex/YouSee_O_customers_W2L_form?dataSyncLogId='+dataSyncLogId+ '&loggedInUserRoleName='+contactRoleName+'&cableunitnumber='+cableunitnumber+'> Register O-end-customers </a></li>'
+        //linkDiv.innerHTML='<a id="someid" onClick=" this.style.color("black"); " style="text-align:left :link {background: black}" href='+newURL+'/apex/YouSee_O_customers_W2L_form?dataSyncLogId='+dataSyncLogId+ '&loggedInUserRoleName='+contactRoleName+'&cableunitnumber='+cableunitnumber+'><b> Registrer dine medlemmer </b></a>'
+        linkDiv.innerHTML='<a id="someid" style="text-align:left :link; color: black; " href='+newURL+'/apex/scYousee_Store_Links_New?dataSyncLogId='+dataSyncLogId+ '&loggedInUserRoleName='+contactRoleName+'&cableunitnumber='+cableunitnumber+'><b> Links til egen hjemmeside </b></a>'
+        //linkDiv.innerHTML='<a href='+newURL+'/apex/YouSee_O_customers_W2L_form?cableunitnumber='+cableunitnumber+ '&loggedInUserRoleName='+contactRoleName '> Form Link </a>
+        theParent.appendChild(linkDiv);
+        
+        insertAfter(theParent.lastChild, linkDiv); */
+        //Code ends for sppoc-2124
+        
+        //alert('mylist '+mylist);
+        var listCount=0;
+        var listCount1=0;
+        for (i=0; i<mylist.length; i++){ // 3 
+            var mG=mylist[i].childNodes;//1,0,5//ul
+            for (j=0; j<mG.length; j++){//
+                //alert('Nodename '+mG[j].nodeName);
+                    var mS=mG[j].childNodes;
+                     if(mG[j].nodeName=="LI"){
+                     //alert('LI Loop ');
+                           listCount = listCount + 1;
+                          // alert('ListCount '+listCount);
+                           mG[j].className="listAlign";
+                     }
+                 for (k=0; k<mS.length; k++){//span, ul
+                 //alert('Nodename '+mS[k].nodeName);
+                     var mA=mS[k].childNodes;
+                        /*var href = window.location.href; 
+                        if(href.indexOf('CableUnitdetailsPage') == -1){
+                           listCount = 6;
+                        }*/
+                     
+                        for (a=0; a<mA.length; a++){// a, li
+                       // alert('Nodename '+mA[a].nodeName);
+                            /*childListCount = 0 
+                             if(mA[a].nodeName=="LI"){
+                                 childListCount = childListCount + 1;
+                                 mA[a].className="listAlign";
+                                 var mla=mA[a].childNodes;
+                                 
+                             }*/
+                            /*  if(mA[a].nodeName=="LI"){
+                                 listCount = listCount + 1;
+                                 mA[a].className="listAlign";
+                                 
+                            }*/
+                            switch(listCount)
+                             {                              
+                                case 1 :
+                                    //alert('newURL%% 1'+newURL);
+                                     //alert('hi');
+                                     mA[a].setAttribute('href',newURL + '/apex/ViewAddressesForInstallationsPage2411?cableunitnumber='+cableunitnumber + '&dataSyncLogId='+ dataSyncLogId +'&accountId='+ accountId +'&loggedInUserRoleName='+ contactRoleName);
+                                     mA[a].setAttribute('style', 'display: block; !important;'); 
+                                     mA[a].setAttribute('Id','shifttvpakkeID');
+                                    break;
+                                case 2 :
+                                   mA[a].setAttribute('href', newURL + '/apex/ViewInvoiceGeneral?cableunitnumber='+cableunitnumber + '&dataSyncLogId='+ dataSyncLogId +'&accountId='+ accountId +'&loggedInUserRoleName='+ contactRoleName);
+                                     //mA[a].setAttribute('style', 'display: none'); // added to hide "Se konti og fakturaer" link
+                                   
+                                     //alert('newURL%% 2'+newURL);
+                                   break;
+                                case 3 :
+                                    mA[a].setAttribute('href', newURL + '/apex/ViewAgreementsPage?cableunitnumber='+cableunitnumber + '&dataSyncLogId='+ dataSyncLogId +'&accountId='+ accountId +'&loggedInUserRoleName='+ contactRoleName);
+                                   // alert('newURL%% 3'+newURL);
+                                    break;
+                                case 4 :
+                                    mA[a].setAttribute('href', newURL + '/apex/ManageContactsPage?cableunitnumber='+cableunitnumber + '&dataSyncLogId='+ dataSyncLogId +'&accountId='+ accountId +'&loggedInUserRoleName='+ contactRoleName);
+                                    //alert('newURL%% 4'+newURL);    
+                                    break;
+                                case 5 :
+                                     mA[a].setAttribute('href', newURL + '/apex/viewYouseeContactPersonPage?cableunitnumber='+cableunitnumber+ '&dataSyncLogId='+ dataSyncLogId +'&accountId='+ accountId +'&loggedInUserRoleName='+ contactRoleName);
+                                     mA[a].setAttribute('Id','contactPerson');
+                                     //alert('newURL%% 5'+newURL);
+                                     break;
+                                case 6 :
+                                     var href = mA[a].getAttribute('href');
+                                     mA[a].setAttribute('href', newURL + '/apex/Yousee_O_customers_W2L_form?cableunitnumber='+cableunitnumber+ '&dataSyncLogId='+ dataSyncLogId +'&accountId='+ accountId +'&loggedInUserRoleName='+ contactRoleName);
+                                   //added to set the href node of the Medlemsregistrering child links
+                                     if(mA[a].nodeName=="LI"){
+                                 listCount1 = listCount1 + 1;
+                                 mA[a].className="listAlign";
+                                        }
+                                     
+                                     switch(listCount1)
+                             { 
+                                case 1:
+                                     var mL=mA[a].childNodes;
+                                     // var href = mL[0].getAttribute('href');
+                                     mL[0].setAttribute('href', newURL + '/apex/Yousee_O_customers_W2L_form?cableunitnumber='+cableunitnumber + '&dataSyncLogId='+ dataSyncLogId +'&accountId='+ accountId +'&loggedInUserRoleName='+ contactRoleName);
+                                     //alert('newURL%% inner case 1'+newURL);
+                                     break;
+                                case 2:
+                                     var mL=mA[a].childNodes;
+                                     //alert('newURL%% inner case 2'+newURL);
+                                     //  var href = mL[0].getAttribute('href');
+                                     mL[0].setAttribute('href', newURL + '/apex/YouSee_O_customers_submitted_leads_form?cableunitnumber='+cableunitnumber + '&dataSyncLogId='+ dataSyncLogId +'&accountId='+ accountId +'&loggedInUserRoleName='+ contactRoleName);
+                                     break;
+                                     }
+                                     break;
+                                 case 7 :
+                                     //var href = mA[a].getAttribute('href');
+                                     //alert('case9');
+                                     //alert('newURL%% 7'+newURL);  
+                                     mA[a].setAttribute('href', newURL + '/apex/scYousee_Store_Links_New?dataSyncLogId='+dataSyncLogId+ '&loggedInUserRoleName='+contactRoleName+'&cableunitnumber='+cableunitnumber+'&accountId='+ accountId );
+                                     
+                                     break;
+                                
+                               /*default:
+                                    document.getElementById("cableDiv").setAttribute("style","color:#ff22ff");*/
+                            }
+                            
+                            
+                        }
+                    }
+                }
+            }
+       }        
+    }
+    //alert('About to call onlad');
+ document.onload = changeLink();
+</script>
+</apex:component>

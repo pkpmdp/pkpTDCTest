@@ -1,0 +1,49 @@
+<apex:page controller="clsTransferCaseController" cache="true" standardStylesheets="true" title="{!$Label.Transfer_Case_Page_Title}" action="{!initialise}">
+    <apex:sectionHeader title="{!$Label.Transfer_Case_Title}" subtitle="{!$Label.Transfer_Case_Subtitle}"/>
+    <apex:pageMessages id="pageMessagesId"/>
+    <apex:form >
+        <apex:pageBlock mode="edit" id="emailBlockId">
+            <apex:pageBlockButtons >
+                <apex:commandButton action="{!sendEmail}" value="{!$Label.Email_Send_Button}"/>
+                <apex:commandButton action="{!cancel}" value="{!$Label.Email_Cancel_Button}" immediate="true"/>
+            </apex:pageBlockButtons>
+            <apex:pageBlockSection columns="1" title="{!$Label.Email_Edit_Section}">
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="{!$Label.Email_To}" for="toFieldId"/>
+                    <apex:inputText value="{!to}" id="toFieldId" size="20"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="{!$Label.Email_Additional_To}" for="additional_to_addr"/>
+                    <apex:inputTextarea value="{!additionalto}" id="additional_to_addr" rows="2" cols="65"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="{!$Label.Email_CC}" for="cc_addr"/>
+                    <apex:inputTextarea value="{!cc}" id="cc_addr" rows="2" cols="65"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="{!$Label.Email_BCC}" for="bcc_addr"/>
+                    <apex:inputTextarea value="{!bcc}" id="bcc_addr" rows="2" cols="65"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="{!$Label.Email_Subject}" for="subjectFieldId"/>
+                    <apex:inputText value="{!subject}" id="subjectFieldId" size="70"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="{!$Label.Email_Body}" for="bodyFieldId"/>
+                    <apex:inputTextarea value="{!body}" id="bodyFieldId" rows="15" cols="93"/>
+                </apex:pageBlockSectionItem> 
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+        <apex:pageBlock mode="edit" id="attachmentsBlockId" title="{!$Label.Email_Attachments_Section}">
+            <apex:pageBlockTable value="{!attachments}" var="att" id="attTableId" >
+                <apex:column width="50" headerValue="{!$Label.Email_Att_Action_Column}">
+                    <apex:commandLink value="{!$Label.Email_Att_Delete_Action}" action="{!delAtt}" reRender="attTableId">
+                        <apex:param name="attId" value="{!att.Id}"/>
+                    </apex:commandLink>
+                </apex:column>
+                <apex:column headerValue="{!$Label.Email_Att_File_Column}" value="{!att.Name}"/> 
+                <apex:column headerValue="{!$Label.Email_Att_Size_Column}" value="{!att.BodyLength}"/> 
+            </apex:pageBlockTable> 
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

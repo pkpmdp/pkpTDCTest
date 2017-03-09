@@ -1,0 +1,12 @@
+<apex:page standardController="Account" extensions="clsAccountEditAddresses">
+    <apex:messages />
+    <apex:pageBlock >
+        <apex:pageBlockTable value="{!addresses}" var="addr" width="100%">
+            <apex:column headerValue="{!$Label.Address}" value="{!addr.fullName}"/>
+            <apex:column headerValue="{!$Label.Type}" value="{!addr.typeFull}"/>
+            <apex:column headerValue="{!$Label.From}" value="{!addr.validFrom}"/>
+            <apex:column headerValue="{!$Label.To}" value="{!addr.validTo}"/>
+            <apex:column headerValue="{!$Label.Address_Deleted}" value="{!addr.deleted}"/>
+        </apex:pageBlockTable>
+    </apex:pageBlock>
+</apex:page>

@@ -1,0 +1,48 @@
+<apex:page >
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+<script type="text/javascript">
+    var j$ = jQuery.noConflict();
+    var str;j$(document).ready(function()
+    {
+        var custObj = ''+j$(location).attr('href');var index = custObj.lastIndexOf('/');    
+        if(custObj.substring(index+1,index+4)=='001')
+        { 
+            if(
+                j$("div.bRelatedList div.listRelatedObject div.bPageBlock div.pbHeader table tbody tr td.pbTitle h3:contains('Kreditering ej tilknyttet')").length >0)
+                {
+                    var id = j$("div.bRelatedList div.listRelatedObject div.bPageBlock div.pbHeader table tbody tr td.pbTitle h3:contains('Kreditering ej tilknyttet')").attr('id'); 
+                    str = id.substring(0,id.lastIndexOf("title")-1);
+                    j$('#'+str).hide();
+                }
+                if(j$("div.bRelatedList div.listRelatedObject div.bPageBlock div.pbHeader table tbody tr td.pbTitle h3:contains('Invoice-Payments')").length >0)
+                {
+                    var id = j$("div.bRelatedList div.listRelatedObject div.bPageBlock div.pbHeader table tbody tr td.pbTitle h3:contains('Invoice-Payments')").attr('id');
+                    str = id.substring(0,id.lastIndexOf("title")-1);j$('#'+str).hide();
+                } 
+                if(j$("div.bRelatedList div.listRelatedObject div.bPageBlock div.pbHeader table tbody tr td.pbTitle h3:contains('Payment-Invoices')").length >0)
+                {
+                    var id = j$("div.bRelatedList div.listRelatedObject div.bPageBlock div.pbHeader table tbody tr td.pbTitle h3:contains('Payment-Invoices')").attr('id');
+                    str = id.substring(0,id.lastIndexOf("title")-1);
+                    j$('#'+str).hide();
+                }
+                if(j$("div.bRelatedList div.listRelatedObject div.bPageBlock div.pbHeader table tbody tr td.pbTitle h3:contains('Tilknyttet kreditering')").length >0)
+                {
+                    var id = j$("div.bRelatedList div.listRelatedObject div.bPageBlock div.pbHeader table tbody tr td.pbTitle h3:contains('Tilknyttet kreditering')").attr('id');
+                    str = id.substring(0,id.lastIndexOf("title")-1);
+                    j$('#'+str).hide();}if(j$("div.bRelatedList div.listRelatedObject div.bPageBlock div.pbHeader table tbody tr td.pbTitle h3:contains('PaymentWithDummys')").length >0)
+                    {
+                        var id = j$("div.bRelatedList div.listRelatedObject div.bPageBlock div.pbHeader table tbody tr td.pbTitle h3:contains('PaymentWithDummys')").attr('id');
+                        str = id.substring(0,id.lastIndexOf("title")-1);
+                        j$('#'+str).hide();
+                    } 
+                    if(j$("div.bRelatedList div.listRelatedObject div.bPageBlock div.pbHeader table tbody tr td.pbTitle h3:contains('InvoiceWithDummys')").length >0)
+                    {
+                        var id = j$("div.bRelatedList div.listRelatedObject div.bPageBlock div.pbHeader table tbody tr td.pbTitle h3:contains('InvoiceWithDummys')").attr('id');
+                        str = id.substring(0,id.lastIndexOf("title")-1);
+                        j$('#'+str).hide();
+                    }   
+        }   
+    });
+    </script>
+
+</apex:page>

@@ -1,0 +1,125 @@
+<apex:page controller="VideoHelpLinkCC" title="Hjælpevideo">
+<!--sopc-2291 start-->
+<apex:includeScript value="/soap/ajax/26.0/connection.js"/>
+    <apex:includeScript value="/support/console/26.0/integration.js"/>
+    <script type="text/javascript">
+        
+        window.onload = function(){
+           testOpenSubtab();
+        };
+        function testOpenSubtab() {
+            //First find the ID of the primary tab to put the new subtab in
+            sforce.console.getEnclosingPrimaryTabId(openSubtab);
+        };
+
+        var openSubtab = function openSubtab(result){
+            var primaryTabId = result.id;
+            system.debug('*******primaryTabId'+primaryTabId);
+            sforce.console.setTabTitle('VideoHelpLinks');
+        };
+        <!--spoc-2291 end-->
+        
+   </script>
+    <style>
+        .radioinput input[type="radio"]{float:left;}
+        .radioinput label{display:block;}
+    </style>
+    <apex:sectionHeader title="Hjælpevideo"> </apex:sectionHeader>
+    <apex:form >
+        
+    <script>
+    function generateURL(msgCode){
+    //alert("asd");
+        genURL(msgCode);
+       // alert('{!actimoURL}');
+    }
+        function switchMethod(param){
+            if(param == 'Switch hardware')
+                genURLSH();
+            else
+              renderSalesOptions();  
+            
+         }
+    
+     
+    function cancel(){
+       url= '/'+ '{!$CurrentPage.parameters.accId}';
+      
+
+        if (sforce.console.isInConsole()) { 
+    srcUp(url);
+} else { 
+    window.open(url,'_blank');
+}
+    }
+    </script>
+        <apex:pageBlock title="{!$Label.Sales_Event}" >
+            <apex:pageBlockButtons location="top">
+               <apex:commandButton title="Cancel" onclick="cancel();" value="{!$Label.Cancel}" rerender="hiddendiv" />
+            </apex:pageBlockButtons>
+            <div id="hiddendiv" />
+           <apex:actionFunction name="genURL" rerender="iFrameBlock" status="Framestatus" action="{!generateURL}">
+                <apex:param id="msgId" name="msgCode" value=""/>
+                    </apex:actionFunction>
+            <!--<apex:actionFunction name="genURLSH" rerender="iFrameBlockForSH,vidOptions,iFrameBlock" status="FramestatusForSH" action="{!generateURLForSwitchHardware}">
+        </apex:actionFunction>-->
+            <apex:actionFunction name="genURLSH" rerender="vidOptions,iFrameBlock,iFrameBlockForSH" status="FramestatusForSH" action="{!generateURLForSwitchHardware}">
+        </apex:actionFunction>
+        <apex:actionFunction name="renderSalesOptions" rerender="vidOptions,iFrameBlock,iFrameBlockForSH" status="status" action="{!resetShowFrame}"/>
+            <apex:selectRadio value="{!salesSelection}" styleClass="radioinput" style="width:100px;" layout="pageDirection" onclick="switchMethod(this.value);">
+              <apex:selectOptions value="{!MessageOptions}"/>
+                 </apex:selectRadio>
+                       </apex:pageBlock>
+           <apex:outputPanel id="vidOptions" >
+           
+              <apex:actionstatus id="status" startText="Please Wait..."> 
+                  <apex:facet name="stop">
+                      <apex:pageBlock rendered="{!showHeadline}" title="{!$Label.Video_Headlines}">
+                          <apex:outputPanel > 
+                              <!--<p>You have selected:</p> 
+                              <apex:outputText value="{!salesSelection}"/> 
+                              <apex:selectRadio value="{!selectedHeadline}" styleClass="radioinput" style="width:350px;" layout="pageDirection">
+                                 <apex:selectOptions value="{!PopulateSalesEventNames}"/>
+                              </apex:selectRadio> -->
+                              <apex:repeat value="{!VMList}" var="vm">
+                                 <div>
+                                      <input type="radio" value="{!vm.Message_Id__c}" title="{!vm.Help_Tips__c}" id="{!vm.id}" name="vmRadio" onclick="generateURL(this.value);"/>
+                                      <label for="{!vm.id}" title="{!vm.Help_Tips__c}" >{!vm.Headline_on_video__c}</label>
+                                 </div>  
+                              </apex:repeat>
+                              
+                          </apex:outputPanel> 
+                      </apex:pageBlock>
+                  </apex:facet> 
+              </apex:actionstatus>
+                          
+           </apex:outputPanel> 
+       
+       <apex:outputPanel id="iFrameBlock">
+        <apex:actionstatus id="Framestatus" startText="Please Wait...">
+        <apex:facet name="stop"> 
+           <apex:pageBlock rendered="{!showFrame}" title="{!$Label.Send_Video}">            
+                <apex:outputPanel layout="block" id="test">
+                    <apex:iframe src="{!actimoURL}" id="theFrame" height="400" scrolling="true"/>
+                </apex:outputPanel>                
+            </apex:pageBlock>
+         </apex:facet>  
+        </apex:actionstatus> 
+      </apex:outputPanel>
+       
+        
+           <apex:outputPanel id="iFrameBlockForSH">
+        <apex:actionstatus id="FramestatusForSH" startText="Please Wait...">
+        <apex:facet name="stop"> 
+           <apex:pageBlock rendered="{!showFrame_SH}" title="{!$Label.Switch_hardware}">            
+                <apex:outputPanel layout="block" id="test">
+                    <apex:iframe src="{!actimoURL_SH}" id="theFrameForSH" width="600" height="780"/>
+                </apex:outputPanel>                
+            </apex:pageBlock>
+         </apex:facet>  
+        </apex:actionstatus> 
+      </apex:outputPanel>
+        
+ 
+    </apex:form>    
+</apex:page>

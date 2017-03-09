@@ -1,0 +1,41 @@
+<apex:page controller="ViewAddressesForInstallationsController2" showHeader="false" sidebar="false" applyHtmlTag="false">
+<html class="cvi2015"><!--spoc 2206-->
+    <script type="text/javascript" src="{!siteCoreUrl}/sitecore/content/data/export/export.aspx?itemguid={59DE8AFC-9FE8-40A1-8323-9DA9602F870A}&functions=true"></script>
+<body id="servicepage">
+<apex:form >
+<!-- Old one<script type="text/javascript" src="https://yousee.dk/sitecore/content/data/export/export.aspx?itemguid={6BB73624-FD1A-47A3-B2E5-C366F1D4A0B9}&amp;functions=true"></script> -->
+<script type="text/javascript">printHeader();</script>
+<script type="text/javascript">printTopMenu();</script>
+<script type="text/javascript">printContentAreaBegin();</script>
+<c:SCLinksComponent CableUnitName="{!cableUnitName}" PortalBrugerRole="{!portalBrugerRole}" />
+     <apex:outputPanel >
+            <div class="bullets">
+                <ul>
+                     <li><apex:outputText value="{!$Label.SC_ChangeTvPackagesReceiptLabel}"/></li>
+                </ul>
+            </div>
+     
+     </apex:outputPanel>
+         <apex:outputLabel value=""/>
+        <apex:pageblock id="packageList">
+            
+            <apex:stylesheet value="{!URLFOR($Resource.scrowOddEvenStyle)}"/>
+                   <apex:pageBlockTable width="100%" value="{!finalInstallations}" var="obj" rowClasses="even,odd" border="0"> 
+                        
+                        <apex:column headervalue="Adresse" value="{!obj.formattedAddress}"  width="30%"/>
+                        <apex:column headervalue="Nuv. tv-pakke" value="{!obj.CurrentProductName}" width="15%" rendered="{!NOT(ISNULL(obj.CurrentProductName))}"/>  
+                        <apex:column headervalue="Nuv. tv-pakke" value="{!obj.CurrentProductName}" width="15%" rendered="{!ISNULL(obj.CurrentProductName)}"/>
+                        <!-- SF-2905 START -->
+                        <apex:column headerValue="Tv-pakke" headerClass="headerStyle" value="{!obj.tvpackage}" width="15%" />
+                        <apex:column headerValue="Ønsket ikrafttrædelsesdato" width="15%" headerClass="headerStyle" value="{!obj.packageChangedDate}" /> 
+                        <!-- SF-2905 END-->
+                        <apex:column headervalue="Bemærkninger" rendered="{!validateNewResident}" value="{!obj.myBebeorTxt}" width="30%"/>
+                    </apex:pageBlockTable><br/><br/> 
+                    <apex:commandButton action="{!backToViewAddressInstallationPage}" value="{!$Label.SC_Back}" styleClass="dialogbutton_grey" id="btnConfirmBack"/>
+               </apex:pageblock>
+     <script type="text/javascript">printContentAreaEnd();</script>
+<script type="text/javascript">printFooter();</script>
+</apex:form>
+</body>
+</html>
+</apex:page>

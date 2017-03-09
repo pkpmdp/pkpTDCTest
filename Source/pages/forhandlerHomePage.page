@@ -1,0 +1,132 @@
+<apex:page showHeader="false" sidebar="false" controller="DealerwebInformationController" applyHtmlTag="false">
+<html class="cvi2015"><!--spoc 2206-->
+    <head>
+    <meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+    <script src="{!$Resource.jQuery}"></script>
+</head>
+<style> 
+ .fontVerdana{ font-family: 'Verdana'; }
+ 
+</style>  
+<apex:form rendered="{!$Label.DE_Login_Access}">
+    <center>
+    <apex:image url="{!$Resource.DW_Maintenance_Image_2}" width="400" height="400"/>
+        <br></br>
+    <apex:outputText style="color: #629E00;font-size: large;" value="{!$Label.DW_Maintenance_message}">
+        
+    </apex:outputText>
+    <br></br>
+    <a class="dialogbutton_orange Right" href="/secur/logout.jsp" style="position: relative; left: -15px;"><span>Back</span></a>
+    </center>
+    </apex:form>
+<apex:form rendered="{! If($Label.DE_Login_Access =='False' ,true,false) }">
+    <script type="text/javascript" src="https://yousee.dk/sitecore/content/data/export/export.aspx?itemguid={F545894B-61F9-4C9D-BC1C-833B7DB0853F}&functions=true" > </script>
+
+<script type="text/javascript" src="https://yousee.dk/sitecore/content/data/export/export.aspx?itemguid={F545894B-61F9-4C9D-BC1C-833B7DB0853F}&functions=true" > </script>
+
+<!--<script type="text/javascript" src="https://stage.yousee.dk/sitecore/content/data/export/export.aspx?itemguid={F545894B-61F9-4C9D-BC1C-833B7DB0853F}&functions=true" > </script>
+-->
+<!-- Added for DW 750 -->
+<c:TopMenuComponent ></c:TopMenuComponent>
+<body>
+<script type="text/javascript">printHeader();</script>
+<script type="text/javascript">printTopMenu();</script>
+<script type="text/javascript">printContentAreaBegin();</script>
+<script>var infoList='';
+var responseValue;
+var jsonResponse = {!dealerGoods}; 
+var defectAndMissingHardware = {!defectAndMissingHardware}; 
+var defectiveProductJsonString = {!defectAndMissingHardwareSerialNumbers};
+</script> 
+
+
+<apex:pageBlock > 
+     <apex:PageBlockSection collapsible="false" columns="1" >
+     
+        <apex:dataTable value="{!information}" var="info"  cellspacing="5" styleClass="fontVerdana">
+            <apex:facet name="header">
+                <apex:outputPanel rendered="{!youseeConferenceRecords.isConferenceActive__c}">
+                    <apex:outputText value="{!youseeConferenceRecords.textAboveUrl__c}"></apex:outputText><br></br>
+                    <apex:outputLink value="/apex/DealerWebConferenceRegister" >{!youseeConferenceRecords.youseeConferenceURL__c}</apex:outputLink><br></br>
+                    <apex:outputText value="{!youseeConferenceRecords.textBelowUrl__c}"></apex:outputText>              
+                </apex:outputPanel>    
+                
+            </apex:facet>
+            <apex:column value="{!info.Description__c}" styleclass="fontVerdana"/>
+        </apex:dataTable>
+     </apex:PageBlockSection>               
+</apex:pageBlock> 
+
+<apex:pageBlock id="pb"/>
+<apex:actionFunction action="{!redirectTOVaremodtagelsePage}" name="redirectTOVaremodtagelsePages">
+</apex:actionFunction> 
+<script>
+      document.getElementById('{!$Component.pb}').style.display = 'none';
+</script>
+<table width="100%" id="infoTable" border="1" cellpadding="0" cellspacing="5" class="list" >   
+     <script> 
+       $("#infoTable").html(infoList);
+     </script> 
+</table>    
+<br/>
+<div class="fontVerdana">
+      <span style="FONT-SIZE: 14pt"> 
+        <strong>Forhandler</strong> 
+      </span>
+      <br/>
+      {!objCommon.dealerNumber} <br></br>
+      {!objCommon.userContact.LastName} <br></br>
+      <c:DealerAddress />
+</div>
+</body>
+
+<script type="text/javascript">
+    function callToVaremodtagelsePage(){
+       var confirmAlert = false;
+       var defectiveProductSerialNumbers='';
+       if(defectiveProductJsonString != 'nope'){
+         defectiveProductSerialNumbers = defectiveProductJsonString.split('s');
+         }
+       if(jsonResponse.logistik.iTransit != undefined && jsonResponse.logistik.iTransit.length > 0){
+         for(i = 0; i < jsonResponse.logistik.iTransit.length; i++){
+           var sn = jsonResponse.logistik.iTransit[i].serienummer;
+           if(jQuery.inArray( sn, defectiveProductSerialNumbers) == -1){
+              if(jsonResponse.logistik.iTransit[i].sidstehandling != undefined){
+               var myDateInput = jsonResponse.logistik.iTransit[i].sidstehandling;
+               var myNewDate = myDateInput.split('-');
+               var dateString = myNewDate[2]+'/'+myNewDate[1]+'/'+myNewDate[0];
+               var myDate = new Date(dateString);
+               myDate.setDate(myDate.getDate()+7);
+               var currentDate = new Date();
+               if(currentDate.getDate() > myDate.getDate()){
+                   confirmAlert = true;
+                   break;
+                 }
+             }else{
+                //console.log('sidstehandling is missing in the json for the hardware '+jsonResponse.logistik.iTransit[i].serienummer);
+             }
+          }
+        }
+       }
+      
+        if(confirmAlert){
+            responseValue=confirm("Der ligger hardware på jeres lager der endnu ikke er varemodtaget – ønsker I at varemodtage nu ?");
+            if(responseValue){
+                  redirectTOVaremodtagelsePages(); 
+            }
+        }
+    }
+    if(jsonResponse.logistik != undefined){ 
+            if(jsonResponse.logistik.iTransit != undefined){    
+               if((jsonResponse.logistik.iTransit.length -defectAndMissingHardware) > 0){
+                setTimeout("callToVaremodtagelsePage()", 20);              
+            }
+        }
+    }
+    
+</script>
+<script type="text/javascript">printContentAreaEnd();</script>
+<script type="text/javascript">printFooter();</script>
+</apex:form>
+    </html>
+</apex:page>

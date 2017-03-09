@@ -1,0 +1,69 @@
+<apex:page standardController="Account" extensions="clsDriftInfoCustomer" showHeader="false" sidebar="false" cache="true">
+    <!-- SPOC-2294 diplays al drifts info -->
+<apex:includeScript value="//code.jquery.com/jquery-1.12.0.min.js"/>
+    <apex:includeScript value="https://cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js"/>
+    <apex:stylesheet value="https://cdn.datatables.net/1.10.10/css/jquery.dataTables.min.css" />
+   <script type="text/javascript">
+  j$ = jQuery.noConflict();
+var product;
+    j$(document).ready( function () {
+               product= j$('[id$="existingProductsTable"]').dataTable({
+               "paging": true,
+        		"ordering": true
+        		
+               })          
+              });
+    </script>
+    <apex:form >    
+  <apex:pageMessages />  
+  <apex:pageBlock title="Information">
+        <apex:pageBlockSection columns="2">
+            <apex:pageBlockSectionItem rendered="{!ActiveErrorsCount > 0}">
+                <apex:outputText style="padding:1px 0 1px 25px; background:url('{!URLFOR($Resource.BierDots, 'img/exc.png')}') no-repeat 0 0" value="{!$Label.BIER_ActiveErrors_Label}" />
+                <apex:outputLink id="di_type_ae" value="{!ActiveErrorsUrl}" target="{!IF(ActiveErrorsCount == 1, '_blank', '_parent')}">{!ActiveErrorsCount}</apex:outputLink>
+            </apex:pageBlockSectionItem>
+            <apex:pageBlockSectionItem rendered="{!ActiveErrorsCount == 0}">
+                <apex:outputLabel value="{!$Label.BIER_ActiveErrors_Label}" for="di_type_ae"/>
+                <apex:outputText id="di_type_ae" value="0" />
+            </apex:pageBlockSectionItem>
+            <apex:pageBlockSectionItem rendered="{!ActiveActivitiesCount > 0 && ActiveActivitiesUrl!='#'}">
+                <apex:outputText style="padding:1px 0 1px 25px; background:url('{!URLFOR($Resource.BierDots, 'img/exc.png')}') no-repeat 0 0" value="{!$Label.BIER_ActiveActivities_Label}" />
+                <apex:outputLink id="di_type_aa" value="{!ActiveActivitiesUrl}" target="{!IF(ActiveActivitiesCount == 1, '_blank', '_parent')}">{!ActiveActivitiesCount}</apex:outputLink>
+            </apex:pageBlockSectionItem>
+            <apex:pageBlockSectionItem rendered="{!ActiveActivitiesCount > 0 && ActiveActivitiesUrl=='#'}">
+                <apex:outputText style="padding:1px 0 1px 25px; background:url('{!URLFOR($Resource.BierDots, 'img/exc.png')}') no-repeat 0 0" value="{!$Label.BIER_ActiveActivities_Label}" />
+                <span onclick="document.getElementById('warn').style.display='inline'" style="text-decoration:underline">{!ActiveActivitiesCount}</span>
+                <span id = "warn" style="color:red;display:None" >{!$Label.BIER_Activity_Not_in_Bier}</span>
+            </apex:pageBlockSectionItem>
+            <apex:pageBlockSectionItem rendered="{!ActiveActivitiesCount == 0}">
+                <apex:outputLabel value="{!$Label.BIER_ActiveActivities_Label}" for="di_type_aa"/>
+                <apex:outputText id="di_type_aa" value="0" />
+            </apex:pageBlockSectionItem>
+        </apex:pageBlockSection>
+    </apex:pageBlock>  
+    <apex:pageBlock title="Drift Information">    
+    
+       <apex:inputHidden value="{!Account.AddressId__c}"/>
+              <apex:pageBlockTable value="{!existingProducts}" var="product" id="existingProductsTable" rules="rows">
+               <apex:column headerValue="{!$Label.DriftsInfo_id}" ><a href="http://www.driks.dk/?id={!product.driftInfo_id}" target="_blank">{!product.driftInfo_id}</a></apex:column>
+               <apex:column headerValue="{!$Label.DriftsInfo_Vist_intern_reference}"><a href="https://biersys.dk/fejl_melder/show.cgi?id={!product.vist_intern_reference}" target="_blank">{!product.vist_intern_reference}</a></apex:column>
+               <apex:column headerValue="{!$Label.DriftsInfo_Overskrift}"><apex:outputText value="{!product.overskrift}" escape="false"></apex:outputText></apex:column> 
+              <!-- <apex:column headerValue="KATEGORI NAVN" value="{!product.kategori_navn}" />-->
+                <apex:column headerValue="{!$Label.DriftsInfo_Produkt_navn}"><apex:outputText value="{!product.produkt_navn}" escape="false"></apex:outputText></apex:column>
+               <apex:column headerValue="{!$Label.DriftsInfo_Node}"><apex:outputText value="{!product.node}" escape="false"></apex:outputText></apex:column>
+               <apex:column headerValue="{!$Label.DriftsInfo_Sum_kunder}" value="{!product.sum_kunder}"/>
+             <!-- <apex:column headerValue="FORVENTET SLUTTID" value="{!product.forventet_sluttid}"/>-->
+              </apex:pageBlockTable>  
+    </apex:pageBlock>  
+    
+  </apex:form>
+  <script language="javascript" type="text/javascript">
+
+function popitup(url) {
+    newwindow=window.open(url,'name','height=500,width=750');
+    if (window.focus) {newwindow.focus()}
+    return false;
+}
+
+</script>
+</apex:page>

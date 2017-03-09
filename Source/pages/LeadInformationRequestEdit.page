@@ -1,0 +1,35 @@
+<apex:page standardController="Lead_Information_Request__c" extensions="LeadInformationRequestController">
+    <apex:sectionHeader title="{!$Label.CL_LeadInformationRequestEdit}"> </apex:sectionHeader>
+    <apex:form >
+        <apex:pageBlock >
+        <apex:pageMessages />
+            <apex:pageBlockButtons >
+                <apex:commandButton action="{!updateOne}" value="{!$Label.Save}"/>
+                <apex:commandButton action="{!cancel}" value="{!$Label.Cancel}"/>               
+            </apex:pageBlockButtons>
+            <apex:pageBlockSection title="Lead" columns="2"  >
+                <apex:outputField value="{!Lead_Information_Request__c.Lead__c}"/>
+                <apex:inputField required="true" value="{!Lead_Information_Request__c.Email__c}"/>
+                <apex:inputField value="{!Lead_Information_Request__c.Send__c}"/>
+                <apex:outputText value="{!Lead_Information_Request__c.Template_Name__c}"/>  
+                <apex:outputField rendered="false" value="{!Lead_Information_Request__c.Group_Template__c}"/>   
+                <apex:outputField rendered="false" value="{!Lead_Information_Request__c.Mail_Mapping__c}"/>                 
+            </apex:pageBlockSection>
+            <apex:pageBlockSection collapsible="false"  title="{!$Label.CL_EmailTemplates}" columns="2" />
+            <apex:panelGrid style="margin:5px 5px 0% 5%;  text-align:left;" cellpadding="0px" cellspacing="0px" title="{!$Label.CL_EmailTemplates}" width="100%" columns="6" id="theGrid">
+                <apex:outputText rendered="{!beforeSaleTemplates.render}" styleClass="labelCol first" value="{!$Label.CL_BeforeSale}"/>
+                <apex:selectCheckboxes label="{!$Label.CL_BeforeSale}"  value="{!beforeSaleTemplates.templates}" layout="pageDirection">
+                    <apex:selectOptions value="{!beforeSaleTemplates.items}"/>
+                </apex:selectCheckboxes>
+                <apex:outputText rendered="{!afterSaleTemplates.render}" styleClass="labelCol first" value="{!$Label.CL_AfterSale}"/>
+                <apex:selectCheckboxes label="{!$Label.CL_AfterSale}" value="{!afterSaleTemplates.templates}" layout="pageDirection">
+                    <apex:selectOptions value="{!afterSaleTemplates.items}"/>
+                </apex:selectCheckboxes>
+                <apex:outputText rendered="{!campainTemplates.render}" styleClass="labelCol first" value="{!$Label.CL_Kampagne}"/>
+                <apex:selectCheckboxes label="{!$Label.CL_Kampagne}" value="{!campainTemplates.templates}" layout="pageDirection">
+                    <apex:selectOptions value="{!campainTemplates.items}"/>
+                </apex:selectCheckboxes>       
+            </apex:panelGrid>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

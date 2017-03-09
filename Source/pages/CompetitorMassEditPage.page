@@ -1,0 +1,104 @@
+<apex:page standardController="Competitor__c" extensions="CompetitorMassEditController" sidebar="false">
+    <script>
+        function setFocusOnLoad(){  
+        }
+    </script>
+    <apex:form >
+        <!-- button commands to be linked to functions in controller -->
+        <apex:actionFunction name="rightArrow" action="{!DoSelect}" reRender="selectionBlock"/>
+        <apex:actionFunction name="leftArrow" action="{!DoUnselect}" reRender="selectionBlock"/>
+        <apex:actionFunction name="upArrow" action="{!MoveUp}" reRender="selectionBlock"/>
+        <apex:actionFunction name="downArrow" action="{!MoveDown}" reRender="selectionBlock"/>
+        <apex:sectionHeader title="{!$Label.editCompetitor}" rendered="{!isEditCmp}"/>  
+        <apex:sectionHeader title="{!$Label.newCompetitor}" rendered="{!isNewCmp}"/>  
+   
+        <apex:pagemessages />
+        <!--apex:messages /-->
+   
+        <apex:pageBlock mode="edit"> 
+    
+            <apex:pageBlockButtons location="both">
+                <apex:commandButton value="{!$Label.Save}" action="{!save}" />
+                <apex:commandButton value="{!$Label.Cancel}" action="{!cancel}"/>
+            </apex:pageBlockButtons>
+             
+            <apex:pageblockSection columns="2">  
+                
+                <apex:pageBlockSectionItem > 
+                      <apex:outputLabel id="customerLabel" value="{!$ObjectType.Competitor__c.fields.Customer__c.label}"></apex:outputLabel>
+                       <apex:outputPanel styleClass="requiredInput" layout="block">
+                            <apex:outputPanel styleClass="requiredBlock" layout="block"/>            
+                            <apex:outputField id="customerField1" value="{!cmp.Customer__c}" rendered="{!isEditCmp}"/>                      
+                            <apex:outputField id="customerField2" value="{!acc.Name}" rendered="{!isNewCmp}"/>                       
+                      </apex:outputPanel>            
+                </apex:pageBlockSectionItem>  
+                
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="{!$ObjectType.Competitor__c.fields.Competitor__c.label}"></apex:outputLabel> 
+                    <apex:actionRegion >
+                                <apex:outputPanel styleClass="requiredInput" layout="block"/>
+                                <apex:outputPanel styleClass="requiredBlock" layout="block"/>  
+                                    <!-- <apex:outputField value="{!cmp.Competitor__c}" id="competitor1" rendered="{!isEditCmp}"></apex:outputField>-->
+                                    <apex:actionRegion > 
+                                    <apex:inputField value="{!cmp.Competitor__c}" id="competitor2" required="true">                            
+                                        <!-- <apex:actionSupport event="onchange" rerender="roleBox" 
+                                                                action="{!prepareSelectBoxes}" 
+                                                                status="status" rendered="{!isNewCmp}">
+                                        </apex:actionSupport> -->                                      
+                                        <apex:actionSupport event="onchange" action="{!prepareSelectBoxes}" reRender="roleBox" status="status">
+                                        </apex:actionSupport>                                      
+                                   </apex:inputField>
+                                 </apex:actionRegion>
+                                <apex:actionstatus id="status">
+                                    <apex:facet name="start">
+                                        <div class="waitingSearchDiv" id="el_loading" style="background-color: #fbfbfb;
+                                               height: 100%;opacity:0.65;width:100%;"> 
+                                            <div class="waitingHolder" style="top: 74.2px; width: 91px;">
+                                                <img class="waitingImage" src="/img/loading.gif" title="Please Wait..." />
+                                                <span class="waitingDescription">Loading...</span>
+                                            </div>
+                                        </div>
+                                    </apex:facet>
+                            </apex:actionstatus>
+                    </apex:actionRegion>
+                </apex:pageBlockSectionItem>                 
+               
+                
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="{!$ObjectType.Competitor__c.fields.contract_expired_at_competitor__c.label}"></apex:outputLabel>          
+                    
+                    <!-- <apex:outputPanel styleClass="requiredInput" layout="block">
+                          <apex:outputPanel styleClass="requiredBlock" layout="block"/>  
+                          <apex:inputField value="{!cmp.contract_expired_at_competitor__c}"></apex:inputField>
+                    </apex:outputPanel> --> 
+                    
+                    <apex:inputField value="{!cmp.contract_expired_at_competitor__c}"></apex:inputField>
+                </apex:pageBlockSectionItem>
+                   
+             </apex:pageblockSection>            
+                
+            <apex:pageblockSection columns="1">
+                <apex:pageBlockSectionItem >   
+                    <apex:outputPanel >
+                        <apex:actionRegion >
+                            <div align="center">
+                                <c:RoleMultiSelectPicklist leftLabel="{!$Label.availbaleRoles}" 
+                                        leftOption="{!availableRoles}" 
+                                        rightLabel="{!$Label.selectedRoles}"
+                                        rightOption="{!selectedRoles}"
+                                        size="14"
+                                        width="250px"
+                                        id="roleBox"/>
+                             </div>
+                         </apex:actionRegion>
+                     </apex:outputPanel>
+                 </apex:pageBlockSectionItem>
+          </apex:pageblockSection>
+          
+           <apex:pageblockSection columns="2">
+                <apex:inputField value="{!cmp.further_information__c}"></apex:inputField>
+           </apex:pageblockSection>
+          
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

@@ -1,0 +1,959 @@
+<apex:page sidebar="false" showHeader="false" controller="DealerProductPageController3" action="{!getSearchSectionDisplayDetails}" applyHtmlTag="false" >
+   <html class="cvi2015"> <!--spoc 2206-->
+ 
+    <script type="text/javascript" src="https://yousee.dk/sitecore/content/data/export/export.aspx?itemguid={BD793F05-9B01-4210-BD63-F33431D1013A}&functions=true" > </script>
+    <!-- Added for DW 750 -->
+    <c:TopMenuComponent ></c:TopMenuComponent>
+    <script type="text/javascript">printHeader();</script>
+    <script type="text/javascript">printTopMenu();</script>
+    <script type="text/javascript">printContentAreaBegin();</script>
+    <link class="user" href="{!$Resource.SalesFlowCSS}" rel="stylesheet" type="text/css" />
+    <c:DealerComponent ></c:DealerComponent>
+    <style>
+    .leftContent2 {
+                float:left;
+                overflow:visible;
+                width:575px;
+                min-height: 600px;
+                height: auto !important;
+                height:800px;
+                max-height:1100px; 
+                }
+    .rightContent2 {
+                float:left;
+                overflow:visible;
+                width:350px;
+                min-height: 600px;
+                height: auto !important;
+                height:800px;
+                max-height:1100px;
+            }
+        .leftContent3 {float:left;width:570px;overflow:visible;min-height: 550px;height: auto !important;height: 950px;max-height:1100px;}
+        .rightContent3 {float:left;width:350px;overflow:visible;min-height: 520px;height: auto !important;height: 920px;max-height:1100px;}
+        
+    </style>
+    <script type="text/javascript">     
+        //If yousee Plus product is selected then Parse productJsonResponse for YouSee Plus
+        var kort2validated;
+        var bsxxFlag = '{!dtvtaflag}';
+        //Added for BS 
+        var freeChoiceFlag={!isFreeChoicePageFlag};   
+        var currentKundeNumber = '{!cCustInstAdd.customerNumber}';        
+        var  productJsonResponse='';
+        if('{!hardwareSelection}' == '1201504'){            
+            var bundleProductNr;    
+            productJsonResponse ={!productJsonResponse};                        
+            if(productJsonResponse['1201504'] != undefined){        
+                var bundleProdData  = productJsonResponse['1201504']['bundle-produkter'];           
+                $.each(bundleProdData, function(j){                 
+                    if(bundleProdData[j]['varenr'] !='1201505'){
+                        bundleProductNr= bundleProdData[j]['varenr'];
+                        return;
+                    }
+                });               
+            }
+        }
+        
+        var myJSONObject={!jsonResponse};   // first json call data                     
+        var selectedAbonnementerAftalenr='{!selectedAbonnementerAftalenr}';
+
+        //Check whether customer has Tvilling card or not.
+        var Tvillingkortarr = new Array();
+        var Tvillingkortobj = new Object();                    
+        Tvillingkortarr = new Array();
+        var kundeId ='';  
+        try{            
+            if('{!hardwareSelection}' == '1201601'){// if tvilling kort     
+                if({!isNewCustomer}){
+                    kundeId= '';
+                }
+                else
+                {
+                    kundeId='{!cCustInstAdd.customerNumber}'; 
+                }
+                
+                //DW -655 changes will be here
+                if(myJSONObject['kunde-data'] != undefined){
+                    var json = myJSONObject['kunde-data'].aftaler;
+                    if(json != undefined){                              
+                        $.each(json,function(i,aftalerNode){                         
+                            if(kundeId == aftalerNode.kundeid){
+                                $.each(aftalerNode.abonnementer,function(j,abonnementerNode){
+                                    if(aftalerNode.aftaletype == "dtv") {
+                                        //Code modified for Dealerweb-834
+                                        if((abonnementerNode.navn=='Tvillingkort' || abonnementerNode.navn=='Oprettelse Ekstrakort') && selectedAbonnementerAftalenr == aftalerNode.aftalenr ){
+                                            Tvillingkortobj = new Object();                                                         
+                                            Tvillingkortobj.Number=abonnementerNode.serienumre[0];
+                                            Tvillingkortobj.aftalenr=aftalerNode.aftalenr;                                                                                                                      
+                                            Tvillingkortarr.push(Tvillingkortobj); 
+                                        }
+                                    }
+                                });
+                             }
+                        });
+                     }
+                 }
+            }                                                                                         
+        }catch(err){
+           //alert("Error: on serial number page  method: "+err.description);
+        }
+    </script>
+
+    <script type="text/javascript"> 
+        var url;
+        var kundeData;
+        var arrayInit;
+        var etag;
+        var callMethod;
+        var hardwareSelectionVar = ''; 
+        var validated = false;
+        var SerialNumber;
+        var idValidated = false;
+        $("#errorBlock").html('');
+        
+        function validateSerialNumber(){
+            hardwareSelectionVar = '{!hardwareSelection}';
+            SerialNumber = document.getElementById("serialdiv").firstChild.value;
+            SerialNumber = SerialNumber.trim();
+            callMethod ='SerialNumberValidate';                 
+            if(hardwareSelectionVar == 'HDstandardboksWithCard'){
+                hardwareSelectionVar = '1218385'; // As HD Std Boks without card.
+            } 
+            validate(SerialNumber);
+        }
+        function validateTVBoxSerialNumber(){
+            //alert('In validateTVBoxSerialNumber ,ethod');
+            hardwareSelectionVar = '{!hardwareSelection}';
+            SerialNumber = document.getElementById("TvBoxdiv").firstChild.value;
+            SerialNumber = SerialNumber.trim();
+            callMethod ='TvBoxSerialNumberValidate'; 
+            validate(SerialNumber);
+        }
+        function validateKortNumber1(){     
+            hardwareSelectionVar = '{!hardwareSelection}';
+            callMethod ='Kort1Validate';
+            SerialNumber = document.getElementById("div1").firstChild.value;
+            SerialNumber = SerialNumber.trim();
+            validate(SerialNumber);     
+        }
+          
+        function validateKortNumber2(){                 
+            hardwareSelectionVar = '{!hardwareSelection}';
+            SerialNumber = document.getElementById("div2").firstChild.value;    
+            SerialNumber = SerialNumber.trim();     
+            callMethod ='Kort2Validate';
+            if(hardwareSelectionVar == 'HDstandardboksWithCard'){
+               hardwareSelectionVar = '1201505'; // as You See Kort
+            }
+            validate(SerialNumber);         
+        }
+    
+        function validateAdditionalTVKortNumber1(){
+        
+            hardwareSelectionVar = '{!hardwareSelection}';      
+            callMethod ='AdditionalKortNumber1Validate';
+            SerialNumber = document.getElementById("ETvdiv1").firstChild.value; 
+            SerialNumber = SerialNumber.trim(); 
+            hardwareSelectionVar = '1201601'; // tvilling kort
+              
+            validate(SerialNumber);     
+         }
+    
+        function validateAdditionalTVKortNumber2(){  
+            hardwareSelectionVar = '{!hardwareSelection}';
+            callMethod ='AdditionalKortNumber2Validate';
+            SerialNumber = document.getElementById("ETvdiv2").firstChild.value;
+            SerialNumber = SerialNumber.trim();
+            hardwareSelectionVar = '1201601'; // tvilling kort      
+                              validate(SerialNumber);     
+
+                   }
+        
+        /* DW-844 modifications START */
+        
+        function validateAdditionalTVKortNumber3(){
+            hardwareSelectionVar = '{!hardwareSelection}';      
+            callMethod ='AdditionalKortNumber3Validate';
+            SerialNumber = document.getElementById("ETvdiv3").firstChild.value; 
+            SerialNumber = SerialNumber.trim(); 
+            hardwareSelectionVar = '1201601'; // tvilling kort      
+                        validate(SerialNumber);     
+        }
+        
+        function validateAdditionalTVKortNumber4(){
+            hardwareSelectionVar = '{!hardwareSelection}';      
+            callMethod ='AdditionalKortNumber4Validate';
+            SerialNumber = document.getElementById("ETvdiv4").firstChild.value; 
+            SerialNumber = SerialNumber.trim(); 
+            hardwareSelectionVar = '1201601'; // tvilling kort      
+            validate(SerialNumber);     
+        }
+        
+        /* DW-844 modifications END */
+        
+        String.prototype.trim = function() {
+            return this.replace(/^\s+|\s+$/g, "");
+        };
+        
+        function validate(SerialNumber){    
+            url=getURL();
+            //alert('url*******'+url);
+          if(url != undefined){
+               numberValidate(SerialNumber);
+               if(validated){
+                    kundeData = JSON.stringify(myJSONObject['kunde-data']);
+                    arrayInit = myJSONObject['array-init'];
+                    etag = myJSONObject['ETag'];
+                    callValidateKort2(url, etag, kundeData, arrayInit,callMethod);
+                } 
+            }else{
+              $("#errorBlock").html('Denne operation er ikke tilladt.');
+              return false;
+            } 
+        }
+
+        function numberValidate(numberStr){
+            $("#errorBlock").html('');
+                                
+            if(numberStr.length > 0 && numberStr != '' ){
+                // if serial number, else validate for kort no 
+                // serial number must be of 12 digits and kort number must be of 11 digits.
+                if(callMethod == 'SerialNumberValidate'){
+                    if(numberStr.length == 12 && !(isNaN(numberStr))){
+                        validated = true;
+                    }else{
+                        validated = false; 
+                        $("#errorBlock").html('serienummer skal være på 12 cifre.');
+                    }
+                }//DW-880 validation for TVBOX
+                else if(callMethod == 'TvBoxSerialNumberValidate'){ 
+                //alert('inside teh else if----'+callMethod);
+                    if(numberStr.length == 30){
+                        var Exp = /((^[0-9]+[a-z]+)|(^[0-9]+)|(^[a-z]+)|(^[a-z]+[0-9]+))+[0-9a-z]+$/i;
+                        if(!numberStr.match(Exp)){
+                            validated = false; 
+                            $("#errorBlock").html('Indtast venligst et alfanumerisk nummer.');
+                        }else{
+                            validated = true;       
+                        } 
+                    }else if (numberStr.length < 30 || numberStr.length > 30){
+                        validated = false; 
+                        $("#errorBlock").html('serienummer skal være på 30 cifre.');
+                    }else{
+                        validated = false; 
+                        $("#errorBlock").html('Indtast venligst et gyldigt nummer.');           
+                    }
+                }
+                else{
+                    if(numberStr.length == 11 && !(isNaN(numberStr))){
+                        validated = true;
+                        // incase of tvilling card ..value in both boxes should be different.
+                        if(hardwareSelectionVar == '1201601' && (callMethod =='Kort1Validate' || callMethod =='Kort2Validate')){
+                            // in case of tvilling kort , value in both the boxes should not be same.
+                            if(document.getElementById("div1").firstChild.value == document.getElementById("div2").firstChild.value){
+                                validated = false;
+                                $("#errorBlock").html('Kort serienummer allerede er valgt.');
+                            }
+                        }
+                        // if additional tvilling kort is selected
+                        // in case of Additional tvilling kort , value in both the boxes should not be same.
+                        // Added additional conditions for DW-844
+                        if(callMethod =='AdditionalKortNumber2Validate'){
+                            if(document.getElementById("ETvdiv1").firstChild.value == document.getElementById("ETvdiv2").firstChild.value){
+                                validated = false;
+                                $("#errorBlock").html('Kort serienummer allerede er valgt.');
+                            }
+                        }
+                        
+                        if(callMethod =='AdditionalKortNumber3Validate'){
+                            if((document.getElementById("ETvdiv1").firstChild.value == document.getElementById("ETvdiv3").firstChild.value)
+                             || (document.getElementById("ETvdiv2").firstChild.value == document.getElementById("ETvdiv3").firstChild.value)){
+                                validated = false;
+                                $("#errorBlock").html('Kort serienummer allerede er valgt.');
+                            }
+                        }
+                        
+                        if(callMethod =='AdditionalKortNumber4Validate'){
+                            if((document.getElementById("ETvdiv1").firstChild.value == document.getElementById("ETvdiv4").firstChild.value)
+                             || (document.getElementById("ETvdiv2").firstChild.value == document.getElementById("ETvdiv4").firstChild.value)
+                             || (document.getElementById("ETvdiv3").firstChild.value == document.getElementById("ETvdiv4").firstChild.value)){
+                                validated = false;
+                                $("#errorBlock").html('Kort serienummer allerede er valgt.');
+                            }
+                        }
+                    }else{
+                        validated = false;
+                        $("#errorBlock").html('Kort nummer skal være på 11 cifre.');
+                                                                
+                    }                               
+                }
+            }
+        }
+
+        function getURL(){    
+            var url='';
+            var type='';
+            //alert('GetURL **** ');
+            //'1201601'- tvilling kort,
+            //'1201505' - YouSee Kort, 1201504 - yousee plus
+            // DEMO HD-Standardboks-1218385
+            if(hardwareSelectionVar == '1218385'){//HDstdBoks
+                type = 'dtv-eng-valg';
+            }else if(hardwareSelectionVar == '1201505' || hardwareSelectionVar == '1201504' || hardwareSelectionVar == '1201508' ||hardwareSelectionVar == '1201509'){ // yousee Kort or Yousee plus || Added 1201508,1201509 for DW-880
+                type = 'dtv-ga-valg';
+            }
+            else if(hardwareSelectionVar == '1201507') //Added 1201507 for DW-880
+                {
+                    type = 'dtv';
+                }
+                else{
+                type = 'dtv-ta-valg'; // '1201601'- tvilling kort, and rest other
+                            }
+                              if(type != ''){
+                try{   
+                    if(hardwareSelectionVar != '1201507')
+                    {
+                            //alert('type'+type);
+                            if(myJSONObject[type] != undefined){
+                            //console.log(' myJSONObject[type]***'+ myJSONObject[type]);
+                            var json = myJSONObject[type].varer;               
+                            if(json != undefined){                              
+                                $.each(json,function(i,varerNode){ 
+                                    if(varerNode.varenr==hardwareSelectionVar){
+                                        //alert('varerNode.links->'+varerNode.links);
+                                        if(varerNode.links == undefined){
+                                            if(hardwareSelectionVar == '1201505'){
+                                            
+                                                if(myJSONObject['kunde-data'] != undefined)
+                        {
+                        
+                            if(myJSONObject['kunde-data'].valgt!= undefined)
+                            {
+                                var valgtNode = myJSONObject['kunde-data'].valgt;
+                                
+                                $.each(valgtNode,function(i,valgtNodesingle)
+                                {
+                                    if(valgtNodesingle.aftaletype=='dtv')
+                                    {
+                                       // alert('valgtNodesingle.aftaletype==dtv');
+                                        var json1 = valgtNodesingle.varer;
+                                        $.each(json1,function(i,varerNode)
+                                        {
+                                       // alert('varerNode.varenr***'+varerNode.varenr);
+                                            if(varerNode.varenr == hardwareSelectionVar)
+                                            {
+                                                $.each(varerNode.links,function(j,linksNode){
+                                                //alert('linksNode.href***'+linksNode.href);
+                                                    if( linksNode.href.indexOf('serienr') != -1)
+                                                    {
+                                                        
+                                                        url = linksNode.href;
+                                                       // alert('*****url****'+url);
+                                                        
+                                                    }
+                                                });
+                                            }
+                                        });
+                                    }
+                                });
+                                //alert('**********url*****'+url);
+                                return url;                       
+                             }
+                         }
+                                            }
+                                        }
+     //alert('varerNode.position->'+i);
+
+                                        $.each(varerNode.links,function(j,linksNode){
+                                            if(hardwareSelectionVar == '1201601'){ // if hardware selected is tvilling kort , then check for opdater.
+                                                
+                                             if( linksNode.href.indexOf('opdater') != -1){
+                                                
+                                                    url = linksNode.href;
+                                                    return false;
+                                                }
+                                            }else{
+                                                if( linksNode.href.indexOf('opdater') != -1 || linksNode.href.indexOf('opret') != -1){
+                                                    //alert('linksNode.href.indexOf(opret) '+linksNode.href.indexOf('opret'));
+                                                url = linksNode.href;
+                                                return false;
+                                                }
+                                            } 
+                                        });
+                                    }
+                                });
+                            }
+                        }
+                    }
+                    else if(hardwareSelectionVar == '1201507')
+                    {
+                           if(myJSONObject['dtv-ga-valg'] != undefined)
+                        {
+                        if(myJSONObject['dtv-ga-valg'].varer!= undefined)
+                        {
+                        //alert('inside dtv');
+                         var vaerlink =myJSONObject['dtv-ga-valg'].varer;
+                         //alert('vaerlink***'+vaerlink);
+                         $.each(vaerlink,function(k,vaerlinksNode){
+                         //alert('vaerlinksNode.varenr***'+vaerlinksNode.varenr);
+                         if(vaerlinksNode.varenr == hardwareSelectionVar){
+                         //alert('vaerlinksNode.varenr***'+vaerlinksNode.varenr);
+                             if(vaerlinksNode.links != undefined){
+                             //alert('inside links node');
+                                 $.each(vaerlinksNode.links,function(m,linksNode){
+                                 //alert('loop links node');
+                                                        if( linksNode.href.indexOf('opdater') != -1)
+                                                        {
+                                                            
+                                                            url = linksNode.href;
+                                                            //alert('url**********'+url);
+                                                        }
+                                 });
+                             }
+                         }
+                                                });
+                        
+                        }
+                        } 
+                          //alert('alert in hardwareSelectionVar ');
+                         if(myJSONObject['kunde-data'] != undefined)
+                        {
+                            if(myJSONObject['kunde-data'].valgt!= undefined)
+                            {
+                                //alert('inside valgt');
+                                var valgtNode = myJSONObject['kunde-data'].valgt;
+                                $.each(valgtNode,function(i,valgtNodesingle)
+                                {
+                                    if(valgtNodesingle.aftaletype=='dtv')
+                                    {
+                                        //alert('valgtNodesingle.aftaletype==dtv');
+                                        var json1 = valgtNodesingle.varer;
+                                        $.each(json1,function(i,varerNode)
+                                        {
+                                            //alert('inside varerNode.varenr');
+                                            if(varerNode.varenr == hardwareSelectionVar)
+                                            {
+                                               // alert('inside link node');
+                                                $.each(varerNode.links,function(j,linksNode){
+                                                    if( linksNode.href.indexOf('serienr') != -1)
+                                                    {
+                                                        url = linksNode.href;
+                                                       // alert('url*****'+url);
+                                                       // document.getElementById("{!$Component.theform.url1}").value =url;
+                                                       // alert(document.getElementById("{!$Component.theform.url1}").value);
+                                                    }
+                                                });
+                                            }
+                                        });
+                                    }
+                                });                        
+                             }
+                         }
+                    }
+                    return url;
+                }catch(err){
+                    //alert("Error: in callKasia method: "+err.description);
+                }  
+            }                        
+        }
+  
+        function idValidation(){ 
+            document.getElementById("jsErrorSection").style.display = 'none'; 
+            document.getElementById("jsErrorText").innerHTML = ''; 
+            var kortno;
+            var radios = document.getElementsByName( 'group1' );
+            var radio1 = document.getElementById( 'radio1' );
+            var radio2 = document.getElementById( 'radio2' );                               
+            var radio3 = document.getElementById( 'radio3' );
+            if(radio1.checked || radio2.checked || radio3.checked){
+                kortno = document.getElementById("idenDiv").firstChild.value;                           
+                if(kortno == '' || kortno.length <=0){
+                    $("#errorBlock").html('Du skal udfylde legitimationsnummer.');   
+                }else if(kortno.length<5 || kortno.length>25){
+                    $("#errorBlock").html('Legitimationsnummer skal være mellem 5 og 25 cifre langt.'); 
+                }else{
+                    idValidated = true;
+                }
+            }else{
+                kortno = document.getElementById("idenDiv").firstChild.value;
+                if(kortno == '' && kortno.length <= 0){
+                    $("#errorBlock").html('Du skal angive hvilken type billedelegitimation kunden fremviser.Du skal udfylde legitimationsnummer.');                                                                         
+                    
+                }else{ 
+                    $("#errorBlock").html('Du skal angive hvilken type billedelegitimation kunden fremviser.');
+                }
+            }       
+        }
+    
+        function setImageState(){
+            if({!serialNumbervalidated}== true){
+                if(validated != true){               
+                    document.getElementById("serialdiv").childNodes[1].style.visibility = 'hidden';
+                }
+             }          
+             if({!KortNumber1Validated}== true){
+                if(validated != true){               
+                    document.getElementById("div1").childNodes[1].style.visibility = 'hidden';
+                }
+             }  
+             if(kort2validated== true){
+                if(validated != true){             
+                    document.getElementById("div2").childNodes[1].style.visibility = 'hidden';
+                }
+             }  
+             if({!AdditionalTVKortNumber1Validated}== true){
+                if(validated != true){               
+                    document.getElementById("ETvdiv1").childNodes[1].style.visibility = 'hidden';
+                }
+            }
+             if({!AdditionalTVKortNumber2Validated}== true){
+                if(validated != true){               
+                    document.getElementById("ETvdiv2").childNodes[1].style.visibility = 'hidden';
+                }
+            }
+            if({!serialNumberTVBoxvalidated}== true){
+                if(validated != true){               
+                    document.getElementById("TvBoxdiv").childNodes[1].style.visibility = 'hidden';
+                }
+            }
+            
+        }
+    
+        function BackPagefromSerialNumber(){
+            if('{!hardwareSelection}' == '1201504' || '{!hardwareSelection}' == '1203021'){ // if yousee plus or Leje of yousee boks
+                idValidated = false;
+                if('{!hardwareSelection}' == '1201504' && {!serialNumbervalidated} == true  && {!KortNumber2Validated} == true)
+                {
+                    idValidation();
+                }
+                else if('{!hardwareSelection}' == '1203021' && {!serialNumbervalidated} == true)
+                {
+                    idValidation();
+                }
+                else
+                idValidated = true;
+            }
+            else{
+                idValidated = true;
+            }
+            if(idValidated){
+                BackFromSerialNumber();
+            }   
+        }
+    
+        function NextPagefromSerialNumber(){
+       $("#errorBlock").html('');   
+       if(document.getElementById('chkdiv') != undefined){
+            if(document.getElementById('chkdiv').firstChild.checked){
+              var tv1 = document.getElementById('ETvdiv1').firstChild.value.trim().length;
+              var tv2 = document.getElementById('ETvdiv2').firstChild.value.trim().length;
+              
+              //DW-844 modifications START
+              var tv3 = document.getElementById('ETvdiv3').firstChild.value.trim().length;
+              var tv4 = document.getElementById('ETvdiv4').firstChild.value.trim().length;
+              //DW-844 modifications END
+              
+                //if(tv1 <= 0 && tv2 <= 0){
+              
+                var tv1flag = true;
+                var tv2flag = true;
+                
+                //DW-844 modifications START
+                var tv3flag = true;
+                var tv4flag = true;
+                //DW-844 modifications END
+                
+                if((tv1 == '11' && !(isNaN(tv1))) || tv1 =='0'){
+                        tv1flag = true;
+                 }else{
+                   tv1flag = false;
+                }
+                
+                if((tv2 == '11' && !(isNaN(tv2))) || tv2 =='0'){
+                        tv2flag = true;
+                }else{
+                   tv2flag = false;
+                }
+                
+                //DW-844 modifications START
+                if((tv3 == '11' && !(isNaN(tv3))) || tv3 =='0'){
+                        tv3flag = true;
+                 }else{
+                   tv3flag = false;
+                }
+                
+                if((tv4 == '11' && !(isNaN(tv4))) || tv4 =='0'){
+                        tv4flag = true;
+                }else{
+                   tv4flag = false;
+                } 
+                //DW-844 modifications END
+                                                        
+                 //if(tv1flag != tv2flag){
+                //Modified for DW-844
+                if(tv4flag != true || tv3flag != true || tv2flag != true || tv1flag != true ){ 
+                $("#errorBlock").html('Venligst validere Tvilling Kort.');
+                    return false;
+                }           
+            }
+        }   
+        if('{!hardwareSelection}' == '1201504' || '{!hardwareSelection}' == '1203021'){ // if yousee plus or Leje of yousee boks
+            idValidated = false;
+            idValidation();
+        }
+        else{
+            idValidated = true;
+        }
+        if(idValidated){
+            NextFromSerialNumber();
+        }
+        var serialNumberArray = new Array();
+        $.each(myJSONObject['kunde-data'].valgt, function(i, valgtNode){   
+           $.each(valgtNode.varer, function(j, varerNode){
+               if(varerNode.varenr == '1201504'){
+                  var youseePlus = varerNode.serienumre[0] + varerNode.serienumre[1];
+                  serialNumberArray.push(youseePlus);
+               }else if(varerNode.varenr == '1201505'){
+                   var youseeKort = varerNode.serienumre[0];
+                   serialNumberArray.push(youseeKort);
+               }else if(varerNode.varenr == '1201601'){
+                   var tvKort = varerNode.serienumre[0];
+                   serialNumberArray.push(tvKort);
+               }else if(varerNode.varenr == '1218385'){
+                   var demoHDBoks = varerNode.serienumre[0];
+                   serialNumberArray.push(demoHDBoks);
+               }
+           });
+        }); 
+        /*$.each(serialNumberArray, function(i, node){
+            //alert(node);
+        });*/       
+        
+    }
+    
+    function setRadiovalue(selectedValue){
+        document.getElementById("{!$Component.theform.SelectedIDRadioValue}").value =selectedValue;
+    }
+    
+    function noenter(ev){
+    var keycode;
+    if(ev.keyCode) //For IE
+      keycode = ev.keyCode;
+    else if(ev.Which)
+      keycode = ev.Which; // For FireFox
+    else
+      keycode = ev.charCode;
+      
+    if ((keycode > 31 && (keycode < 48 || keycode > 57)) || keycode == 13)
+       return false;
+            
+    return true;     
+    }
+    </script>
+    <apex:form id="theform" styleClass="fontVerdana">
+        <div class="message errorM3" id="jsErrorSection" style="display:none">
+            <table border="0" cellpadding="0" cellspacing="0" class="messageTable" style="padding:0px;margin:0px;">
+                <tr valign="top">
+                    <td>
+                        <img alt="Fejl" src="/s.gif" class="msgIcon" title="Fejl" />
+                     </td>
+                     <td class="messageCell">
+                        <div class="messageText">
+                            <span style="color:#cc0000">
+                                <h4>Fejl:</h4>
+                            </span> 
+                            <div id="jsErrorText"></div>
+                            <br/>
+                        </div>
+                     </td>
+                </tr>
+                <tr>
+                </tr>
+            </table>
+        </div>
+        <div id="errorBlock" class="errorMessage" style="display:Block;"></div>
+<apex:inputhidden id="SelectedIDRadioValue" value="{!SelectedIDRadioValue}" /> 
+<apex:inputhidden id="bundleProductValue" value="{!bundleProductValue}" /> 
+<apex:inputhidden id="ValidatedState" value="{!ValidatedState}" /> 
+<apex:inputhidden id="url1" value="{!url}" />
+    <apex:pageMessages rendered="true" id="msg2" />
+    
+    <apex:panelGrid columns="2" width="100%" columnClasses="leftContent2,rightContent2">
+         <!-- <apex:panelGroup id="columnA"> -->             
+            <apex:outputPanel styleClass="leftContent2" layout="inline">
+            <apex:pageblock id="pbblk" >
+            <!-- Jira-501 .Change in text "Indtast de korrekte serienr." to "Indtast eller skan de korrekte serienr."-->
+            <!-- Jira-501  and deletion of text "Du kan desværre IKKE skanne serienr. ind. Du skal taste dem manuel, vi beklager!" -->
+             <!--<p><font style="font-size:18px;font-weight:bold;">Indtast eller skan de korrekte serienr.</font><br></br><br></br> -->
+                <!--Du kan desværre IKKE skanne serienr. ind. Du skal taste dem manuel, vi beklager!-->
+               <!-- <br></br><br></br> 
+                Samsung HD-boks uden harddisk begynder med serienr. 8181 - Samsung HD-boks med harddisk med serienr. 8383 og YouSee Kort/Tvillingkort med serienr. 3290.
+                <br></br><br/>
+                Indtast serienr.
+             </p> -->
+             <br/>
+             <p><apex:outputText value="{!salesFlowObj.messages[0]}" escape="false" style="font-size:18px;font-weight:bold;"/>
+             <br/>
+             <apex:outputText value="{!salesFlowObj.messages[1]}" escape="false"/>
+             </p>
+             <apex:outputPanel id="allSerialNos">
+                <!-- Serial Number Section -->
+                <apex:pageBlockSection title=" Digitalmodtager boksnr " id="SerialNoSection" columns="1" collapsible="false" rendered="{!SerialNoSection}">                          
+                    <apex:pageBlockSectionItem LabelStyle="width:30%" >                                                             
+                        <apex:outputLabel value=" Serienr: " style="font-weight:bold; font-size:10pt;" styleClass="fontVerdana"/>                                                                                                                       
+                        <apex:outPutPanel id="outputpanel1" >
+                            <div id="serialdiv">                 
+                                <apex:inputText id="SerialNo" value="{!SerialNo}" maxlength="12" onchange="validateSerialNumber();" disabled="{!serialNumbervalidated}" onkeypress="return noenter(event);"/>                               
+                                <apex:image id="theImage" value="{!$Resource.validated}"  rendered="{!serialNumbervalidated}" style="width:15px;height:15px;"/>                                
+                            </div>
+                         </apex:outPutPanel>
+                    </apex:pageBlockSectionItem>                                        
+                </apex:pageBlockSection>
+            
+            <!-- Twilling kort 1 section (this is used for autopopulation of tvilling kort, incase of one existing tv kort.)-->                       
+                <apex:pageBlockSection title="YouSee Kortnr. for nyt kort " columns="1" collapsible="false" id="kortSerialNo" rendered="{!KortSection1}">               
+                    <apex:pageBlockSectionItem LabelStyle="width:30%" >
+                        <apex:outputLabel value="Serienr. " style="font-weight:bold; font-size:10pt;" styleClass="fontVerdana"/>                                                                        
+                            <apex:outputpanel id="kort1panel">
+                                <div id="div1"> 
+                                    <apex:inputText id="KortNo1" value="{!KortNo1}" maxlength="11" onchange="validateKortNumber1();" onkeypress="return noenter(event);" />
+                                    <apex:image id="theImage" value="{!$Resource.validated}" style="width:15px;height:15px;" rendered="{!KortNumber1Validated}"/><!-- rendered="{!KortNumber1Validated}" -->               
+                                </div>
+                            </apex:outputpanel>
+                    </apex:pageBlockSectionItem> 
+                </apex:pageBlockSection>
+                 
+                 <!-- TV Box section (this is used for autopopulation of TV Box, incase of one existing tv kort.)-->                       
+                <apex:pageBlockSection title="YouSee boksnr" columns="1" collapsible="false" id="TvBoxSerialNo" rendered="{!tvBoxSection}">               
+                    <apex:pageBlockSectionItem LabelStyle="width:30%" >
+                        <apex:outputLabel value="Serienr. " style="font-weight:bold; font-size:10pt;" styleClass="fontVerdana"/>                                                                        
+                            <apex:outputpanel id="TvBoxPanel">
+                                <div id="TvBoxdiv"> 
+                                    <apex:inputText id="TvBox" value="{!TvBox}" maxlength="30" onchange="validateTVBoxSerialNumber();" />
+                                    <apex:image id="theImage5" value="{!$Resource.validated}" style="width:15px;height:15px;" rendered="{!serialNumberTVBoxvalidated}"/><!-- rendered="{!KortNumber1Validated}" -->               
+                                </div>
+                            </apex:outputpanel>
+                    </apex:pageBlockSectionItem> 
+                </apex:pageBlockSection>
+                
+            <!-- Twilling kort 1 section (this is used for autopopulation of tvilling kort, incase of one existing tv kort.)-->
+                <div id="ExistingTvkort">
+                    <apex:inputhidden id="ETC" value="{!ExistingTvkort}" />
+                </div> 
+                                     
+                <apex:pageBlockSection title="YouSee Kortnr. for nyt kort " columns="1" collapsible="false" rendered="{!KortSection2}">    
+                    <apex:pageBlockSectionItem LabelStyle="width:30%" >
+                        <apex:outputLabel value="Serienr. " style="font-weight:bold; font-size:10pt;" styleClass="fontVerdana"/>                                                                        
+                        <apex:outputpanel id="out1">
+                            <div id="div2">
+                                <apex:inputText id="KortNo2" value="{!KortNo2}" maxlength="11" onchange="validateKortNumber2();" disabled="{!KortNumber2Validated}" onkeypress="return noenter(event);"/> <!-- onchange="resetValidation()" -->
+                                <apex:image id="theImage1" value="{!$Resource.validated}" rendered="{!KortNumber2Validated}" style="width:15px;height:15px;"/>                   
+                            </div>                               
+                        </apex:outputpanel>
+                    </apex:pageBlockSectionItem> 
+                </apex:pageBlockSection>
+      
+      <!-- if want to purchase Additional tvilling kort checkbox sections -->
+                <apex:outputPanel id="chk">
+                 <apex:outputpanel rendered="{!IF(enableTvlkortFlag==true ,true,false)}"><!-- rendered="{!IF('{!hardwareSelection}'=='1201504',true,false)}" -->
+                    <div id= "chkdiv">
+                        <apex:inputCheckbox value="{!displayTVkort}" onclick="if(this.checked) document.getElementById('twlk').style.display='block'; else document.getElementById('twlk').style.display='none';">  
+                        </apex:inputCheckbox>Ønsker kunden Ekstrakort?
+                    </div> 
+                  </apex:outputPanel>
+                </apex:outputPanel>
+            
+                <div id="twlk" style="display:none">
+                    <apex:outputPanel id="TVSection" >
+                        <apex:pageBlockSection title="YouSee Kortnr. for nyt kort " columns="1" collapsible="false" >
+                           <!--<div>Du kan sælge op til 4 tvillingkort. Angiv et eller to serienumre alt efter antal af tvilling-kort kunde ønsker.</div>-->
+                           <div> <apex:outputText value="{!salesFlowObj.messages[2]}" escape="false" rendered="{!NOT(tvKortSelected)}"/></div>    
+                            <apex:pageBlockSectionItem LabelStyle="width:30%" >                     
+                                <apex:outputLabel value="Serienr. " style="font-weight:bold; font-size:10pt;" styleClass="fontVerdana"/>                                                                        
+                                <apex:outputpanel id="ETvOut1">
+                                    <div id="ETvdiv1">
+                                        <apex:inputText id="TVKortNo1" value="{!TVKortNo1}" maxlength="11" disabled="{!AdditionalTVKortNumber1Validated}" onchange="validateAdditionalTVKortNumber1();" onkeypress="return noenter(event);" /> <!-- onchange="resetValidation()" -->
+                                        <apex:image id="theImage3" value="{!$Resource.validated}" rendered="{!AdditionalTVKortNumber1Validated}" style="width:15px;height:15px;"/>                   
+                                    </div>
+                                </apex:outputpanel>
+                            </apex:pageBlockSectionItem> 
+                         
+                            <apex:pageBlockSectionItem LabelStyle="width:30%" >                         
+                                <apex:outputLabel value="Serienr. " style="font-weight:bold; font-size:10pt;" styleClass="fontVerdana"/>   
+                                <apex:outputpanel id="ETvOut2">
+                                    <div id="ETvdiv2">
+                                        <apex:inputText id="TVKortNo2" value="{!TVKortNo2}" maxlength="11" disabled="{!OR(AdditionalTVKortNumber2Validated,NOT(AdditionalTVKortNumber1Validated))}" onchange="validateAdditionalTVKortNumber2();" onkeypress="return noenter(event);" /> <!-- onchange="resetValidation()" -->
+                                        <apex:image id="theImage4" value="{!$Resource.validated}" rendered="{!AdditionalTVKortNumber2Validated}" style="width:15px;height:15px;"/>                   
+                                    </div>
+                                </apex:outputpanel>                               
+                            </apex:pageBlockSectionItem>
+                            <!--  DW-844 modifications START -->
+                            
+                            <apex:pageBlockSectionItem LabelStyle="width:30%" >                     
+                                <apex:outputLabel value="Serienr. " style="font-weight:bold; font-size:10pt;" styleClass="fontVerdana"/>                                                                        
+                                <apex:outputpanel id="ETvOut3">
+                                    <div id="ETvdiv3">
+                                        <apex:inputText id="TVKortNo3" value="{!TVKortNo3}" maxlength="11" disabled="{!OR(AdditionalTVKortNumber3Validated,NOT(AdditionalTVKortNumber2Validated))}" onchange="validateAdditionalTVKortNumber3();" onkeypress="return noenter(event);" /> <!-- onchange="resetValidation()" -->
+                                        <apex:image id="theImage3" value="{!$Resource.validated}" rendered="{!AdditionalTVKortNumber3Validated}" style="width:15px;height:15px;"/>                   
+                                    </div>
+                                </apex:outputpanel>
+                            </apex:pageBlockSectionItem>
+                            
+                            <apex:pageBlockSectionItem LabelStyle="width:30%" >                     
+                                <apex:outputLabel value="Serienr. " style="font-weight:bold; font-size:10pt;" styleClass="fontVerdana"/>                                                                        
+                                <apex:outputpanel id="ETvOut4">
+                                    <div id="ETvdiv4">
+                                        <apex:inputText id="TVKortNo4" value="{!TVKortNo4}" maxlength="11" disabled="{!OR(AdditionalTVKortNumber4Validated,NOT(AdditionalTVKortNumber3Validated))}" onchange="validateAdditionalTVKortNumber4();" onkeypress="return noenter(event);" /> <!-- onchange="resetValidation()" -->
+                                        <apex:image id="theImage3" value="{!$Resource.validated}" rendered="{!AdditionalTVKortNumber4Validated}" style="width:15px;height:15px;"/>                   
+                                    </div>
+                                </apex:outputpanel>
+                            </apex:pageBlockSectionItem> 
+                            
+                            <!--  DW-844 modifications END   -->
+                        </apex:pageBlockSection>                        
+                   </apex:outputPanel>
+                </div>
+      <!-- end of Additional tvilling kort --> 
+            </apex:outputPanel>
+            <br></br>
+            <apex:pageBlockSection title=" Billedlegitimation " columns="1" collapsible="false" rendered="{!BilledelegitimationSection}">                     
+                    <p><apex:outputText value="{!salesFlowObj.messages[3]}" escape="false"/>
+                    </p>                   
+                    <input type="radio" name="group1" id="radio1" value="Kørekort" onclick="setRadiovalue(this.value)">Kørekort</input><br/>
+                    <input type="radio" name="group1" id="radio2" value="Pas" onclick="setRadiovalue(this.value)">Pas</input><br/>
+                    <input type="radio" name="group1" id="radio3" value="Anden billedlegitimation" onclick="setRadiovalue(this.value)">Anden billedlegitimation</input><br/>
+                   
+                   <apex:pageblockSectionItem >                  
+                   <apex:outputLabel value=" Kortnr. " style="font-weight:bold; font-size:10pt;" styleClass="fontVerdana"/>     
+                    <apex:outputpanel >                                  
+                        <div id="idenDiv">
+                        <apex:inputText id="KortNr" value="{!KortNr}" maxlength="25"/>
+                    </div>
+                     
+                    </apex:outputpanel>
+                                  </apex:pageblockSectionItem>
+             </apex:pageBlockSection>           
+                 <br></br><br></br>
+                                                            
+              <apex:outputPanel id="btnid">
+                <center>
+                    <apex:commandButton value=" Annuller " action="{!cancel}"  style="margin-right:200px;" /> <!-- style="margin-right:300px;" -->
+                    <apex:commandButton value=" Tilbage "  action="{!backFlow}" /> <!-- action="{!backFlow}" -->
+                    <apex:commandButton value=" Videre "  onclick="NextPagefromSerialNumber()" disabled="{!NOT(EnableNextButton)}"  style="{!if(EnableNextButton=true,'background-color:orangeRed;color:#FFFFFF;font-weight:bold;height:26px', 'background-color:#F5DEB3')}" oncomplete=""/>
+                </center>
+              </apex:outputPanel>                                    
+            </apex:pageBlock> 
+            </apex:outputPanel>
+        <apex:outputPanel styleClass="rightContent2" layout="inline">
+            <c:CustomerAndProductComponent isNewKunde="{!isNewCustomer}" kundeNumber="{!cCustInstAdd.customerNumber}"
+                kundeName="{!cCustInstAdd.firstName} {!cCustInstAdd.lastName}" Adresse="{!cCustInstAdd.addr1}"
+                Postnummer="{!cCustInstAdd.addr2}">
+            </c:CustomerAndProductComponent>                      
+        </apex:outputPanel>
+    </apex:panelGrid>     
+     
+    <apex:actionFunction name="callValidateKort2" action="{!NumberValidate}" rerender="JsonPanel,msg2,outputpanel1,out1,TVSection,kort1panel,btnid,out2,jsErrorSection,chk,TvBoxPanel" status="queryStatus"> <!-- kort1panel, -->
+        <apex:param name="url" assignTo="{!url}" value=""/>
+        <apex:param name="etag" assignTo="{!etag}" value=""/>
+        <apex:param name="kundeData" assignTo="{!kundeData}" value=""/>
+        <apex:param name="arrayInit" assignTo="{!arrayInit}" value="" />
+        <apex:param name="callMethod" assignTo="{!callMethod}" value="" />
+    </apex:actionFunction> 
+    <apex:actionFunction action="{!callToKasia}" name="callToKasia" reRender="JsonPanel,msg2,allSerialNos,out2, btnid" status="queryStatus">
+                <apex:param name="url" assignTo="{!url}" value="" />
+                <apex:param name="etag" assignTo="{!etag}" value="" />
+                <apex:param name="kundeData" assignTo="{!kundeData}" value="" />
+                <apex:param name="arrayInit" assignTo="{!arrayInit}" value="" />
+    </apex:actionFunction> 
+    <apex:actionFunction name="NextFromSerialNumber" action="{!NextFromSerialNumberPage}">    
+    </apex:actionFunction> 
+     <apex:actionFunction name="BackFromSerialNumber" action="{!backFlow}">    
+    </apex:actionFunction> 
+    
+    <script type="text/javascript" src="../js/click.js" charset="ISO-8859-1"></script> 
+    
+    <apex:outputpanel id="JsonPanel">   
+        <script>
+            myJSONObject={!jsonResponse};
+            var firstJSONResponse = {!firstJsonResponse}; 
+            myJSONObject=refreshFirstJSONResponse(firstJSONResponse,myJSONObject);
+            kort2validated = {!KortNumber2Validated};
+            //alert('check.... '+kort2validated);
+            var serialNumber = {!dummySerialNo};
+            displayBasket();
+        </script>
+    </apex:outputpanel> 
+    <apex:outputpanel id="out2">
+        <script>        
+            var e = '{!error}';
+            if(e != '' && e.length > 0){
+                document.getElementById("jsErrorSection").style.display = 'block'; 
+                document.getElementById("jsErrorText").innerHTML = '{!error}';
+            }else{
+                document.getElementById("jsErrorSection").style.display = 'none'; 
+            }
+            
+        // to display additional twilling kort section.
+         if({!enableTvlkortFlag}==true){    
+          if(document.getElementById('chkdiv').firstChild.checked) 
+             document.getElementById('twlk').style.display='block';
+         } 
+         //Added for DW-844
+         if({!tvKortSelected}==true){    
+             document.getElementById('twlk').style.display='block';
+             
+         }    
+            //populate TVkortSection-tvkortNo1 value ,incase of existing tvilling kort.
+            if(Tvillingkortarr.length > 0){                                                                 
+                var tvilingkort1 = Tvillingkortarr[0].Number; 
+                //alert("have tvillingkort-->"+ tvilingkort1);                                                                     
+                document.getElementById("div1").firstChild.value = tvilingkort1;                            
+                document.getElementById("div1").firstChild.disabled = 'true';                                                                                                   
+                document.getElementById("ExistingTvkort").firstChild.value = true;// hidden variable                                                    
+            }else{                                                      
+                if({!KortNumber1Validated}){
+                    document.getElementById("div1").firstChild.disabled = 'true';                                                                                               
+                    document.getElementById("div1").childNodes[2].style.visibility = 'visible';                             
+                }
+            }
+            
+            if('{!SelectedIDRadioValue}' != ''){
+                var Allradios = document.getElementsByName( 'group1' );
+                var Kradio1 = document.getElementById( 'radio1' );
+                var Pradio2 = document.getElementById( 'radio2' );                              
+                var Aradio3 = document.getElementById( 'radio3' );
+                
+                if ('{!SelectedIDRadioValue}' == Kradio1.value){                    
+                    radio1.checked = true;
+                }
+                if ('{!SelectedIDRadioValue}' == Pradio2.value){                    
+                    Pradio2.checked = true;
+                }
+                if ('{!SelectedIDRadioValue}' == Aradio3.value){                    
+                    Aradio3.checked = true;
+                }
+            }
+            
+             if(bundleProductNr != null){
+               document.getElementById("{!$Component.theform.bundleProductValue}").value =bundleProductNr;
+             }  
+                                             
+            // validated = {!ValidatedState};
+            // setImageState(); 
+             
+        </script>
+    </apex:outputpanel>
+    
+    <apex:actionStatus id="queryStatus"> 
+        <apex:facet name="start">
+            <c:loadingComponent BackColor="#efefef" borderColor="#336699"
+                    borderSize="3" height="50px" width="120px" 
+                    ImageUrl="{!$Resource.Loading}" Message="Loading..." 
+                    messageStyle="color:darkred;font-size:11pt;font-weight:bold;"/>
+        </apex:facet>         
+    </apex:actionStatus>
+   </apex:form>
+   <script type="text/javascript">printContentAreaEnd();</script>
+    <script type="text/javascript">printFooter();</script>
+</html>
+</apex:page>

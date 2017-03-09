@@ -1,0 +1,632 @@
+<apex:page controller="CreatePortalUserController" sidebar="false" showheader="false" id="page1" applyHtmlTag="false">
+<html class="cvi2015">
+<apex:includeScript value="{!URLFOR($Resource.DynaTree,'/DynaTree/jquery/jquery.js')}"/>
+<script>var $j15 = jQuery.noConflict(true);</script>
+<apex:includeScript value="{!URLFOR($Resource.DynaTree,'/DynaTree/jquery/jquery-ui.custom.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.DynaTree,'/DynaTree/jquery/jquery.cookie.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.DynaTree,'/DynaTree/src/jquery.dynatree.js')}"/>
+<apex:stylesheet value="{!URLFOR($Resource.DynaTree,'/DynaTree/src/skin/ui.dynatree.css')}"/>
+<apex:stylesheet value="{!URLFOR($Resource.scStyleCss,'myStyle/myStyle.css')}"/> 
+
+<script type="text/javascript" src="{!siteCoreUrl}/sitecore/content/data/export/export.aspx?itemguid={934A91A8-0EDD-4035-8DA9-E386D8112557}&functions=true"></script>
+<body id="servicepage">
+<apex:form id="theform">
+<script type="text/javascript">printHeader();</script>
+<script type="text/javascript">printTopMenu();</script>
+<script type="text/javascript">printContentAreaBegin();</script>
+<!-- <script type="text/javascript">
+window.onload = function(){
+document.getElementById("page1:theform:contactDetailsPB:addressDetailsPBS:streetI").value = '';
+
+}
+</script> -->
+
+<apex:outputPanel id="Panel1">
+<script> 
+     function reloadContactLayout(){ 
+    
+        var rdUrl = '{!pageName}';
+         //   alert('Status'+status);
+        if(rdUrl != null && rdUrl.length > 0){
+         document.getElementById("errorMsg123").style.display = "none";
+            window.top.location= '{!$Site.Prefix}' + rdUrl;
+        }
+  }
+        document.onload = reloadContactLayout();
+</script>
+</apex:outputPanel>
+<script>
+
+        
+     function validationFunction(){
+         document.getElementById("errorMsg123").style.display = "none";
+         document.getElementById("page1:theform:showErrorMsg").style.display ="none";
+       //document.getElementById("page1:theform:errormsg").style.display ="none";
+       //alert('hi');
+            var mobileNumber = document.getElementById("page1:theform:contactDetailsPB:contactDetailsPBS:mobilePhone").value;
+            //alert('mobileNumber'+mobileNumber);
+            var homePhoneNo = document.getElementById("page1:theform:contactDetailsPB:contactDetailsPBS:homePhone").value;
+            //alert('homePhoneNo'+homePhoneNo);
+            var phoneNo = document.getElementById("page1:theform:contactDetailsPB:contactDetailsPBS:phone").value;
+            //alert('phoneNo'+phoneNo);
+            
+            // Commented For SF-1599 remove validation for First name on contact
+            //var fname = document.getElementById("page1:theform:contactDetailsPB:contactDetailsPBS:firstName").value;
+            //alert('fname'+fname);
+            
+            var lname = document.getElementById("page1:theform:contactDetailsPB:contactDetailsPBS:lastName").value;
+            //alert('lname'+lname);
+            var email = document.getElementById("page1:theform:contactDetailsPB:contactDetailsPBS:email").value;
+            //alert('email is'+email);
+            
+            var streetI = document.getElementById("page1:theform:addressDetailPB:addressDetailsPBS:addressDetailPBSI:streetI").value;
+            //alert('streetI'+streetI);
+            
+            /* Commented For SF-1599 remove validation for First name on contact
+            if(fname.length <= 0){
+                document.getElementById("errorMsg123").innerHTML = "Fornavn: Du skal angive en værdi";
+                document.getElementById("errorMsg123").style.display = "block";
+                return false;
+            }*/
+            
+            if(lname.length <= 0){
+                document.getElementById("errorMsg123").innerHTML = "Efternavn: Du skal angive en værdi";
+                document.getElementById("errorMsg123").style.display = "block";
+                return false;
+            }
+            if(email.length <= 0){
+            
+                document.getElementById("errorMsg123").innerHTML = "E-mail: Du skal angive en værdi";
+                document.getElementById("errorMsg123").style.display = "block";
+                return false;
+            }
+            if(mobileNumber.length == 0 && homePhoneNo.length == 0 && phoneNo.length == 0){
+                    //alert('enter atleast one phone number');
+                    document.getElementById('errorMsg123').innerHTML = "{!$Label.SC_PhoneValidation}";
+                     
+                    document.getElementById('errorMsg123').style.display ='block';
+                            return false;
+                }else if(mobileNumber.length > 20 || homePhoneNo.length > 20 || phoneNo.length > 20){
+                           // alert('phone number is gt 20');
+                    document.getElementById('errorMsg123').innerHTML = "{!$Label.SC_PhoneLengthValidation}";
+                        document.getElementById('errorMsg123').style.display ='block';
+                            
+                            return false;
+             }
+            if(streetI.length == 0){
+                  document.getElementById("errorMsg123").innerHTML = "Søg adresse Du skal angive en værdi.";
+                  document.getElementById("errorMsg123").style.display = "block";
+                  return false;
+                
+            }
+            
+            if(email.length > 0){
+                if(!validateEmailAddress(email)) {
+                  document.getElementById("errorMsg123").innerHTML = "Ugyldig e-mail-adresse.."
+                  document.getElementById("errorMsg123").style.display = "block";
+                  return false;
+                }      
+            }
+           //alert('Validation');
+           var tmpIds = 'A,'+selectedIds + ',b';
+           selectedIds = tmpIds;
+           saveAction(selectedIds);
+           return true;
+   
+    }
+        
+ function validateEmailAddress(email) {
+       var reg = /^[a-z0-9]+(?:[-\._]?[a-z0-9]+)*@(?:[a-z0-9]+(?:-?[a-z0-9]+)*\.)+[a-z]+$/;
+       if(reg.test(email)) {
+
+          return true;
+       } else {
+          return false;         
+       } 
+}
+        
+        
+        
+        
+</script>
+<script type="text/javascript">
+//  document.write('jsonresponse: '+JSON.stringify(rootTreeObj));
+var selectedIds='';
+ var  gstr = '';
+ var rootNode;
+ var parentId='';
+
+ $j15(document).ready(function(){
+ var jsonArr ={!objectStrListJson}; 
+                var objMap = {};
+                var rootTreeObj = {};
+                $j15.each(jsonArr, function(index,jsn){
+                                if(jsn.pos.nodeType == "start"){
+                                                rootTreeObj.title = jsn.pos.account.Name;
+                                                rootTreeObj.children = new Array();
+                                                rootTreeObj.accountType = jsn.pos.account.Type;
+                                                rootTreeObj.icon = "star16.png";
+                                                if(jsn.selected == true)
+                                                rootTreeObj.select=true;
+                                                else
+                                                rootTreeObj.select=false;
+                                                rootTreeObj.id=jsn.pos.account.Id;
+                                                rootTreeObj.key=jsn.pos.account.Id;
+                                                objMap[jsn.pos.account.Id] = rootTreeObj;
+                                }else if(jsn.pos.account.Type == "Hierarki"){
+                                                var parentObj = objMap[jsn.pos.account.ParentId];
+                                                TreeObj = {};
+                                                TreeObj.title = jsn.pos.account.Name;
+                                                TreeObj.children = new Array();
+                                                TreeObj.accountType = jsn.pos.account.Type;
+                                                TreeObj.icon = "factory16.png";
+                                                if(jsn.selected == true)
+                                                TreeObj.select=true;
+                                                else
+                                                TreeObj.select=false;
+                                                TreeObj.id=jsn.pos.account.Id;
+                                                TreeObj.key=jsn.pos.account.Id;
+                                                parentObj.children.push(TreeObj);
+                                                objMap[jsn.pos.account.Id] = TreeObj;
+                                }else if(jsn.pos.account.Type == "Kunde"){
+                                                var parentObj = objMap[jsn.pos.account.ParentId];
+                                                TreeObj = {};
+                                                TreeObj.title = jsn.pos.account.Cable_Unit__r.Name+' '+jsn.pos.account.Anlaeg_No__c;
+                                                TreeObj.icon = "desk16.png";
+                                                if(jsn.selected == true)
+                                                TreeObj.select=true;
+                                                else
+                                                TreeObj.select=false;
+                                                TreeObj.id=jsn.pos.account.Id;
+                                                TreeObj.key=jsn.pos.account.Id;
+                                                parentObj.children.push(TreeObj);
+                                }
+                
+                });
+// $j = jQuery.noConflict();
+ //$j.ui.dynatree.nodedatadefaults["icon"] = false;
+ $j15("#tree1").dynatree({
+            checkbox: true,
+            autoCollapse: false,
+            selectMode: 3,
+            fx: { height: "toggle", duration: 400 },
+            keyPathSeparator: "/",
+            children:rootTreeObj,
+            strings: {
+        loading: "Loading…",
+        loadError: "Load error!"
+            },            
+            classNames: {
+        container: "dynatree-container",
+        expanded: "dynatree-expanded"},
+        onSelect: function(select, node) {
+        // Get a list of all selected nodes, and convert to a key array:
+   /*     if(node.hasChildren()){     
+           if(node.isSelected()){
+            node.visit(function(node){
+             node.select(true); 
+             });
+           }else{        
+            node.visit(function(node){
+             node.select(false); 
+            });        
+          }
+        }*/
+        
+        var selKeys = $j15.map(node.tree.getSelectedNodes(), function(node){
+          return node.data.key;
+        });
+     selectedIds = selKeys;
+     $j15('#selectedIds').html(''+selectedIds);
+    }
+    });
+       
+        
+         $j15("#tree1").dynatree("getRoot").visit(function(node){
+    node.expand(true); 
+ }); 
+
+ rootNode = $j15("#tree1").dynatree("getRoot");
+ 
+ if(('{!contact.UserProfile__c}').indexOf("Admin")!=-1){
+     $j15("#tree1").dynatree("disable");
+    }
+ 
+   var selectedNodesObj = $j15("#tree1").dynatree("getSelectedNodes");
+ 
+    var   selKeys = $j15.map(selectedNodesObj, function(node){
+          return node.data.key;
+        });
+
+  selectedIds = selKeys;
+  $j15('#selectedIds').html(''+selectedIds);
+ //alert('Selected: '+selectedIds); 
+});
+
+/*
+function updateHierarchy(){
+                 
+            var tmpselectobj = document.getElementsByTagName("select");
+            var allChkBoxes = document.getElementsByTagName("input");
+            for(var i =0;i<tmpselectobj.length;i++ ){
+                if((tmpselectobj[i].id).toString().indexOf("UserProfileId")!=-1){
+                profilComponent = tmpselectobj[i];
+                
+                }
+            } 
+            if(profilComponent.selectedIndex == '1'){
+            
+            $j15("#tree1").dynatree("getRoot").visit(function(node){
+              node.select(true);
+             }); 
+
+             $j15("#tree1").dynatree("disable");
+              
+            }else{
+            
+            $j15("#tree1").dynatree("getRoot").visit(function(node){
+              node.select(false);
+             });
+             
+             $j15("#tree1").dynatree("enable")
+              
+            }
+        }
+
+ 
+ 
+ function makeItDisabled(selectObject){
+           var checkObj = document.getElementById(selectObject);
+           var  selectComponent;
+           var selectobj = document.getElementsByTagName("select");
+           for(var i =0;i<selectobj.length;i++ ){
+               if((selectobj[i].id).toString().indexOf("UserProfileId")!=-1){
+                  selectComponent = selectobj[i];
+               }
+           }
+           if(checkObj.checked){
+              selectComponent.disabled=false;
+           }else{
+              selectComponent.disabled=true; 
+           }  
+             updateHierarchy();                
+*/
+ </script>
+<script type="text/javascript"> 
+    function openLookup(baseURL, width, modified, searchParam){
+          //    alert('baseURL: '+baseURL);
+          //    alert('width: '+width);
+          //    alert('modified: '+modified);
+          //    alert('searchParam: '+searchParam);
+            
+            var originalbaseURL = baseURL;
+            var originalwidth = width;
+            var originalmodified = modified;
+            var originalsearchParam = searchParam;
+         
+            var lookupType = baseURL.substr(baseURL.length-3, 3);
+           // alert('lookupType: '+lookupType);
+            if (modified == '1') 
+                baseURL = baseURL + searchParam;
+         
+            var isCustomLookup = false;
+         
+            // Following "001" is the lookup type for Account object so change this as per your standard or custom object
+           // if(lookupType == "001"){
+                var urlArr = baseURL.split("&");
+                var txtId = '';
+                if(urlArr.length > 2) {
+                    urlArr = urlArr[1].split('=');
+                    txtId = urlArr[1];
+                }
+                
+                //alert('txtId: '+txtId);
+                
+                // Following is the url of Custom Lookup page. You need to change that accordingly
+                baseURL = "{!$Site.Prefix}/apex/CustomAddressLookup?txt=" + txtId;
+         
+                // Following is the id of apex:form control "theform". You need to change that ac-cordingly
+                baseURL = baseURL + "&frm=" + escapeUTF("{!$Component.theform}");
+                if (modified == '1') {
+                    baseURL = baseURL + "&lksearch=" + searchParam;
+                  }
+         
+                  // Following is the ID of inputField that is the lookup to be customized as custom lookup
+                if(txtId.indexOf('streetI') > -1 ){
+                    isCustomLookup = true;
+                }
+           // }
+         
+         
+            if(isCustomLookup == true){
+              openPopup(baseURL, "lookup", 350, 480, "width="+800+",height=580,toolbar=no,status=no,directories=no,menubar=no,resizable=yes,scrollable=yes", true);
+            }
+            else {
+              if (modified == '1') 
+                originalbaseURL = originalbaseURL + originalsearchParam;
+              openPopup(originalbaseURL, "lookup", 350, 480, "width="+originalwidth+",height=480,toolbar=no,status=no,directories=no,menubar=no,resizable=yes,scrollable=yes", true);
+            } 
+        }
+var userProfile  = '{!$Profile.Name}';
+var portalAdminUserProfile = '{!portalAdminUser}';
+var portalBrugerRole = '{!portalBrugerRole}';
+var contactRoleName = '{!$CurrentPage.parameters.loggedInUserRoleName}';
+
+/*
+function setParentMenu()
+{
+   var myParentlist=document.getElementById('inunion').childNodes;
+   for (p=0; p < myParentlist.length; p++)
+    {
+         var mP=myParentlist[p].childNodes;
+     for (j=0; j < mP.length; j++)
+               {
+                   var mS=mP[j].childNodes;
+                   if(mP[j].nodeName=="LI")
+        {
+            mP[j].className='parenttopAlign';
+
+        }
+    }
+
+    }
+
+}
+document.onload = setParentMenu();*/
+
+   
+</script>
+<style type="text/css">
+         .container{
+            overflow-x:hidden;
+            overflow-y:auto;
+            width:133%;
+         } 
+         .parenttopAlign {
+            margin:1px 0px 1px 2px;
+            display: block;
+         }
+        .exceptionText { 
+            font-style:italic;
+            font-weight:bold;
+            color:red;
+        }
+        .labelStyle
+            {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size:12px;
+            font-weight:bold;
+            text-align:center;
+            }
+        .headerStyle {
+                 font-family: Arial, Helvetica, sans-serif;
+                 font-size:12px;
+                 font-weight:bold;
+          }
+          .ui-dynatree-disabled ul.dynatree-container {
+            opacity: 1;
+            }
+        
+</style>
+
+
+
+
+<c:SCParentLinkComponent PortalBrugerRole="{!portalBrugerRole}" />
+<apex:outputPanel id="showErrorMsg">
+  
+  <apex:messages id="warningMsg" globalOnly="true"  styleClass="warningError" rendered="{!warningFlag == true}"/> 
+  <apex:messages id="errormsg" globalOnly="true"  styleClass="mailError" rendered="{!errorFlag == true}"/>  
+</apex:outputPanel>
+<script>
+        var myerror = document.getElementById("{!$Component.errormsg}");
+        var testExp=new RegExp("terminated by the matching end-tag");
+        if(myerror != null && myerror.hasChildNodes())
+        {
+        
+            for (var t = 0; t < myerror.children.length; t++) 
+            {
+                var x = myerror.childNodes[t];
+                    if(testExp.test(x.innerText)){
+                        x.style.display='none';
+                    }
+            }
+        }
+        
+</script>
+<script>
+        var duplUsererror = document.getElementById("{!$Component.errormsg}");
+        var testExp=new RegExp("allerede valgt dette brugernavn.<br>Vælg et andet.");
+        if(duplUsererror != null && duplUsererror.hasChildNodes())
+        {
+            for (var t = 0; t < duplUsererror.children.length; t++) 
+            {
+                var x = duplUsererror.childNodes[t];
+                    if(testExp.test(x.innerText))
+                    {
+                        x.style.display='none';
+                    }
+            }
+        }
+</script>
+
+<h1> Opret bruger </h1>
+  
+    <br/>
+    
+    <div id="errorMsg123" style="display:none;height: 21px;padding-left: 50px;padding-top: 18px;border-color: red;color: grey;" class="mailError">
+        
+    </div>
+       
+    
+   <!--  <div id="phoneLengthMsg" style="display:none;height: 21px;padding-left: 50px;padding-top: 18px;border-color: red;color: grey;" class="mailError">
+        <apex:outputText id="Msg3" value="{!$Label.SC_PhoneLengthValidation}"/>
+    </div> -->
+    
+<apex:stylesheet value="{!URLFOR($Resource.scStyleCss,'myStyle/myStyle.css')}"/> 
+<!-- <apex:outputPanel layout="block" styleclass="container"> -->
+        <apex:PageBlock id="contactDetailsPB">
+            
+               <apex:PageBlockSection title="Kontakt information" collapsible="false" columns="2" id="contactDetailsPBS">
+               <!--Commented For SF-1599 
+                  <apex:inputField value="{!contact.FirstName}" id="firstName" required="true" style="width:150px"></apex:inputField> -->
+                  
+                  <apex:inputField value="{!contact.FirstName}" id="firstName" style="width:150px"></apex:inputField>
+                  <apex:inputField value="{!contact.LastName}" id="lastName" style="width:150px"></apex:inputField>
+                  <apex:inputField value="{!contact.Email}" id="email" required="true" style="width:150px"></apex:inputField>
+                  <apex:inputField value="{!contact.Phone}" id="phone" style="width:150px"></apex:inputField>
+                  <apex:inputField value="{!contact.MobilePhone}" id="mobilePhone" style="width:150px"></apex:inputField>
+                  <apex:inputField value="{!contact.HomePhone}" id="homePhone" style="width:150px"></apex:inputField>
+               </apex:PageBlockSection>
+        </apex:pageBlock>
+        
+        <apex:pageBlock id="addressDetailPB">       
+               <apex:PageBlockSection id="addressDetailsPBS" title="Adresse information" collapsible="false" columns="2">
+                    <apex:pageBlockSectionItem labelStyleClass="labelStyle" id="addressDetailPBSI">
+                        <apex:outputLabel styleClass="headerStyle">Søg adresse</apex:outputLabel>
+                        <apex:actionRegion > 
+                        <apex:inputField value="{!contact.Street_P__c}" id="streetI" required="true" >
+                            <apex:actionSupport event="onchange" action="{!fetchAddressDetails}" rerender="addressDetails" status="refreshStatus"/>
+                        </apex:inputField>
+                        <apex:actionStatus id="refreshStatus" >
+                            <apex:facet name="start" ><apex:image id="TestImage" url="/resource/1324980953000/Loading" width="16" height="16"/></apex:facet>
+                            <apex:facet name="stop" ></apex:facet>
+                        </apex:actionStatus>
+                    </apex:actionRegion> 
+              </apex:pageBlockSectionItem> 
+           </apex:pageBlockSection>
+        <apex:outputPanel id="addressDetails">
+        
+               <apex:pageBlockSection rendered="{!displayAddressInfo}" collapsible="false" columns="2" id="addressDetailsPBS1">
+               
+                    <apex:pageBlockSectionItem labelStyleClass="labelStyle" >
+                              <apex:outputLabel value="Gade" for="Gadenavn"/>
+                              <apex:outputField value="{!address.Street__c}"></apex:outputField>  
+                      </apex:pageBlockSectionItem>
+                      <apex:pageBlockSectionItem >
+                              <apex:outputLabel value="Husnr." for="Husnr"/>
+                              <apex:outputField value="{!address.House_No__c}"></apex:outputField>  
+                      </apex:pageBlockSectionItem>
+                     <apex:pageBlockSectionItem >
+                              <apex:outputLabel value="Opgang" for="Opgang"/>
+                              <apex:outputField value="{!address.Entrance__c}"></apex:outputField>
+                      </apex:pageBlockSectionItem>
+                      <apex:pageBlockSectionItem >
+                              <apex:outputLabel value="Side/dørnr" for="Dør"/>
+                              <apex:outputField value="{!address.Door_No__c}"></apex:outputField> 
+                      </apex:pageBlockSectionItem>
+                      <apex:pageBlockSectionItem >
+                              <apex:outputLabel value="Etage" for="Etage"/>
+                              <apex:outputField value="{!address.Floor__c}"></apex:outputField> 
+                      </apex:pageBlockSectionItem>
+                      <!--<apex:pageBlockSectionItem >
+                              <apex:outputLabel value="Side" for="Side"/>
+                              <apex:outputField value="{!address.Side__c}"></apex:outputField>
+                      </apex:pageBlockSectionItem>-->
+                      <apex:pageBlockSectionItem >
+                              <apex:outputLabel value="Postnr" for="Postnr"/>
+                              <apex:outputField value="{!address.Postcode__c}"></apex:outputField>      
+                      </apex:pageBlockSectionItem>
+                      <apex:pageBlockSectionItem >
+                              <apex:outputLabel value="By" for="By"/>
+                              <apex:outputField value="{!address.Town__c}"></apex:outputField> 
+                      </apex:pageBlockSectionItem>
+                 </apex:PageBlockSection>
+            </apex:outputPanel>     
+  </apex:pageBlock>
+             
+             <!-- 
+             <apex:PageBlockSection title="Adresse information" collapsible="false" columns="1" id="addressDetailsPBS">
+                <apex:pageBlockSectionItem id="PBSItem">
+                
+                <apex:outputLabel >Gadenavn</apex:outputLabel>
+                <apex:actionRegion >
+                <apex:inputField value="{!contact.Street_P__c}" id="streetI" required="true" style="width:150px">
+                 <apex:actionSupport event="onchange" action="{!fetchAddressDetails}" rerender="addressDetails" status="refreshStatus"/>
+                  <apex:actionStatus id="refreshStatus" >
+                      <apex:facet name="start" ><apex:image id="TestImage" url="/resource/1324980953000/Loading" width="16" height="16"/></apex:facet>
+                      <apex:facet name="stop" ></apex:facet>
+                 </apex:actionStatus>
+                 </apex:inputField> 
+                 </apex:actionRegion> 
+                 </apex:pageBlockSectionItem>   
+               <apex:outputPanel id="addressDetails"><br/>
+                 <apex:PageBlockSection rendered="{!displayAddressInfo}">
+                   <apex:outputField value="{!address.Street__c}"/>
+                   <apex:outputField value="{!address.House_No__c}"/>
+                   <apex:outputField value="{!address.Entrance__c}"/>
+                   <apex:outputField value="{!address.Door_No__c}"/>
+                   <apex:outputField value="{!address.Floor__c}"/>
+                   <apex:outputField value="{!address.Side__c}"/>
+                   <apex:outputField value="{!address.Postcode__c}"/>
+                   <apex:outputField value="{!address.Town__c}"/>
+                </apex:pageBlockSection>   
+               </apex:outputPanel>  
+          </apex:PageBlockSection>  -->
+          
+                    
+            <apex:pageBlock id="pbTreeId">       
+            <apex:PageBlockSection title="Tildel Kunde" collapsible="true" columns="1" id="pbs1"> 
+                <div id="tree1" style="width: 850px;"></div><br/>
+            </apex:PageBlockSection>  
+   
+   <apex:pageBlockButtons location="bottom">
+         <!--       <apex:commandButton action="{!save}" value="{!$Label.SC_EditContactPage_Save}" onClick="return validationFunction();" styleClass="dialogbutton_orange" title="Klik for at gemme bruger" rerender="Panel1">
+                <apex:param name="selectedIds" value="" assignTo="{!selectNodeIds}"/></apex:commandButton>&nbsp;&nbsp;&nbsp;&nbsp;-->
+                  <input type="button" onClick="return validationFunction();" value="{!$Label.SC_EditContactPage_Save}" class="btn dialogbutton_grey"/>&nbsp;&nbsp;&nbsp;&nbsp;
+           <!--       <apex:Button value="{!$Label.SC_EditContactPage_Save}" onClick="return validationFunction();" styleClass="dialogbutton_orange" title="Klik for at gemme bruger" rerender="Panel1">
+               </apex:commandButton>&nbsp;&nbsp;&nbsp;&nbsp;-->
+                <apex:commandButton action="{!cancelCreate}" value="{!$Label.SC_EditContactPage_Cancel}" id="theCommandLink"  immediate="true" styleClass="dialogbutton_grey" title="Klik for at annullere"/>
+    </apex:pageBlockButtons>
+  </apex:PageBlock>
+  <apex:actionFunction name="saveAction" action="{!save}" reRender="Panel1,showErrorMsg" status="queryStatus">
+<apex:param name="selectedIds" assignTo="{!selectNodeIds}" value="" />
+</apex:actionFunction>    
+    <script> 
+        var myerror = document.getElementById("{!$Component.warningMsg}");
+        var testExp=new RegExp("terminated by the matching end-tag");
+        if(myerror != null && myerror.hasChildNodes())
+        {
+            for (var t = 0; t < myerror.children.length; t++) 
+            {
+                var x = myerror.childNodes[t];
+                    if(testExp.test(x.innerText))
+                    {
+                        x.style.display='none';
+                    }
+            }
+        }
+</script>       
+           
+     <!-- </apex:outputPanel> -->
+        <script type="text/javascript">
+            document.getElementById('{!$Component.theform:addressDetailPB:addressDetailsPBS:addressDetailPBSI:streetI}').readOnly = true;
+            function changeImage(s, i) {
+                imageURL = document.getElementById(s).src;
+                 if (i == 1) {
+                     if (imageURL.indexOf("/img/tree/minusStart.gif") != -1) imageURL = "/img/tree/plusStart.gif";
+                     else  imageURL = "/img/tree/minusStart.gif";
+                 } else if (i == 2) {
+                     if (imageURL.indexOf("/img/tree/minus.gif") != -1) imageURL = "/img/tree/plus.gif";
+                     else  imageURL = "/img/tree/minus.gif";
+                 } else if (i == 3) {
+                     if (imageURL.indexOf("/img/tree/minusEnd.gif") != -1) imageURL = "/img/tree/plusEnd.gif";
+                     else imageURL = "/img/tree/minusEnd.gif";
+                 } else {
+                    return;
+                 }
+                 document.getElementById(s).src=imageURL;
+            }       
+        </script>
+   <script type="text/javascript">printContentAreaEnd();</script>
+<script type="text/javascript">printFooter();</script>
+
+</apex:form>
+</body>
+<apex:actionStatus id="queryStatus">  
+                <apex:facet name="start">
+                     <c:CarrieHenterData BackColor="#efefef" borderColor="#336699" borderSize="3" height="50px" width="180px" ImageUrl="{!$Resource.CarrieLoading}" Message="Henter Data..." messageStyle="color:darkred;font-size:11pt;font-weight:bold;"/> 
+                </apex:facet>
+</apex:actionStatus>
+</html>
+</apex:page>

@@ -1,0 +1,138 @@
+<apex:component controller="KnowledgeHomeSidebar_CT" > 
+<apex:attribute name="view_id" type="String" assignTo="{!viewId}" description="Passing viewID"/> 
+
+<apex:inputHidden value="{!pageLoad}"/> 
+<apex:outputPanel id="YOTDSinfo" layout="block" rendered="{!showYOTDS == True}" >
+        <apex:pageBlock tabStyle="YO_OperationConsultant__c" >
+            <apex:PageBlockSection title="Specialdrift" columns="1" collapsible="false">                
+                <table border = "0" cellpadding = "0" cellspacing = "0" id="table1">   
+                    <tr >
+                        <td > 
+                             <table cellpadding="0" cellspacing="0" border = "0" style="width:180px; table-layout:fixed;">
+                        <tr>
+                                   <td style="width:60px;"><img src = "{!userData.SmallPhotoUrl}"/></td>
+                                   <td style="width:80px; word-wrap:break-word;">
+                                       {!userData.Name}<br/>
+                                       {!userData.email}<br/>
+                                       {!userData.phone}
+                                   </td>
+                               </tr>                                                              
+                             </table>                                
+                        </td>
+                    </tr>                 
+                    <tr> 
+                        <td >
+                            <apex:outputText value="{!sectionInfo}" escape="false" />
+                        </td> 
+                    </tr>
+                 </table>   
+             </apex:PageBlockSection>
+            <apex:pageBlockSection columns="1" rendered="{!isAdmin ==True}"> 
+                            <apex:outputLink value="/{!sectionInfoId}" target="_blank" ><b>Rediger</b></apex:outputLink> 
+            </apex:pageBlockSection> 
+            <apex:pageBlockSection columns="1">
+                <table>
+                    <tr>
+                        <td>
+                            <apex:outputText value="{!sectionTextInfo}" escape="false" />
+                        </td>
+                    </tr>
+                </table>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection columns="1" rendered="{!isAdmin ==True}">
+                            <apex:outputLink value="/{!sectionTextInfoId}/e" target="_blank" ><b>Rediger</b></apex:outputLink> 
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+    </apex:outputPanel>
+    <!------------------vagtinfo Section--------------------------------->
+    <apex:outputPanel id="Vagtinfo" layout="block" rendered="{!showVagtInfo == true}">
+        <apex:pageBlock tabStyle="YO_OperationConsultant__c">
+            <apex:PageBlockSection title="VagtInfo"  columns="1" collapsible="false">
+                <table border = "0" cellpadding = "0" cellspacing = "0" >   
+                    <tr >
+                        <td > 
+                             <table cellpadding="0" cellspacing="0" border = "0" style="width:180px; table-layout:fixed;">
+             <!--          <tr>
+                                   <td style="width:60px;"><img src = "{!userData.SmallPhotoUrl}"/></td>
+                                   <td style="width:80px; word-wrap:break-word;">
+                                       {!userData.Name}<br/>
+                                       {!userData.email}<br/>
+                                       {!userData.phone}
+                                   </td>
+                               </tr>                        -->                           
+                             </table>                                
+                        </td>
+                    </tr>                 
+                    <tr> 
+                        <td >
+                            <apex:outputText value="{!sectionInfo}" escape="false" />
+                        </td> 
+                    </tr>
+                </table>
+            </apex:PageBlockSection>
+            <apex:pageBlockSection columns="1" rendered="{!isAdmin ==True}"> 
+                            <apex:outputLink value="/{!sectionInfoId}" target="_blank" ><b>Rediger</b></apex:outputLink> 
+            </apex:pageBlockSection> 
+            <apex:pageBlockSection columns="1">
+                <table>
+                    <tr>
+                        <td>
+                            <apex:outputText value="{!sectionTextInfo}" escape="false" />
+                        </td>
+                    </tr>
+                </table>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection columns="1" rendered="{!isAdmin ==True}">
+                            <apex:outputLink value="/{!sectionTextInfoId}/e" target="_blank" ><b>Rediger</b></apex:outputLink> 
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+    </apex:outputPanel> 
+    
+    <apex:pageBlock tabStyle="YO_OperationConsultant__c" rendered="{!showBookingInfo}">
+    <apex:PageBlockSection title="YK Booking" columns="1" collapsible="false">
+        <apex:OutputPanel >
+<!--             <apex:repeat value="{!listInfo}" var="bi">-->
+<!--                  <apex:outputText value="{!bi.Information__c}" escape="false"></apex:outputText>-->
+<!--            </apex:repeat>-->
+                <table>
+                    <tr>
+                        <td>Auto:</td>
+                        <td>{!ddmmyyDateFAuto}</td>
+                    </tr>
+                    <tr>
+                        <td>Stik:</td>
+                        <td>{!ddmmyyDateFStik}</td>
+                    </tr>
+                    <tr>
+                        <td>Fiber:</td>
+                        <td>{!ddmmyyDateFFiber}</td>
+                    </tr>
+                </table>
+            <br/>
+            
+            <apex:repeat value="{!listInfo}" var="bi">
+                <apex:outputText value="{!bi.Information__c}" escape="false"></apex:outputText>
+            </apex:repeat>
+            <br/><br/>
+            <apex:outputPanel rendered="{!isAdmin ==True}">
+                 <apex:outputLink value="/{!operationConsultantKeyPrefix}/o" target="_blank"><b>Rediger</b></apex:outputLink>
+            </apex:outputPanel>
+        </apex:OutputPanel>
+    </apex:PageBlockSection>
+</apex:pageBlock> 
+    
+    <apex:pageBlock tabStyle="YO_OperationConsultant__c" rendered="{!showYKInfo}">
+      <apex:PageBlockSection title="YK Info" columns="1" collapsible="false">
+          <apex:outputPanel >
+              <apex:repeat value="{!listInfo}" var="YkInfo">
+                  <apex:outputText value="{!YkInfo.YK_Info__c}" escape="false"></apex:outputText>
+              </apex:repeat>
+          </apex:outputPanel>
+          <br/>       
+          <apex:outputPanel rendered="{!isAdmin ==True}">
+                  <apex:outputLink value="/{!operationConsultantKeyPrefix}/o" target="_blank"><b>Rediger</b></apex:outputLink>
+          </apex:outputPanel>      
+       </apex:PageBlockSection>    
+    </apex:pageBlock>
+    
+</apex:component>

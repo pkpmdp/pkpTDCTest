@@ -1,0 +1,73 @@
+<apex:page >
+<body>
+    <div>
+    <font face="">
+        <span style="COLOR: #333333; FONT-SIZE: 10pt">
+            <font face="Verdana,Helvetica,Sans-Serif">
+                <font size="2">
+                    <p>
+                        Nedenfor kan du åbne og se de&nbsp;nye Klikkelikker - højreklik og vælg åbn i nyt vindue/fane, eller klik som du plejer, så skal du blot gå tilbage i din browser for at komme tilbage til din forside.&nbsp;
+                    </p>
+                </font>
+            </font>
+        </span>
+    </font>
+    <span style="FONT-FAMILY: 'Times New Roman'; FONT-SIZE: 12pt">
+        <span style="FONT-FAMILY: 'Times New Roman'; COLOR: black; FONT-SIZE: 12pt">
+            <span style="COLOR: black; FONT-SIZE: 10pt"> 
+                <p style="MARGIN: 0cm 0cm 0pt" class="MsoNormal">
+                    <font face="Verdana">
+                        "Se Fodbold og hør musik på din pc" 
+                    </font>
+                    <a href="https://emea.salesforce.com/servlet/servlet.FileDownload?file=01520000000kiD8">
+                        <font color="#800080" face="Verdana">læs den her</font>
+                    </a>
+                </p> 
+                <p style="MARGIN: 0cm 0cm 0pt" class="MsoNormal">
+                    <!--?xml:namespace prefix = o ns = "urn:schemas-microsoft-com:office:office" /-->
+                            <font face="Verdana">&nbsp;</font>
+                </p> 
+                <p style="MARGIN: 0cm 0cm 0pt" class="MsoNormal">
+                    <font face="Verdana">
+                        "Få 30 film i 30 dage med YouSee Plus" 
+                    </font>
+                    <a href="https://emea.salesforce.com/servlet/servlet.FileDownload?file=01520000000kiD3">
+                        <font color="#800080" face="Verdana">læs den her</font>
+                    </a>
+                </p> 
+                <p style="MARGIN: 0cm 0cm 0pt" class="MsoNormal">
+                        <font face="Verdana">&nbsp;</font>
+                </p> 
+                <p style="MARGIN: 0cm 0cm 0pt" class="MsoNormal">
+                    <font face="Verdana">
+                        "Køb Bredbånd og få Web-tv og musik" 
+                    </font>
+                    <a href="https://emea.salesforce.com/servlet/servlet.FileDownload?file=01520000000kiCy">
+                        <font color="#800080" face="Verdana">læs den her</font>
+                    </a>
+                </p> 
+                <p style="MARGIN: 0cm 0cm 0pt" class="MsoNormal">
+                        <font face="Verdana">&nbsp;</font>
+                </p> 
+                <p style="MARGIN: 0cm 0cm 0pt" class="MsoNormal">
+                    <font face="Verdana">"YouSee Plus - saadan gør du" </font>
+                    <a href="https://emea.salesforce.com/servlet/servlet.FileDownload?file=01520000000kiCt">
+                        <font color="#800080" face="Verdana">læs den her</font>
+                    </a>
+                </p> 
+                <p style="MARGIN: 0cm 0cm 0pt" class="MsoNormal"></p>
+            </span> 
+            <p style="MARGIN: 0cm 0cm 0pt" class="MsoNormal">
+                <font size="2" face="Verdana,Helvetica,Sans-Serif"></font>
+            </p> 
+            <p style="MARGIN: 0cm 0cm 0pt" class="MsoNormal">
+                <font face="Verdana,Helvetica,Sans-Serif">&nbsp;</font>
+            </p> 
+            <p style="MARGIN: 0cm 0cm 0pt" class="MsoNormal">
+                <strong><font face="Verdana,Helvetica,Sans-Serif">God fornøjelse!</font></strong>
+            </p>
+        </span>
+    </span>
+</div>
+</body>
+</apex:page>

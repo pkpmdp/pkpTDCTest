@@ -1,0 +1,3 @@
+<apex:page controller="Amazon_DocUploadMultiCU_CT" action="{!uploadMulti}">
+    Uploading files to mulitple Cable Units....
+</apex:page>

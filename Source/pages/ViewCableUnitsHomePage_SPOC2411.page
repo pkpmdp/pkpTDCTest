@@ -1,0 +1,442 @@
+<apex:page showHeader="false" sidebar="false"  id="pageID" name="ViewCable" controller="ViewCableUnitsController_SPOC2411" readOnly="true" applyHtmlTag="false">
+   <html class="cvi2015">
+       <apex:includescript value="https://code.jquery.com/jquery-1.12.0.min.js" />
+        <apex:includescript value="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js" />
+        <apex:stylesheet value="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.min.css" />
+    <head>
+        <style>
+             <!--.sorting_disabled{text-align: center;}  -->
+            table.dataTable thead th, table.dataTable tbody td{padding: 3px 14px;}
+            .mainTitle
+            {
+                font-family: "Times New Roman", Times, serif !important;
+                font-size: 13px;
+                font-weight: bold;
+            }
+            .headerRow div
+            {
+                  color: white;
+                  font-family: "Times New Roman", Times, serif !important;
+                  font-size: 13px;
+                  font-weight: bold;
+            }
+            .list tr.even td, .list tr.odd td {
+            border-bottom-width: 1px;
+            word-break : break-all;
+            }
+            .custPopup
+            {
+                background-color: white;
+                border-width: 2px;
+                border-style: solid;
+                z-index: 9999;
+                left: 61%;
+                padding:10px;
+                position: fixed;
+                /* These are the 3 css properties you will need to change so the popup 
+                displays in the center of the screen. First set the width. Then set 
+                margin-left to negative half of what the width is. You can add 
+                the height property for a fixed size pop up if you want.*/
+                width: 500px;
+                margin-left: -355px;
+                top: 300px;
+            }
+            .popupBackground
+            {
+                background-color:black;
+                opacity: 0.30;
+                filter: alpha(opacity = 20);
+                position: fixed;
+                width: 100%;
+                height: 100%;
+                top: 0;
+                left: 0;
+                z-index: 9998;
+            }
+            table.dataTable thead .sorting_asc {
+        background-color: #676767;
+       }
+       table.dataTable thead .sorting_desc{
+        background-color: #676767;
+       }
+        table.dataTable thead .sorting {
+        background-color: #676767;
+       }
+        table.dataTable tr.odd { background-color: #CAE6C4;  border:1px lightgrey;}
+    table.dataTable tr.even{ background-color: white; border:1px lightgrey; }
+            .no-footer{margin-top: -22px;}
+            html.cvi2015 .btn{min-height: 0px;min-width: 0px;}
+        </style>
+<script type="text/javascript">
+function breakout_of_frame(){
+  if (top.location != location) {
+    top.location.href = document.location.href;
+  }
+}
+breakout_of_frame();
+
+</script>
+        <style>
+            table tr {
+            line-height: 19px;
+        }
+        </style>
+</head>
+<body id="servicepage">
+    <script type="text/javascript">
+    j$=jQuery.noConflict();
+    var PBTableId;
+    j$(document).ready(function() {
+        PBTableId=j$('[id$="PBTableId"]').DataTable({
+            "columnDefs": [ {
+      			"orderable": false,
+                "targets"  : [3,4,5] 
+    }],
+            //"scrollY": "277px",
+            "scrollCollapse": true,
+            "ordering":true,
+            //"order": [[ 0, "asc" ]],
+            "paging":false,
+            "language":{
+                "info": "Vis _START_ til _END_ af _TOTAL_ poster",
+                 "infoEmpty": "Vis 0 til 0 af 0 poster",
+                 "search": "Søg",
+    		     "infoFiltered":   "(filtreret fra _MAX_ poster)",
+    			"loadingRecords": "Henter...",
+    		    "zeroRecords":    "Ingen poster fundet",
+                "emptyTable": "Ingen data fundet"
+                }
+        });
+        });
+</script>
+<script type="text/javascript" src="{!siteCoreUrl}/sitecore/content/data/export/export.aspx?itemguid={59DE8AFC-9FE8-40A1-8323-9DA9602F870A}&functions=true"></script>
+<!-- <script type="text/javascript" src="https://yousee.dk/sitecore/content/data/export/export.aspx?itemguid={59DE8AFC-9FE8-40A1-8323-9DA9602F870A}&functions=true"></script>-->
+<script type="text/javascript">printHeader();</script>
+<script type="text/javascript">printTopMenu();</script>
+<script type="text/javascript">printContentAreaBegin();</script>
+<apex:stylesheet value="{!URLFOR($Resource.scStyleCss,'myStyle/myStyle.css')}"/>
+<apex:includescript value="//code.jquery.com/jquery-1.11.1.min.js" />
+        <apex:includescript value="//cdn.datatables.net/1.10.4/js/jquery.dataTables.min.js" />
+        <apex:stylesheet value="//cdn.datatables.net/1.10.4/css/jquery.dataTables.css" />    
+<style>
+.listAlign {  margin:2px 0px 1px 2px; display: block;} 
+.profileDisplay{display: none;}
+.parenttopAlign {margin:1px 0px 1px 2px; display: block;} 
+</style>
+
+<style>
+
+       .list .headerRow TH{background-color:#676767;color:#ffffff;font-weight:bold;!important;}
+       .list .headerStyleLeft TH{background-color:#676767;color:#ffffff;text-align:left;font-weight:bold;!important;}
+       .list .headerStyleCenter TH{background-color:#676767;color:#ffffff;text-align:center;font-weight:bold;!important;}     
+      // .container{ overflow-x:hidden;overflow-y:auto; height:210px; width:133%; } 
+       //.container{ overflow-x:hidden;overflow-y:auto; height:210px; width:100%; } 
+       // .container2{ overflow-x:hidden;overflow-y:auto; height:230px; width:133%; } 
+   
+</style>
+
+<script type="text/javascript"> 
+var userProfile  = '{!$Profile.Name}';
+var portalAdminUser = '{!portalAdminUser}';
+var portalBrugerRole = '{!portalBrugerRole}';
+var statusFlag = true;
+var contactRoleName = '{!contactRolename}';
+//To check the status of logged in user
+
+function chkStatus(){
+    var currentStatus = '{!contactStatus}';
+    if(currentStatus == 'Inaktiv'){
+        statusFlag = false;
+        //document.location.href="https://c.cs2.visual.force.com/secur/logout.jsp";
+        document.location.href="/secur/logout.jsp";
+    }
+ }
+
+function setParentMenu(){
+    //alert('In setParentMenu');
+    //alert(document.getElementById('inunion'));
+   var myParentlist=document.getElementById('inunion');
+   if(myParentlist != null ){
+       var myChildlist = myParentlist.childNodes;
+       for (p=0; p<myChildlist.length; p++){
+             var mP=myChildlist[p].childNodes;
+            for (j=0; j<mP.length; j++){
+                var mS=mP[j].childNodes;
+                if(mP[j].nodeName=="LI"){
+                  mP[j].className='parenttopAlign ';
+                }
+            }
+        }
+        }
+}
+function checkProfile(){
+//alert('contactRoleName-'+contactRoleName);
+     var newURL;
+     newURL = window.location.protocol + "//" + (window.location.host).replace("//","/")+ '{!$Site.Prefix}';
+     var exURL;
+     
+    setParentMenu();
+     //alert('role is :#'+contactRoleName+'#');
+     var profileList=document.getElementById('productnavigation').childNodes;
+     
+     for (var p=0; p < profileList.length; p++){
+        var listcount = 0;
+       //  alert('profileList[p].nodeName '+profileList[p].nodeName);
+         var parentList = profileList[p].childNodes;
+         for(var q=0; q<parentList.length; q++)
+             {
+          //   alert('parentList[q].nodeName '+parentList[q].nodeName);
+             var childList = parentList[q].childNodes;
+         //    alert('childList '+childList[0].nodeName);
+            
+        if(childList[0].nodeName=='UL'){
+                  var mUL=childList[0].childNodes;
+                  for (var i=0; i < mUL.length; i++){
+                     // alert('mUL[i].nodeName '+mUL[i].nodeName);
+                     if(mUL[i].nodeName == 'LI' ){
+                           // mUL[i].className='listAlign';
+                            if(contactRoleName != null || contactRoleName != ''){
+                                   if(userProfile  != portalAdminUser && i == 1 && contactRoleName == changePortalBrugerRole) {
+                                     //  listcount = listcount + 1;
+                                      mUL[i].className+=' profileDisplay';
+                                   }
+                                   listcount = listcount + 1;
+                                   var mA = mUL[i].childNodes;
+                                   for(a=0; a< mA.length; a++){
+                                   var mB = mA[a].childNodes;
+                                      switch(listcount){
+                                       case 1 : 
+                                              exURL = newURL + '/apex/ViewCableUnitsHomePage';
+                                              mA[a].setAttribute('href',exURL);
+                                              break;
+                                       case 2 : 
+                                             exURL = newURL + '/apex/ManagePortalUsersPage';
+                                             mA[a].setAttribute('href',exURL);
+                                             break;
+                                        case 3 : 
+                                             exURL = newURL + '/apex/EditContactDispatcherPage?loggedInUserRoleName='+ contactRoleName;
+                                             mA[a].setAttribute('href',exURL);
+                                             break;
+                                        case 4 : 
+                                             exURL = newURL + '/secur/logout.jsp';
+                                            // exURL = {!$Site.Prefix} + '/secur/logout.jsp';
+                                             mA[a].setAttribute('href',exURL);
+                                            break;   
+                                   }
+       
+                                   }
+                             }
+                       }
+               }    }
+          }
+   }
+    
+ }
+ document.onload = chkStatus();
+ 
+ if(statusFlag){
+     document.onload = checkProfile();
+  }
+  
+  </script>
+<script>
+function imageStatus(){
+  var status=document.getElementById("pageID:j_id0:j_id2:j_id3:PBID:PBTableId:0:statusImage").value;
+  var status2=document.getElementById("{!$Component.PBID:PBTableId:0:statusImage}").value;
+}
+</script>
+<!-- <div id="jsErrorSection" style="display:none;font-family:Verdana;">
+    <table border="0" cellpadding="0" cellspacing="0" class="messageTable" style="padding:0px;margin:0px;">
+        <tr valign="top">
+            <td>
+                <img alt="Fejl" src="/s.gif" class="msgIcon" title="ERROR" />
+            </td>
+            <td class="messageCell">
+                <div class="messageText">
+                    <span style="color:#cc0000">
+                        <h4>Fejl:</h4>
+                    </span> 
+                <div id="jsErrorText"></div>
+                <br/>
+                </div>
+            </td>
+        </tr>
+    </table>
+ </div> -->
+<script>
+function chkHierarchyDetail(){
+    var hierarchyStatus = '{!hierarchyStatus}';
+    //alert('hierarchyStatus'+hierarchyStatus);
+    if(hierarchyStatus == ''){
+        //alert('$Check$')
+        document.getElementById("hierarchyValidationMsg").style.display = "block";
+        //document.getElementById("jsErrorText").innerHTML = "Der er desværre sket en teknisk fejl på siden.Vi beklager naturligvis fejlen og arbejder på at få den rettet hurtigst muligt.";
+        return false;
+    }
+ }
+</script>
+<apex:form >  
+    <div id="hierarchyValidationMsg" style="display:none;height: 33px;padding-left: 50px;padding-top: 18px;border-color: red;color: grey;" class="mailError">
+            <apex:outputText id="Msg1" value="{!$Label.SC_commonError}"/>
+    </div>
+<apex:outputPanel layout="block" styleclass="container">
+    <div id="headText"> 
+    <table width="103%">
+        <tr style="line-height: 19px;">
+            <td>
+              <h1>{!$Label.SC_HomePageHeader}</h1><br></br>  
+                  {!$Label.SC_HomePageSubHeader}<br></br>&nbsp; 
+                  <div class="bullets"> 
+                      <ul>
+                         <li>{!$Label.SC_HomePageList}</li>
+                         <li>{!$Label.SC_HomePageList2}</li>
+                         <li>{!$Label.SC_HomePageList3}</li>
+                         <li>{!$Label.SC_HomePageList4}</li>
+                         <li>{!$Label.SC_HomePageList5}</li>
+                         <li>{!$Label.SC_HomePageList6}</li>
+                      </ul>
+                  </div>
+            </td>
+           <!-- <td><br/>
+                <span><apex:image url="{!$Resource.SC_HomePage}" /></span>
+            </td>-->
+        </tr>  
+    </table>
+    </div> 
+</apex:outputPanel>
+<apex:outputPanel >
+<table>
+    <tr>
+      <td colspan="2">{!$Label.SC_HomePageLabel}</td>
+    </tr>
+</table>
+</apex:outputPanel><br/>
+<!--  <apex:pageMessages /> -->
+<apex:messages globalOnly="true" styleClass="mailError" rendered="true"/><br/>
+<apex:stylesheet value="{!URLFOR($Resource.scrowOddEvenStyle)}"/>
+<!-- --------------------Start of fixed header---------------------------------------- -->
+<!-- <apex:actionFunction name="checkContactHierarchy1" action="{!checkContactHierarchy}"/> -->
+<apex:outputPanel rendered="{!cUList.size > 0}"> 
+  <!--  <apex:outputPanel rendered="{!cUList.size > 0 && hierarchyStatus != null}">
+        <table BGCOLOR="#DADAFF" border="0" width="100%">
+          <tr>
+            <th width="11%" align="center"><FONT COLOR="#000000" ><B>Kundenr</B></FONT></th> <!-- sf160change --><!--
+            <th width="22%" align="center"><FONT COLOR="#000000" ><B>Kundenavn</B></FONT></th> <!-- sf160change --><!--
+            <th width="41%" align="center"><FONT COLOR="#000000" ><B>Løsning</B></FONT></th>
+            <!-- <th width="5%" align="center"><FONT COLOR="#000000" ><B>Status</B></FONT></th> --><!--
+            <th width="5%" align="left"><IMG SRC="{!$Resource.tv}"></IMG></th>
+            <th width="5%" align="left"><IMG SRC="{!$Resource.Bredband}"></IMG></th>
+            <th width="5%" align="left"><IMG SRC="{!$Resource.telephone}"></IMG></th>
+          </tr>
+        </table>
+    </apex:outputPanel>-->
+
+<!-- --------------------End of fixed header---------------------------------------- -->
+    <apex:outputPanel layout="block" styleclass="container">
+      <apex:pageBlock id="PBID"> 
+      <apex:actionFunction name="exportCableUnits" action="{!exportExcel}"/>
+        <!-- Changed the width from 890px to 929px -->
+        <apex:pageBlockTable id="PBTableId" rendered="{!cUList.size > 0 && hierarchyStatus != null}" value="{!cUList}" var="cu" rowClasses="even,odd" border="0" style="width:895px; height:130px;">
+         <!--  <apex:column value="{!cu.CableUnitNumber}" width="20%" headerValue="Kundenr" headerClass="headerStyle"/>
+           <apex:column value="{!cu.cableUnitName}" width="20%" headerValue="Kundenavn" headerClass="headerStyle"/> --> 
+           <!--<apex:column headerValue="Kundenr" width="4%">
+          <apex:outputLink value="{!$Site.Prefix}/apex/CableUnitdetailsPage"><apex:outputText value="{!cu.CableUnitNumber}" /></apex:outputLink>
+              
+          </apex:column> -->
+            <apex:column headerClass="headerStyleLeft" width="14%" headerValue="Kundenr">
+              <apex:outputPanel rendered="{!cu.cableUnitEnabled}">  
+               <!--<apex:outputlink value="{!$Site.Prefix}/apex/CableUnitdetailsPage" style="color:black;">--> 
+                   <apex:outputlink value="{!$Site.Prefix}/apex/CableUnitdetailsPage_SPOC2411" style="color:black;"> 
+                {!cu.CableUnitNumber}
+                <apex:param name="cableunitnumber" value="{!cu.cableUnitNumber }"/>
+                <apex:param name="accountId" value="{!cu.accountId}"/>  
+                <apex:param name="loggedInUserRoleName" value="{!contactRolename}"/>
+                <apex:param name="cableName" value="{!cu.cableUnitName}"/> 
+                <apex:param name="portalAdminUser" value="{!portalAdminUser}"/>
+               </apex:outputLink>
+              </apex:outputPanel>
+              <apex:outputPanel rendered="{!NOT(cu.cableUnitEnabled)}">
+                {!cu.CableUnitNumber}
+              </apex:outputPanel>
+            </apex:column>
+          <apex:column value="{!cu.cableUnitName}" width="25%" headerValue="Kundenavn" headerClass="headerStyle"/> 
+           <apex:column value="{!cu.solution}" width="50%" headerValue="Løsning" headerClass="headerStyle"/> 
+           <!-- <apex:column headerClass="headerStyleLeft" width="10%">
+            <apex:outputLabel id="statusImage" value="{!$Resource.tv}" escape="false" />
+             </apex:column>-->
+          <!--<apex:column headerClass="headerStyleLeft" width="10%">
+              <apex:outputPanel rendered="{!cu.cableUnitEnabled}">  
+               <apex:outputlink value="{!$Site.Prefix}/apex/CableUnitdetailsPage" style="color:black;"> 
+                {!cu.CableUnitNumber}
+                <apex:param name="cableunitnumber" value="{!cu.cableUnitNumber }"/>
+                <apex:param name="accountId" value="{!cu.accountId}"/>  
+                <apex:param name="loggedInUserRoleName" value="{!contactRolename}"/>
+                <apex:param name="cableName" value="{!cu.cableUnitName}"/> 
+                <apex:param name="portalAdminUser" value="{!portalAdminUser}"/>
+               </apex:outputLink>
+              </apex:outputPanel>
+              <apex:outputPanel rendered="{!NOT(cu.cableUnitEnabled)}">
+                {!cu.CableUnitNumber}
+              </apex:outputPanel>
+            </apex:column> -->
+
+            <!--<apex:column value="{!cu.cableUnitName}"  headerClass="headerStyleLeft" width="22%"/>
+            <apex:column value="{!cu.solution}"  headerClass="headerStyleLeft" width="40%"/>             
+            <!-- <apex:column headerClass="headerStyleCenter" width="6%" id="statuscolId" style="text-align:center">
+               <apex:outputLabel id="statusImage" value="{!cu.cableUnitStatusImgHolder}" escape="false" />
+            </apex:column> -->
+            <apex:column headerClass="headerStyle" width="2%">
+               <apex:facet name="header"><IMG SRC="{!$Resource.tv}"></IMG></apex:facet>
+                <apex:image rendered="{!cu.tVService == $Label.SC_Ja}" url="{!$Resource.Ja_icon}"/>
+               <apex:image rendered="{!cu.tVService == $Label.SC_Nej}" url="{!$Resource.Nej_icon}" />
+            </apex:column>
+            <apex:column headerClass="headerStyle" width="2%">
+                <apex:facet name="header"><IMG SRC="{!$Resource.Bredband}"></IMG></apex:facet>
+                <apex:image rendered="{!cu.broadBandService == $Label.SC_Ja}" url="{!$Resource.Ja_icon}"/> 
+               <apex:image rendered="{!cu.broadBandService == $Label.SC_Nej}" url="{!$Resource.Nej_icon}" />
+            </apex:column>
+            <apex:column headerClass="headerStyle" width="2%">
+                <apex:facet name="header"><IMG SRC="{!$Resource.telephone}"></IMG></apex:facet>
+                <apex:image rendered="{!cu.telephonyService == $Label.SC_Ja}" url="{!$Resource.Ja_icon}" />
+               <apex:image rendered="{!cu.telephonyService == $Label.SC_Nej}" url="{!$Resource.Nej_icon}" />
+            </apex:column>
+        </apex:pageBlockTable>  
+      </apex:pageBlock>
+
+    </apex:outputPanel>
+    <!-- <apex:outputPanel layout="Centre" rendered="{!cUList.size > 0 && hierarchyStatus != null}">
+        <apex:commandButton value="{!$Label.SC_CableUnitExportToExcel}" action="{!exportExcel}"></apex:commandButton>
+    </apex:outputPanel> -->
+    <br> </br>
+    <apex:outputPanel layout="center" rendered="{!cUList.size > 0 && hierarchyStatus != null}">
+        <apex:commandButton value="{!$Label.SC_CableUnitExportToExcel}" action="{!exportExcel}" styleClass="dialogbutton_orange"></apex:commandButton>      
+    </apex:outputPanel>
+    
+</apex:outputPanel>
+<br> </br>
+ 
+<h2 style="font-size:medium;"><b>Symbolforklaring</b></h2>
+<!-- <br> </br>
+<apex:image url="{!$Resource.sc_cu_status_green}" /><apex:outputLabel value="I drift" />&nbsp; &nbsp; &nbsp; &nbsp;  
+<apex:image url="{!$Resource.sc_cu_status_yellow}" /><apex:outputLabel value="Under opsætning" />&nbsp; &nbsp; &nbsp; &nbsp; 
+<apex:image url="{!$Resource.sc_cu_status_grey}" /><apex:outputLabel value="Opsagt" />&nbsp; &nbsp; &nbsp; &nbsp; 
+<apex:image url="{!$Resource.sc_cu_status_black}" /><apex:outputLabel value="Uden aftale" />
+-->
+<br> </br>  
+<table style="width:920px;">
+   <tr>
+      <td><apex:image url="{!$Resource.tv}"  style="vertical-align:middle;"></apex:image></td>
+      <td><apex:outputLabel value="{!$Label.SC_HomePageTvText}"/></td>
+      <td><apex:image url="{!$Resource.Bredband}" style="vertical-align:middle;"/></td>
+      <td><apex:outputLabel value="{!$Label.SC_HomePageBBText}"/></td> 
+      <td><apex:image url="{!$Resource.telephone}" style="vertical-align:middle;"/></td>
+      <td><apex:outputLabel value="{!$Label.SC_HomePageTFText}"/></td>
+   </tr>
+</table>
+     
+</apex:form>
+<script type="text/javascript">printContentAreaEnd();</script>
+<script type="text/javascript">printFooter();</script>
+</body>
+</html>
+</apex:page>

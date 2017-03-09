@@ -1,0 +1,71 @@
+<apex:page standardController="Account" extensions="clsCustomerRelatedAddressesYKController" showHeader="false" sidebar="false" cache="true">
+  <script src="/support/console/28.0/integration.js" type="text/javascript"></script>
+  <apex:includeScript value="{!URLFOR($Resource.DynaTree_JS,'jquery/jquery.js')}"/>
+  <script>
+    function openSubTab(url,label,name,openimmediately) {
+      sforce.console.getEnclosingPrimaryTabId(function(primarytab){
+        sforce.console.openSubtab(primarytab.id , url, openimmediately, label, null, function(result){
+          // do any processing here if passes or fails, use result.success (boolean)
+        }, name);
+      });
+}
+  </script>
+  
+  <apex:pageMessages />
+  <div id="detailPage">
+  <apex:pageBlock id="idCustomerRelatedAddresses">
+    <apex:pageBlockSection >
+       <!-- <apex:outputLink value="/apex/AccountEditAddresses?id={!accountId}" target="_parent">{!$Label.Edit_Addresses}</apex:outputLink>-->
+    </apex:pageBlockSection>   
+    <apex:pageBlockTable value="{!addresses}" var="item" id="idAddressesTable" >
+        <apex:column headerValue="{!$Label.Customer_Address_Type_Label}" value="{!item.addressType}"/>
+        <apex:column headerValue="{!$ObjectType.Address__c.fields.Name.label}" >
+           <apex:outputLink value="{!URLFOR($Action.Address__c.View, item.address.id)}" target="_blank" rendered="{!IF(item.address.id != null, true , false)}">{!item.address.Full_Address__c}</apex:outputLink> 
+        </apex:column>
+        <apex:column headerValue="{!$ObjectType.Net_Installations__c.Fields.Cable_Unit_No__c.Label}">
+            <apex:outputLink value="/apex/CableUnitRedirect?CableUnitNo={!item.cableUnitNo}" target="_blank" styleClass="viewLink">{!item.cableUnitNo}</apex:outputLink>
+        </apex:column> 
+       
+        <apex:column headerValue="Stik Status">
+            <apex:outputText value="{!item.installationsStatus}">&nbsp;</apex:outputText>
+        </apex:column>
+        <apex:column headerValue="{!$ObjectType.Customer_Related_Address__c.fields.Cable_Type__c.label}">
+            <apex:outputText value="{!item.cableType}">&nbsp;</apex:outputText>
+        </apex:column>
+    </apex:pageBlockTable>
+  </apex:pageBlock>
+  </div>
+  <div id = "consolePage">
+  <apex:pageBlock id="idCustomerRelatedAddressesConsole">
+    <apex:pageBlockSection >
+        <apex:outputLink value="#" onclick="openSubTab('/apex/AccountEditAddresses?id={!accountId}','Edit Addresses','Edit Addresses',true);return false;">{!$Label.Edit_Addresses}</apex:outputLink>
+    </apex:pageBlockSection>
+    <apex:pageBlockTable value="{!addresses}" var="item" id="idAddressesTable" >
+        <apex:column headerValue="{!$Label.Customer_Address_Type_Label}" value="{!item.addressType}"/>
+        <apex:column headerValue="{!$ObjectType.Address__c.fields.Name.label}" >
+             <apex:outputLink value="#" onclick="openSubTab('{!URLFOR($Action.Address__c.View, item.address.id)}','Address','Address',true);return false;" rendered="{!IF(item.address.id != null, true , false)}">{!item.address.Full_Address__c}</apex:outputLink>
+        </apex:column>
+        <apex:column headerValue="{!$ObjectType.Net_Installations__c.Fields.Cable_Unit_No__c.Label}">
+            <apex:outputLink value="#" onclick="openSubTab('/apex/CableUnitRedirect?CableUnitNo={!item.cableUnitNo}','Cable Unit','Cable Unit',true);return false;" styleClass="viewLink">{!item.cableUnitNo}</apex:outputLink>
+        </apex:column> 
+        
+        <apex:column headerValue="Stik Status">
+            <apex:outputText value="{!item.installationsStatus}">&nbsp;</apex:outputText>
+        </apex:column>
+        <apex:column headerValue="{!$ObjectType.Customer_Related_Address__c.fields.Cable_Type__c.label}">
+            <apex:outputText value="{!item.cableType}">&nbsp;</apex:outputText>
+        </apex:column>
+    </apex:pageBlockTable>
+  </apex:pageBlock>
+  </div>  
+  <script>
+  if(sforce.console.isInConsole()){
+    $("#detailPage").hide();
+    $("#consolePage").show();
+  }
+  else{
+    $("#detailPage").show();
+    $("#consolePage").hide();
+  }
+  </script>
+</apex:page>

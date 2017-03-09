@@ -1,0 +1,73 @@
+<apex:component controller="PagingController">
+      <style>
+      	  .clsButton{
+      	  	width: 45px;
+			text-align: left;
+			font-family: Georgia;
+			text-shadow: 0 -1px 1px #999;
+			background: linear-gradient(bottom, #973105 20%, #E85D1D 53%, #FF802B 89%);
+			background: -moz-linear-gradient(bottom, #973105 20%, #E85D1D 53%, #FF802B 89%);
+			background: -ms-linear-gradient(bottom, #973105 20%, #E85D1D 53%, #FF802B 89%);
+			text-transform: none;
+			height: 20px;
+			border-width: 0px;
+			font-weight: bold;
+			padding: 0 15px;
+			border: 1px solid #930;
+			border-top: 1px solid #C30;
+			border-bottom: 1px solid #611A00; 
+      	  }
+      </style>
+
+      <div align="right"> 
+      <b>
+        <apex:attribute name="pageController" type="PageControllerBase" assignTo="{!pageController}"  required="true" 
+            description="The controller for the page." >
+        </apex:attribute>
+             
+        <!-- <apex:selectList value="{!pageSize}" size="1" onchange="changPaging();" rendered="{!requirePageChange}" >
+            <apex:selectOption itemValue="5" itemLabel="5"></apex:selectOption>
+            <apex:selectOption itemValue="10" itemLabel="10" ></apex:selectOption>
+            <apex:selectOption itemValue="20" itemLabel="20" ></apex:selectOption>
+            <apex:selectOption itemValue="50" itemLabel="50" ></apex:selectOption>
+            <apex:selectOption itemValue="0" itemLabel="Alle"></apex:selectOption>
+        </apex:selectList> -->
+      
+        <br/>
+        <apex:attribute name="userSelectedPage" description="This is the value of page user selected for the component." type="String" required="false"/>
+     	
+        <apex:outputLabel value="{!currentCountText}" rendered="true" style="text-align:left"></apex:outputLabel>
+        
+        <!-- <apex:outputLabel value="{!userSelectedPage}" rendered="{!NOT(ISNULL(currentCountText))}"></apex:outputLabel>&nbsp;&nbsp;&nbsp;&nbsp;<br></br>
+        <apex:commandLink action="{!first}" rendered="{!NOT(pageNumber == 1)}">Første</apex:commandLink> 
+        <apex:outputLabel value="Første" rendered="{!(pageNumber == 1)}" />&nbsp;
+        <apex:commandLink action="{!previous}" rendered="{!hasPrevious}">Forrige</apex:commandLink> 
+        <apex:outputLabel value="Forrige" rendered="{!NOT(hasPrevious)}" />&nbsp; 
+        <apex:commandLink action="{!next}" rendered="{!hasNext}">Næste</apex:commandLink> 
+        <apex:outputLabel value="Næste" rendered="{!NOT(hasNext)}" />&nbsp; 
+        <apex:commandLink action="{!last}" rendered="{!(hasNext)}" >Sidste </apex:commandLink> 
+         <apex:outputLabel value="Sidste" rendered="{!NOT(hasNext)}" />&nbsp; -->
+        
+        <apex:outputLabel value="{!userSelectedPage}" rendered="{!NOT(ISNULL(currentCountText))}"></apex:outputLabel>&nbsp;&nbsp;&nbsp;&nbsp;<br></br>
+        <apex:commandLink action="{!first}" rendered="{!NOT(pageNumber == 1)}">
+	        <apex:commandButton title="Første" rendered="{!NOT(pageNumber == 1)}" value="Første" styleClass="dialogbutton_orange"/>&nbsp;
+	    </apex:commandLink>    
+	    <apex:commandButton title="Første" value="Første" rendered="{!(pageNumber == 1)}" disabled="true" styleClass="dialogbutton_orange"/>&nbsp;
+	    <apex:commandLink action="{!previous}" rendered="{!hasPrevious}">
+			<apex:commandButton title="Forrige" rendered="{!hasPrevious}" value="Forrige" styleClass="dialogbutton_orange"/>&nbsp;
+		</apex:commandLink>
+		<apex:commandButton title="Forrige" rendered="{!NOT(hasPrevious)}" value="Forrige" disabled="true" styleClass="dialogbutton_orange"/>&nbsp;
+		<apex:commandLink action="{!next}" rendered="{!hasNext}">
+			<apex:commandButton title="Næste" value="Næste" rendered="{!hasNext}" styleClass="dialogbutton_orange"/>&nbsp;
+		</apex:commandLink>
+		<apex:commandButton title="Næste" value="Næste" rendered="{!NOT(hasNext)}" disabled="true" styleClass="dialogbutton_orange"/>&nbsp;
+		<apex:commandLink action="{!last}" rendered="{!(hasNext)}">
+			<apex:commandButton title="Sidste" rendered="{!(hasNext)}" value="Sidste" styleClass="dialogbutton_orange"/>
+		</apex:commandLink>	
+		<apex:commandButton title="Sidste" rendered="{!NOT(hasNext)}" value="Sidste" disabled="true" styleClass="dialogbutton_orange"/> 
+         
+      </b> 
+    </div>
+    <br/>
+    <apex:actionFunction name="changPaging" action="{!changPaging}"></apex:actionFunction>
+</apex:component>

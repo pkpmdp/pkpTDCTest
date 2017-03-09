@@ -1,0 +1,136 @@
+<apex:component >
+<style>
+.listAlign { margin: 0px 5px; display: block; }
+.profileDisplay{display: none;}
+.topAlign {  margin:2px 0px 1px 2px; display: block;}
+.parenttopAlign {  margin:1px 0px 1px 2px; display: block;} 
+.list .headerRow TH{background-color:#c2e4fe;color:#ffffff;text-align:left;font-weight:bold;!important;}
+.list .headerStyleLeft TH{background-color:#676767;color:#ffffff;text-align:left;font-weight:bold;!important;}
+.list .headerStyleCenter TH{background-color:#676767;color:#ffffff;text-align:center;font-weight:bold;!important;}     
+.container{ overflow-x:hidden;overflow-y:auto; height:210px; width:133%; } 
+.container2{ overflow-x:hidden;overflow-y:auto; height:230px; width:133%; } 
+</style>
+<apex:stylesheet value="{!URLFOR($Resource.styleCss,'myStyle/myStyle.css')}"/>
+
+<script type="text/javascript"> 
+
+ 
+function setParentMenu()
+{
+     newURL = window.location.protocol + "//" + (window.location.host).replace("//","/");
+    document.getElementById("logo").href=newURL + "/apex/forhandlerHomePage";
+    
+   
+    
+    
+    var productList=document.getElementById('productnavigation').childNodes;
+    
+    var productList=document.getElementById('productnavigation').childNodes;
+    var exURL;
+    
+    for (p=0; p<productList.length; p++){
+            var mP=productList[p].childNodes;
+            for (j=0 ; j < mP.length; j++){
+                
+                if(mP[j].nodeName!="LI"){
+                    var mS=mP[j].childNodes;
+                    for (k=0 ; k < mS.length; k++){
+                        if(k==0){
+                            if(mS[k].nodeName!="LI"){
+                                exURL = newURL + '/apex/ChangePasswordPage';
+                                mS[k].setAttribute('href',exURL);
+                                break;
+                            }
+                        }
+                    }
+                }else{
+                    var mS=mP[j].childNodes;
+                    for (k=0 ; k < mS.length; k++){
+                        if(k==0){
+                            if(mS[k].nodeName!="LI"){
+                                exURL = newURL + '/apex/ManualFormsPage';
+                                mS[k].setAttribute('href',exURL);
+                                break;
+                            }
+                        }
+                    }    
+                }   
+            }
+    }
+    var exURL;
+    
+    var myParentlist=document.getElementById('topnavigation').childNodes;
+    for (p=0; p<myParentlist.length; p++){
+        var listCount=0;
+        
+        var mP=myParentlist[p].childNodes;
+        for (j=0; j<mP.length; j++){
+            var mS=mP[j].childNodes;
+            for (k=0 ; k < mS.length; k++){
+                
+                if(mS[k].nodeName=="LI"){
+                    listCount = listCount + 1;
+                    mS[k].className='parenttopAlign ';
+                }
+                
+            var mA=mS[k].childNodes;
+            for (a=0; a < mA.length; a++){
+            var mB = mA[a].childNodes;
+            
+                switch(listCount){
+                    case 1 : 
+                        exURL = newURL + '/apex/DealerCustomerSearch';
+                        mA[a].setAttribute('href',exURL);
+                        break;
+                    case 2 : 
+                
+                        exURL = newURL + '/apex/DealerExchangeInShopSearchPage';
+                        mA[a].setAttribute('href',exURL);
+                        break;
+                    case 3 : 
+                    
+                        exURL = newURL + '/apex/BlackListedCustomersPage?pageType=BlacklistedCustomers';
+                        mA[a].setAttribute('href',exURL);
+                        break;
+                    case 4 :
+                       
+                        exURL = newURL + '/apex/ManualFormsPage';
+                        mA[a].setAttribute('href',exURL);
+                        //setBlanketter('Blanketter');
+                        break;
+                    case 5 :
+                        
+                        exURL = newURL + '/apex/HelpSupportPage?pageType=HelpSupport';
+                        mA[a].setAttribute('href',exURL);
+                    //  setBlanketter('HelpAndSupport   ');
+                        break;
+                    case 6 :
+                    
+                        exURL = newURL + '/apex/DealerProductPage';
+                        mA[a].setAttribute('href',exURL);
+                        break;
+                    case 7 : 
+                    
+                        exURL = newURL + '/apex/VaremodtagelsePage';
+                        mA[a].setAttribute('href',exURL);
+                        break;
+                    case 8 : 
+                    
+                        exURL = newURL + '/apex/NyttigInfoPage?pageType=NyttigInfo';
+                        mA[a].setAttribute('href',exURL);
+                        break;
+                    }
+            }   
+        }
+    }
+}
+    
+}
+
+
+
+
+document.onload = setParentMenu();
+</script>
+
+</apex:component>

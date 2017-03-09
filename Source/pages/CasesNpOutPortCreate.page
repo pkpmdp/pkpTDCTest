@@ -1,0 +1,22 @@
+<apex:page standardController="Case" extensions="clsCasesNpOutPortCreateController" title="{!$Label.NP_Out_port_Order}: {!$Label.New_NP_Out_port}" showHeader="true" sidebar="true">
+    <apex:sectionHeader title="{!$Label.NP_Out_port_Order}" subtitle="{!$Label.New_NP_Out_port}"/>
+    <apex:form id="formID">
+        <apex:pageBlock title="{!$Label.NP_Out_port_Order}" mode="edit" id="Detail">
+            <apex:pageMessages />
+            <apex:pageBlockButtons >
+                <apex:commandButton value="{!$Label.Save}" action="{!save}"/>
+                <apex:commandButton value="{!$Label.Cancel}" action="{!cancel}"/>
+            </apex:pageBlockButtons>
+            <apex:pageBlockSection title="{!$Label.NP_Information}" columns="1" id="NpInformation">
+                <apex:inputField value="{!npOrder.Customer_Number__c}" required="true"/>
+                <apex:inputField value="{!Case.Origin}" required="true"/>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection title="{!$Label.Case_Information}" columns="1" id="CaseInformation">
+                <apex:outputField value="{!Case.Department__c}" id="dept"/>
+                <apex:outputField value="{!Case.Product_2__c}" id="prod"/>
+                <apex:outputField value="{!Case.Type_Task__c}" id="typetask"/>
+                <apex:outputField value="{!Case.Status}" id="status"/>
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

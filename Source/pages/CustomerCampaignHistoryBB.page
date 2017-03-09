@@ -1,0 +1,59 @@
+<apex:page standardController="Account" extensions="clsProductsYKController_V3" showHeader="false" sidebar="false" cache="true" action="{!updateCampaignHistory}">
+  <style>
+    .activeTab {background-color: #1797C0; color:white; background-image:none;-webkit-border-radius:10px; -moz-border-radius:10px; padding:5px;}
+    .inactiveTab { background-color: #D6ECF3; color:black; background-image:none; -webkit-border-radius:10px; -moz-border-radius:10px; padding:5px;}
+    .headerClass { text-align:right }
+    .viewLink {font-size: 8pt; font-weight:bold}
+    .latestUsageGrid td {vertical-align:top}
+  </style>
+  <!-- script type="text/javascript" src="http://www.dillerdesign.com/experiment/DD_roundies/DD_roundies_0.0.2a-min.js"></script -->
+  <script type="text/javascript">DD_roundies.addRule('.activeTab', '5px');</script>
+  <apex:pageMessages />
+  <apex:form id="form">       
+    <apex:pageBlock id="productPageBlock">    
+      <apex:inputHidden value="{!Account.Customer_No__c}"/>
+      <apex:inputHidden value="{!Account.Currency_Format__c}"/>
+      <apex:outputField value="{!Account.Street_YK__r.External_Id__c}" rendered="false"/>
+      <apex:tabPanel switchType="client" height="200px" value="{!currentTab}" tabClass="activeTab" inactiveTabClass="inactiveTab" id="focusTab">            
+              
+
+        <apex:tab label="{!$Label.Campaign_History}" labelWidth="150px" id="campaignHistoryTab" status="campaignHistoryStatus" ontabenter="checkUpdateCampaignHistory()">
+          <apex:outputText rendered="{!displayErrMsg}" value="{!errMsg}" />
+          <apex:actionStatus rendered="{!!displayErrMsg}" startText="Requesting..." id="campaignHistoryStatus">
+            <apex:facet name="stop"> 
+              <apex:pageBlockTable value="{!campaignHistory}" var="campaign" id="campaignHistoryTable" rules="rows">
+                <apex:column title="{!campaign.mouseOverText}" headerValue="{!$Label.Subject}" >
+                  <apex:outputLink rendered="{!IF(campaign.contentURL != '', true, false)}" value="{!campaign.contentURL}" target="_blank" id="scriptLink" styleClass="viewLink">{!campaign.subject}</apex:outputLink>
+                  <apex:outputText rendered="{!IF(campaign.contentURL == '', true, false)}" value="{!campaign.subject}" styleClass="viewLink" />
+                </apex:column>
+                <apex:column headerValue="{!$Label.Category}" value="{!campaign.category}"/>
+                <apex:column headerValue="{!$Label.Type}" value="{!campaign.type}"/>
+                <apex:column headerValue="{!$Label.Sender}" value="{!campaign.sender}"/>
+                <apex:column headerValue="{!$Label.Receiver}" value="{!campaign.receiver}"/>
+                <apex:column headerValue="{!$Label.Campaign_Time}" value="{!campaign.timeDate}"/>
+                <apex:column headerValue="{!$Label.Campaign_Status}" value="{!campaign.responseStatus}"/>
+              </apex:pageBlockTable>   
+            </apex:facet>
+          </apex:actionStatus>
+        </apex:tab>
+
+      </apex:tabPanel>              
+    </apex:pageBlock>       
+    <apex:actionFunction name="updateCampaignHistory" action="{!updateCampaignHistory}" rerender="campaignHistoryTable" status="campaignHistoryStatus"/> 
+    <!--<apex:actionFunction name="updateOfferProducts" action="{!updateOfferProducts}" rerender="overnightProductsTable, sasProductTable" status="offerProductsStatus"/>     
+    <apex:actionFunction name="updateExistingProducts" action="{!updateExistingProducts}" rerender="existingProductsTable" status="existingProductsStatus"/> 
+    <apex:actionFunction name="updateLatestProductUsage" action="{!updateLatestProductUsage}" rerender="productUsageTable,latestProductUsageTable,returnPathActivatedTable,bbHistoryTable" status="latestProductUsageStatus"/>
+    <apex:actionFunction name="updatePotentialProducts" action="{!updatePotentialProducts}" rerender="potentialProductsTable" status="potentialProductsStatus"/> -->
+    <script>      
+      campaignHistory = false;
+      
+      function checkUpdateCampaignHistory() {
+        if ( ! campaignHistory ) {
+          updateCampaignHistory();
+          campaignHistory = true;
+        }
+      }
+         
+    </script>
+  </apex:form>
+</apex:page>

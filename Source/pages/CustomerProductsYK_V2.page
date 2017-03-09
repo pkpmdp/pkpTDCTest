@@ -1,0 +1,115 @@
+<apex:page standardController="Account" extensions="clsProductsYKController_V2" showHeader="false" sidebar="false" cache="true">
+  <style>
+    .activeTab {background-color: #8a9ebe; color:white; background-image:none }
+    .inactiveTab { background-color: #D3D3D3; color:black; background-image:none }
+    .headerClass { text-align:right }
+    .viewLink {font-size: 8pt; font-weight:bold}
+  </style>
+  <apex:pageMessages />
+  <apex:form >        
+    <apex:pageBlock >    
+      <apex:inputHidden value="{!Account.Customer_No__c}"/>
+      <apex:inputHidden value="{!Account.Currency_Format__c}"/>
+      <apex:outputField value="{!Account.Street_YK__r.External_Id__c}" rendered="false"/>
+      <apex:tabPanel switchType="client" height="200px" value="{!currentTab}" tabClass="activeTab" inactiveTabClass="inactiveTab">            
+        <apex:tab label="{!$Label.Product_Offers}" labelWidth="150px" id="offerProductsTab" status="offerProductsStatus" >
+          <apex:outputText rendered="{!displayNoOffers}" value="{!$Label.AccountHasNoProducts}" />              
+          <apex:actionStatus startText="Requesting..." id="offerProductsStatus">
+            <apex:facet name="stop"> 
+              <apex:pageBlock rendered="{!displayOffers}">
+                <apex:pageBlockButtons >
+                  <apex:commandButton value="{!$Label.Submit}" action="{!submitResponses}"/>
+                </apex:pageBlockButtons>
+                <apex:pageBlockTable rendered="{!displayOvernight}" value="{!overnightProducts}" var="product" id="overnightProductsTable" rules="rows" width="800px">
+                  <apex:column headerValue="{!$Label.email}" width="5%"> 
+                  	<apex:outputLink value="{!product.scriptUrl}"  target="_blank" id="scriptLink" styleClass="viewLink">{!$Label.View}</apex:outputLink>
+                  </apex:column>
+                  <apex:column headerValue="{!$Label.Name}" value="{!product.offerName}" width="20%"/>
+                  <apex:column headerValue="{!$Label.Effective_From}" value="{!product.effectiveFromDate}" width="10%"/>
+                  <apex:column headerValue="{!$Label.Expiration_Date}" value="{!product.expirationDate}" width="10%"/>
+                  <apex:column headerValue="{!$Label.Description}" value="{!product.description}" width="40%"/>
+                  <apex:column headerValue="{!$Label.Price}" value="{!product.sasPrice}" width="10%"/> 
+                  <apex:column headerValue="{!$Label.Response}" width="10%">
+                    <apex:selectList value="{!product.response}" size="1">
+                      <apex:selectOptions value="{!items}"/>
+                    </apex:selectList>
+                  </apex:column>
+                </apex:pageBlockTable> 
+	            <apex:pageBlockTable rendered="{!displaySAS}" value="{!sasProducts}" var="product" id="sasProductsTable" rules="rows" width="800px">
+	              <apex:column headerValue="{!$Label.Scripts}" width="5%">
+                  	<apex:outputLink value="{!product.scriptUrl}"  target="_blank" id="scriptLink" styleClass="viewLink">{!$Label.View}</apex:outputLink>
+                  </apex:column>
+                  <apex:column headerValue="{!$Label.Name}" value="{!product.offerName}" width="15%"/>
+                  <apex:column headerValue="{!$Label.Description}">
+                  	 <apex:outputText style="width:50%;height:75px;" value="{!product.description}"/>
+                  </apex:column>
+                  <apex:column headerValue="{!$Label.Street}" value="{!product.Street}" width="15%"/>
+                  <apex:column headerValue="{!$Label.Subscription}" value="{!product.subscription}" width="10%"/>
+                  <apex:column headerValue="{!$Label.Response}" width="10%">
+                    <apex:selectList value="{!product.response}" size="1">
+                      <apex:selectOptions value="{!items}"/>
+                    </apex:selectList>
+                  </apex:column> 
+                </apex:pageBlockTable>                 
+              </apex:pageBlock>
+            </apex:facet>
+          </apex:actionStatus>
+        </apex:tab>
+        <apex:tab label="{!$Label.Existing_Products}" labelWidth="150px" id="existingProductsTab" status="existingProductsStatus" ontabenter="checkUpdateExistingProducts()">
+          <apex:actionStatus startText="Requesting..." id="existingProductsStatus">
+            <apex:facet name="stop"> 
+              <apex:pageBlockTable value="{!existingProducts}" var="product" id="existingProductsTable" rules="rows">  
+                <apex:column headerValue="{!$Label.Business_Group}" value="{!product.businessGroup}"/>
+                <apex:column headerValue="{!$Label.Subscription}" value="{!product.subscription}"/>
+                <apex:column headerValue="{!$Label.Active}" value="{!product.active}"/>
+                <apex:column headerValue="{!$Label.Billing_Start}" value="{!product.billingStart}"/>
+                <apex:column headerValue="{!$Label.Billing_End}" value="{!product.billingEnd}"/>
+                <apex:column headerValue="{!$Label.Price}" value="{!product.account.Currency_Format__c}" headerClass="headerClass" style="text-align:right"></apex:column>
+              </apex:pageBlockTable>
+            </apex:facet>
+          </apex:actionStatus>
+        </apex:tab>          
+        <apex:tab label="{!$Label.Campaign_History}" labelWidth="150px" id="campaignHistoryTab" status="campaignHistoryStatus" ontabenter="checkUpdateCampaignHistory()">
+          <apex:actionStatus startText="Requesting..." id="campaignHistoryStatus">
+            <apex:facet name="stop"> 
+              <apex:pageBlockTable value="{!campaignHistory}" var="campaign" id="campaignHistoryTable" rules="rows">
+                <apex:column headerValue="{!$Label.Campaign_Name}" value="{!campaign.campaignName}"/>
+                <apex:column headerValue="{!$Label.Campaign_Type}" value="{!campaign.campaignType}"/>            
+                <apex:column headerValue="{!$Label.Channel}" value="{!campaign.channel}"/>            
+                <apex:column headerValue="{!$Label.Effective_From}" value="{!campaign.effectiveFromDate}"/>            
+                <apex:column headerValue="{!$Label.Expiration_Date}" value="{!campaign.expirationDate}"/>            
+                <apex:column headerValue="{!$Label.Product_Group}" value="{!campaign.productGroup}"/>            
+              </apex:pageBlockTable>   
+            </apex:facet>
+          </apex:actionStatus>
+        </apex:tab>
+      </apex:tabPanel>              
+    </apex:pageBlock>       
+    <apex:actionFunction name="updateCampaignHistory" action="{!updateCampaignHistory}" rerender="campaignHistoryTable" status="campaignHistoryStatus"/> 
+    <apex:actionFunction name="updateOfferProducts" action="{!updateOfferProducts}" rerender="overnightProductsTable, sasProductTable" status="offerProductsStatus"/>     
+    <apex:actionFunction name="updateExistingProducts" action="{!updateExistingProducts}" rerender="existingProductsTable" status="existingProductsStatus"/>     
+    <script> 
+      campaignHistory = false;
+      offerProducts = false;
+      existingProducts = false;
+      function checkUpdateCampaignHistory() {
+        if ( ! campaignHistory ) {
+          updateCampaignHistory();
+          campaignHistory = true;
+        }
+      }
+      function checkUpdateOfferProducts() {
+        if ( ! offerProducts ) {
+          updateOfferProducts();
+          offerProducts = true;
+        }
+      }
+      function checkUpdateExistingProducts() {
+        if ( ! existingProducts ) {
+          updateExistingProducts();
+          existingProducts = true;
+        }
+      }
+    </script>
+  </apex:form>
+</apex:page>

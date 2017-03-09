@@ -1,0 +1,10 @@
+<apex:component controller="GiftCodeList" access="global">
+    <apex:attribute name="BBGiftCodeId" type="Id" description="Id of the BBGiftCode" assignTo="{!giftCodeId}"/>
+    <table>
+        <apex:repeat value="{!codes}" var="o">
+        <tr>
+            <td>{!o}</td>
+        </tr>
+        </apex:repeat>        
+    </table>
+</apex:component>

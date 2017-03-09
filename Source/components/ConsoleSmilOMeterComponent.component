@@ -1,0 +1,4 @@
+<apex:component >
+<!-- <iframe src="/apex/SmiloMeter?core.apexpages.devmode.url=1" frameborder="0" height="206" width="100%"></iframe> -->
+<iframe src="/apex/ConsoleSmiloMeter?core.apexpages.devmode.url=1" frameborder="0" height="206" width="100%"></iframe>
+</apex:component>

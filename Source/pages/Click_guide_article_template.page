@@ -1,0 +1,27 @@
+<apex:page standardController="Interaktiv_vejledning__kav" sidebar="false" showHeader="false">
+    <style>
+        .pageTitleIcon {
+            background: url('https://eu1.salesforce.com/servlet/servlet.ImageServer?id=015M00000009l1q&amp;oid=00DM0000000Clb5');
+        }
+        #contentArea {
+            margin: 20px 40px;
+        }
+        iframe {
+            border: 1px solid #3F44A4;
+        }
+        .apexp .bPageBlock.apexDefaultPageBlock .pbBody .pbSubheader {
+            padding: 10px 20px;
+        }
+    </style>
+    <div id="contentArea">
+        <apex:sectionHeader title="Knowledge Article" subTitle="{!Interaktiv_vejledning__kav.Title}"/>        
+        <knowledge:articleRendererToolbar articleId="{! $CurrentPage.parameters.id}" />
+        <br /><br />        
+        <apex:pageBlock title="{!Interaktiv_vejledning__kav.Title}">
+            
+                    <apex:pageBlockSection title="Content" collapsible="false" columns="1">        
+                <iframe src="{!Interaktiv_vejledning__kav.embed_URL__c }" width="100%" height="1280px" border="0" frameborder="0" scrolling="no"/>
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+    </div>
+</apex:page>

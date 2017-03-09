@@ -1,0 +1,5 @@
+<apex:page standardController="Lookup_Account_Team_Member__c" extensions="clsKissInternalContactController" action="{!showInternalContact}">
+    <apex:form >
+        <apex:Messages />        
+    </apex:form>
+</apex:page>

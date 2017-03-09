@@ -1,0 +1,11 @@
+<apex:page showHeader="false" sidebar="false" standardStylesheets="false" >
+<apex:composition template="youbioIdeasTemplate">
+    <apex:define name="PageTitle">Salesforce Ideas - {!$ObjectType.Idea.Label} Detail</apex:define>
+    
+    <apex:define name="MainPanel">         
+      <div class="list_item comment is_active">
+      </div>                                  
+      <c:YoubioIdeaDetailView DeveloperName="SingleIdeaDetail" IdRecord="{!$CurrentPage.parameters.id}"></c:YoubioIdeaDetailView>             
+    </apex:define>
+</apex:composition>
+</apex:page>

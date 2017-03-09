@@ -1,0 +1,201 @@
+<apex:page controller="DealerProductPageController3" sidebar="false" showHeader="false"  id="clearKravet" action="{!initializeText}" applyHtmlTag="false">
+<html class="cvi2015"> <!--spoc 2206-->
+    
+    <script type="text/javascript" src="https://yousee.dk/sitecore/content/data/export/export.aspx?itemguid={BD793F05-9B01-4210-BD63-F33431D1013A}&functions=true" > </script>
+    <!--Added for DW 750-->
+    <c:TopMenuComponent ></c:TopMenuComponent>
+              <script type="text/javascript">printHeader();</script>
+              <script type="text/javascript">printTopMenu();</script>
+    <link class="user" href="{!$Resource.SalesFlowCSS}" rel="stylesheet" type="text/css" />
+    <c:DealerComponent ></c:DealerComponent>   
+    <script type="text/javascript">  
+        var myJSONObject={!jsonResponse};
+        var firstJSONResponse = {!firstJsonResponse}; 
+        var serialNumber = {!dummySerialNo};
+        myJSONObject=refreshFirstJSONResponse(firstJSONResponse,myJSONObject);
+        var custFlag = false;
+        var isBlandSelvProduct = false; 
+        var isTVBoksProduct = false; 
+        var isKortOrBox  = false;       
+        var newCustFlag = '{!isNewCustomer}';                   
+        if(newCustFlag == "true"){
+            custFlag  = "false"; 
+        }
+        else if(newCustFlag == "false"){
+            custFlag  = "true";
+        }
+        var bsxxFlag = '{!dtvtaflag}'; 
+        var kraveatString = 'clear-kraevet-valg';
+        var kraveatprods = new Array();
+        //Added for BS
+        var freeChoiceFlag={!isFreeChoicePageFlag}; 
+        var currentKundeNumber = '{!cCustInstAdd.customerNumber}';
+        //var clearkraveatprods = createProductsData(kraveatString,'kr.', custFlag);
+        var clearkraveatprods = getValgtNodeProduct('kyd','clear');
+        
+        var dtvkraveatprods = new Array();
+        if(bsxxFlag == 'true'){
+            /*if(newCustFlag == 'true'){
+                clearkraveatprods = $.grep(clearkraveatprods,function(element,index){
+                              return (element.varenr!='undefined' && element.varenr=='1111101');
+                        });
+            }else clearkraveatprods = [];*/
+            dtvkraveatprods = getValgtNodeProduct('yd','dtv');
+            if(dtvkraveatprods!=undefined && dtvkraveatprods.length > 0){
+                clearkraveatprods = $.merge(clearkraveatprods, dtvkraveatprods);
+            }
+        }
+        kraveatprods = $.merge([],clearkraveatprods);
+        
+        /*if(kraveatprods!=undefined && kraveatprods.length == 0){
+            var kraveatprod = new Object();
+            kraveatprod.navn = 'Pakkeskift uden beregning';
+            kraveatprod.price = '0.0';
+            kraveatprod.priceSuffix = 'kr.';
+            kraveatprods.push(kraveatprod);
+        }*/
+        
+    </script>
+    <style type="text/css">
+         .errorMessage {color: red; font-weight: bold;}
+         .mailError{
+            color: red; 
+            border-bottom: #000000 1px solid; 
+            border-left: #000000 1px solid; 
+            padding-bottom: 1px; 
+            background-color: #f1f1f1; 
+            padding-left: 4px; 
+            padding-right: 4px; 
+            font-family: Verdana; 
+            font-size: 9pt; border-top: #000000 1px solid; 
+            border-right: #000000 1px solid; 
+            padding-top: 1px; 
+        }
+        .leftContent2 {float:left;width:555px;overflow:visible;min-height: 530px;height: auto !important;height: 930px;max-height:1100px;}
+              .rightContent2 {float:left;width:370px;overflow:visible;min-height: 500px;height: auto !important;height: 900px;max-height:1100px;}
+              
+    </style>
+    <body>
+       <script type="text/javascript">printContentAreaBegin();</script>    
+        <apex:form id="frmClearKravet" styleClass="fontVerdana">
+        <apex:outputText value="{!salesFlowObj.messages[0]}" escape="false" />
+               <apex:outputPanel id="errorMessage" >
+                   <apex:messages globalOnly="true"  styleClass="mailError"/>  
+               </apex:outputPanel>
+            <div id="errorBlock" class="errorMessage" style="display:block;"></div>
+            <apex:panelGrid columns="2" columnClasses="leftContent2,rightContent2" width="100%">
+            <!-- <apex:panelGroup id="columnA"> -->
+            <apex:outputPanel styleClass="leftContent2" >
+                <apex:pageBlock id="pbClearKravet">             
+                    <apex:pageBlockSection title="Gebyr for Kabel-tv-installation " collapsible="false" columns="1">
+                        <table id="productTable" class="zebra" width="100%" border="1" ></table>
+                    </apex:pageBlockSection>
+                    <apex:pageBlockButtons location="bottom">
+                        <apex:commandButton action="{!cancel}" value="Annuller" style="margin-right:260px;"/>
+                        <apex:commandButton action="{!backFlow}" value="Tilbage"/>                  
+                        <input type="button" value="Videre" onclick="startNextFlow();" class="videreBtnCls"/>
+                        <input type="hidden" id="isBlandSelvProduct" name="isBlandSelvProduct" value="" />
+                        <input type="hidden" id="numberOfYouseeKorts" name="numberOfYouseeKorts" value="" />
+                        <apex:actionFunction name="nextPageFlow" action="{!nextPageFlow}"> 
+                        </apex:actionFunction>
+                        <apex:actionFunction name="nextClearFlow" action="{!nextClearFlow}"> 
+                        </apex:actionFunction>
+                        <apex:actionFunction name="addDtvHardwareSelectionPage" action="{!addDtvHardwareSelectionPage}"></apex:actionFunction>
+                        <apex:actionFunction name="addSerialNumberPage" action="{!addSerialNumberPage}">   
+                            
+                            
+                        </apex:actionFunction>
+                    </apex:pageBlockButtons>
+                </apex:pageBlock> 
+                </apex:outputPanel>
+            <apex:outputPanel styleClass="rightContent2">
+                <c:CustomerAndProductComponent isNewKunde="{!isNewCustomer}" kundeNumber="{!cCustInstAdd.customerNumber}"
+                        kundeName="{!cCustInstAdd.firstName} {!cCustInstAdd.lastName}" Adresse="{!cCustInstAdd.addr1}"
+                        Postnummer="{!cCustInstAdd.addr2}">
+                </c:CustomerAndProductComponent> 
+            
+            <apex:actionFunction action="{!callToKasia}" name="callToKasia" reRender="jspanel,errorMessage" status="queryStatus">
+                <apex:param name="url" assignTo="{!url}" value="" />
+                <apex:param name="etag" assignTo="{!etag}" value="" />
+                <apex:param name="kundeData" assignTo="{!kundeData}" value="" />
+                <apex:param name="arrayInit" assignTo="{!arrayInit}" value="" />
+</apex:actionFunction>
+<apex:actionStatus id="queryStatus">
+                <apex:facet name="start">
+                    <c:loadingComponent BackColor="#efefef" borderColor="#336699"
+                        borderSize="3" height="50px" width="120px"
+                        ImageUrl="{!$Resource.Loading}" Message="Loading..."
+                        messageStyle="color:darkred;font-size:11pt;font-weight:bold;" />
+                </apex:facet>
+</apex:actionStatus>
+<apex:outputPanel id="jspanel">
+    <script type="text/javascript">
+        var myJSONObject={!jsonResponse};
+        var firstJSONResponse = {!firstJsonResponse}; 
+        myJSONObject=refreshFirstJSONResponse(firstJSONResponse,myJSONObject); 
+        displayBasket();
+    </script>
+</apex:outputPanel>
+</apex:outputPanel>
+</apex:panelGrid> 
+        </apex:form>
+        <script type="text/javascript">printContentAreaEnd();</script>
+    <!-- <script type="text/javascript">printFooter();</script> -->
+    </body>
+    <script type="text/javascript">
+         var basicHeader = ["","","",""];
+         if(kraveatprods.length == 1){
+                addProduct(kraveatprods[0],kraveatString);              
+                $("#productTemplateSingleRecord").tmpl(kraveatprods).appendTo(createHeaders(basicHeader,"#productTable"));
+        }
+        else if(kraveatprods.length > 1){
+                $("#productTemplate").tmpl(kraveatprods).appendTo(createHeaders(basicHeader,"#productTable"));    
+        }
+        displayBasket(); 
+        
+        //to add DtvHardwareSelection page if Bland Selv is in basket and customer is not heaving an existing kort.
+        function startNextFlow(){
+               if(myJSONObject['kunde-data'] != undefined){
+                    isBlandSelvProduct =  isBlandSelvInBasket(myJSONObject['kunde-data']);
+                    isTVBoksProduct = isTVBoksSelected(myJSONObject['kunde-data']);
+                    if(myJSONObject['kunde-data']['aftaler'] != undefined){
+                        isKortOrBox = isKortOrBoxInExistingproducts(myJSONObject['kunde-data']['aftaler']);
+                    }
+                    document.getElementById('isBlandSelvProduct').value = isBlandSelvProduct;
+                    document.getElementById('numberOfYouseeKorts').value = numberOfYouseeKorts;
+                    if(((isBlandSelvProduct && isKortOrBox) && numberOfYouseeKorts < 2)==true){
+                        nextPageFlow();
+                    }
+                    else if(isTVBoksProduct)
+                    {
+                            //alert('isTVBoksProduct ** '+isTVBoksProduct);
+                        addSerialNumberPage();
+                    }
+                    else if(((isKortOrBox == false && isBlandSelvProduct == "true") ||  numberOfYouseeKorts > 1)==true){
+                        addDtvHardwareSelectionPage();
+                    }else{
+                        document.getElementById('isBlandSelvProduct').value = false;
+                        nextClearFlow();
+                    }
+                }
+        }
+
+    function isTVBoksSelected(kundeData)
+    {
+        var returnValue = false;
+        if(kundeData['valgt'] != undefined){
+                $.each(jsonValgNode = kundeData['valgt'], function(i, valgtNode){
+                    if(valgtNode.aftaletype == 'dtv' && valgtNode.varer != undefined){
+                        $.each(valgtNode.varer, function(j, varerNode){
+                            if(varerNode.varenr == '1201507'){
+                               returnValue='true';
+                            }
+                        });
+                    }
+                 });
+                 }
+        return returnValue;
+    }
+    </script>
+</html>
+</apex:page>

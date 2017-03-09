@@ -1,0 +1,67 @@
+<apex:component controller="clsCustomerRelatedAddressesYKController"><!-- SPOC-2294 -->
+     <script src="/support/console/28.0/integration.js" type="text/javascript"></script>
+  <!--<apex:includeScript value="{!URLFOR($Resource.jQuery160)}"/>-->
+  <script>
+    function openSubTab(url,label,name,openimmediately) {
+      sforce.console.getEnclosingPrimaryTabId(function(primarytab){
+        sforce.console.openSubtab(primarytab.id , url, openimmediately, label, null, function(result){
+          // do any processing here if passes or fails, use result.success (boolean)
+        }, name);
+      });
+}
+  </script>
+    <apex:attribute name="currentId4" description="This is the Account Id for displaying Addresses" type="Id" required="true" assignTo="{!currentId}"/>
+ <style>
+    <!--fieldset
+     {
+        border: 1px solid #ddd;
+        padding: 0 1.4em 1.4em 1.4em;
+        margin: 0 0 1.5em 0;
+        border-radius: 8px;
+        margin: 0 5px;
+        height: 100%; 
+        display:inline-block;
+        display:inline;
+     }-->
+    </style>
+    <script>
+        //setTimeout(function(){invoke()}, 50);
+    </script>
+
+           <fieldset id="addressId"><!-- 87px -->
+            <legend style="color:#B8B8B8;font-family:Calibri,sans-serif;font-size:15px;">{!$label.Address_Information}</legend>
+            <apex:outputpanel id="tab">
+
+              <table style="position:relative; width:100%;border-collapse: collapse;" cellpadding="3" cellspacing="0" >
+                  <tr>
+                        
+                            <apex:outputPanel style="position:relative;">
+                                <th style="border-width:1px;border-right:#F0F0F0">{!$Label.Customer_Address_Type_Label}</th>
+                                <th style="border-width:1px;border-right:#F0F0F0">{!$ObjectType.Address__c.fields.Name.label}</th>
+                            </apex:outputPanel>
+                        
+                    </tr>
+                  <apex:repeat value="{!addresses}" var="item">  
+                      <tr>
+                            <td style="border-width:1px;border-bottom-style:solid;border-color:#F0F0F0;word-wrap: break-word;word-break: break-word;"><!--  style="border-width:2px;border-bottom-style:solid;border-color:#F0F0F0">-->
+                                          <apex:outputText value="{!item.addressType}"></apex:outputText>
+                            </td>
+                          <td style="border-width:1px;border-bottom-style:solid;border-color:#F0F0F0;word-wrap: break-word;word-break: break-all;">
+                                    <apex:outputPanel >
+                                         <apex:outputLink value="#" onclick="openSubTab('{!URLFOR($Action.Address__c.View, item.address.id)}','Address','Address',true);return false;" rendered="{!IF(item.address.id != null, true , false)}" >{!item.address.Full_Address__c}</apex:outputLink>
+                                    </apex:outputPanel>
+                            </td>
+                      </tr>
+                  </apex:repeat>
+                </table>
+         <!--    <apex:dataTable value="{!addresses}" var="item" style="border-collapse: separate;table-layout:fixed;width:100%;">
+                     <apex:column headerValue="{!$Label.Customer_Address_Type_Label}" value="{!item.addressType}" style="text-align: center;" />
+        <apex:column headerValue="{!$ObjectType.Address__c.fields.Name.label}" >
+             <apex:outputLink value="#" onclick="openSubTab('{!URLFOR($Action.Address__c.View, item.address.id)}','Address','Address',true);return false;" rendered="{!IF(item.address.id != null, true , false)}" style="text-align: center;">{!item.address.Full_Address__c}</apex:outputLink>
+        </apex:column>
+                </apex:dataTable>-->
+            </apex:outputpanel>
+               <span style="display:{!IF(addresses.empty,'block','none')};float:left;font-weight:bold;"><apex:toolbar style="background-color:#F0F0F0;background-image:none;"><font color="black">No Adresser</font></apex:toolbar></span>  
+      </fieldset>
+      
+</apex:component>

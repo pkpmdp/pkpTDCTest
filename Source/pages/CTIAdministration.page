@@ -1,0 +1,76 @@
+<apex:page standardController="Call_Registration_Job__c" extensions="CTIAdministrationController" standardStylesheets="true">
+<apex:pageMessages id="id_messages" />
+<apex:form id="frm">
+	<apex:pageBlock mode="edit" id="jobRegistration">
+	
+		<apex:pageBlockSection title="{!$Label.CR_Admin_Label}" columns="2" id="id_callreg_block">
+			<apex:inputField value="{!callRegistration.TaksonomySet__c}" id="id_taxonomy_set" required="true" />
+			<apex:inputField value="{!callRegJob.Job_Type__c}" id="id_job_type"  onchange="jsJobTypeVisible(this.value)" required="true" />
+			<apex:inputField value="{!callRegJob.Valid_From__c}" id="id_valid_from" required="true" />
+			<apex:pageBlockSectionItem id="id_time_from" rendered="{!jobTypeTime}">
+				<apex:outputLabel value="{!$Label.CR_Hour_From}" for="id_hour_from"/>
+				<apex:inputText value="{!hourFrom}" id="id_hour_from" required="true" size="12" />
+			</apex:pageBlockSectionItem>
+<!-- 		<apex:inputField value="{!callRegJob.Time_From__c}" id="id_time_from" rendered="{!jobTypeTime}" required="true" /> -->
+			<apex:inputField value="{!callRegJob.Valid_To__c}" id="id_valid_to" required="false" />
+			<apex:pageBlockSectionItem id="id_time_to" rendered="{!jobTypeTime}">
+				<apex:outputLabel value="{!$Label.CR_Hour_To}" for="id_hour_to"/>
+				<apex:inputText value="{!hourTo}" id="id_hour_to" required="true" size="12" />
+			</apex:pageBlockSectionItem>
+<!-- 		<apex:inputField value="{!callRegJob.Time_To__c}" id="id_time_to"  rendered="{!jobTypeTime}" required="true" /> -->
+			<apex:inputField value="{!callRegJob.Coverage__c}" id="id_coverage"  rendered="{!jobTypeCoverage}" required="true" />
+			<apex:inputField value="{!callRegJob.CDN__c}" id="id_cdn" rendered="{!jobTypeCDN}" required="true" />
+		</apex:pageBlockSection>
+		
+		<apex:pageBlockSection title="{!$Label.CR_Job_Group_Label}" columns="2" id="id_user_group_block">
+			<apex:pageBlockSectionItem >
+				<apex:inputField value="{!userLookup.User__c}" id="id_user" />
+				<apex:commandButton action="{!addUser}" value="{!$Label.CR_Add_User}" id="id_add_user" reRender="id_job_users_table,id_user,id_messages" />
+			</apex:pageBlockSectionItem>
+			<apex:pageBlockSectionItem >
+				<apex:selectList value="{!selectedGroupsIDs}" multiselect="true" id="id_group">
+            		<apex:selectOptions value="{!groupItems}"/>
+        		</apex:selectList>
+				<apex:commandButton action="{!addGroup}" value="{!$Label.CR_Add_Group}" id="id_add_group" reRender="id_job_groups_table,id_group,id_messages" />
+			</apex:pageBlockSectionItem>
+			<apex:pageBlockTable value="{!jobUsersDisplay}" var="item" id="id_job_users_table">
+				<apex:column headerValue="{!$Label.CR_Action}">
+					<apex:commandLink action="{!removeUser}" value="{!$Label.CR_Remove}">
+						<apex:param name="userId" value="{!item.User__c}" />
+					</apex:commandLink>
+				</apex:column>
+				<apex:column value="{!item.User__c}" headerValue="{!$ObjectType.Jobs_Users__c.fields.User__c.label}" />
+     		</apex:pageBlockTable>
+     		<apex:pageBlockTable value="{!groupsDisplay}" var="item" id="id_job_groups_table">
+     			<apex:column headerValue="{!$Label.CR_Action}">
+					<apex:commandLink action="{!removeGroup}" value="{!$Label.CR_Remove}">
+						<apex:param name="groupId" value="{!item.Id}"/>
+					</apex:commandLink>
+				</apex:column>
+				<apex:column value="{!item.Name}" headerValue="{!$Label.CR_Group_Label}" />
+     		</apex:pageBlockTable>
+     	</apex:pageBlockSection>
+     		     	
+		<apex:pageBlockButtons >
+			<apex:commandButton action="{!save}" value="{!$Label.Save}" id="save" onclick="return confirmSave('{!$Label.ValidToConfirm}')"/>
+			<apex:commandButton action="{!cancel}" value="{!$Label.Cancel}" id="cancel" immediate="true" />
+		</apex:pageBlockButtons>
+	</apex:pageBlock>
+	
+	<apex:actionFunction action="{!jobTypeVisible}" name="jsJobTypeVisible" reRender="id_callreg_block" immediate="true">
+		<apex:param name="selectedJobType" assignTo="{!selectedJobType}" value="" />  
+	</apex:actionFunction>
+</apex:form>
+<script type="text/javascript">
+  function confirmSave(message) {
+     var validTo = document.getElementById('{!$Component.frm.jobRegistration.id_callreg_block.id_valid_to}');
+     if(validTo == null || validTo.value == null || validTo.value == ""){
+	     var isCancel = confirm(message);
+	     if (isCancel) return true;
+	     return false;
+     }else {
+     	 return true;
+     }
+  }  
+</script>
+</apex:page>

@@ -1,0 +1,43 @@
+<apex:component controller="IWLShareOnWidgetController" layout="none" >
+
+    <apex:attribute name="DeveloperName" type="String" required="true" description="The Id of the IWLWidget record that will be loaded by this widget" assignTo="{!widgetDeveloperName}" />
+    <apex:attribute name="Widget" type="IWLWidget__c" required="false" description="A Pre-loaded widget record to be used as the source of information for this widget" assignTo="{!widgetRecord}" />
+    <apex:attribute name="IdeaId" type="String" required="true" description="" assignTo="{!IdeaId}" />
+
+	
+
+	<apex:outputPanel layout="block" id="IWLLoadOk" styleClass="yui3-cssreset IWLShareOnWidgetView IWLShareOnWidgetView{!DeveloperName}" rendered="{!loadWidget}">
+	
+		<!-- BEGINS WIDGET STYLING -->
+				
+		<apex:outputPanel rendered="{!widgetRecord.CSSFileUrl__c != null}" layout="none">
+			<!-- Custom Widget Style -->
+			<link href="{!widgetRecord.CSSFileUrl__c}" rel="stylesheet" type="text/css" />
+		</apex:outputPanel>
+			
+		<apex:outputPanel rendered="{!widgetRecord.overrideCSS__c}" layout="none">
+		
+			<!-- CSS override rules -->
+			<style type="text/css">
+			
+				.IWLShareOnWidgetView{!HTMLENCODE(DeveloperName)} .IWLShareOnImage {
+					width: {!widgetRecord.width__c}px;
+					height: {!widgetRecord.height__c}px;
+				}
+			</style>
+		</apex:outputPanel>
+	
+		<!-- This panel shows when the widget has been correctly loaded -->
+		<apex:outputLink styleClass="IWLShareOnImageLink" value="{!url}">
+			<apex:image rendered="{!widgetRecord.ShareOn_Type__c == SHAREON_TYPE_FACEBOOK}" title="{!SHAREON_TYPE_FACEBOOK}" value="{!URLFOR($Resource.IWLResources, 'styles/images/icons/facebook.png')}" />			
+			<apex:image rendered="{!widgetRecord.ShareOn_Type__c == SHAREON_TYPE_TWITTER}" title="{!SHAREON_TYPE_TWITTER}" value="{!URLFOR($Resource.IWLResources, 'styles/images/icons/twitter.png')}" />			
+			<apex:image rendered="{!widgetRecord.ShareOn_Type__c == SHAREON_TYPE_LINKEDIN}" title="{!SHAREON_TYPE_LINKEDIN}" value="{!URLFOR($Resource.IWLResources, 'styles/images/icons/linkedin.png')}" />			
+			<apex:image rendered="{!widgetRecord.ShareOn_Type__c == SHAREON_TYPE_MAIL}" title="{!SHAREON_TYPE_MAIL}" value="{!URLFOR($Resource.IWLResources, 'styles/images/icons/mail.png')}" />		
+		</apex:outputLink>
+    </apex:outputPanel>
+    
+    <apex:outputPanel rendered="{!!loadWidget}" styleClass="IWLLoadErrorMessage IWLShareOnLoadErrorMessage IWLShareOnLoadErrorMessage{!DeveloperName}">
+		<c:IWLStatusRenderer StatusMessagesWrap="{!statusMessagesWrap}" />
+	</apex:outputPanel>
+
+</apex:component>

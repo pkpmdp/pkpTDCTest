@@ -1,0 +1,17 @@
+<apex:page controller="CallbackBookingController" id="cancelCBPage" tabStyle="Case" title="{! $Label.CB_Cancel_Case_Title}" standardStylesheets="true">
+<apex:pageMessages />
+<apex:form >
+	<apex:pageBlock mode="edit" id="emailBlockId">
+		<apex:pageBlockSection title="{!$Label.CB_Cancel_Case_Title}" columns="1">
+			<apex:pageBlockSectionItem >
+				<apex:outputLabel value="{!$Label.CB_Cancellation_Reason}" for="id_cancel_reason" />
+				<apex:inputField value="{!caseComment.CommentBody}" id="id_cancel_reason" required="true" style="width:50%" />
+			</apex:pageBlockSectionItem>
+		</apex:pageBlockSection>
+		<apex:pageBlockButtons >
+			<apex:commandButton action="{!cancelCBCase}" value="{!$Label.Save}" id="save" />
+			<apex:commandButton action="{!returnToCBCase}" value="{!$Label.Cancel}" id="cancel" immediate="true" />
+		</apex:pageBlockButtons>
+	</apex:pageBlock>
+</apex:form>
+</apex:page>

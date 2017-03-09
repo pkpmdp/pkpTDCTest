@@ -1,0 +1,24 @@
+<apex:page standardController="ActiveErrors__c" extensions="ActiveErrorsController" title="Active Errors" tabStyle="Account">
+ <apex:sectionHeader title="{!$Label.BIER_ActiveErrors_Section_Title}" subtitle="{!$Label.BIER_ActiveErrors_Section_Subtitle}"/> 
+ <apex:pageBlock title="{!$Label.BIER_ActiveErrors_Block_Title}">
+  <apex:pageBlockTable value="{!Items}" var="item" width="100%">
+   <apex:column width="7">
+    <apex:image rendered="{!AND(item.Dot__c != 0, NOT(ISBLANK(item.Dot__c)))}" alt="" url="{!URLFOR($Resource.BierDots, IF(item.Dot__c == 1, 'img/yellow.gif', 'img/red.gif'))}" width="7" height="7" />
+   </apex:column>   
+   <apex:column headerValue="{!$ObjectType.ActiveErrors__c.fields.name.label}">
+    <apex:outputLink value="{!BierUrl & TEXT(item.ActiveErrorId__c)}" target="BIER" onclick="newwindow=window.open('{!BierUrl & TEXT(item.ActiveErrorId__c)}', 'BIER');if (window.focus) {newwindow.focus()};return false;">{!TEXT(item.ActiveErrorId__c)}</apex:outputLink>
+   </apex:column>
+   <apex:column headerValue="P." value="{!item.Prio__c}"/>
+   <apex:column value="{!item.PostCode__c}"/>
+   <apex:column value="{!item.Address__c}"/>
+   <apex:column value="{!item.Created__c}"/>
+   <apex:column value="{!item.HF_number__c}"/>
+   <apex:column value="{!item.Subject__c}"/>
+   <apex:column value="{!item.ReachTime__c}"/>
+   <apex:column value="{!item.Created_By__c}"/>
+   <apex:column value="{!item.Technique__c}"/>
+   <apex:column value="{!item.KKIB__c}"/>
+   <apex:column value="{!item.Status__c}"/>
+  </apex:pageBlockTable>
+ </apex:pageBlock> 
+</apex:page>

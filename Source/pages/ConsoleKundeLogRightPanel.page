@@ -1,0 +1,7 @@
+<apex:page standardController="account" tabStyle="Account"><!-- SPOC-2294 display customers logs on right side bar -->
+    <table class="Container">
+        <tr>
+        	<c:ConsoleKundeLogRightPanelSitel currentId6="{!Account.Id}"></c:ConsoleKundeLogRightPanelSitel>
+        </tr>
+        </table> 
+</apex:page>

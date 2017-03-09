@@ -1,0 +1,48 @@
+<apex:page showHeader="true" title="{!$Label.Convert_Lead}: {!Lead.Name}" standardController="Lead" tabStyle="Lead" extensions="clsFbLeadConverterControler" cache="true" action="{!chooseAction}">
+  <script type = "text/javascript"> 
+    function closeWindow(){ 
+      window.open('','_self',''); 
+      window.close(); 
+   }
+  </script>
+  <apex:pageMessages showDetail="false"/>
+  <apex:form >
+    <apex:sectionHeader title="{!$Label.Convert_Lead}" subtitle="{!Lead.Name}" help="/help/doc/user_ed.jsp?loc=help&target=leads_convert.htm&section=Leads&showSplash=true" />
+    <apex:pageBlock id="mainBlock" rendered="{!NOT(showConfirmation)}">
+      <apex:pageBlockButtons >
+        <apex:commandButton value="{!$Label.Convert}" action="{!convertLead}"/>
+        <apex:commandButton value="{!$Label.Cancel}" onClick="closeWindow();"/>
+        <!--<apex:commandButton value="{!$Label.Cancel}" action="{!cancel}"/>-->
+      </apex:pageBlockButtons>
+      <apex:pageBlockSection title="{!$Label.Convert_Lead}" columns="1" collapsible="false" id="convertLeadSection">
+        <apex:pageBlockSectionItem >
+          <apex:outputLabel value="{!$Label.Record_Owner}" style="labelCol requiredInput" />          
+          <apex:inputField value="{!account.OwnerId}"/>
+        </apex:pageBlockSectionItem>
+
+        <apex:pageBlockSectionItem id="customerNameSectionItem">
+          <apex:outputLabel value="{!$Label.Customer_Name}" for="Customer Name"/>   
+          <apex:inputField value="{!c.sf4twitter__Account__c}" required="true"/>
+          <!--<apex:outputPanel styleClass="requiredInput" layout="block">
+            <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+            <apex:selectList value="{!duplicateAccountId}" size="1" required="true" id="customerNameSelect">
+              <apex:selectOptions value="{!duplicateAccounts}"></apex:selectOptions>
+            </apex:selectList>&nbsp;
+            <!--<apex:outputLink value="javascript:showAccount()" >{!$Label.View}</apex:outputLink>-->
+          <!--</apex:outputPanel>-->
+        </apex:pageBlockSectionItem>
+      </apex:pageBlockSection>
+    </apex:pageBlock>
+
+    <apex:pageBlock id="confirmationBlock" rendered="{!showConfirmation}" title="{!$Label.Fb_Lead_Confirmation_Text}">
+      <apex:pageBlockButtons location="bottom">
+        <apex:commandButton value="{!$Label.Convert}" action="{!convertLead}"/>
+        <apex:commandButton value="{!$Label.Cancel}" onClick="closeWindow();"/>
+      </apex:pageBlockButtons>
+      <apex:pageBlockSection columns="1" collapsible="false" id="confirmationSection">
+        <apex:outputField value="{!c.sf4twitter__Lead__c}"/>
+        <apex:outputField value="{!c.sf4twitter__Account__c}"/>
+      </apex:pageBlockSection>
+    </apex:pageBlock>
+  </apex:form>
+</apex:page>

@@ -1,0 +1,33 @@
+<apex:page standardController="Account" showHeader="false" sidebar="false">
+
+    <iframe src="/apex/ConsoleCustomerLog?id={!Account.id}" width="182px" align="top"  frameborder="0" scrolling="no" id="customerLogFrameId" onload='adjustFrameSize("customerLogFrameId");' />
+    <br />
+    <br />
+    <iframe src="/apex/SmiloMeter" width="182px" align="top"  frameborder="0" scrolling="no" id="smiloMeterFrameId" onload='adjustFrameSize("smiloMeterFrameId");' />
+    <script type="text/javascript">
+    
+    function getElement(aID)
+    {
+        return (document.getElementById) ? document.getElementById(aID) : document.all[aID];
+    }
+
+    function getIFrameDocument(aID){ 
+        var rv = null; 
+        var frame=getElement(aID);
+        if (frame.contentDocument){
+            rv = frame.contentDocument;
+        }
+        else {
+            rv = document.frames[aID].document;
+        }
+        return rv;
+    }
+
+    function adjustFrameSize(frameId)
+    {
+        var frame = getElement(frameId);
+        var frameDoc = getIFrameDocument(frameId);
+        frame.height = frameDoc.body.offsetHeight;
+    }
+</script> 
+</apex:page>

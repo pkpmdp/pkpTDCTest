@@ -1,0 +1,148 @@
+<apex:page controller="ViewAddressesForInstallationsController" showHeader="false" sidebar="false" id="pageID" applyHtmlTag="false">
+<html class="cvi2015">
+<body id="servicepage">
+<!-- <script type="text/javascript" src="http://daily.yousee.dk/sitecore/content/data/export/export.aspx?itemguid={59DE8AFC-9FE8-40A1-8323-9DA9602F870A}&functions=true"></script> --> 
+<script type="text/javascript" src="{!siteCoreUrl}/sitecore/content/data/export/export.aspx?itemguid={59DE8AFC-9FE8-40A1-8323-9DA9602F870A}&functions=true"></script>
+<script type="text/javascript">printHeader();</script>
+
+<script type="text/javascript">printTopMenu();</script>
+
+<script type="text/javascript">printContentAreaBegin();</script>
+<script type="text/javascript"> var portalBrugerRole = '{!portalBrugerRole}'; </script>
+<c:SCLinksComponent CableUnitName="{!cableUnitName}" PortalBrugerRole="{!portalBrugerRole}"/>
+<style type="text/css">
+       .customPopup{ 
+          background-color: white;
+          border-style: solid;
+          border-width: 2px;
+          padding:10px; 
+          position: absolute; 
+          left: 65%;
+          width: 258px;
+          margin-left: -150px;
+          color:#FF0000;
+      }
+      .StatusColor{
+        color:#FF0000;
+      }
+</style>
+<apex:stylesheet value="{!URLFOR($Resource.scStyleCss,'myStyle/myStyle.css')}"/>
+<script type="text/javascript">
+
+     function popup(popupId,formattedAddress,errorColumn){
+        var eColumn = document.getElementById(errorColumn);
+        var divTag = document.getElementById(popupId);
+        divTag.style.visibility='visible';
+        eColumn.style.visibility='visible';
+        var divIdName = '<Table width="100%" >';
+        divIdName =divIdName+ '<tr>';
+        divIdName =divIdName+ '<td><right><a href="javascript:hideObject(\'' + popupId + '\');" style="float: right"><img src="{!$Resource.Nej_icon}"></img></a></right></td>';
+        divIdName=divIdName + '</tr>';
+        divIdName =divIdName+ '<tr>';
+        divIdName =divIdName+ '<td><center><b><font color="red">Vores system har desværre problemer med at vise mulige pakkevalg for denne installation. Vi beklager.</font> </b></center></td>';
+        divIdName=divIdName + '</tr>'; 
+        divIdName = divIdName + '</Table>';
+        document.getElementById(formattedAddress).innerHTML=divIdName;
+     } 
+     
+     function hideObject(htmlObject){    
+        document.getElementById(htmlObject).style.visibility = "hidden";  
+     }
+      
+     function callKasiaForChangedDates(changedDate, amsId){
+        //alert('changedDate: '+changedDate+', amsId: '+amsId);
+        callKasiaForChangedDates1(changedDate, amsId);
+     }  
+</script>
+<apex:pageMessages rendered="true"/>
+<apex:form id="formID">
+   <br>&nbsp; &nbsp; &nbsp; </br>
+   <style>
+     .bgColumn{background-color:white}
+     .bgHeaderFont{
+       color: #676767;
+     }
+    </style>
+    <script>
+      function FetchData(){
+         
+         fetchValue();
+      }
+            
+      function FetchDateVal(dateVal){
+          fetchDate(dateVal);
+      }
+    </script> 
+    <apex:actionFunction name="fetchValue" status="changePkg" action="{!displaySelectedValue}" rerender="packageList1,optId"></apex:actionFunction>
+    <apex:actionFunction name="fetchDate" status="queryStatus" action="{!displaySelectedDate}" rerender="packageList1"></apex:actionFunction>
+    <apex:actionFunction name="callKasiaForChangedDates1" action="{!callKasiaForChangedDates}" reRender="packageList1" status="queryStatus">
+        <apex:param name="changedDate" value="" assignTo="{!changedDate}" />
+        <apex:param name="amsId" assignTo="{!changedAmsId}" value="" />
+    </apex:actionFunction>
+    <apex:actionStatus id="queryStatus">
+        <apex:facet name="start">
+            <c:SC_ChangeTvPackageLoadingComponent BackColor="#efefef" borderColor="#336699" borderSize="3" height="50px" width="120px" 
+            ImageUrl="{!$Resource.Loading}" Message="Loading..." messageStyle="color:darkred;font-size:11pt;font-weight:bold;" />
+        </apex:facet>
+    </apex:actionStatus>        
+    <apex:outputPanel id="optId">
+        <apex:actionStatus id="changePkg" startstyle="color:red;">
+           <apex:facet name="stop"></apex:facet>
+        </apex:actionStatus>
+    </apex:outputPanel>
+    <apex:pageBlock id="pageBlockID">   
+       <apex:pageBlockTable value="{!selectListALL}" width="100%" var="obj" border="0" style="{!showChangeALL}"> 
+            <apex:column width="68%" colspan="4" headerValue="Skift alle"  headerClass="headerStyle" styleClass="bgColumn">
+                <div class="bullets">
+                    <li>Ønsker du at skifte alle valgte tv-pakker på kunde på en gang kan du gøre det her</li>
+                </div> 
+            </apex:column>     
+            <apex:column headerValue="Ønsket ikrafttrædelsesdato" headerClass="headerStyle" width="16%" styleClass="bgColumn">
+                <apex:selectList value="{!selectedPackageDate}" size="1" onchange="FetchDateVal(this.options[this.selectedIndex].text);" id="dropDownHeaderDate" >
+                    <apex:selectOptions value="{!itemsDropDown}" id="optionDate"></apex:selectOptions>
+                </apex:selectList> 
+            </apex:column> 
+            <apex:column headerValue="Tv-pakke" styleClass="bgColumn" headerClass="headerStyle">
+                <apex:selectList value="{!selectedPackage}" size="1" onchange="FetchData(this.options[this.selectedIndex].text);">
+                    <apex:selectOptions value="{!packageItems}"/>
+                </apex:selectList>
+            </apex:column>
+        </apex:pageBlockTable>
+        <apex:pageBlockTable width="100%" value="{!installationOfferingList}" var="obj" rowClasses="even,odd" border="0" id="packageList1"> 
+            <apex:stylesheet value="{!URLFOR($Resource.scrowOddEvenStyle)}"/>
+         <!-- <apex:column headervalue="id" value="{!obj.amsid}" style="text-align:left" headerClass="headerStyleLeft"/>   -->    
+            <apex:column headervalue="Skift tv-pakke på specifik adresse" value="{!obj.formattedAddress}" />
+            <apex:column headervalue="Nuv. tv-pakke" value="{!obj.CurrentProductName}" rendered="{!NOT(ISNULL(obj.CurrentProductName))}"/>  
+            <apex:column headervalue="Nuv. tv-pakke" value="{!obj.CurrentProductName}" rendered="{!ISNULL(obj.CurrentProductName)}"/>
+            <apex:column headervalue="Ny beboer" rendered="{!validateNewResident}">
+                <apex:inputCheckbox value="{!obj.selectedmyBeboer}" disabled="{!obj.errorFlag == 'true'}"/>        
+            </apex:column> 
+            <apex:column id="errorColumn">
+                <apex:outputPanel id="popupId" style="visibility:hidden;" styleClass="customPopup" >
+                    <label id="{!obj.formattedAddress}" for="View Error"></label> 
+                </apex:outputPanel>
+                <apex:image id="theImage" style="padding-top:6px;" height="80%" rendered="{!obj.errorFlag == 'true'}" value="{!$Resource.errorIcon}" onclick="popup('{!$Component.popupId}', '{!obj.formattedAddress}','{!$Component.errorColumn}');"  />
+            </apex:column>
+            <apex:column headerValue="Ønsket ikrafttrædelsesdato" width="15%" headerClass="headerStyle">
+                <apex:selectList value="{!obj.packageChangedDate}" size="1" id="dropDownDetailDate" disabled="{!obj.errorFlag == 'true'}" onChange="callKasiaForChangedDates(this.value, {!obj.amsId});">
+                    <apex:selectOptions value="{!itemsDropDown}" id="optionDetailDate"></apex:selectOptions>
+                </apex:selectList>
+            </apex:column>
+            <apex:column headerValue="Tv-pakke" width="20%" headerClass="headerStyle">
+                <apex:selectList value="{!obj.tvpackage}" multiselect="false" size="1" id="dropDownTvPackage" disabled="{!obj.errorFlag == 'true'}">
+                    <apex:selectOptions value="{!obj.optionsPackages}"></apex:selectOptions>
+                </apex:selectList>   
+            </apex:column>
+        </apex:pageBlockTable>
+
+        <br></br> 
+      <apex:commandButton action="{!confirmTvPackage}" value="{!$Label.SC_ViewAddressesForInstallationsPage_ChangeTVPackage}" disabled="{!showChangePackageButton}" styleClass="dialogbutton_orange" title="Klik for at skifte tv-pakke"> </apex:commandButton>&nbsp;&nbsp;
+      <apex:commandButton action="{!backToViewInstallation}" value="{!$Label.SC_EditContactPage_Cancel}" styleClass="dialogbutton_grey" title="Klik for at annullere" id="btnCBack"/>
+    </apex:pageblock>
+    <apex:outputLabel value="{!$Label.SCBlandSlevtext}"/>
+</apex:form>
+<script type="text/javascript">printContentAreaEnd();</script>
+<script type="text/javascript">printFooter();</script>
+</body>
+</html>
+</apex:page>

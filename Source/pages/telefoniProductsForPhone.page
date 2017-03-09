@@ -1,0 +1,977 @@
+<apex:page controller="DealerProductPageController3" sidebar="false" showHeader="false"  id="page3" action="{!initializeText}" applyHtmlTag="false">
+        <html class="cvi2015"> <!--spoc 2206-->
+        <script type="text/javascript" src="https://yousee.dk/sitecore/content/data/export/export.aspx?itemguid={BD793F05-9B01-4210-BD63-F33431D1013A}&functions=true" > </script>
+        <!-- Added for DW 750 -->
+        <c:TopMenuComponent ></c:TopMenuComponent>
+        <script type="text/javascript">printHeader();</script>
+        <script type="text/javascript">printTopMenu();</script>
+        <script type="text/javascript">printContentAreaBegin();</script>
+        <link class="user" href="{!$Resource.SalesFlowCSS}" rel="stylesheet" type="text/css" />
+        <c:DealerComponent > </c:DealerComponent>
+        <script src="{!$Resource.jQuery}"></script>
+        <script src="{!$Resource.jQueryUI}"></script>
+        <script src="{!$Resource.JQuery_tmpl}"></script>
+        <link class="user" href="{!$Resource.jqueryuicss}" rel="stylesheet" type="text/css" />
+        
+        <style> 
+        .nextBtnCls {
+            background-color:orangeRed;
+            color:#FFFFFF;
+            font-weight:bold;
+            height:26px;
+        }
+        .leftContent1 {
+                float:left;
+                width:580px;
+                overflow:visible;
+                min-height:1000px;
+                height: auto !important;
+                height:1100px;
+                max-height:1300px; 
+            }
+            .rightContent1 {
+                float:left;
+                width:345px;
+                overflow:visible;
+                min-height:1000px;
+                height: auto !important;
+                height:1100px;
+                max-height:1300px;
+            }
+        body button, body .x-btn, body .btn, body .btnDisabled, body .btnCancel, body .menuButton .menuButtonButton {
+            background-color:#585858;
+            color:#FFFFFF;
+            background:#585858;
+            font-weight:bold;
+            height:26px;
+        }   
+        .verticalSpacingCls {
+            margin-right:300px;
+        }
+        .bPageBlock .pbTitle {
+            color: #222;
+            font-size: 0%;
+            width:0%;
+        }
+        <!--
+        .linkCls {color: orangeRed;font-weight: bold;}
+        -->
+        .ui-icon-circle-triangle-e {
+            background-position: -48px -192px;
+            background-color: black;
+        }
+        .ui-icon ui-icon-circle-triangle-w {
+            background-position: -80px -192px;
+            background-color: black;
+        }
+        
+    </style>
+    
+    <script type="text/javascript">
+                function numberValidate(ev)
+                {
+                        
+                        var keycode;
+                        if(ev.keyCode)
+                            keycode = ev.keyCode;
+                        else if(ev.Which)
+                            keycode = ev.Which;
+                        else
+                            keycode = ev.charCode;
+                        if((keycode > 31 && (keycode < 48 || keycode > 57 )) || keycode == 46)  {
+                            return false;
+                        } 
+                        if(window.event && window.event.keyCode == 13) {
+                            availableTelephoneNumbers();
+                            return false;
+                        }else{
+                            return true;
+                        }
+                                
+                }
+                
+                function numberValidate1(ev)
+                {
+                        var keycode;
+                        if(ev.keyCode)
+                            keycode = ev.keyCode;
+                        else if(ev.Which)
+                            keycode = ev.Which;
+                        else
+                            keycode = ev.charCode;
+                        if((keycode > 31 && (keycode < 48 || keycode > 57)) || keycode == 46){
+                            return false;
+                        }
+                        if(window.event && window.event.keyCode == 13){
+                            return false;
+                        }else{
+                            return true;
+                        }
+                }
+                
+    </script>
+    <script type="text/javascript">
+            //DW-861
+            var bsxxFlag = {!dtvtaflag};
+            //Added for BS
+            var freeChoiceFlag={!isFreeChoicePageFlag};
+            var currentKundeNumber = '{!cCustInstAdd.customerNumber}';
+            var checkFlagForTelephony = false;
+            function CheckTelephony(selectedId){
+                var selectedTelephoneno = document.getElementById('selectedTelephone1').value;
+                alert('Selected Telephone Number is' + selectedTelephoneno);
+                if(selectedTelephoneno != 'Intet nummer valgt'){
+                    checkFlagForTelephony = true;
+                }else{
+                    checkFlagForTelephony = false;
+                }
+                
+            }
+    
+    </script>
+    <script type="text/javascript">
+        var validated = false;
+        function displaySelectedTelephones(selectedId){
+                var lstTelephones = document.getElementById('selectedTelephone1').value;
+                var selectedNumberID = {!selectedNumber};
+                if(lstTelephones == 'Intet nummer valgt'){
+                        validated = false;
+                        document.getElementById('selectedNumberID').value = '';
+                }
+                else{
+                        validated = true;
+                        document.getElementById('selectedNumberID').value = selectedNumberID;   
+                }            
+                        return null;
+                        
+        }
+    </script>
+    
+    <script type="text/javascript">
+            
+            function checkchange(e) {
+                var s1 = document.getElementById("selectedTelephones").selectedValue;
+                if(s1 == 'Intet nummer valgt'){
+                        return false;               
+                }
+                else{
+                        displayNewPhoneNumber1();
+                }
+        </script>
+        <script>
+        
+            var checkforNewNumberRadioId='false';
+            var checkForExistingNumberRadioId='false';
+            var existingTlfId='{!extTelephoneId}';
+            var newTelefoniId='{!newTelephoneId}';
+            var tlfDirectoryID = '{!telePhoneDirectoryID}';
+            var selectedNPCurrentDate='{!NPCurrentDate}';
+            var selectedNPFutureDate='{!NPFutureDate}';
+            var selectedLaterPortingDateRadioID='{!selectedLaterPortingDateRadioID}';
+            var selectedCurrentPortingDateRadioID='{!selectedCurrentPortingDateRadioID}';
+            
+            // splitted sellProducts function
+            var validateTlfDirectoryVal='';
+            var newTelephoneNumber='';
+            var existingTelephoneNumber='';
+            var laterPortingDate='';
+            var portingDate='';
+            var NPMergedstring='';
+            var selectedNumberPortingDate='false';
+            var selectNumberportingRadioText ='Behold nuværende telefonnummer';
+            var selectNumberportingRadioVal='95,00';
+            var selectNewNumberRadioText='00,00';
+            var errorMsgValidationFlag=false; 
+            var newTelephoneNumberValidationFlag=false;
+            var existingTelephoneNumberValidationFlag=false;
+        
+        
+            function showKundens(flag,TlfID){
+                  document.getElementById('kundens').style.display = "none";
+                  document.getElementById('efter').style.display = "none"; 
+                  document.getElementById('nyt').style.display = "none";     
+                  if(flag){
+                        document.getElementById('kundens').style.position = "relative";
+                        document.getElementById('kundens').style.display = "block";
+                        document.getElementById("extTlfID").value = TlfID;   
+                        document.getElementById('{!$Component.page3.FormID.OuterPblockID.selectedNumberID}').value='';
+                        //Modified for DW-656
+                        document.getElementById('{!$Component.page3.FormID.telephoniFlagId}').value=false;                                                                   
+                  } else { 
+                        document.getElementById('efter').style.position = "relative";
+                        document.getElementById('efter').style.display = "block";
+                        document.getElementById('nyt').style.position = "relative";
+                        document.getElementById('nyt').style.display = "block"; 
+                        document.getElementById("newTlfID").value = TlfID; 
+                        document.getElementById('{!$Component.page3.FormID.OuterPblockID.selectedNumberID1}').value='';
+                        document.getElementById("after30daysID").checked = false; 
+                        document.getElementById("futureDateID").checked = false;
+                        document.getElementById("datepicker").value = '';   
+                        //Modified for DW-656
+                        document.getElementById('{!$Component.page3.FormID.telephoniFlagId}').value=true;               
+                  }
+                  document.getElementById("datepicker").disabled=true;
+            }
+            
+            function takeKeyPressValue(e, txtObj) {
+                var evt = e || window.event;
+                
+                var keyPressed = evt.which || evt.keyCode;
+                if (keyPressed == 13){
+                    getAvailableTelephoneNumbers();
+                }
+            } 
+             
+            function dateComparator(val){
+                var errMsg='';
+                $("#errorBlock1").html(errMsg);
+                var splitValues = val.split('.');               
+                var today = new Date(); 
+                var hiddendate = splitValues[0]+'.'+splitValues[1]+'.'+splitValues[2];          
+                var newSelectedDate= splitValues[1]+'-'+splitValues[0]+'-'+splitValues[2]; 
+                var newTodayDate=today.getMonth()+1+'-'+today.getDate()+'-'+today.getFullYear();
+                //for #777
+                if(newSelectedDate.indexOf('undefined') != -1){
+                    errMsg='Invalid Date Format.';
+                    $("#errorBlock1").html(errMsg);
+                    document.getElementById("datepicker").value='';
+                }
+                
+                else if (new Date(newTodayDate).getTime() >= new Date(newSelectedDate).getTime()){
+                    errMsg='Indtast kun fremtidigt tidspunkt.';
+                    $("#errorBlock1").html(errMsg);
+                    document.getElementById("datepicker").value='';
+                } else {
+                    errMsg='';
+                    $("#errorBlock1").html(errMsg);  
+                     document.getElementById("activationDateForTlfBB").value = hiddendate;
+                }
+            }   
+        </script>
+        
+        <script id="productTemplate1" type="text/x-jQuery-tmpl">  
+            <tr>
+                <td width="5%"><input type="${selectType}" name="selectOneProduct" value="${varenr}" checked="checked" class="prodCheckbox"/> </td>
+                <td>${navn}</td>
+                <td>${price}</td>
+                <td>${priceSuffix}</td> 
+            </tr>
+        </script> 
+        
+        <script>
+             $(function() {
+                $( "#datepicker" ).datepicker();
+            });
+        </script>
+        <script>
+        function noenter(ev)
+            {
+                        var keycode;
+                        if(ev.keyCode) //For IE
+                            keycode = ev.keyCode;
+                        else if(ev.Which)
+                            keycode = ev.Which; // For FireFox
+                        else
+                            keycode = ev.charCode;
+                        if ((keycode > 31 && (keycode < 48 || keycode > 57)) || keycode == 46 ){
+                            return false;
+                        }
+                        
+                            return true;     
+            }
+        </script>
+    
+        <script>
+            functon noenter1(ev)
+            {
+                alert('a');
+                 var keycode;
+                 if(ev.keyCode)// For IE
+                    keycode = ev.keyCode;
+                 else if(ev.which)
+                    keycode = ev.which;
+                 else
+                    keycode = ev.charCode;
+                 if((keycode > 31 && (keycode < 48 || keycode > 57 )) || keycode == 46 ){
+                    return false;
+                 }
+                 if(window.event && window.event.keyCode == 13){
+                    availableTelephoneNumbers();
+                    return false;
+                 }  
+                    return true;
+            }
+        </script>
+    <script type="text/javascript">   
+            var prefix=' kr. pr. md.';
+            var myJSONObject={!jsonResponse};
+            var firstJSONResponse = {!firstJsonResponse};
+            var existingCustomerFlag = false;
+            var broadBandString = 'bb-kraevet-valg';
+            var broadbandProducts = new Array();
+            var custFlag = false;
+            var errMsg=''; 
+            var a='';
+            //var b='';
+            var prodSelected='';
+            myJSONObject=refreshFirstJSONResponse(firstJSONResponse,myJSONObject);
+           // displayBasket();
+            var newCustFlag = '{!isNewCustomer}'; 
+                if(newCustFlag == "true"){
+                    custFlag  = "false"; 
+                }else if(newCustFlag == "false"){
+                    custFlag  = "true";
+            }                
+            broadbandProducts = createProductsData(broadBandString, prefix, custFlag);
+            
+            if(broadbandProducts.length == 1){
+                
+                addProduct(broadbandProducts[0],broadBandString);
+                a = $("#productTemplate1").tmpl(broadbandProducts);
+                
+            }else if(broadbandProducts.length > 1){
+               
+                a = $("#productTemplate1").tmpl(broadbandProducts);    
+            }    
+            
+            $(document).ready( function() {
+              $("table.zebra").find("tr:nth-child(even)").each(
+                function(i) {
+                    if( 0 == $(this).find("th").length ) {
+                        $(this).addClass("odd");
+                    }
+                }
+              );
+            } );
+            
+        
+        
+        function sellProducts(){
+            if(document.getElementById("errorBlock1").innerHTML != ''){
+                return false;
+            }
+            
+            setupGetElementValues();
+            
+            if (validateMandatoryFields()){
+                //alert('Validate successfully');
+                sellnumberPortingProductForTelephony();
+            }
+            if (document.getElementById("choice10").checked){
+                
+            }else if(document.getElementById("choice11").checked){
+                existingTelephoneNumber = '';
+                document.getElementById("activationDateForTlfBB").value = '';
+            }
+        }
+        
+        function validateMandatoryFields(){
+            if (( checkforNewNumberRadioId=='true') ||
+                 (checkForExistingNumberRadioId=='true' && (laterPortingDate =='true' || portingDate=='true') && (existingTelephoneNumber!=null && existingTelephoneNumber!='')) ){
+                    if (validateTlfDirectoryVal!=null && validateTlfDirectoryVal!=''){
+                        if (portingDate=='true'&& selectedNumberPortingDate=='false'){
+                            errMsg='nummerportering dato er obligatorisk';
+                            errorMsgValidationFlag = false;
+                            $("#errorBlock").html(errMsg);
+                            return false;
+                        } 
+                        else if (newTelephoneNumber!=null && newTelephoneNumber!='') {
+                            if (validateTelephoneNumber(newTelephoneNumber)){
+                                errorMsgValidationFlag = true;  
+                                newTelephoneNumberValidationFlag = true;
+                                
+                            } else {
+                                    
+                                    errMsg='Indtast validt telefonnummer';
+                                    errorMsgValidationFlag = false;
+                                    $("#errorBlock").html(errMsg);
+                                    return false;
+                             }
+                             
+                        } else if (existingTelephoneNumber!=null && existingTelephoneNumber!='') {
+                                if (validateTelephoneNumber(existingTelephoneNumber)){
+                                    errorMsgValidationFlag = true;
+                                    existingTelephoneNumberValidationFlag=true;
+                                } else {
+                                    errMsg='Indtast validt telefonnummer';
+                                    errorMsgValidationFlag = false;
+                                    $("#errorBlock").html(errMsg);
+                                    return false;
+                                }
+                          }
+                 } else {
+                        errMsg='Vælg telefonbog.';
+                        errorMsgValidationFlag = false;
+                        $("#errorBlock").html(errMsg);
+                        return false;
+                    }
+            } else {
+                errMsg='Vælg venligst telefonnummer, hvis du allerede har valgt vælg derefter nummerportering dato.';
+                $("#errorBlock").html(errMsg);
+                return false;
+             }
+             if (document.getElementById("choice10").checked){
+             
+             }
+             
+             else if((document.getElementById("page3:FormID:OuterPblockID:selectedNumberID").value==null) || (document.getElementById("page3:FormID:OuterPblockID:selectedNumberID").value=='')){
+                    
+                    errMsg='Indtast validt telefonnumer';
+                    erroMsgValidation = false;
+                    $("#errorBlock").html(errMsg);
+                    return false;
+             
+             }
+             
+             //if(newTelephoneNumber==null || newTelephoneNumber==''){
+             //alert('b');
+             //         errMsg='Indtast validt telefonnummer';
+            //          errorMsgValidationFlag = false;
+            //          $("#errorBlock").html(errMsg);
+            //          return false;
+            // }
+             return true;
+        }
+        
+        function sellnumberPortingProductForTelephony(){
+        
+            if (errorMsgValidationFlag){
+                if (laterPortingDate=='true' || portingDate=='true'){
+                    if (existingTelephoneNumberValidationFlag){ 
+                         var responseNode = myJSONObject['tlf-eng-valg'];
+                         var kundeData = JSON.stringify(myJSONObject['kunde-data']);
+                         var arrayInit = myJSONObject['array-init'];
+                         var etag = myJSONObject['ETag'];
+                         var npHref;
+                         $.each(responseNode.varer,function(i,varerNode){
+                            if(varerNode.links != undefined){
+                               $.each(varerNode.links, function(j,linkNode){
+                                 if(linkNode.rel == 'opret' || linkNode.rel == 'opdater'){
+                                   npHref = linkNode.href;
+                                 }
+                                });
+                             }
+                         });
+                        
+                        NPMergedstring = kundeData +'@@@'+arrayInit+'@@@'+etag+'@@@'+npHref;
+                        document.getElementById("NPMergedstring").value = NPMergedstring;
+                        callOutNPAction();
+                  }
+               }
+               
+                if (newTelephoneNumberValidationFlag){
+                     nextFlow();
+                 }   
+            } 
+        
+        }
+        
+        function setupGetElementValues(){
+            
+            document.getElementById("resetTlfFlags").value = resetTlfFlags;
+            document.getElementById("resetBBFlags").value = resetBBFlags;
+                    
+            if (document.getElementById("choice11").checked){
+                checkforNewNumberRadioId='true';
+            }
+            if (document.getElementById("choice10").checked){
+                checkForExistingNumberRadioId='true';
+            }
+            if (document.getElementById("radioValue").value!=null){
+                validateTlfDirectoryVal = document.getElementById("radioValue").value;
+            }
+            
+            if (document.getElementById("page3:FormID:OuterPblockID:selectedNumberID").value!=null){
+                newTelephoneNumber = document.getElementById("page3:FormID:OuterPblockID:selectedNumberID").value;              
+            }
+            
+            if (document.getElementById("page3:FormID:OuterPblockID:selectedNumberID1")!=null){
+                existingTelephoneNumber = document.getElementById("page3:FormID:OuterPblockID:selectedNumberID1").value;                
+                document.getElementById("npTffNumber").value = existingTelephoneNumber;         
+            }
+           
+            if (document.getElementById("after30daysID").checked){
+                laterPortingDate ='true';
+                document.getElementById("laterPortingDate").value = laterPortingDate;
+                
+            }
+            if (document.getElementById("futureDateID").checked){
+                portingDate = 'true';
+                document.getElementById("portingDate").value = portingDate;         
+            }
+            
+            if (document.getElementById("datepicker").value!=null && document.getElementById("datepicker").value!=''){
+                selectedNumberPortingDate = 'true';
+            } 
+            
+            if (validateTlfDirectoryVal==null || validateTlfDirectoryVal==''){ 
+                if (tlfDirectoryID!=null && tlfDirectoryID!=''){
+                    validateTlfDirectoryVal=tlfDirectoryID;
+                }
+            }
+        
+        }
+       
+       function validateTelephoneNumber(tlfNumber){
+        
+             if(isNaN(tlfNumber)||tlfNumber.indexOf(" ")!=-1) 
+                  return false; 
+             else if (tlfNumber.length < 8)
+                  return false;
+             else 
+                 return true;     
+      }  
+        
+      function selectVal(selectedRadioValue,selectedID){
+        document.getElementById("radioValue").value = selectedRadioValue;
+        document.getElementById("radioID").value = selectedID;
+        
+      }
+      
+      function setNPVal(NpId){
+       
+        if (document.getElementById("datepicker")!=null){
+            document.getElementById("datepicker").value ='';
+            document.getElementById("datepicker").disabled=true;
+            // added for #777
+            document.getElementById("activationDateForTlfBB").value = '';
+        }
+        if (NpId!=null){
+            var today = new Date();
+            var newTodayDate = today.getMonth()+1+'/'+today.getDate()+'/'+today.getFullYear();
+            
+            var unformatedAfterDate = new Date().setDate(new Date().getDate()+30);  
+            var formatedAfterDate = new Date (unformatedAfterDate);
+            var futureDate = formatedAfterDate.getMonth()+1+'/'+formatedAfterDate.getDate()+'/'+formatedAfterDate.getFullYear();
+            var nextMonth = formatedAfterDate.getMonth()+1;
+            // for #777
+            var formattedDate = formatedAfterDate.getDate();
+            var formattedMonth = nextMonth;
+            if(formattedDate < 10)
+                formattedDate = '0' + formattedDate;
+            if(formattedMonth < 10)
+                formattedMonth = '0' + formattedMonth;
+            var futureDateMod = formattedDate + '/' + formattedMonth +'/'+formatedAfterDate.getFullYear();
+            //var futureDateMod = formatedAfterDate.getDate() + '/' + nextMonth +'/'+formatedAfterDate.getFullYear();
+            document.getElementById("npFutureDate").value = futureDateMod;
+            
+        }
+        
+      }
+      
+      function enabledDate(NpId){
+        if (NpId!=null){
+            if (document.getElementById("datepicker")!=null){
+                document.getElementById("datepicker").disabled=false;
+                // added for #777
+                document.getElementById("npFutureDate").value = '';
+            }
+        }
+      }
+      
+      function acceptNumerics(event,selectedId){
+        var keyValue = window.event.keyCode || event.keyCode;
+        if ((keyValue >= 48 && keyValue <= 57)|| (keyValue >= 97 && keyValue <= 105) ||
+            (keyValue==13||keyValue==96 || keyValue==40||keyValue==8 || keyValue==46 || keyValue==40||keyValue==41||keyValue==45 || keyValue==37 || keyValue==38||keyValue==39)) {
+            
+            return false;
+        }   
+        else{
+            document.getElementById(selectedId).value=''; 
+            return true;
+        }
+    }
+  
+    </script>
+    
+     <apex:form id="FormID" styleClass="fontVerdana">
+                <apex:message />
+        <apex:actionFunction name="displayNewPhoneNumber1" action="{!displayNewPhoneNumber}"/>
+        <apex:actionFunction name="availableTelephoneNumbers" action="{!getAvailableTelephoneNumbers}" status="phoneStatus" reRender="telID"/>
+        <apex:inputHidden value="{!telephoniFlag}" id="telephoniFlagId" />
+        <apex:panelGrid columns="2" width="100%" columnClasses="leftContent1,rightContent1">
+        <apex:outputPanel styleClass="leftContent1">    
+            <!-- <apex:panelGroup id="columnA">  -->    
+                <apex:pageblock id="OuterPblockID">
+                <br></br>
+                        <!--  <span>
+                            <br></br>
+                             <font style="font-size:18px;font-weight:bold;">Nyt telefonnr. eller behold nuværende telefonnr.</font>
+                            <p>Vælges der nyt telefonnr., er det gratis, og kunden kan bruge Telefoni omgående. Ønsker kunden at  beholde sit nuværende telefonnr., koster det <span id="tPrice"></span> (opkræves af YouSee). </p>
+                        </span> <br></br><br></br>-->
+                        <apex:outputText value="{!salesFlowObj.messages[0]}" escape="false" style="font-size:18px;font-weight:bold;"/><br></br>             
+                        <p>Vælges der nyt telefonnr., er det gratis, og kunden kan bruge Telefoni omgående. Ønsker kunden at  beholde sit nuværende telefonnr., koster det <span id="tPrice"></span> (opkræves af YouSee). </p><br></br><br></br>
+                        <apex:outputpanel rendered="{!isFromTelephony}">
+                            <!-- <p style="color:red">Vælges Behold nuværende telefonnr. - og det skal ske til en tidlig ønskedato skal du i stedet benytte den manuelle blanket til salget. (Informer altid kunden om, at her risikere han at betale abonnement 2 steder afhængig af bindings-/ opsigelsesperioden </p> <br></br> -->
+                        </apex:outputpanel>
+                            
+                        <div id="errorBlock" style="color:red;"> </div>
+                        
+                        <apex:outputpanel rendered="{!isFromBroadBand}">
+                                <apex:PageBlockSection title="Vælg installation til Bredbånd" collapsible="false" columns="1">
+                                </apex:PageBlockSection>
+                        
+                                <apex:PageBlockSection title="Trådløst modem" collapsible="false" columns="1">
+                                    <table id="BroadBandID" class="zebra" width="100%"></table>
+                                </apex:PageBlockSection>
+                        </apex:outputpanel>
+              
+                 <!-- PHONE BLOCK START -->
+                <div class="mf-section">
+                        <div>
+                            <!-- <label>V&aelig;lg telefonnummer for Telefoni</label> -->
+                            <apex:pageBlockSection title="Vælg telefonnummer for Telefoni" collapsible="false"></apex:pageBlockSection>
+                        </div>
+                        <br/>                        
+                        <table class="mf-fieldset-rows">
+                               <tr>
+                                 <td align="left" valign="top" width="75%">
+                                  <input style="vertical-align: middle;" type="radio" id="choice10" name="phone:phoneNumberChoice" value="radio51"  onclick="showKundens(true,this.id);"/>
+                                    <span><a href="https://yousee.dk/sitecore/content/data/export/export.aspx?itemguid={1E0CBD39-2761-4A08-964D-E76229708DD4}&html=true&popup=true" onclick="var w = window.open(href, 'yousee_popup', 'scrollbars=yes,location=no,menuBar=no,resizable=no,status=no,toolbar=no,width=600,height=300'); if(w.blur) w.focus(); return false;" target="yousee-popup" style="font-weight:bold;">Behold nuværende telefonnummer</a></span>
+                                 </td>
+                                 <td valign="top" nowrap="nowrap">
+                                   <span id="tlfPrice" style="text-align:right"></span>
+                                   <script>
+                                   if(myJSONObject['1417006'] != undefined){
+                                     if(myJSONObject['1417006'].totalpris!=undefined && myJSONObject['1417006'].betalingsperiode!=undefined ){
+                                        var telefoniPrice = myJSONObject['1417006'].totalpris + ' ' + 'kr.';                
+                                        $('#tlfPrice').html(telefoniPrice);
+                                        $('#tPrice').html(telefoniPrice);
+                                     }
+                                    } 
+                                   </script>
+                                 </td>
+                               </tr>
+                               <tr>
+                                 <td align="left" valign="top" width="75%">
+                                   <input style="vertical-align: middle;" type="radio" id="choice11" name="phone:phoneNumberChoice" value="radio61" class="wicket-phoneNumberChoice" onclick="showKundens(false,this.id);"/>
+                                   <span>Vælg et nyt telefonnummer</span>
+                                  </td>
+                                  <td valign="top" nowrap="nowrap">
+                                    <span style="text-align:right;">0,00 kr.</span>
+                                  </td>
+                               </tr>
+                         </table>
+                   
+                        <div id="idd" style="display:none"></div>
+                        <div id="ide" style="display:none"></div>
+                        <div class='mf-bug'>&nbsp;</div>
+                </div>
+                
+                <div class="mf-section" style="display:none;" id="kundens">
+                    
+                    <div>
+                        
+                        <apex:pageBlockSection title="Flytning af telefonnummer" collapsible="false"></apex:pageBlockSection>
+                        
+                    </div>
+                    <br/>      
+                                    
+                    <table class="mf-fieldset-rows">
+                            
+                       <tr>
+                             <td align="left" valign="top">                                      
+                                 <span style="font-weight:bold">telefonnummer</span>&nbsp;&nbsp; <apex:inputText value="{!selectedNumberForNP}" id="selectedNumberID1" maxlength="8"  onKeyPress="return numberValidate1(event);"/>
+                             </td>                 
+                       </tr>
+                        
+                    </table>
+                    
+                    <div>
+                        
+                        <apex:pageBlockSection title="Nummerportering" collapsible="false"></apex:pageBlockSection>
+                        
+                    </div>
+                    
+                    <div>
+                        <span>Ønsker kunden at beholde sit nuværende telefonnummer, modtager kunden en e-mail fra YouSee, som skal returneres som accept på, YouSee må overføre telefonnummeret til YouSee. Først herefter kan nummerporteringen sættes i gang.</span>
+                    </div>
+                    
+                    <table class="mf-fieldset-rows">
+                        <tr>
+                            <td align="left" valign="top">
+                                <span style="font-weight:bold">Vælg den type nummerportering kunden ønsker:</span>
+                            </td>
+                        </tr>
+                    
+                        <tr>
+                         <td align="left" valign="top">                   
+                           <!-- <span>Nuværende telefonnummer</span><input type="text" id="id1" size="8"/> -->
+                           <!--<span>Nuværende telefonnummer:</span>&nbsp;&nbsp;<apex:inputText value="{!ExistingNumber}" onkeyUp="return acceptNumerics(this.event,this.id)" id="id1" maxlength="8"/> -->
+                           <input type= "radio" name="numberPortability" id="after30daysID" onclick="setNPVal(this.id)"/> <span>Når bindings-/opsigelsesperioden er afsluttet  i nuværende teleselskab – typisk 30 dages op-sigelse</span> 
+                          </td>
+                       </tr>
+                               
+                       <tr> 
+                            <td align="left" valign="top">
+                             <input type= "radio" name="numberPortability" id="futureDateID" onclick="enabledDate(this.id)"/>
+                             <!-- <apex:outputLabel value="Ønskedato *(MM/DD/YY):" style="margin-left:10px"></apex:outputLabel>-->
+                             <span>Ønskedato *(dd.mm.åååå):</span>
+                             <input type="text" id="datepicker" onchange="dateComparator(this.value)" />
+                             <div id="errorBlock1" style="color:red;font-weight:bold;"></div>
+                            </td>
+                            
+                       </tr>
+                       <tr>
+                           <td align="left" valign="top"> 
+                                <span style="color:red">* Venligst informere kunden om, at ved valg af ønskedato kan han risikere at betale abonnement 2 steder afhængig af bindings-/opsigelseperiode. </span>
+                           </td>
+                       </tr>
+                           
+                   </table>
+               </div>
+                
+                <div class="mf-section" style="display:none;" id="efter">
+                    <div>
+                        <apex:PageBlockSection title="Søg efter ønskenummer" collapsible="false"></apex:PageBlockSection>
+                        <!-- <label>Søg efter ønskenummer</label>-->
+                    </div>
+                    <br/>                        
+                    <table class="mf-fieldset-rows">
+                           <tr>
+                                 <td text-align="left" valign="top">
+                                    <span>Indtast mellem 1 og 4 af de sidste 4 cifre</span>     
+                                 </td>  
+                                 <td text-align="right" valign="top">                   
+                                   <!-- Changed for DW-773. Value changed from 4841 to 4842-->
+                                   <select><option value="4842">4842</option></select>&nbsp;
+                                   &nbsp;
+                                   <apex:inputText value="{!newNumber}" id="searchTelephone"  maxlength="4" size="4" onKeyPress="return numberValidate(event);"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                    <apex:commandButton action="{!getAvailableTelephoneNumbers}" status="phoneStatus" value="Søg"  reRender="telID"/>
+                                 </td>
+                            </tr>
+                            <tr>
+                                <td text-align="left" valign="top">
+                                    <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>     
+                                 </td>
+                                 <td text-align="right" valign="top">
+                                    <div>
+                                        <apex:outputPanel id="telID">
+                                          <apex:actionRegion id="actionRegionID">
+                                            <apex:outputPanel rendered="{!telephoniFlag}" id="optID">
+                                                 <apex:selectList value="{!selectedNumber}" id="listTelephony" size="4"> 
+                                                     <apex:selectOptions value="{!selectedTelephones}" id="selectedTelephone1"/> 
+                                                        <!-- <apex:actionSupport event="onclick=displaySelectedTelephones(this.id)" status="phoneStatus" reRender="TelPhID"></apex:actionSupport> --> 
+                                                        <apex:actionSupport event="onchange" action="{!displayNewPhoneNumber}" status="phoneStatus" reRender="TelPhID"></apex:actionSupport>   
+                                                    <!-- </apex:selectOptions> -->
+                                                         
+                                                 </apex:selectList>
+                                            </apex:outputPanel>
+                                            </apex:actionRegion>
+                                        </apex:outputPanel>
+                                    </div>
+                                 </td>
+                            </tr>     
+                     </table>
+                </div>
+                <apex:outputPanel id="dummyPanel">
+                    
+                </apex:outputPanel>
+               <apex:actionStatus id="phoneStatus" startText="Søgning..." >
+                                 <apex:facet name="start" ><img src="{!URLFOR($Resource.Loading)}" border="0" height="18px" width="18px" style="color:red;"/>  Søgning...</apex:facet>
+                                 <apex:facet name="stop" ></apex:facet>
+                        
+                </apex:actionStatus>
+                <!-- <apex:actionStatus id="phoneStatus" startText="In progress..." style="color:red">
+                </apex:actionStatus> -->
+                
+                <!-- <apex:actionFunction name="" action="{!getAvailableTelephoneNumbers}" status="phoneStatus"/> -->
+                
+                <div class="mf-section" style="display:none;" id="nyt"> 
+                    <div>
+                        <!-- <label>Nyt telefonnummer </label>-->
+                        <apex:pageBlockSection title="Nyt telefonnummer" collapsible="false" id="pageBlkID"></apex:pageBlockSection>
+                            <table class="mf-fieldset-rows" id="telNumberTableID">
+                                   <tr>
+                                         <td text-align="left" valign="top">
+                                                <span>Kunden får dette telefonnummer:</span>     
+                                         </td>
+                                         <td text-align="right" valign="top">                                      
+                                               <!-- <input type="text" size="8"/> -->
+                                               <apex:outputpanel id="TelPhID">
+                                                    <apex:inputText value="{!selectedNumber}" disabled="true" id="selectedNumberID"/>
+                                               </apex:outputpanel>
+                                         </td>                 
+                                  </tr>
+                            </table>
+                    </div>
+                                            
+                    
+               </div>
+         <!-- PHONE BLOCK END -->
+              
+         <!-- PHONE STATUS BLOCK START -->
+                <div class="mf-section">
+                        <div>
+                          <!-- <label>Telefonbogsoplysninger for Telefoni</label>-->
+                          <apex:pageBlockSection title="Telefonbogsoplysninger for Telefoni" collapsible="false"></apex:pageBlockSection>
+                        </div>           
+                        <div class="mf-radio">
+                            <input style="vertical-align: middle;" type="radio" id="choice0" name="phoneStatus:phoneBookStatus" onclick="selectVal(this.value,this.id);" value="visalt" class="wicket-phoneBookStatus"/>&nbsp;
+                            <a href="https://yousee.dk/sitecore/content/data/export/export.aspx?itemguid={77F58AF7-2648-4AE5-A717-D44A37EE23D4}&html=true&popup=true" onclick="var w = window.open(href, 'yousee_popup', 'scrollbars=yes,location=no,menuBar=no,resizable=no,status=no,toolbar=no,width=600,height=300'); if(w.blur) w.focus(); return false;" target="yousee-popup" style="font-weight:bold;">
+                                <span>Kunden ønsker at stå opført i telefonbogen</span>
+                            </a>
+                        </div>
+                        <div class="mf-radio">
+                            <input style="vertical-align: middle;" type="radio" id="choice1" name="phoneStatus:phoneBookStatus" value="althemmeligt" onclick="selectVal(this.value,this.id);" class="wicket-phoneBookStatus"/>&nbsp;
+        
+                            <a href="https://yousee.dk/sitecore/content/data/export/export.aspx?itemguid={AAB81713-66F6-41BB-BFC0-554F608E90DC}&html=true&popup=true" onclick="var w = window.open(href, 'yousee_popup', 'scrollbars=yes,location=no,menuBar=no,resizable=no,status=no,toolbar=no,width=600,height=300'); if(w.blur) w.focus(); return false;" target="yousee-popup" style="font-weight:bold;">
+                                                                
+                                <span>Hemmelige kundedata</span>
+                            </a>
+                        </div>
+                        <div class="mf-radio">
+                            <input style="vertical-align: middle;" type="radio" id="choice2" name="phoneStatus:phoneBookStatus" onclick="selectVal(this.value,this.id);" value="hemmeligtnummer" class="wicket-phoneBookStatus"/>&nbsp;
+                            <a href="https://yousee.dk/sitecore/content/data/export/export.aspx?itemguid={1FF5E5B4-472B-49BC-BA4A-6332A9ED2ED1}&html=true&popup=true" onclick="var w = window.open(href, 'yousee_popup', 'scrollbars=yes,location=no,menuBar=no,resizable=no,status=no,toolbar=no,width=600,height=300'); if(w.blur) w.focus(); return false;" target="yousee-popup" style="font-weight:bold;">
+                                <span>Hemmeligt nummer</span>
+                            </a>
+                        </div>
+                        <div class="mf-radio">
+                            <input style="vertical-align: middle;" type="radio" id="choice3" name="phoneStatus:phoneBookStatus" onclick="selectVal(this.value,this.id);"  value="hemmeligadresse" class="wicket-phoneBookStatus"/>&nbsp;
+                            <a href="https://yousee.dk/sitecore/content/data/export/export.aspx?itemguid={9A0A535E-DF88-4029-AB8E-3C55F92D24BC}&html=true&popup=true" onclick="var w = window.open(href, 'yousee_popup', 'scrollbars=yes,location=no,menuBar=no,resizable=no,status=no,toolbar=no,width=600,height=300'); if(w.blur) w.focus(); return false;" target="yousee-popup" style="font-weight:bold;">
+                                <span>Hemmelig adresse</span>
+                            </a>
+                        </div>         
+                </div>
+                <!-- PHONE STATUS BLOCK END -->
+        
+                <apex:pageBlockButtons location="bottom" id="PBlockBtnID">
+                                <apex:commandButton action="{!cancel}" value="Annuller" style="margin-right:300px;" id="CancellationId"/>
+                                <apex:commandButton action="{!backFlow}" value="Tilbage" id="BackBtnID"/>
+                                <input type="button" value="Videre" onclick="sellProducts();" class="videreBtnCls" id="nextBtnId"/>
+                </apex:pageBlockButtons>
+                
+                <!-- SET ALL HIDDEN VALUES HERE AND CALLING ACTION FUNCTIONS IN BELOW SECTION  -->
+                <apex:actionFunction name="nextFlow" action="{!RedirectToCustomerInfoPage}" />
+                <apex:actionFunction name="backFlow" action="{!backFlow}" />
+                       <apex:actionFunction name="callOutNPAction" action="{!callOutNPAction}"/>
+                       <input type = "hidden" id="radioValue" name = "radioValue" value=""/>
+                       <input type = "hidden" id="radioID" name = "radioID" value=""/>
+                       <input type = "hidden" id="extTlfID" name = "extTlfID" value=""/>
+                       <input type = "hidden" id="newTlfID" name = "newTlfID" value=""/> 
+                       <input type = "hidden" id="NPMergedstring" name = "NPMergedstring" value=""/>
+                       <input type = "hidden" id="activationDateForTlfBB" name = "activationDateForTlfBB" value=""/>
+                       <input type = "hidden" id="npFutureDate" name = "npFutureDate" value=""/>
+                       <input type = "hidden" id="npTffNumber" name = "npTffNumber" value=""/>
+                       <input type = "hidden" id="laterPortingDate" name = "laterPortingDate" value=""/>
+                       <input type = "hidden" id="portingDate" name = "portingDate" value=""/>
+                       <input type = "hidden" id="npHref" name = "npHref" value=""/>
+                       <input type = "hidden" id="resetBBFlags" name = "resetBBFlags" value=""/>
+                       <input type = "hidden" id="resetTlfFlags" name = "resetTlfFlags" value=""/>
+                       
+                </apex:pageblock>
+            <!-- </apex:panelGroup> -->
+            </apex:outputPanel>
+            <apex:outputPanel styleClass="rightContent1">   
+            <!-- <apex:panelGroup id="columnB"> --> 
+                        <c:CustomerAndProductComponent isNewKunde="{!isNewCustomer}" kundeNumber="{!cCustInstAdd.customerNumber}"
+                            kundeName="{!cCustInstAdd.firstName} {!cCustInstAdd.lastName}" Adresse="{!cCustInstAdd.addr1}"
+                            Postnummer="{!cCustInstAdd.addr2}">
+                        </c:CustomerAndProductComponent>
+            <!-- </apex:panelGroup> -->
+            </apex:outputPanel>
+            </apex:panelGrid>   
+                
+                <script type="text/javascript">
+                          
+                          var basicHeader = [" "," "," "," "];   
+                          var requiredHeader = [" "," "," "," "];     
+                          if(a != ''){     
+                             a.appendTo(createHeaders(basicHeader,"#BroadBandID"));
+                           }
+                          
+                </script>
+                <script type="text/javascript">
+                    document.title += ' - Vælg installation';
+                </script>
+                <script>
+                    
+                    if (tlfDirectoryID!=null && tlfDirectoryID!=''){
+                        
+                        document.getElementById(tlfDirectoryID).checked = true;
+                    }
+                    if (existingTlfId!=null && existingTlfId!=''){
+                        
+                        document.getElementById(existingTlfId).checked = true;
+                    }
+                    if (newTelefoniId!=null && newTelefoniId!=''){
+                        
+                        document.getElementById(newTelefoniId).checked = true;
+                    }
+           
+                    if (existingTlfId!=null && existingTlfId!=''){
+                        
+                        document.getElementById('kundens').style.position = "relative";
+                        document.getElementById('kundens').style.display = "block"; 
+                        document.getElementById('efter').style.display = "none"; 
+                        document.getElementById('nyt').style.display = "none"; 
+                        
+                    }
+                    
+                    if (newTelefoniId!=null && newTelefoniId!=''){
+                        
+                        document.getElementById('kundens').style.display = "none";  
+                        document.getElementById('efter').style.display = "block"; 
+                        document.getElementById('nyt').style.display = "block";
+                    }
+                    
+                    if (selectedLaterPortingDateRadioID!='' && selectedLaterPortingDateRadioID!=null){
+                        document.getElementById("after30daysID").checked=true;
+                        document.getElementById("datepicker").disabled=true;
+                        
+                    }
+                    
+                    if (selectedCurrentPortingDateRadioID!='' && selectedCurrentPortingDateRadioID!=null){
+                        document.getElementById("futureDateID").checked=true;
+                        if (selectedNPCurrentDate!=null && selectedNPCurrentDate!=''){
+                            document.getElementById("datepicker").value =selectedNPCurrentDate;
+                        }
+                    }
+                   
+             </script>
+             
+             
+             <apex:actionStatus id="queryStatus"> 
+                           <apex:facet name="start">
+                           <c:loadingComponent BackColor="#efefef" borderColor="#336699"
+                            borderSize="3" height="50px" width="120px" 
+                            ImageUrl="{!$Resource.Loading}" Message="Loading..." 
+                            messageStyle="color:darkred;font-size:11pt;font-weight:bold;"/>
+                           </apex:facet>         
+                </apex:actionStatus>
+        
+                <apex:outputpanel id="renderJason">
+                <script>
+                   myJSONObject={!jsonResponse};
+                   firstJSONResponse = {!firstJsonResponse};
+                   myJSONObject=refreshFirstJSONResponse(firstJSONResponse,myJSONObject);
+                   kundeData = JSON.stringify(myJSONObject['kunde-data']);
+                   arrayInit = myJSONObject['array-init'];
+                   etag = myJSONObject['ETag'];
+                   kundeid = '{!cCustInstAdd.firstName}';
+                   var serialNumber = {!dummySerialNo};
+                   displayBasket(); 
+                   if (resetTlfFlags){
+                        backFlow();
+                   }
+                  
+                    document.getElementById("resetTlfFlags").value = resetTlfFlags;
+                    document.getElementById("resetBBFlags").value = resetBBFlags;   
+                </script>
+                </apex:outputpanel>
+        
+                <apex:actionFunction action="{!callToKasia}" name="callToKasia" status="queryStatus" reRender="renderJason">
+                                <apex:param name="url" assignTo="{!url}" value="" />
+                                <apex:param name="etag" assignTo="{!etag}" value="" />
+                                <apex:param name="kundeData" assignTo="{!kundeData}" value="" />
+                                <apex:param name="arrayInit" assignTo="{!arrayInit}" value="" />
+                </apex:actionFunction>
+             
+         
+ </apex:form>
+
+    <script type="text/javascript">printContentAreaEnd();</script>
+    <script type="text/javascript" src="js/s_code.js"></script>
+    <script type="text/javascript">printFooter();</script>
+    </html>
+</apex:page>

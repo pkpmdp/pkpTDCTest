@@ -1,0 +1,4 @@
+<apex:page standardController="Account" extensions="clsCallBackCaseOpenController" showHeader="false" sidebar="false" cache="true" standardStylesheets="true">
+ <apex:outputText value="{!OpenCBCaseLabel}" id="openCBCase" style="display: block; float: left;" />  
+ <apex:image url="{!URLFOR($Resource.calendar, 'excs.png')}" rendered="{!OpenCBCase}" style="display: block; float: left; margin-left: 10px;" />
+</apex:page>

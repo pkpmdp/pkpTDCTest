@@ -1,0 +1,110 @@
+<apex:page standardController="CampaignMember" extensions="Yousee13DeltageIndblikController" showHeader="false" sidebar="false" cache="false">
+
+<apex:composition template="PermissionSiteTemplate">
+    <apex:define name="body">
+    
+    
+        <style>
+                 .vfHelpText a            {position:relative;}         
+                 .vfHelpText a span       {display: none;}         
+                 .vfHelpText a:hover span {display: block;
+                                           position:absolute;  
+                                           top:1.25em;  
+                                           padding:2px 5px;
+                                           left:-15em; width:15em;
+                                           z-index:100;
+                                           border:1px solid orange;                                      
+                                           background-color:#FEFDB9; 
+                                           color:black; 
+                                         }
+                .headerStyle{text-align: center;}     
+                .widthStyle{width:80px; text-align: center;}                         
+         </style> 
+        <apex:form >
+        <br></br>
+         <div class="k_mf_progress" style="width: 85%;margin:0 auto;">        
+                  <div class="k_mf_progress_bg" >            
+                    <div class="k_mf_progress_indicator" style="width: 50%"> </div>
+                  </div>    
+        </div>    
+        <ul class="k_mf_progress_list_3" style="width: 85%;margin:0 auto;">         
+               <li class="k_current">Kontaktpersoner registreret hos YouSee</li>    
+               <li> &nbsp; </li>        
+               <li> &nbsp; </li>    
+               <li> Kvittering </li>  
+        </ul>
+        <br></br>
+        <h1>Tilmeld kontaktpersoner registreret hos YouSee til YouSee LIVE '13</h1>
+       
+        <apex:pagemessages />
+        <apex:pageBlock title="">
+            <apex:pageBlockSection id="contactInfo">
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel >Navn</apex:outputLabel>
+                    <apex:outputText value="{!cm.contact.name}"></apex:outputText>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel >Deltager i YouSee LIVE '13</apex:outputLabel>
+                    <apex:inputCheckbox value="{!cm.Deltage__c}" />
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel >
+                     E-mail
+                    <span class="vfHelpText">
+                        <apex:outputLink value="javascript:return false;">
+                            <img src="/s.gif" alt="" class="helpOrb" />
+                            <span> E-mail-adresser skal udfyldes, hvis personen skal deltage i YouSee LIVEâ€™13. Vi sender billetter og anden relevant information via e-mail.  <br></br>
+                            </span>
+                        </apex:outputLink>
+                    </span> 
+                    </apex:outputLabel>
+                    <apex:outputPanel styleClass="requiredInput" layout="block">
+                     <apex:outputPanel styleClass="requiredBlock" layout="block"/>  
+                    <apex:inputText value="{!lgUserEmail}"></apex:inputText>
+                    </apex:outputPanel>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                  <apex:outputLabel >Deltager i tv-show</apex:outputLabel>  
+                  <apex:inputCheckbox value="{!cm.Show__c}"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem helpText="Vi bruger">
+                    <apex:outputLabel >
+                     Mobilnr.    
+                    <span class="vfHelpText">
+                        <apex:outputLink value="javascript:return false;">
+                            <img src="/s.gif" alt="" class="helpOrb" />
+                            <span> Vi bruger kun mobilnummeret i forbindelse med information om YouSee LIVE '13. <br></br>
+                            </span>
+                        </apex:outputLink>
+                    </span>                     
+                    </apex:outputLabel>
+                    <apex:outputPanel styleClass="requiredInput" layout="block">
+                    <apex:outputPanel styleClass="requiredBlock" layout="block"/>  
+                    <apex:inputText value="{!lgUserMobile}" title="Vi bruger kun mobilnummeret i forbindelse med information om YouSee LIVE '13."></apex:inputText>
+                    </apex:outputPanel>
+                   
+                </apex:pageBlockSectionItem>                
+                <apex:pageBlockSectionItem rendered="{!showBus}">
+                    <apex:outputLabel >
+                    Ã˜nsker bustransport
+                    <span class="vfHelpText">
+                        <apex:outputLink value="javascript:return false;">
+                            <img src="/s.gif" alt="" class="helpOrb" />
+                            <span> Der kan max. tilmeldes 5 personer til bustransport. Hvis I er flere end 5 fra foreningen, der vil deltage pÃ¥ YouSee LIVE '13 er i meget velkomne. I skal dog selv sÃ¸rge for transport for de Ã¸vrige personer.</span>
+                        </apex:outputLink>
+                    </span>   
+                    </apex:outputLabel>
+                    <apex:inputField value="{!cm.Bus__c}" />
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem rendered="{!showPermission}"> 
+                    <apex:inputCheckbox value="{!lgUserPermission}"/>
+                    <apex:outputLabel >{!$Label.YS_Permission}<br/><br/>Jeg kan til enhver tid afmelde.</apex:outputLabel>
+                </apex:pageBlockSectionItem>
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+        <apex:commandButton action="{!saveRegistration}" value="Gem og næste" title="Opret" style="background-color:#DF7401;background-image:none; text-transform: capitalize;margin: 0 2px;background-position: left top;background-repeat: repeat-x;border-color: -moz-use-text-color #FF4500;border-style: none solid solid none;display: inline;font-family: 'Verdana','Geneva',sans-serif;font-size: 80%;color: #FFFFFF;font-weight: bold;height: 27px; width:95px; float:right;" ></apex:commandButton>
+        &nbsp; &nbsp; <apex:image url="{!$Resource.ManatorySign}" /> = &nbsp; Feltet skal udfyldes, hvis personen skal deltage.
+        </apex:form>
+    </apex:define>
+    </apex:composition>
+</apex:page>

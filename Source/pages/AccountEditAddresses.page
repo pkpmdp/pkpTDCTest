@@ -1,0 +1,326 @@
+<apex:page standardController="Account" extensions="clsAccountEditAddresses" id="pg" >
+    <!--<apex:messages style="color: red; font-weight: bold;" globalOnly="true" />--> 
+    
+    <script>
+      var newWin=null;
+      var addrid=null;
+      var newWin2=null
+      function openLookupPopup(name, id,type)  {
+        var url="/apex/LookupExamplePopup?namefield=" + name + "&idfield=" + id +"&type="+type;
+         newWin=window.open(url, 'Popup','height=500,width=600,left=100,top=100,resizable=no,scrollbars=yes,toolbar=no,status=no');
+         if (window.focus)    {
+             newWin.focus();   
+         }           
+         return false;
+       } 
+       function closeLookupPopup()  {
+            if (null!=newWin)     {
+           //alert('new id '+document.getElementById('pg:frm:pgBlk:hidid').value);
+        //   var addid = document.getElementById('pg:frm:pgBlk:hidid').value;
+           //alert('The new addid @@@@' + addid) ;
+        //   var tempname= document.getElementById('pg:frm:pgBlk:addresses:j_id44:accinstid');
+        //   tempname.value='';
+        //   var tempid= document.getElementById('pg:frm:pgBlk:addresses:j_id44:instid');
+       //    tempid.value='';
+           //populate(); 
+           newWin.close(); 
+           //window.close(); 
+            }
+       }
+       function testSave(){
+        alert('inside save');
+        saveAddress();
+       }
+       
+     
+       document.ready = function(){
+       
+       setVisibility();
+       onloadchangetype();//added for SPOC-1203
+       //setTimeout(setVisibility(),10000);
+       checkIfDummyAddr(event); /* shailesh SPOC-1203 */
+       }
+      function setVisibility() 
+         { 
+          //var ele='{!acc.Billing_Address__r.name}';
+          var ele="{!acc.Billing_Address__r.name}";
+          if(ele=='Dummyudlandsvej')
+          {
+            window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddressType').disabled=false;
+            
+          
+          }else if(ele!='Dummyudlandsvej')
+          {
+            window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress1').value='';
+            window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress2').value='';
+            window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress3').value='';
+            window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress4').value='';
+            window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress5').value='';
+            window.document.getElementById('pg:frm:pgBlk:BUC_address:bucCountry').value='';
+            
+            window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress1').disabled=true;
+            window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress2').disabled=true;
+            window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress3').disabled=true;
+            window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress4').disabled=true;
+            window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress5').disabled=true;
+            window.document.getElementById('pg:frm:pgBlk:BUC_address:bucCountry').disabled=true;
+            window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddressType').disabled=true;
+            window.document.getElementById('pg:frm:pgBlk:BUC_address:bucCountry_lkwgt').style.display='none';
+               
+          }
+          
+        }
+         //Added for SPOC-1203
+       function changetype(){
+        var type=window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddressType');
+        if(type.value=="Postbox")
+        {
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucCountry').value='Danmark';
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucCountry_lkwgt').style.display='none';
+ 
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress1').value='';
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress2').value=''; 
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress4').value='';
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress5').value='';         
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress3').disabled=true;
+             
+          
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucCountry').disabled=true;
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress1').disabled=true;
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress2').disabled=true;
+          
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress3').disabled=false;
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress4').disabled=false;
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress5').disabled=false;
+       
+        }
+        else if(type.value=="Foreign address")
+        {          
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress3').value='';
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress4').value='';
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress5').value='';
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucCountry').value='';
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucCountry_lkwgt').style.display='inline';
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucCountry').disabled=false;
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress1').disabled=false;
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress2').disabled=false;          
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress3').disabled=true;
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress4').disabled=false;
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress5').disabled=false;       
+        }  
+        else
+        {
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucCountry').value='';
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucCountry_lkwgt').style.display='none';
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress1').value='';
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress2').value='';          
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress3').value='';
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress4').value='';
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress5').value='';  
+          
+           window.document.getElementById('pg:frm:pgBlk:BUC_address:bucCountry').disabled=true;
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress1').disabled=true;
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress2').disabled=true;
+          
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress3').disabled=true;
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress4').disabled=true;
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress5').disabled=true;
+        }        
+       }
+       //On load
+       function onloadchangetype(){
+        var type=window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddressType');
+        if(type.value=="Postbox")
+        {
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucCountry_lkwgt').style.display='inline';
+ 
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress1').value='';
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress2').value='';          
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress3').disabled=true;
+                     
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucCountry').disabled=true;
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress1').disabled=true;
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress2').disabled=true;
+          
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress3').disabled=false;
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress4').disabled=false;
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress5').disabled=false;
+       
+        }
+        else if(type.value=="Foreign address")
+        {          
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress3').value='';
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucCountry_lkwgt').style.visibility='visible';
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucCountry').disabled=false;
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress1').disabled=false;
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress2').disabled=false;          
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress3').disabled=true;
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress4').disabled=false;
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress5').disabled=false;       
+        }  
+        else
+        {
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucCountry').value='';
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucCountry_lkwgt').style.display='none';
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress1').value='';
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress2').value='';          
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress3').value='';
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress4').value='';
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress5').value='';  
+          
+           window.document.getElementById('pg:frm:pgBlk:BUC_address:bucCountry').disabled=true;
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress1').disabled=true;
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress2').disabled=true;
+          
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress3').disabled=true;
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress4').disabled=true;
+          window.document.getElementById('pg:frm:pgBlk:BUC_address:bucAddress5').disabled=true;
+        }        
+       }
+       
+       function checkIfDummyAddr(e)
+       {
+       //alert('entered checkIfDummyAddr');
+       // if (window.document.getElementById('targetName').value == 'Dummyudlandsvej' && window.document.getElementById('billingName').value != 'Dummyudlandsvej')
+       if (window.document.getElementById('pg:frm:pgBlk:addresses:j_id34:targetName').value == 'Dummyudlandsvej' && window.document.getElementById('pg:frm:pgBlk:addresses:pgBlkSecItm:billingName').value != 'Dummyudlandsvej')
+      {
+        //alert('Ved Juridisk adresse Dummyudlandsvej 1, 9999 Ukendt, så skal Faktura adresse være Dummyudlandsvej 1, 9999 Ukendt');
+        window.document.getElementById('targetName').value='';
+        //e.preventDefault();
+      }
+       }
+       
+       function callupdate()
+       {
+     updateCategory();
+       }
+       
+       function changefun()
+       {
+           alert ('Function called onchange');
+       }
+       
+       function openInstPopup(){
+           var temp= document.getElementById('pg:frm:pgBlk:addresses:pgBlkSecItm:billingId');
+           //alert('Addr Id' +temp.value );
+           var url;
+           url ="/apex/InstallationLookuppage?addrid="+temp.value;
+           newWin2=window.open(url, 'Popup','height=500,width=600,left=100,top=100,resizable=no,scrollbars=yes,toolbar=no,status=no');
+           if (window.focus)    {
+               newWin2.focus();   
+           }           
+           return false;
+       
+       }
+    </script>    
+   <apex:form id="frm">
+    <!--<apex:actionFunction name="populate" action="{!populatenetinstid}" reRender="addid"> 
+    </apex:actionFunction> --> 
+    <!--<apex:actionFunction name="updateCategory" action="{!getOnchange}" rerender="pickval"/> -->
+        <apex:outputPanel id="pbMsg">
+                <apex:PageMessages id="pageErrorMessage"/>
+        </apex:outputPanel>
+       
+        <apex:pageBlock mode="edit" id="pgBlk">
+            <apex:pageBlockButtons >
+                <apex:actionStatus id="SaveButtonStatus">
+                  <apex:facet name="stop">
+                   <apex:outputPanel >
+                    <apex:commandButton action="{!save}" value="{!$Label.Save}" status="SaveButtonStatus" rerender="pbMsg"/>
+                 <!--   <apex:commandButton action="{!showPopup}" value="Installation" rerender="tstpopup"/> -->
+                    <apex:commandButton action="{!cancel}" value="{!$Label.Cancel}" immediate="true" />
+                   </apex:outputPanel>
+                  </apex:facet>
+             
+                  <apex:facet name="start">
+                   <apex:outputPanel >
+                            <div class="waitingSearchDiv" id="el_loading" style="background-color: #fbfbfb;
+                                   height: 100%;opacity:0.65;width:100%;"> 
+                                <div class="waitingHolder" style="top: 74.2px; width: 91px;">
+                                    <img class="waitingImage" src="/img/loading.gif" title="Please Wait..." />
+                                    <span class="waitingDescription">Saving...</span>
+                                </div>
+                            </div>
+                   </apex:outputPanel> 
+                  </apex:facet>
+                 </apex:actionStatus>
+               <!-- <apex:commandButton value="{!$Label.Save}" action="{!save}" reRender="pbMsg"/>
+                <apex:commandButton value="{!$Label.Cancel}" action="{!cancel}" />
+                 --> 
+                 </apex:pageBlockButtons>
+            <apex:pageBlockSection columns="2" id="info">
+                <apex:outputField value="{!Account.Name}"/>
+                <apex:outputField value="{!acc.Customer_No__c}"/>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection columns="2" id="addresses">
+                <!--apex:inputField value="{!acc.Street_YK__c}" label="{!$Label.Customer_Address_Type_Legal}" required="true"/--> 
+                                 
+              <apex:pageblockSectionItem >
+              <apex:outputLabel value="{!$Label.Customer_Address_Type_Legal}"></apex:outputLabel>                
+                                  
+                              <apex:outputPanel styleClass="requiredInput" layout="block">
+              <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+               <apex:inputHidden value="{!acc.Street_YK__c}" id="targetId"/>
+                             <apex:inputText value="{!acc.Street_YK__r.name}" id="targetName" onFocus="this.blur()" disabled="false" label="{!$Label.Customer_Address_Type_Legal}" maxlength="255" size="20" required="false"  />                                  
+                             <a href="#" onclick="openLookupPopup('{!$Component.targetName}', '{!$Component.targetId}','legal'); return false"><img class="lookupIcon" title="Address Lookup (New Window)" src="/s.gif"/></a>                
+              </apex:outputPanel>
+              </apex:pageblockSectionItem> 
+                                                   
+              <apex:pageblockSectionItem id="pgBlkSecItm">
+              <apex:outputLabel value="{!$Label.Customer_Address_Type_Billing}"></apex:outputLabel>                
+                                  
+                              <apex:outputPanel styleClass="requiredInput" layout="block">
+               <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+               <apex:inputHidden value="{!acc.Billing_Address__c}" id="billingId"/>
+                             <apex:inputText value="{!acc.Billing_Address__r.name}" id="billingName" onFocus="this.blur()" disabled="false"  maxlength="255" size="20" required="true" >
+                             <!--  <apex:actionSupport event="onchange" action="{!getOnchange}" reRender="none" oncomplete="changefun()"/>  -->
+                              </apex:inputText> 
+               <!--<apex:actionFunction name="changefun" action="{!populatecode}" />                 -->
+                            
+                             <a href="#" onclick="openLookupPopup('{!$Component.billingName}', '{!$Component.billingId}','billing'); return false"><img class="lookupIcon" title="Address Lookup (New Window)" src="/s.gif"/></a>                
+              </apex:outputPanel>
+              </apex:pageblockSectionItem>
+                              
+              <!-- apex:inputField value="{!acc.Billing_Address__c}" label="{!$Label.Customer_Address_Type_Billing}" required="true"/-->
+            </apex:pageBlockSection>
+            <apex:pageBlockSection columns="1" title="{!$Label.Address_History}">
+                <apex:pageBlockTable value="{!addresses}" var="addr" width="100%">
+                    <apex:column headerValue="{!$Label.Address}" value="{!addr.fullName}"/>
+                    <apex:column headerValue="{!$Label.Type}" value="{!addr.typeFull}"/>
+                    <apex:column headerValue="{!$Label.From}" value="{!addr.validFrom}"/>
+                    <apex:column headerValue="{!$Label.To}" value="{!addr.validTo}"/>
+                    <apex:column headerValue="{!$Label.Address_Deleted}" value="{!addr.deleted}"/>
+                </apex:pageBlockTable>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection columns="1" title="{!$Label.Customer_Alternative_Address}" id="BUC_address">   
+<!-- Make R/O temporarily
+                <apex:selectList id="BUC_CountryPickList" value="{!Account.BUC_country__c}" size="1" rendered="true">
+                   <apex:selectOptions value="{!countryOptions}"/>
+                                   </apex:selectList>
+                <apex:inputField value="{!Account.BUC_address_type__c}" />
+                <apex:inputField value="{!Account.BUC_address1__c}" style="width:540px"/>
+                <apex:inputField value="{!Account.BUC_address2__c}" style="width:540px"/>
+                <apex:inputField value="{!Account.BUC_address3__c}" style="width:270px"/>
+                <apex:inputField value="{!Account.BUC_address4__c}" style="width:400px"/>
+                <apex:inputField value="{!Account.BUC_address5__c}" style="width:400px"/>
+-->
+                <apex:inputField value="{!acc.BUC_address_type__c}"  id="bucAddressType" style="disabled:true" onchange="changetype()"  rendered="true"/>             
+                <apex:inputField value="{!acc.BUC_country__c}" id="bucCountry" style="disabled:true"/>
+                <apex:inputText value="{!acc.BUC_address1__c}"  id="bucAddress1" style="disabled:true" maxlength="20"/>
+                <apex:inputText value="{!acc.BUC_address2__c}"  id="bucAddress2" style="disabled:true" maxlength="16"/>
+                <apex:inputText value="{!acc.BUC_address3__c}"  id="bucAddress3" style="disabled:true" maxlength="20"/>
+                <apex:inputText value="{!acc.BUC_address4__c}"  id="bucAddress4" style="disabled:true" maxlength="20"/>
+                <apex:inputText value="{!acc.BUC_address5__c}"  id="bucAddress5" style="disabled:true" maxlength="18"/> 
+   <!--             <apex:outputField value="{!Account.BUC_country__c}" />
+                <apex:outputField value="{!Account.BUC_address_type__c}" />
+                <apex:outputField value="{!Account.BUC_address1__c}" style="width:540px"/>
+                <apex:outputField value="{!Account.BUC_address2__c}" style="width:540px"/>
+                <apex:outputField value="{!Account.BUC_address3__c}" style="width:270px"/>
+                <apex:outputField value="{!Account.BUC_address4__c}" style="width:400px"/>
+                <apex:outputField value="{!Account.BUC_address5__c}" style="width:400px"/>  -->
+                
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+        <p></p>
+    </apex:form>
+</apex:page>

@@ -1,0 +1,531 @@
+<apex:page cache="false" sidebar="false" showHeader="false" controller="clsFbContactController" action="{!initialize}" title="Skriv til os!" id="fbContactPage">
+<title>Skriv til os!</title>
+<meta name="description" content="Udfyld denne formular, og dine oplysninger sendes direkte til YouSee. Alle dine data er sikrede, og der er ingen forbindelse mellem de info, du afgiver her og øvrigt indhold på Facebook." />
+<!-- apex:page cache="false" sidebar="false" showHeader="false" controller="clsFbContactController" action="{!initialize}"-->
+<apex:stylesheet value="https://yousee.dk/css/reset.css"/>
+<apex:stylesheet value="https://yousee.dk/css/master.css?201322616"/>
+
+    <script src="{!$Resource.JQuery}" type="text/javascript"></script>
+    <script src="{!$Resource.jqueryuijs}" type="text/javascript"></script>
+    <link class="user" href="{!$Resource.jqueryuicss}" rel="stylesheet" type="text/css" />
+    <link rel="image_src" href="{!$Resource.YouSeeLogo}" />
+    <style>
+       .ui-autocomplete-loading { 
+            background: white url('{!URLFOR($Resource.Loading)}') right center no-repeat !important; 
+        } 
+       body button, body .x-btn, body .btn, body .btnDisabled, body .btnCancel, body .menuButton .menuButtonButton 
+       {background-color:#585858;color:#FFFFFF;font-weight:bold;height:26px;}   
+       .bPageBlock .pbTitle {color: #222;font-size: 0%;width:0%;}
+       .nextBtnCls {background-color:orangeRed;color:#FFFFFF;font-weight:bold;height:26px;}
+       .sogBtn {border-width: 0;padding: 0 15px;text-transform: capitalize;margin: 0 2px;background-position: left top;background-repeat: repeat-x;border-color: -moz-use-text-color #FF4500;border-right: 1px solid #FF4500;border-style: none solid solid none;display: inline;font-family: 'Verdana','Geneva',sans-serif;font-size: 80%;color: #FFFFFF;font-weight: bold;height: 26px;width:110px;background-color: #FF4500;}
+       .videreBtnCls {border-width: 0;padding: 0 15px;text-transform: capitalize;margin: 0 2px;background-position: left top;background-repeat: repeat-x;border-color: -moz-use-text-color #FF4500;border-right: 1px solid #FF4500;border-style: none solid solid none;display: inline;font-family: 'Verdana','Geneva',sans-serif;font-size: 80%;color: #FFFFFF;font-weight: bold;height: 26px;width:76px;background-color: #FF4500;}
+       .list .headerRow TH{background-color:#676767;color:#ffffff;text-align:left;font-weight:bold;!important;}
+       .list .headerStyleLeft TH{background-color:#676767;color:#ffffff;text-align:left;font-weight:bold;!important;}
+       .fontVerdana{ font-family: 'Verdana'; }   
+       button.helpButton:hover{background-position:0 0;}
+    </style>
+
+    <STYLE TYPE="TEXT/CSS">
+        .VALIDATIONERRORLABEL
+        {
+            DISPLAY: NONE;
+        }
+        INPUT.INPUT-VALIDATION-ERROR, TEXTAREA.INPUT-VALIDATION-ERROR, SELECT.INPUT-VALIDATION-ERROR
+        {
+            BORDER: 0 !IMPORTANT;
+        }
+    
+    </STYLE>
+    
+    <script type="text/javascript">
+        var j$ = jQuery.noConflict();         
+        //window.onload=setFocus;
+        var streets = '';
+        var streetNumbers = '';
+        var lastPostNr = '';
+        var lastStreetAndHouseNr = '';
+        var lastStreet = '';
+        var streetItemIsSelected = false;
+        var houseItemIsSelected = false;
+        jQuery(function(){ 
+              var streetAuto = j$('input[id$="searchStreetText"]').autocomplete({
+                  source: function (request, response) {
+                      var streetIni = jQuery.trim(request.term);
+                      if(streetIni.length>0){
+                          findStreets();
+                          streets = response;
+                          streetItemIsSelected = false;
+                      }  
+                  },
+                  change: function(event, ui){
+                      if (!streetItemIsSelected){
+                          validateStreet();
+                      }
+                  },
+                  select: function(event,ui){
+                      j$('#streetDiv').removeClass("validationError");
+                      streetItemIsSelected = true;
+                  },
+                  autoFocus: true,
+                  minLength: 4,
+                  delay: 500
+              });
+              var streetNumbersAuto = j$('input[id$="searchHouseText"]').autocomplete({
+                  source: function (request, response) {
+                      var streetNumberIni = jQuery.trim(request.term);
+                      if(streetNumberIni.length>0){
+                          var strNo = jQuery.trim(j$('input[id$="searchStreetText"]')[0].value);
+                          findStreetNumbers();
+                          streetNumbers = response;
+                          houseItemIsSelected = false;
+                      }
+                  },
+                  change: function(event, ui){
+                      var streetValue = jQuery.trim(j$('input[id$="searchStreetText"]')[0].value);
+                      var houseNrValue = jQuery.trim(j$('input[id$="searchHouseText"]')[0].value);
+                      
+                      var streetAndHouseNr = streetValue + ' ' + houseNrValue;
+                      if(!houseItemIsSelected){
+                          searchAddress();
+                          lastStreetAndHouseNr = streetAndHouseNr;
+                      }
+                  },
+                  select: function(event,ui){
+                      j$('input[id$="searchHouseText"]')[0].value = ui.item.value;
+                      
+                      var streetValue = jQuery.trim(j$('input[id$="searchStreetText"]')[0].value);
+                      var houseNrValue = jQuery.trim(j$('input[id$="searchHouseText"]')[0].value);
+                      
+                      var streetAndHouseNr = streetValue + ' ' + houseNrValue;
+                      if(streetValue.length>0 && houseNrValue.length>0 && streetAndHouseNr!=lastStreetAndHouseNr){
+                          searchAddress();
+                          lastStreetAndHouseNr = streetAndHouseNr;
+                          houseItemIsSelected = true;
+                      }
+                  },
+                  autoFocus: true,
+                  delay: 500
+              });
+
+              j$('input[id$="searchStreetText"]')[0].disabled= true; 
+              j$('input[id$="searchHouseText"]')[0].disabled= true;
+               
+              /*j$('ul.ui-autocomplete').delegate('a.ui-corner-all', "click", function(){
+                    invokeSearchAddress();
+                });*/
+        });
+        
+        function validatePostCodeOnKeyup(val){ 
+          var postNr = jQuery.trim(val);
+          if(lastPostNr!=postNr) {
+            if(postNr.length == 4){
+              if(isNaN(postNr)){
+                document.getElementById('postNumberError').innerHTML ='Fejl: Postnummer skal være 4 cifre';
+                j$('#postNrDiv').addClass("validationError");
+                clearStreet(true);
+              }else{
+                 document.getElementById('postNumberError').innerHTML ='';
+                 clearStreet(false);
+                 findCityName();
+                 j$('#postNrDiv').removeClass("validationError");
+              }
+            } else {
+              clearStreet(true);
+            }
+            lastPostNr = postNr;
+          }
+          /*
+          if(postNr.length == 4){
+            if(isNaN(postNr)){
+              document.getElementById('postNumberError').innerHTML ='Fejl: Postnummer skal være 4 cifre';
+              j$('#postNrDiv').addClass("validationError");
+              clearStreet();
+            }else{
+              if (lastPostNr!=postNr){
+                document.getElementById('postNumberError').innerHTML =''; 
+                findCityName();
+                j$('#postNrDiv').removeClass("validationError");
+              } 
+            }
+            lastPostNr = postNr;
+          }*/
+        }
+
+        function validatePostCodeOnBlur(val){
+          var postNr = jQuery.trim(val);
+          if(postNr.length != 4){
+            document.getElementById('postNumberError').innerHTML ='Fejl: Postnummer skal være 4 cifre';
+            j$('#postNrDiv').addClass("validationError");
+          }
+        }
+         
+        function validateStreetCallback(){
+          if(jsonStreetIsValidated) {
+            j$('#streetDiv').removeClass("validationError");
+          }else{
+            j$('#streetDiv').addClass("validationError");
+          }
+        }
+        
+        function validateHouseCallback(){
+          if(jsonHouseIsValidated) {
+            j$('#houseDiv').removeClass("validationError");
+          }else{
+            j$('#houseDiv').addClass("validationError");
+          }
+        }
+         
+        /*         
+         function invokeSearchAddress(){
+             var streetValue = jQuery.trim(j$('input[id$="searchStreetText"]')[0].value);
+             var houseNrValue = jQuery.trim(j$('input[id$="searchHouseText"]')[0].value);
+
+             alert("houseNrValue: "+houseNrValue);
+             var streetAndHouseNr = streetValue + ' ' + houseNrValue;
+             if(streetValue.length>0 && houseNrValue.length>0 && streetAndHouseNr!=lastStreetAndHouseNr){
+                 searchAddress();
+                 lastStreetAndHouseNr = streetAndHouseNr;
+             }
+         }
+         */
+ 
+         function renderCityName(){
+            if (jsCityName == '@@##'){             
+              document.getElementById('postNumberError').innerHTML ='Der findes ingen by for det angivet postnummer';
+              j$('#postNrDiv').addClass("validationError");
+              //clearStreet(false);
+              j$('span[id$="cityName"]')[0].innerHTML='';
+              j$('input[id$="searchText"]')[0].focus();
+            }else {
+              document.getElementById('postNumberError').innerHTML ='';
+              j$('input[id$="searchText"]')[0].select();
+              j$('input[id$="searchStreetText"]')[0].disabled=false;
+              j$('input[id$="searchHouseText"]')[0].disabled=false;
+              j$('input[id$="searchStreetText"]')[0].focus();
+            }
+         }
+        
+         function setFocus(){
+            if (j$('input[id$="searchText"]')[0]!= null) {
+              //j$('input[id$="firstnameId"]')[0].focus();
+            }
+         }
+        
+         function displayStreets(){
+             if (jsonStreet==''){
+                document.getElementById('postNumberError').innerHTML ='Adressen findes ikke.';
+                j$('#streetDiv').addClass("validationError");
+             }else {
+                document.getElementById('postNumberError').innerHTML ='';
+                //j$('#streetDiv').removeClass("validationError");
+             }
+             streets(jsonStreet);
+             //var evt = window.event;
+         }
+          
+         function displayStreetNumbers(){
+             if (jsonStreetNumbers==''){
+               document.getElementById('postNumberError').innerHTML='Adressen findes ikke.';
+               j$('#houseDiv').addClass("validationError");
+             }else {
+               document.getElementById('postNumberError').innerHTML='';
+               //j$('#houseDiv').removeClass("validationError");
+             }
+             streetNumbers(jsonStreetNumbers);
+             //var evt = window.event;
+         } 
+        
+        function clearStreet(send){
+           j$('span[id$="cityName"]')[0].innerHTML='';
+           j$('input[id$="searchStreetText"]')[0].value='';
+           j$('input[id$="searchHouseText"]')[0].value='';
+           j$('input[id$="searchStreetText"]')[0].disabled=true;
+           j$('input[id$="searchHouseText"]')[0].disabled=true;
+           j$('#streetDiv').removeClass("validationError");
+           j$('#houseDiv').removeClass("validationError");
+           j$('input[id$="searchStreetText"]').data().autocomplete.term = null;
+           j$('input[id$="searchHouseText"]').data().autocomplete.term = null;
+           streetItemIsSelected = false;
+           houseItemIsSelected = false;
+           if (send && j$('span[id$="floorAndDoorBlock"]')[0].innerText!=''){
+             hideAddressPicklists();
+           }
+           lastStreetAndHouseNr='';
+           return false;
+        }
+        
+        function clearHouse(val){
+          var street = jQuery.trim(val);
+          if(street!=lastStreet) {
+            j$('input[id$="searchHouseText"]')[0].value='';
+            j$('#houseDiv').removeClass("validationError");
+            j$('input[id$="searchHouseText"]').data().autocomplete.term = null;
+            houseItemIsSelected = false;
+            if (j$('span[id$="floorAndDoorBlock"]')[0].innerText!=''){
+              hideAddressPicklists();
+            }
+            lastStreetAndHouseNr='';
+            lastStreet=street;
+          }
+        }
+        
+        function validateAndSubmit(){
+            var validated = true;
+            var errorMessage = '';
+        
+            if (j$('input[id$="firstNameInput"]')[0].value == '') {
+                j$('#firstNameDiv').addClass("validationError");
+                validated = false;
+                if (errorMessage.length > 0) {
+                    errorMessage += ', ';
+                }
+                errorMessage+= 'Fornavn';
+            } else {
+                j$('#firstNameDiv').removeClass("validationError");
+            }
+            if (j$('input[id$="lastNameInput"]')[0].value == '') {
+                j$('#lastNameDiv').addClass("validationError");
+                validated = false;
+                if (errorMessage.length > 0) {
+                    errorMessage += ', ';
+                }
+                errorMessage+= 'Efternavn';
+            } else {
+                j$('#lastNameDiv').removeClass("validationError");
+            }
+            if (j$('input[id$="searchText"]')[0].value == '' ||
+                j$('input[id$="searchStreetText"]')[0].value == '' ||
+                j$('input[id$="searchHouseText"]')[0].value == '') {
+                if (j$('input[id$="searchText"]')[0].value == '') {
+                    j$('#postNrDiv').addClass("validationError");
+                } else {
+                    j$('#postNrDiv').removeClass("validationError");
+                }
+                if (j$('input[id$="searchStreetText"]')[0].value == '') {
+                    j$('#streetDiv').addClass("validationError");
+                } else {
+                    j$('#streetDiv').removeClass("validationError");
+                }
+                if (j$('input[id$="searchHouseText"]')[0].value == '') {
+                    j$('#houseDiv').addClass("validationError");
+                } else {
+                    j$('#houseDiv').removeClass("validationError");
+                }
+                validated = false;
+                if (errorMessage.length > 0) {
+                    errorMessage += ', ';
+                }
+                errorMessage+= 'Adresse';
+            }
+            if (j$('input[id$="emailId"]')[0].value == '' ||
+                !j$('input[id$="emailId"]')[0].value.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+                j$('#emailDiv').addClass("validationError");
+                validated = false;
+                if (errorMessage.length > 0) {
+                    errorMessage += ', ';
+                }
+                errorMessage+= 'Mail adresse';
+            } else {
+                j$('#emailDiv').removeClass("validationError");
+            }
+        
+            if (validated) {
+                j$('#SubmitId').attr("disabled", true);
+                j$('#SubmitId').addClass('disabled');
+                //j$('#SubmitId').val('Please wait...');
+                selectAddress();
+            } else {
+                document.getElementById('postNumberError').innerHTML='Fejl i indtastningsfelterne<br/>Ret venligst fejlene i felterne: ' + errorMessage;
+            }
+        }
+        
+        function selectAddressCompleted(){
+            j$('#SubmitId').attr("disabled", false);
+            j$('#SubmitId').removeClass('disabled');
+            //j$('#SubmitId').val('Send');
+        }
+    </script>
+
+
+<apex:form id="fbContactForm">
+    <div id="IdentityOverlay" class="dialog dialogwide" style="width: 520px; left: 50%; margin-left:-260px; margin-bottom: 81px; position: relative; z-index: 9999; top: 41.1px; display: block;">
+        <div class="contentWrap">
+
+<div class="Clear dialogequalheight">
+
+<div class="dialogbox CallMeDialog">
+    <div class="dialogheader">
+        <h1>
+            Kontakt YouSee's Team Facebook
+        </h1>
+        Vi har brug for lidt flere oplysninger. Udfyld venligst denne formular
+        
+    </div>
+
+    <div class="dialogcontent">
+     
+        <div id="content_0_dialogcontent_0_AddressLogin">
+            <fieldset>
+                    <h2>
+                        Skriv dine oplysninger
+                    </h2>
+                    <div class="dialoginput Clear">
+
+                        <apex:outputPanel id="searchAddMsg"><div id="postNumberError" class="inputerror" style="padding:0 15px"><apex:messages /></div></apex:outputPanel>
+                         
+                         <div class="formcol dialogcolumn2" id="firstNameDiv">
+                            <apex:outputLabel value="Fornavn"></apex:outputLabel><span style="color:red;">*</span>
+                            <div class="inputbox">
+                                <apex:inputText value="{!firstName}" id="firstNameInput"/>
+                            </div>
+                        </div>
+                        
+                        <div class="formcol dialogcolumn2" id="lastNameDiv">
+                            <apex:outputLabel value="Efternavn"></apex:outputLabel><span style="color:red;">*</span>
+                            <div class="inputbox">
+                                <apex:inputText value="{!lastName}" id="lastNameInput"/>
+                            </div>
+                        </div>
+                        
+                        <div class="formcol dialogcolumn1" id="postNrDiv">
+                            <apex:outputLabel value="Postnr." for="searchText"/><span style="color:red;">*</span>
+                            <div class="inputbox" id="postNrInput">
+                                <apex:inputText maxlength="4" id="searchText" value="{!searchPostNrText}" onkeyup="validatePostCodeOnKeyup(this.value);" onblur="validatePostCodeOnBlur(this.value);" required="true"/>
+                                
+                            </div>
+                            
+                        </div>
+                        
+                        <div class="formcol dialogcolumn3 inputinactive">
+                            <apex:outputPanel id="innetoptID" styleClass="requiredInput" layout="block">
+                            <apex:outputLabel value="By" for="cityName"/>
+                            <div class="inputbox city">
+                                <apex:outputText value="{!cityName}" id="cityName" style="position: absolute; bottom: 2px"/>
+                                <apex:actionStatus id="searchStatus">
+                                    <apex:facet name="start"><img src="{!URLFOR($Resource.Loading)}" border="0" height="18px" width="18px" style="position: absolute; bottom: 2px; right: 2px"/></apex:facet> 
+                                    <apex:facet name="stop" ></apex:facet>
+                                </apex:actionStatus>
+                                <script type="text/javascript">
+                                   var jsCityName = '{!cityName}';   
+                                </script>
+                            </div>
+                            </apex:outputPanel>
+                        </div>
+                        
+                        <div class="formcol dialogcolumn4" id="streetDiv">
+                            <apex:outputLabel value="Vej" for="searchStreetText"/><span style="color:red;">*</span>
+                            <div class="inputbox">
+                                <apex:inputText value="{!searchStreetText}" id="searchStreetText" onkeyup="clearHouse(this.value);"/>    
+                            </div>
+                        </div>
+    
+                        <div class="formcol dialogcolumn5" id="houseDiv">
+                            <apex:outputLabel value="Husnummer" for="searchHouseText"/><span style="color:red;">*</span>
+                            <div class="inputbox">
+                                <!--apex:inputText id="searchHouseText" value="{!searchHouseText}" onchange="invokeSearchAddress()"/-->
+                                <apex:inputText id="searchHouseText" value="{!searchHouseText}" />
+                            </div>
+                        </div>
+                        
+                        <apex:outputPanel id="floorAndDoorBlock">
+                            <apex:outputPanel rendered="{!showAddressPicklists}">
+                                <div class="formcol dialogcolumn5">
+                                    <apex:outputLabel value="Etage/dør" for="floorAndDoorId"/><span style="color:red;">*</span>
+                                    <div class="selectbox" style="padding:1px;">
+                                        <apex:selectList id="floorAndDoorId" value="{!selectedFloorAndDoor}" size="1" styleClass="inputtxt stednavn-textbox" style="width:100%;">
+                                            <apex:selectOptions value="{!floorAndDoorItems}"/>
+                                        </apex:selectList>
+                                    </div>
+                                </div>
+                            </apex:outputPanel>
+                        </apex:outputPanel>
+                        
+                        <div class="formcol dialogcolumn4" id="emailDiv">
+                            <apex:outputLabel value="Mail adresse (til brug for svar)" for="emailId"/><span style="color:red;">*</span>    
+                            <div class="inputbox">
+                                <apex:inputText value="{!email}" id="emailId"/>
+                            </div>
+                        </div>
+    
+                        <!--div class="formcol dialogcolumn5">
+                            <apex:outputLabel value="Kundenummer"></apex:outputLabel>
+                            <div class="inputbox">
+                                <apex:inputText value="{!customerNumber}" id="customerNumberId" maxlength="9"/>
+                            </div>
+                        </div-->
+    
+                        <div class="formcol dialogcolumn4">
+                            <apex:outputLabel value="Uddybende kommentarer:" for="commentId"/>
+                            <div class="inputbox multiline">
+                                <apex:inputTextarea value="{!comment}" id="commentId"/>
+                            </div>
+                        </div>
+
+                        <div class="formcol dialogcolumn4 clearleft extraspaceTop">
+                            <input type="button" class="dialogbutton_orange" id="SubmitId" name="Submit" value="Send" onclick="return validateAndSubmit();"/>
+                        </div>
+                    
+                    </div>
+   
+            </fieldset>
+        </div>
+    </div>
+</div>
+
+        <apex:actionFunction name="findCityName" status="searchStatus" action="{!findCityName}" oncomplete="renderCityName();" rerender="innetoptID, floorAndDoorBlock">
+        </apex:actionFunction>
+
+        <apex:actionFunction name="findStreets" action="{!findStreets}" reRender="thePanel" oncomplete="displayStreets();">
+        </apex:actionFunction>
+        <apex:actionFunction name="findStreetNumbers" action="{!findStreetNumbers}" reRender="thePanelStreetNumbers" oncomplete="displayStreetNumbers();">
+        </apex:actionFunction>
+        <apex:actionFunction name="findFloorsAndDoors" status="searchStatus" action="{!findFloorsAndDoors}" reRender="floorAndDoorBlock">
+        </apex:actionFunction>
+        
+        
+        <apex:actionFunction name="searchAddress" status="searchStatus" action="{!searchAddress}" rerender="floorAndDoorBlock,searchAddMsg,thePanelHouseValidation" oncomplete="validateHouseCallback();"> 
+        </apex:actionFunction>
+        <apex:actionFunction name="selectAddress" status="searchStatus" action="{!selectAddress}" rerender="searchAddMsg" oncomplete="selectAddressCompleted();"> 
+        </apex:actionFunction>
+        <apex:actionFunction name="hideAddressPicklists" status="hideAddressPicklists" action="{!hideAddressPicklists}" rerender="floorAndDoorBlock"> 
+        </apex:actionFunction>
+        
+        <apex:actionFunction name="validateStreet" status="validateStreet" action="{!validateStreet}" rerender="thePanelStreetValidation" oncomplete="validateStreetCallback();"/>
+        
+        <apex:outPutPanel id="thePanel" >
+            <apex:outPutPanel rendered="{!NOT(ISNULL(streetSuggestion))}">
+               <script type="text/javascript"> 
+                   var jsonStreet = {!streetSuggestion};
+               </script>
+            </apex:outPutPanel> 
+        </apex:outPutPanel> 
+
+        <apex:outPutPanel id="thePanelStreetNumbers" >
+            <apex:outPutPanel rendered="{!NOT(ISNULL(streetNumbersSuggestion))}">
+               <script type="text/javascript"> 
+                   var jsonStreetNumbers = {!streetNumbersSuggestion};
+               </script>
+            </apex:outPutPanel> 
+        </apex:outPutPanel>
+        
+        <apex:outPutPanel id="thePanelStreetValidation" >
+            <apex:outPutPanel rendered="true">
+               <script type="text/javascript"> 
+                   var jsonStreetIsValidated = {!isStreetValidated};
+               </script>
+            </apex:outPutPanel> 
+        </apex:outPutPanel> 
+        
+        <apex:outPutPanel id="thePanelHouseValidation" >
+            <apex:outPutPanel rendered="true">
+               <script type="text/javascript"> 
+                   var jsonHouseIsValidated = {!isHouseValidated};
+               </script>
+            </apex:outPutPanel> 
+        </apex:outPutPanel> 
+</div>
+    </div>
+    </div> 
+ </apex:form>
+  
+</apex:page>

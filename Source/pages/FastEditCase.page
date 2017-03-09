@@ -1,0 +1,38 @@
+<apex:page controller="FastEditCaseController" tabStyle="Case" title="{!$Label.Fast_Edit_Page_Title}" id="id_page">
+    <script>
+        var previousOnload = window.onload;        
+        window.onload = function() { 
+            if (previousOnload) { 
+                previousOnload();
+            }
+        document.getElementById('{!$Component.id_page.id_form.id_pb.id_section.id_department}').focus();    
+        }
+    </script>
+    <apex:sectionHeader title="Case" subtitle="{!caseToSave.CaseNumber}"/>
+    <apex:pageMessages />
+    <apex:form id="id_form">
+        <apex:pageBlock title="{!$Label.Fast_Edit_Page_Title}" mode="edit" id="id_pb">
+            <apex:pageBlockButtons >
+                <apex:commandButton action="{!retrieveNextCase}" value="{!$Label.CL_SaveAndNext}" />             
+                <apex:commandButton action="{!saveGoToQueue}" value="{!$Label.CL_SaveGoToQueue}" /> 
+                <apex:commandButton action="{!cancel}" value="{!$Label.Cancel}"/> 
+            </apex:pageBlockButtons>
+            <apex:pageBlockSection title="{!$Label.Case_Information}" columns="1" id="id_section">
+                <apex:inputField value="{!caseToSave.Department__c}" required="true" id="id_department"/>   
+                <apex:inputField value="{!caseToSave.Product_2__c}" required="true"/>
+                <apex:inputField value="{!caseToSave.Type_Task__c}"/>
+                <apex:inputField value="{!caseToSave.Status}" required="true"/>
+                <apex:inputField value="{!caseToSave.Reserve_Until__c}" />
+                <apex:inputField value="{!caseToSave.Reservation_Reason__c}" />
+                <apex:inputField value="{!caseToSave.Postpone_Until__c}" />
+                <apex:inputField value="{!caseToSave.Number_of_task_in_this_case__c}" />
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="{!$ObjectType.Case.fields.Anlaeg_No_New__c.label}" for="cuIframe"/>
+                    <apex:iframe src="{!URLFOR($Page.CaseSearchCustomerByAnlaegnr)}?id={!caseToSave.Id}&retUrl=fastEdit" id="cuIframe" height="26px" width="420px"/>
+                </apex:pageBlockSectionItem>
+                <apex:inputField value="{!caseToSave.Internal_Comments_Close_Reason__c}" id="id_closeReason" style="width:420px;height:110px;"/>
+                <apex:inputField value="{!caseToSave.Violation_of_SLA__c}"/>
+            </apex:pageBlockSection>
+        </apex:pageBlock>   
+    </apex:form>
+</apex:page>

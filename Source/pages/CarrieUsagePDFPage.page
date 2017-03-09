@@ -1,0 +1,65 @@
+<apex:page standardcontroller="Aria_Account__c" extensions="CarrieCustomerUsageController" renderAs="pdf" sidebar="False" showHeader="False" standardStylesheets="false">    
+    <img src="{!URLFOR($Resource.CarrieKopiWatermark)}" id="watermark" style=" position: fixed; z-index: -1; top: 35%;left:30%;"/>
+    <apex:form >
+        <apex:pageBlock >
+            <div align="left"> <h1 style="font-size:13pt">Kundeoplysninger</h1></div>
+            <table>
+                <tr>
+                    <td><apex:outputText value="Kundenavn: "/></td>
+                    <td><apex:outputText value="{!Aria_Account__c.account__r.name}"/></td>
+                </tr>
+                <tr>     
+                    <td><apex:outputText value="Kundenummer: "/></td>
+                    <td><apex:outputText value="{!Aria_Account__c.account__r.Customer_No__c}"/> </td>
+                </tr>
+            </table>  
+            <br/>
+            <div align="left"> <h1 style="font-size:12pt">Forbrug fra {!fromDate} til {!toDate}</h1></div>     
+            <br/>
+            <table style="width:100%;border-collapse:collapse;" border="1">
+                <tr>
+                    <th style="width:30%;text-align:left;">Dato
+                    </th>
+                    <th style="width:40%;text-align:left;">Beskrivelse
+                    </th>
+                    <th style="width:15%;text-align:left;">Varighed
+                    </th>
+                    <th style="width:15%;text-align:left;">Pris i dkk.
+                    </th>
+                </tr>
+            </table> 
+            
+            <apex:repeat value="{!thousandBlocks}" var="blocks"> 
+                <apex:repeat value="{!blocks.usages}" var="sort">
+                    <div style="page-break-inside:avoid;height:90%;width:100%;" > 
+                        <table style="width:100%;overflow:auto;border-collapse:collapse;" border="1">
+                            <tr style="width:100%;">
+                                <td style="width:30%;">{!sort.startDate}
+                                </td>
+                                <td style="width:40%;">{!sort.numberForEmail}
+                                </td>
+                                <td style="width:15%;">{!sort.duration}
+                                </td>
+                                <td style="width:15%;text-align:right;">{!sort.amount}
+                                </td>
+                            </tr>
+                        </table>                   
+                    </div>
+                </apex:repeat>     
+            </apex:repeat>
+                         
+            <table frame="border" rules="all" style="width:100%;border: 1px solid black;overflow:auto;">
+                <tr>
+                    <th style="width:30%;text-align:left;">
+                    </th>
+                    <th style="width:40%;text-align:left;">Vis Alt
+                    </th>
+                    <th style="width:15%;text-align:left;">
+                    </th>
+                    <th style="width:15%;text-align:left;">{!visAlt}
+                    </th>
+                </tr>
+            </table>  
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

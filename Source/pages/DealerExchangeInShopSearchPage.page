@@ -1,0 +1,212 @@
+<apex:page sidebar="false" showHeader="false" controller="DealerExchangeInShop" action="{!GettextAreaDetails}" applyHtmlTag="false">
+<html class="cvi2015"><!--spoc 2206-->
+<head>  
+ <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" /> 
+<title> Ombyt lejeboks </title>
+<apex:form rendered="{!$Label.DE_Login_Access}">
+    <center>
+    <apex:image url="{!$Resource.DW_Maintenance_Image_2}" width="400" height="400"/>
+        <br></br>
+    <apex:outputText style="color: #629E00;font-size: large;" value="{!$Label.DW_Maintenance_message}">
+        
+    </apex:outputText>
+    <br></br>
+    <a class="dialogbutton_orange Right" href="/secur/logout.jsp" style="position: relative; left: -15px;"><span>Back</span></a>
+    </center>
+</apex:form>
+<apex:form rendered="{!$Label.DE_Login_Access} != 'true'">
+<script type="text/javascript" src="https://yousee.dk/sitecore/content/data/export/export.aspx?itemguid={2AE76805-70CA-4F63-9DC4-BC2DF507483E}&functions=true"></script>
+    <!-- Added for DW 750 -->
+    <c:TopMenuComponent ></c:TopMenuComponent>
+        <script type="text/javascript">printHeader();</script>
+        <script type="text/javascript">printTopMenu();</script>
+</apex:form>
+<style>
+.SøgBtnCls {border-width: 0;padding: 0 15px;text-transform: capitalize;margin: 0 2px;background-position: left top;background-repeat: repeat-x;border-color: -moz-use-text-color #FF4500;border-right: 1px solid #FF4500;border-style: none solid solid none;display: inline;font-family: 'Verdana','Geneva',sans-serif;font-size: 80%;color: #FFFFFF;font-weight: bold;height: 26px;background-color: #FF4500;}
+.errorMessage {color: red; font-weight: bold;}
+.mailError{color: red;border-bottom: #000000 1px solid;border-left: #000000 1px solid;padding-bottom: 1px;background-color: #f1f1f1;padding-left: 4px;padding-right: 4px;font-family: Verdana;font-size: 9pt; border-top: #000000 1px solid;border-right: #000000 1px solid;padding-top: 1px; 
+            }
+</style>    
+   
+ <script>
+ var validated = false;
+ function numberValidate()
+        {
+            document.getElementById("jsErrorSection").style.display = 'none'; 
+            document.getElementById("jsErrorText").innerHTML = ''; 
+                                
+            var numberStr =  document.getElementById("div1").firstChild.value;
+                numberStr= numberStr.trim();
+            if(numberStr.length > 0 && numberStr != '' && !(isNaN(numberStr)))
+            {               
+                    if(numberStr.length == 12)
+                    {   
+                        validated = true;
+                    }
+                    else
+                    {
+                        validated = false;                      
+                        document.getElementById("jsErrorSection").style.display = 'block'; 
+                        document.getElementById("jsErrorText").innerHTML = 'Nummeret skal være 12 cifre.';
+                    }               
+            }
+            else
+            {
+                validated = false;  
+                document.getElementById("jsErrorSection").style.display = 'block'; 
+                document.getElementById("jsErrorText").innerHTML = 'Angiv gyldigt serienummer.';             
+            }
+            if(validated)
+            {
+                SearchSerialNO();
+            }       
+        }
+ 
+String.prototype.trim = function() {
+    return this.replace(/^\s+|\s+$/g, "");
+};
+ 
+ </script>
+ 
+ <script type='text/javascript'>
+    function noenter(ev)  {
+            
+        var keycode;
+        if(ev.keyCode)
+            keycode = ev.keyCode;
+        else if(ev.Which)
+            keycode = ev.Which;
+        else
+            keycode = ev.charCode;
+        if((keycode > 31 && (keycode < 48 || keycode >57 )) || keycode == 46){
+            return false;               
+        }    
+        if (window.event && window.event.keyCode == 13 || ev.which == 13) {
+            
+            numberValidate();
+            return false;
+         } else {
+              return true;
+         }
+     }
+</script>
+
+  </head>
+
+<apex:form id="theform" rendered="{!$Label.DE_Login_Access} != 'true'">
+
+<body>
+        <script type="text/javascript">printContentAreaBegin();</script>
+   
+   <div class="message errorM3" id="jsErrorSection" style="display:none;font-family: 'Verdana';">
+             <!-- <table border="0" cellpadding="0" cellspacing="0" class="mailError" style="padding:0px;margin:0px;">
+                <tr valign="top">
+                    <td>
+                        <img alt="Fejl" src="/s.gif" class="msgIcon" title="ERROR" />
+                     </td>
+                     <td class="messageCell">
+                        <div class="messageText">
+                            <span style="color:#cc0000">
+                                <h4>Fejl:</h4>
+                            </span> 
+                            <div id="jsErrorText"></div>
+                            <br/>
+                        </div>
+                     </td>
+                </tr>
+                <tr>
+                </tr>
+            </table>
+        
+            -->
+             <div>
+                        <img alt="Fejl" src="/s.gif" class="msgIcon" title="ERROR" /> 
+                         <span style="color:#cc0000">
+                                <h4>Fejl:</h4>
+                            </span> 
+                            <div id="jsErrorText"></div>
+                            <br/>
+                        
+             </div>
+            
+        </div>
+        
+   <apex:panelGrid id="Pgd" columns="2" width="100%">
+            
+        <apex:pageblock id="pbblk" >                
+         <apex:pageMessages rendered="true" id="msg2"/>         
+        <apex:pageBlockSection title="Ombytning af lejeboks " columns="1" collapsible="false">  
+             <table width="100%" id="tableFormat"  border="0" cellpadding="0" cellspacing="5">
+             <tr>
+             <td>
+              <apex:OutputText id="textArea1" value="{!ToptextArea1}" escape="false" rendered="{!textAreaRendering != true}"  />
+              <apex:OutputText id="textArea2" value="{!ToptextArea2}" escape="false" rendered="{!textAreaRendering}"  />                    
+                </td>
+                </tr>
+                                
+                <tr>
+                    <td>
+                        <apex:outputLabel value="Indtast serienr. på kundens defekte boks: " style="font-weight:bold; font-size:9pt; font-family: 'Verdana';" >
+                        </apex:outputLabel>                         
+                        <apex:outputpanel ><div id="div1">
+                        <apex:inputText id="SerialNo" value="{!SerialNo}" onkeypress="return noenter(event);" maxlength="12"/> &nbsp;&nbsp;                       
+                     <!-- <apex:commandButton status="mystatus1" value=" SØG " action="{!SearchSerialNO}" oncomplete="parseJson();" rendered="{!DisPBoxCondParam != true}" reRender="outpanel1,pbblk,pbblk2" /> -->
+                    <!-- <apex:commandButton value=" SØG "  onclick="numberValidate()"  oncomplete="" /> <!-- action="{!SearchSerialNO}"  status="mystatus1"-->
+                     <input type="button" value="Søg" onclick="numberValidate();" oncomplete="" class="SøgBtnCls"/>
+                          <!--    <apex:actionStatus id="mystatus1" >
+                                 <apex:facet name="start" >
+                                      <img src="{!URLFOR($Resource.loadingImage)}" border="0" height="18px" width="18px" /> please wait...
+                                 </apex:facet>
+                             </apex:actionStatus>   -->
+                             
+                             
+                                                                                                                  
+                       </div> </apex:outputpanel>
+                    </td> 
+                </tr>                         
+                
+                </table> 
+          
+                    </apex:pageBlockSection>
+            <br> </br>                  
+</apex:pageBlock>
+
+    
+        </apex:panelGrid>
+        
+        <apex:actionFunction name="SearchSerialNO" action="{!SearchSerialNO}"> <!-- status="queryStatus"  rerender="out2,jsErrorSection" -->
+    </apex:actionFunction> 
+    <apex:actionStatus id="queryStatus"> 
+                                <apex:facet name="start">
+                                    <c:loadingComponent BackColor="#efefef" borderColor="#336699"
+                                        borderSize="3" height="50px" width="120px" 
+                                        ImageUrl="{!$Resource.loadingImage}" Message="Henter Data..." 
+                                        messageStyle="color:darkred;font-size:11pt;font-weight:bold;"/>
+                                </apex:facet>         
+                            </apex:actionStatus>  
+   <apex:outputpanel id="out2">  
+        <script>        
+            
+            var e = '{!error}';         
+            if(e != '' && e.length > 0)
+            {
+                //alert('inside eerrrr');
+                document.getElementById("jsErrorSection").style.display = 'block'; 
+                document.getElementById("jsErrorText").innerHTML = '{!error}';
+            }
+            else
+            {
+                //alert('inside eerrrr else');
+                document.getElementById("jsErrorSection").style.display = 'none'; 
+            } 
+        
+        </script></apex:outputpanel>
+        <script type="text/javascript">printContentAreaEnd();</script>
+    <script type="text/javascript">printFooter();</script>
+    <script type="text/javascript" src="../js/click.js" charset="ISO-8859-1"></script> 
+
+        </body>
+        
+</apex:form>
+</html>
+</apex:page>

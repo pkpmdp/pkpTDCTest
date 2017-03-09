@@ -1,0 +1,33 @@
+<apex:page standardController="Case" extensions="clsCasesSearchCustomerSerialNoController">
+
+<script>
+function setFocusOnLoad() {} 
+</script>
+<apex:form >
+  <apex:outputPanel layout="block"  style="border: 1px solid rgb(192, 190, 114); background: rgb(227, 222, 184); width : 100%; min-width:350px"> 
+
+        <!--  font-family: Verdana, Geneva, sans-serif; font-weight: normal -->
+    <!--     <apex:outputText value=" Search by Serial No. " style="font-family: Verdana, Geneva, sans-serif; font-weight: bold; font-size: 10px;"/>  -->
+        <apex:inputText value="{!searchFor}" style="height: 15px"/> 
+         <apex:commandButton status="lookupStatus" action="{!lookupCustomer}" oncomplete="gotoResults('{!resultString}')" value="Lookup"/>
+         <apex:actionStatus startStyle="labelCol" startText="(searching...)"   id="lookupStatus"/>
+
+  </apex:outputPanel>
+
+
+  <apex:actionFunction oncomplete="javascript: if ('{!resultString}' != 'ok') alert('Error updating Case : {!resultString}'); else parent.location.href = '/{!case.Id}';" immediate="true" action="{!updateCase}" name="updateCaseInJavascript">
+        </apex:actionFunction>   
+
+    <script>
+       function gotoResults(res1) {
+         if (res1.match("^"+"Error")=="Error") {
+         } else {
+           if (confirm ("Found Customer\n\n" + res1 + "\n\nUpdate Case Address? \n\nNOTE: Any unsaved Changes will be lost!")) {
+             updateCaseInJavascript();
+           }
+         }
+      }
+    </script>
+</apex:form>
+
+</apex:page>

@@ -1,0 +1,43 @@
+<apex:component controller="DealerProductPageController3">
+<script src="{!$Resource.jQuery}"></script>
+    <script src="{!$Resource.JQuery_tmpl}"></script>
+    <script src="{!$Resource.jQueryTableSorter}"></script>
+    <script src="{!$Resource.tableSorterFilter}"></script>
+    <apex:stylesheet value="{!URLFOR($Resource.styleCss,'myStyle/myStyle.css')}"/>
+    
+    	<script type="text/javascript">
+  			var ProductOfferArray =new Array();
+  		 function getproductOffers(){
+        	try{        								
+					
+						<apex:repeat value="{!ProductOfferWrapperList}" var="ProductOfferVar"> 								
+							var Product = new Object();
+							Product.ProductNumber="{!ProductOfferVar.ProductNumber}";
+							Product.ProductSummary = "{!ProductOfferVar.ProductSummary}";
+							Product.ProductOfferExists="{!ProductOfferVar.ProductOfferExists}";
+							Product.ProductCampaignExists = "{!ProductOfferVar.ProductCampaignExists}"; 																																							
+							ProductOfferArray.push(Product);						
+						</apex:repeat>																	
+        	}
+        	catch(err){
+			     alert("Error: in getproductOffers method: "+err.description);
+			}
+        }
+	
+ 	function getOfferFlag(productNumber){
+        	try{        		
+        		var offerproducts= $.grep(ProductOfferArray, function(element,index){        		        										
+		        								return (element.ProductNumber == productNumber);
+		        							});
+		       			
+		        if(offerproducts.length > 0){
+		        	var offerproduct=offerproducts[0];		        
+		        	return offerproduct;		        		        			        	
+		        }
+        	}
+        	catch(err){
+			     alert("Error: in getOfferFlag method: "+err.description);
+			}
+        }                 
+  </script>
+</apex:component>

@@ -1,0 +1,5 @@
+<apex:page standardController="Account" showChat="false" showHeader="false" sidebar="false" >
+     <apex:form >
+        <c:Amazon_FileList />
+     </apex:form>                        
+</apex:page>

@@ -1,0 +1,131 @@
+<apex:page cache="false" standardController="Smilometer__c" extensions="clsSmiloMeterController" showHeader="false" sidebar="false" standardStylesheets="true">
+<head>
+    <script type="text/javascript">
+        function show_alert()
+        {
+            alert(
+                'Fortæl os hvordan du synes IT systemerne har virket i dag.' +
+                '\n\nDu giver en samlet bedømmelse ved at afgive din stemme fra 1-5, hvor 5 er bedst.' +
+                '\n\nI kommentarfeltet kan du med en kort kommentar uddybe, fx: \'Godt humør i dag fordi system X har virket uden afbrydelser.\'' +
+                '\n\nDette Smil-O-Meter er blevet introduceret i Februar 2012.'
+            );
+        }
+        function show_validation_msg()
+        {
+            if (validation_msg != null && validation_msg != "") {
+                alert(validation_msg);
+            }
+        }
+    </script>
+
+    <style type="text/css">
+        td.smilometer { font-size:11px; }
+    </style>
+</head>
+<apex:form id="SmilOMeterForm">
+    <!-- SPOC-1129
+    <apex:outputPanel id="Global" layout="block" style="min-height:216px; background-color: #cfeef8;overflow-x:hidden;overflow-y:hidden;width:100%">
+    SPOC-1129 -->
+<apex:outputPanel id="Global" layout="block" style="min-height:206px;background-color:#FFFFFF;overflow-x:hidden;overflow-y:hidden;width:100%;">
+    <apex:pageMessages />
+        <script type="text/javascript"> 
+            var validation_msg = "{!validationMsg}";
+        </script>
+
+        <apex:outputPanel id="Create_SmiloMeter" layout="block" rendered="{!mode = 'Create'}">
+            <table >
+                <!--<tr>-->
+                    <!--<td style="text-align:left" class="smilometer">
+                        <!-- SPOC-1129
+                        <b>Her måler vi dit IT humør i dag</b><br/>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        <apex:image id="theImage1" url="{!URLFOR($Resource.SmilOMeter, '/Smilometer_Smileys/30x30_Smiley_01.png')}"
+                            width="30" height="30" style="margin:4px;"
+                        />
+                        SPOC-1129 -->
+                        <!-- <b>Her måler vi dit IT humør</b><br/><br/> -->
+                   <!-- </td>-->
+               <!-- </tr>-->
+              
+                <tr>
+                    <td class="smilometer">
+                        <b>Hvordan synes du IT systemerne har virket i dag?</b>
+                    </td>
+                    
+                </tr>
+                
+                <tr >
+                    <td class="smilometer" >
+                        <!-- <b><apex:outputLabel value="{!$ObjectType.Smilometer__c.fields.Comment__c.label}" /></b><br/> -->
+                        <!--<apex:inputField id="comment" value="{!smiloMeter.Comment__c}" style="width:100%;height:200%"/><br/>-->
+                        <apex:inputtextarea value="{!smiloMeter.Comment__c}" cols="28" rows="4" id="mailDescId" />
+                    </td>
+                </tr>
+                
+                
+                <tr >
+                    
+                    <td class="smilometer" colspan="3" >
+                        <b><apex:outputLabel value="{!$ObjectType.Smilometer__c.fields.Mood__c.label}"/></b><br/>
+                        <span style="color:#CF0000;font-size:20px;font-weight:bold;">|</span>
+                        <apex:inputField id="mood" value="{!smiloMeter.Mood__c}" />
+                    </td>
+                </tr>
+                <tr >
+                    <td >
+                        <apex:commandButton value="Send" action="{!saveSmiloMeter}" oncomplete="show_validation_msg();" rerender="Global" />
+                        <!-- <apex:commandButton value="Om Smil-O-Meter" onclick="show_alert();return false;" /> -->
+                    </td>
+                </tr>
+            </table>
+        </apex:outputPanel>
+
+        <apex:outputPanel id="View_SmiloMeter" layout="block" rendered="{!mode = 'View'}" style="v-align:bottom">
+            <table>
+                <!-- SPOC-1129
+                <tr>
+                    <td style="text-align:center" class="smilometer">
+                        &nbsp;&nbsp;<b>Samlet YouSee humør i dag:</b><br/>
+                        <b><apex:outputText value="{0,number,0.00}"><apex:param value="{!SmiloMeterRatingAverageToday}"/></apex:outputText>
+                         (Antal svar:&nbsp;<apex:outputText value="{!SmiloMeterRatingNumberToday}"/>)</b>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align:center" class="smilometer">
+                        <apex:variable var="smileyToday" value="{!SmileyToday}"/>
+                        <apex:image id="theImage2" url="{!URLFOR($Resource.Smilometer, SmileyToday)}" width="30" height="30" style="margin:5px"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align:center" class="smilometer">
+                        &nbsp;&nbsp;<b>Samlet YouSee humør i går:<br/>&nbsp;<apex:outputText value="{0,number,0.00}">
+                        <apex:param value="{!SmiloMeterRatingAverageYesterday}"/></apex:outputText>
+                         (Antal svar:&nbsp;<apex:outputText value="{!SmiloMeterRatingNumberYesterday}"/>)</b>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align:center" class="smilometer">
+                        <apex:variable var="smileyYesterday" value="{!SmileyYesterday}"/>
+                        <apex:image id="theImage3" url="{!URLFOR($Resource.Smilometer, SmileyYesterday)}" width="30" height="30" style="margin:4px"/>
+                    </td>
+                </tr>
+                SPOC-1129 -->
+                <tr>
+                    <!-- SPOC-1129 -->
+                    <td style="text-align:center" class="smilometer">
+                        <b>{!$Label.Smilometer_view_mode_msg}</b>
+                    </td>
+                </tr>
+                <tr>
+                    <td>&nbsp;</td>
+                </tr>
+                <!-- <tr>
+                    <td style="text-align:center">
+                        <apex:commandButton onclick="show_alert();return false;" value="Om Smil-O-Meter"/>
+                    </td>
+                </tr> -->
+            </table>
+        </apex:outputPanel>
+    </apex:outputPanel>
+    </apex:form>
+</apex:page>

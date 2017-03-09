@@ -1,0 +1,65 @@
+<apex:page standardcontroller="Account" extensions="CarrieBillingController" action="{!upsertAriaAccount}" sidebar="False"  showHeader="False"  tabStyle="Invoice_Usage__c">
+    <style type="text/css">   
+        .actionColumn {display:none;}
+    </style>
+   
+ <!-- removed for Carrie-1116    <apex:pageBlock >
+            <div><br/></div><div></div>
+            <div align="center"><h3 style="font-size:12pt"><i>Vælg produkt</i></h3></div>
+            <div><br/></div> <div></div>
+    </apex:pageBlock>     -->
+    <apex:form >
+        <apex:pageBlock >
+            <apex:pageMessages />
+            <!--start carrie-1116 -->            
+            <apex:pageBlockSection title="Kundeoplysninger"  columns="2" >                   
+         <!--for carrie-1116    <apex:outputText label="Kundenummer" style="margin-left:60px;font-size:10pt;font-weight:bold;" value="{!account.Customer_No__c}" id="Legal_Account" /> -->
+            <apex:outputField value="{!Account.name}" label="Kundenavn"/>
+            <apex:outputField value="{!Account.Customer_No__c}" label="Kundenummer/Juridisk"/>
+            </apex:pageBlockSection>  
+            <apex:pageBlockSection title="Vælg Produkt" columns="1" rendered="{!(listAcct.size != 0)}" >        
+                    <apex:selectRadio value="{!selectAccount}" label="Vælg produkt" layout="PageDirection" style="font-size:10pt; font-weight:bold ;font-style:italic; margin-left:50px;" rendered="{!(listAcct.size != 0)}"> 
+                    <apex:selectOptions value="{!SelectAccounts}" id="Select_a_product"/> 
+                    </apex:selectRadio>
+            </apex:pageBlockSection>            
+            <apex:pageBlockButtons location="bottom" rendered="{!(listAcct.size != 0)}">
+                <apex:commandButton value="Fortsæt" action="{!redirectCustomerBillingPage}" />
+            </apex:pageBlockButtons>
+             </apex:pageBlock>
+             </apex:form>
+             <!-- end of Carrie-1116 -->
+             
+             <!-- start of Carrie-1116 -->
+        <apex:pageBlock id="pb" title="Vælg BetalerId" >
+        <apex:form >
+        <apex:pageBlockTable value="{!Betalerlstacc}" var="item">
+        <apex:column headerValue="Betaler Id" style="{!if(item.CustNo==Account.Customer_No__c,'background-color:#D8FAB6','')}">
+        <apex:commandLink action="{!CallAriaPage}" value="{!item.AriaNo}" target="_self">
+        <apex:param name="pageAriaId" value="{!item.AriaNo}" assignTo="{!PageAriaId}"/></apex:commandLink></apex:column>
+        <apex:column headerValue="Kundenummer/Juridisk" value="{!item.CustNo}" style="{!if(item.CustNo==Account.Customer_No__c,'background-color:#D8FAB6','')}"><!-- <apex:commandLink action="{!CallCustomerPage}" value="{!item.CustNo}" target="_self">
+        <apex:param name="pageKundeId" value="{!item.CustNo}" assignTo="{!PageKundeId}"/></apex:commandLink> -->
+        </apex:column>
+        <apex:column value="{!item.name}" headerValue="Kundenavn" style="{!if(item.CustNo==Account.Customer_No__c,'background-color:#D8FAB6','')}"/>
+        <apex:column value="{!item.Plan}" headerValue="Produkt" style="{!if(item.CustNo==Account.Customer_No__c,'background-color:#D8FAB6','')}"/>
+        </apex:pageBlockTable>     
+                <apex:panelGroup rendered="{!(Betalerlstacc.size >0)}">
+                <apex:commandLink action="{!First}" value="|<" reRender="pb" title="First" rendered="{!hasPrevious}" status="fetchStatus">
+                </apex:commandLink>&nbsp;&nbsp;&nbsp;&nbsp;
+                <apex:commandLink action="{!Previous}" value="<" reRender="pb" title="Previous" rendered="{!hasPrevious}" status="fetchStatus">             
+                </apex:commandLink>&nbsp;&nbsp;&nbsp;&nbsp;
+                <apex:outputLabel style="font-size:15px; margin-bottom:0px;" rendered="{!if(count1 > 10,true,false)}" > Side nr.&nbsp;{!pageno} of {!totalPage} </apex:outputLabel>&nbsp;&nbsp;&nbsp;&nbsp;
+                <apex:commandLink action="{!Next}" value=">" title="Next" reRender="pb" rendered="{!hasNext}" status="fetchStatus">             
+                </apex:commandLink>&nbsp;&nbsp;&nbsp;&nbsp;
+                <apex:commandLink action="{!Last}" value=">|" title="Last" reRender="pb" rendered="{!hasNext}" status="fetchStatus">             
+                </apex:commandLink>&nbsp;&nbsp;&nbsp;&nbsp;
+                </apex:panelGroup> 
+                <apex:outputPanel style="color:#4AA02C;font-weight:bold">
+                    <apex:actionStatus id="fetchStatus" startText="Henter Data..." stopText=""/>
+                </apex:outputPanel>                
+                <apex:outputLabel value="Ingen registreringer at vise" rendered="{!(Betalerlstacc.size ==0)}" styleClass="noRowsHeader"></apex:outputLabel>  
+				</apex:form>
+         </apex:pageBlock> 
+         <!-- end of Carrie-1116-->
+         
+    
+</apex:page>

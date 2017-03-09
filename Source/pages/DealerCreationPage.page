@@ -1,0 +1,177 @@
+<apex:page standardController="Account" extensions="DealerCreationController"  >
+<style>
+ .panelStyle{ 
+    padding-top: 0px;
+    padding-right: 0px;
+    padding-bottom: 13px;
+    padding-left: 81px;
+   
+} 
+</style>
+<apex:form id="theform">
+
+<apex:pagemessages />
+<apex:stylesheet value="{!URLFOR($Resource.styleCss,'myStyle/myStyle.css')}"/> 
+ <apex:outputPanel layout="block" styleclass="container"> 
+<apex:PageBlock >
+ <apex:pageBlockButtons location="bottom">
+    <apex:commandButton action="{!save}" value="Gem" ></apex:commandButton>
+        <apex:commandButton action="{!cancel}" value="Afbryd" id="theCommandLink"  immediate="true"/>
+    </apex:pageBlockButtons>
+       <apex:PageBlockSection title="Forhandler Information" collapsible="false" columns="2">
+            <apex:inputField value="{!account.Dealer_Number__c}" required="true"  onkeypress="return chekLength(this,10)"/>
+            <apex:inputField value="{!account.Debitor_Number__c}" required="true"  onkeypress="return chekLength(this,10)"/>
+            <apex:inputField value="{!account.Name}" required="true" onkeypress="return chekLength(this,10)"/>
+            <apex:inputField value="{!account.Basis__c}"  />
+           <apex:pageBlockSectionItem >
+                <apex:outputLabel value="Dealer Kategori" for="kategori"></apex:outputLabel>
+                 
+                    <apex:selectList id="kategori" value="{!account.Category__c}" size="1" title="Dealer Category" required="true">
+                        <apex:selectOptions value="{!dealerCategoryItems}"></apex:selectOptions>
+                    </apex:selectList>
+
+           </apex:pageBlockSectionItem>
+             <apex:inputField value="{!account.POS__c}"  />
+            <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Dealer Group" for="dealerGroupID"  ></apex:outputLabel>
+                    <apex:outputPanel styleClass="requiredInput" layout="block">
+                    <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+                    <apex:selectList id="dealerGroupID" required="true" value="{!account.DealerGroup__c}" size="1" title="Dealer Group" >
+                        <apex:selectOptions value="{!dealerGroupItems}"></apex:selectOptions>
+                    </apex:selectList>
+                   
+                    <apex:outputText rendered="{if(account.DealerGroup__c == '--Select--   ')}" value="You must enter value"></apex:outputText> 
+                 </apex:outputPanel>
+               </apex:pageBlockSectionItem>
+                 <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Sales Consultant" for="salesConsultant"></apex:outputLabel>
+                    <apex:selectList id="salesConsultant" value="{!account.sales_consultant__c}" size="1" title="Sales Consultant">
+                        <apex:selectOptions value="{!salesConsultantItems}"></apex:selectOptions>
+                    </apex:selectList>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Dealer Products" for="consultant"></apex:outputLabel>
+                    <apex:outputPanel styleClass="requiredInput" layout="block">
+                    <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+                    <apex:selectList id="consultant"  value="{!account.DealerProducts__c}" size="5" title="Dealer Product" multiselect="true" >
+                        <apex:selectOptions value="{!dealerProductsItems}"></apex:selectOptions>
+                    </apex:selectList>
+                     </apex:outputPanel>
+                </apex:pageBlockSectionItem>
+            <apex:inputField value="{!account.Afregnes__c}" required="true"  />
+           <apex:inputField value="{!account.Email__c}" required="true"/>
+            <apex:inputField value="{!account.Phone}" required="true"/> 
+            <apex:inputField value="{!account.Fax}"  />
+            <apex:inputField value="{!account.Street_YK__c}"  />    
+    <!--     </apex:PageBlockSection>
+       <apex:PageBlockSection title="kommunikationsmuligheder" collapsible="false" columns="2">
+           
+          -->   
+
+    </apex:PageBlockSection>
+    <apex:PageBlockSection title="Manager" collapsible="false"  id="managerPanel">
+      <apex:actionRegion >
+             <apex:outputPanel >
+                     <apex:dataTable columns="4" value="{!managerContact}" var="item">                       
+                         <apex:column styleClass="panelStyle">
+                           <apex:outputLabel value="Name" for="NameText"/>
+                         </apex:column>
+                         <apex:column styleClass="panelStyle">
+                          <apex:outputPanel styleClass="requiredInput" layout="block">
+                           <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+                            <apex:inputText id="NameText" value="{!item.LastName}" />
+                          </apex:outputPanel>
+                         </apex:column><br/>
+                         <apex:column styleClass="panelStyle">
+                           <apex:outputLabel value="Email" for="EmailText"/>
+                         </apex:column>
+                         <apex:column styleClass="panelStyle">
+                         <apex:outputPanel styleClass="requiredInput" layout="block">
+                           <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+                           <apex:inputText id="EmailText" value="{!item.Email}" />
+                          </apex:outputPanel>
+                         </apex:column><br/>
+                         <apex:column breakBefore="true" styleClass="panelStyle">
+                           <apex:outputLabel value="Mobile" for="MobileText"/>
+                         </apex:column>
+                         <apex:column styleClass="panelStyle">
+                          <apex:outputPanel styleClass="requiredInput" layout="block">
+                           <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+                           <apex:inputText id="MobileText" value="{!item.phone}"  />
+                          </apex:outputPanel>
+                         </apex:column><br/>
+                         <apex:column styleClass="panelStyle">
+                           <apex:outputLabel value="Address" for="AddressText"/>
+                         </apex:column>
+                         <apex:column styleClass="panelStyle">
+                           <!-- <apex:inputText id="AddressText" value="{!item.Street_P__c }"/>-->
+                          <apex:inputField value="{!item.Street_P__c}" />
+                         </apex:column><br/>
+                     </apex:dataTable>  
+                    </apex:outputPanel><br/> 
+            <apex:commandButton action="{!addManager}" status="searchstatusmgr"  value="Add New Manager" rerender="managerPanel" rendered="{!IF(ISNULL(managerContact),true,false)}"/>
+           </apex:actionRegion>
+
+          <apex:actionStatus id="searchstatusmgr"  >
+                     <apex:facet name="start">    
+                          please wait...
+                     </apex:facet>
+          </apex:actionStatus>                  
+        </apex:PageBlockSection> 
+  <apex:PageBlockSection title="Ambassador" collapsible="false"  id="ambassadorPanel">
+   <apex:actionRegion >
+                <apex:outputPanel >
+                     <apex:dataTable columns="4" value="{!contactFinalList}" var="item"  >                       
+                         <apex:column styleClass="panelStyle">
+                           <apex:outputLabel value="Ambassador " style="font-weight:bold"/>
+                         </apex:column>
+                         <apex:column breakBefore="true" styleClass="panelStyle">
+                           <apex:outputLabel value="Name" for="NameText"/>
+                         </apex:column>
+                         <apex:column styleClass="panelStyle">
+                          <apex:outputPanel styleClass="requiredInput" layout="block">
+                           <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+                           <apex:inputText id="NameText" value="{!item.LastName}"  />
+                          </apex:outputPanel>
+                         </apex:column><br/>
+                         <apex:column styleClass="panelStyle">
+                           <apex:outputLabel value="Email" for="EmailText"/>
+                         </apex:column>
+                         <apex:column styleClass="panelStyle">
+                          <apex:outputPanel styleClass="requiredInput" layout="block">
+                           <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+                           <apex:inputText id="EmailText" value="{!item.Email}"  />
+                          </apex:outputPanel>
+                         </apex:column><br/>
+                         <apex:column breakBefore="true" styleClass="panelStyle">
+                           <apex:outputLabel value="Mobile" for="MobileText"/>
+                         </apex:column>
+                         <apex:column styleClass="panelStyle">
+                          <apex:outputPanel styleClass="requiredInput" layout="block">
+                           <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+                           <apex:inputText id="MobileText" value="{!item.phone}"  />
+                          </apex:outputPanel>
+                         </apex:column><br/>
+                         <apex:column styleClass="panelStyle">
+                           <apex:outputLabel value="Address" for="AddressText"/>
+                         </apex:column>
+                         <apex:column styleClass="panelStyle">
+                           <!-- <apex:inputText id="AddressText" value="{!item.Street_P__c }"/>-->
+                          <apex:inputField value="{!item.Street_P__c}" />
+                         </apex:column><br/>
+                     </apex:dataTable>                     
+               </apex:outputPanel><br/>
+      
+           <apex:commandButton action="{!addAmbassador}" status="searchstatus"  value="Add New Ambassador" rerender="ambassadorPanel"/>
+           </apex:actionRegion>
+
+          <apex:actionStatus id="searchstatus"  >
+      <apex:facet name="start">    
+          please wait...
+     </apex:facet>
+    </apex:actionStatus>
+   </apex:PageBlockSection> 
+  </apex:pageBlock> 
+</apex:outputPanel> 
+</apex:form>
+</apex:page>

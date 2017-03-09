@@ -1,0 +1,60 @@
+<apex:component controller="IWLDetailViewWidgetController" layout="none" allowDml="true">
+
+    <apex:attribute name="DeveloperName" type="String" required="true" description="The Developer Name of the Widget record that will be loaded by this widget" assignTo="{!widgetDeveloperName}" />
+    <apex:attribute name="Widget" type="IWLWidget__c" required="false" description="A Pre-loaded widget record to be used as the source of information for this widget" assignTo="{!widgetRecord}" />
+    <apex:attribute name="IdRecord" type="String" required="true" description="The Developer Name of the Widget record that will be loaded by this widget"  assignTo="{!IdRecords}" />
+ 
+
+      <script>  
+          function loginInfo() {
+            alert('Du skal først logge ind');
+          }
+          function callVote(id) {
+            voteJS1(id);
+          }
+      </script>
+                
+      <apex:outputPanel id="jspanel"> 
+        <script>  
+          function onControllerReturn1() {
+            alert('{!detailViewMessage }');
+          }
+        </script>
+      </apex:outputPanel>
+ 
+      <apex:outputPanel layout="block" id="IWLdetailView" rendered="{!loadWidget}">
+      </apex:outputPanel>
+      
+        
+      <apex:outputPanel layout="block" id="hightlightNewPanel">          
+        <span>{!visualData.activityDate.value}</span>                 
+        <div class="text_container">
+          <h2><a href='/apex/youbioIdeaDetail?id={!idRecords}'>{!visualData.title.value}</a></h2>
+              <div class="text_object">
+                  <apex:outputText value="{!visualData.content.value}" escape="false" styleClass="text_object"/>   
+              </div>
+        </div>                                
+        <apex:outputPanel layout="block" styleclass="share_box">
+             <apex:outputPanel layout="inline" onclick="postComment('{!JSENCODE(visualData.recordId.value)}');"><i class="icon icon_comment"></i>{!visualData.feedSize.value}</apex:outputPanel>                                                                                 
+             <!--apex:commandButton onclick="voteJS1('{!JSENCODE(visualData.recordId.value)}');" reRender="hightlightIdeaPanel" styleClass="{!IF(visualData.canVote,'icon icon_like','icon icon_like is-liked')}" rendered="{!$ObjectType.Idea.createable}"/-->
+             <apex:outputPanel layout="inline" onclick="voteJS1('{!JSENCODE(visualData.recordId.value)}');" styleClass="" rendered="{!$ObjectType.Idea.createable}"><i class="{!IF(visualData.canVote,'icon icon_like','icon icon_like is-liked')}"></i>{!visualData.likes.value}</apex:outputPanel>
+             <!--apex:commandButton onclick="loginInfo();" reRender="highlightIdeaVC" styleClass="icon icon_like" rendered="{!!$ObjectType.Idea.createable}"/-->
+             <apex:outputPanel layout="inline" onclick="loginInfo();" styleClass="" rendered="{!!$ObjectType.Idea.createable}"><i class="icon icon_like"></i>{!visualData.likes.value}</apex:outputPanel>           
+        </apex:outputPanel>                        
+        </apex:outputPanel> 
+   <apex:form id="hightlightForm">                   
+         <apex:actionstatus id="voteStatus" onStop="onControllerReturn1();">
+         </apex:actionstatus>
+         <apex:actionFunction action="{!IWLDetailViewVote}" name="voteJS1" rerender="hightlightNewPanel, jspanel" status="voteStatus">
+            <apex:param name="IdeaId" assignTo="{!voteIdeaId}" value="" />               
+         </apex:actionFunction>     
+         <apex:actionFunction action="{!redirectToDetailPage}" name="postComment" reRender="IWLDetailViewItem">
+            <apex:param name="IdeaId" assignTo="{!commentIdeaId}" value=""/>    
+         </apex:actionFunction>   
+                    
+ 
+    </apex:form> 
+       
+
+ 
+</apex:component>

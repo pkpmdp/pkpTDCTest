@@ -1,0 +1,138 @@
+<apex:page standardController="CampaignMember" extensions="Yousee13DeltageController" showHeader="false" sidebar="false" cache="false" action="{!initializeGuest}">
+ <apex:composition template="PermissionSiteTemplate">
+    <apex:define name="body">
+        <style>
+                 .vfHelpText a            {position:relative;}         
+                 .vfHelpText a span       {display: none;}         
+                 .vfHelpText a:hover span {display: block;
+                                           position:absolute;  
+                                           top:1.25em;  
+                                           padding:2px 5px;
+                                           left:-15em; width:15em;
+                                           z-index:100;
+                                           border:1px solid orange;                                      
+                                           background-color:#FEFDB9; 
+                                           color:black; 
+                                         }
+                 .headerStyle{text-align: center;}                               
+          </style>
+    <apex:form >
+     <br> </br>     
+    <div class="k_mf_progress" style="width: 85%;margin:0 auto;">        
+         <div class="k_mf_progress_bg">            
+             <div class="k_mf_progress_indicator" style="width: 75%"> </div>
+         </div>    
+    </div>    
+    <ul class="k_mf_progress_list_3" style="width: 85%;margin:0 auto;">        
+         <li>Kontaktpersoner registreret hos YouSee </li>        
+              <li>Nye kontaktpersoner</li>        
+              <li  class="k_current">Ledsager til kontaktpersoner</li>  
+              <li>Kvittering</li>  
+    </ul>
+     <br> </br>     
+    <h1>Tilmeld ledsager til YouSee LIVE '13</h1>
+    <apex:pagemessages />
+    <p>Her kan du tilmelde eventuelle ledsagere.</p>
+    	<apex:outputPanel rendered="{!showBus}" > 
+   	              <div align="right">
+            Ønsker bustransport.  
+            <span class="vfHelpText">
+                    <apex:outputLink value="javascript:return false;">
+                        <img src="/s.gif" alt="" class="helpOrb" />
+                        <span> Der kan max. tilmeldes 5 personer til bustransport. Hvis I er flere end 5 fra foreningen, der vil deltage på YouSee LIVE '13 er i meget velkomne. I skal dog selv sørge for transport for de øvrige personer.  </span>
+                    </apex:outputLink>
+            </span>
+            </div>
+      </apex:outputPanel>      
+    <apex:pageBlock >
+           <table class="list" width="100%" cellspaning="0" cellpadding="0" border="0" frame="´box">
+               <colgroup span="6"></colgroup>
+               <thead class="rich-table-thead">
+                   <tr class="headerRow">
+                       <th class="headerRow" colspan="1" scope="col" style="width:70px; text-align: center;">
+                           <div>Fornavn</div>
+                       </th>
+                       <th class="headerRow" colspan="1" scope="col" style="width:70px; text-align: center;">
+                           <div>Efternavn</div>
+                       </th>
+                       <th class="headerRow" colspan="1" scopr="col">
+                           <div>Ledsager til</div>
+                       </th>
+                       <!--th class="headerRow" colspan="1" scope="col">
+                           <div>Email</div>
+                       </th-->                       
+                  <!--     <th class="headerRow" colspan="1" scope="col">
+                           <div>Deltager<br></br>i YouSee<br></br>Live '13</div>
+                       </th>
+                    -->    
+                       <th class="headerRow" colspan="1" scope="col" style="text-align: center;">
+                           <div>Deltager i tv-show</div>
+                       </th>
+                       <apex:outputPanel rendered="{!showBus}" >
+                       <th class="headerRow" colspan="1" scope="col" style="width:250px; text-align: center;">
+                           <div>Ønsker bustransport</div>
+                       </th>      
+                       </apex:outputPanel>                 
+                   </tr>
+                </thead>
+                   <tbody>
+                    <tr class="dataRow even first last">
+                       <td class="datacel1" colspan="1" style="text-align: center;"><apex:outputPanel styleClass="requiredInput" layout="block">
+     <apex:outputPanel styleClass="requiredBlock" layout="block"/> <apex:inputField value="{!guest.lead.firstname}" style="width:100px;"/></apex:outputPanel></td>
+                       <td class="datacel1" colspan="1" style="text-align: center;"> <apex:outputPanel styleClass="requiredInput" layout="block">
+     <apex:outputPanel styleClass="requiredBlock" layout="block"/> <apex:inputField value="{!guest.lead.lastname}" style="width:100px;"/></apex:outputPanel></td>
+                       <td class="datacel1" colspan="1" > <apex:outputPanel styleClass="requiredInput" layout="block"><apex:outputPanel styleClass="requiredBlock" layout="block"/>
+                       <apex:selectList id="mgr" value="{!guest.lead.email}" size="1" title="Manager" style="width:120px;">
+                        <apex:selectOptions value="{!Relations}"></apex:selectOptions>
+                    </apex:selectList>
+
+                        </apex:outputPanel></td>
+                       <!--td class="datacel1" colspan="1"> <apex:outputPanel styleClass="requiredInput" layout="block"> 
+     <apex:outputPanel styleClass="requiredBlock" layout="block"/> <apex:inputField value="{!lead1.email}"/></apex:outputPanel></td-->
+                 <!--       <td class="datacel1" colspan="1"> <apex:inputField value="{!guest.Deltage__c}"/></td> --> 
+                       <td class="datacel1" colspan="1" style="text-align: center;"> <apex:inputField value="{!guest.Show__c}"/></td>
+                       <apex:outputPanel rendered="{!showBus}" >
+                           <td class="datacel1" colspan="1" style="text-align: center;"> <apex:inputField value="{!guest.Bus__c}"/></td>
+                       </apex:outputPanel>        
+                   </tr>
+                   </tbody>
+               </table>
+               <br></br>
+                
+      </apex:pageBlock>
+      <br></br>
+       &nbsp; &nbsp; <apex:image url="{!$Resource.ManatorySign}" /> = &nbsp; Feltet skal udfyldes, hvis personen skal deltage. 
+       <br/><br/> 
+      <apex:pageBlock >
+              <apex:pageBlockTable value="{!guestList}" var="list" columns="6" width="100%" frame="box" >
+            <apex:column headerValue="Navn på ledsager" value="{!list.lead.name}" style="text-align: center;" headerClass="headerStyle"/>
+            <apex:column headerValue="E-mail" value="{!list.lead.email}" style="text-align: center;" headerClass="headerStyle">
+            </apex:column>
+            <apex:column headerValue="Ledsager til" value="{!list.lead.description}" style="text-align: center;" headerClass="headerStyle">
+            </apex:column>
+            <apex:column headerValue="Deltager i YouSee LIVE '13" value="{!list.Deltage__c}" style="text-align: center;" headerClass="headerStyle">
+            </apex:column>    
+            <apex:column headerValue="Deltager i tv-show" value="{!list.Show__c}" style="text-align: center;" headerClass="headerStyle">
+            </apex:column>
+            <apex:column headerValue="Ønsker bustransport" rendered="{!showBus}" value="{!list.Bus__c}" style="text-align: center;" headerClass="headerStyle">
+            </apex:column>
+            
+        </apex:pageBlockTable>
+           </apex:pageBlock>
+           <apex:commandButton action="{!redirectToConfirmation}" value="Spring over" title="Opret" immediate="true" style="background-color:#DF7401;background-image:none; margin: 0 2px;background-position: left top;background-repeat: repeat-x;border-color: -moz-use-text-color #FF4500;border-style: none solid solid none;display: inline;font-family: 'Verdana','Geneva',sans-serif;font-size: 80%;color: #FFFFFF;font-weight: bold;height: 27px; width: 80px; float:right;" ></apex:commandButton>
+           
+           <script type="text/javascript">
+				function disable_quicksave() {
+					document.getElementById('{!$Component.quicksave}').style.visibility='hidden';
+				}
+				function disable_addMore() {
+					document.getElementById('{!$Component.addMore}').style.visibility='hidden';
+				}
+			</script>
+			
+       	   <apex:commandButton action="{!saveGuestAndNext}" id="quicksave" onclick="disable_quicksave();" value="Gem og næste" title="Opret" style="background-color:#DF7401;background-image:none; margin: 0 2px; background-position: left top;background-repeat: repeat-x;border-color: -moz-use-text-color #FF4500;border-style: none solid solid none;display: inline;font-family: 'Verdana','Geneva',sans-serif;font-size: 80%;color: #FFFFFF;font-weight: bold;height: 27px; width:110px; float:right;" ></apex:commandButton>
+       	   <apex:commandButton action="{!addMoreGuest}" value="Tilføj flere" id="addMore" onclick="disable_addMore();" style="background-color:#DF7401;background-image:none;  margin: 0 2px; background-position: left top;background-repeat: repeat-x;border-color: -moz-use-text-color #FF4500;border-style: none solid solid none;display: inline;font-family: 'Verdana','Geneva',sans-serif;font-size: 80%;color: #FFFFFF;font-weight: bold;height: 27px; width:75px; float:right;" />	
+    </apex:form>
+    </apex:define>
+</apex:composition>
+</apex:page>

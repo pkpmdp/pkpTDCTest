@@ -1,0 +1,34 @@
+<apex:page sidebar="False"  showHeader="False" controller="BlockBusterCaseSubmittedController" >
+<apex:stylesheet value="{!stylesheet}"/>
+<!--
+<apex:stylesheet value="{!URLFOR($Resource.BlockbusterStyles, 'salesforce.css')}"/>
+-->
+  <script>
+            function goBack() {
+                alert('Go back');
+                history.go(-1);
+                
+            }
+  </script>
+  <apex:form >
+  <head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/></head>
+   <body>
+   
+  <h2><b>TAK FOR DIN BESKED</b></h2><br/><br/>
+ 
+  Vi svarer dig inden 24 timer.<br/><br/>
+  Husk du også kan skrive med os på&nbsp;<apex:outputLink target="_parent" value="http://www.facebook.dk/blockbusterdenmark/">Facebook</apex:outputLink>.<br/><br/>
+  Vi sidder klar hver dag mellem klokken 16 og 22.
+  <br/><br/>
+  <b>Måske du kan finde svar på dit spørgsmål her?</b><br/><br/>
+  <!--<apex:outputLink value="{!URLENCODE('https://www.blockbuster.dk/nulstil/')}">Glemt adgangskode?</apex:outputLink><br/>-->
+  <!--<apex:outputLink value="{!URLENCODE('https://www.blockbuster.dk/hjælp/viewright/')}">Problemer med at afspille film?</apex:outputLink><br/> -->
+  <apex:outputLink value="https://www.blockbuster.dk/nulstil/">Glemt adgangskode?</apex:outputLink><br/>
+  <apex:outputLink value="https://www.blockbuster.dk/hj%C3%A6lp/viewright">Problemer med at afspille film?</apex:outputLink><br/>
+  <apex:outputLink value="https://www.blockbuster.dk/hj%C3%A6lp">Blockbuster FAQ</apex:outputLink><br/><br/>
+  
+  <apex:commandButton value="Tilbage til formular" action="{!goBack}"/>
+  </body>
+
+  </apex:form>
+</apex:page>

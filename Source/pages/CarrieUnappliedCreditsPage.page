@@ -1,0 +1,32 @@
+<apex:page standardController="Unapplied_Credit__c" tabStyle="Invoice_Usage__c" extensions="CarrieUnappliedCreditController"  sidebar="false" showHeader="false">
+    <apex:pageBlock >
+        <div></div><div></div>
+        <div align="center"><h1 style="font-size:12pt"><i> Kreditering ej tilknyttet </i></h1></div>
+        <apex:outputPanel id="err"> 
+            <apex:pageMessages />
+        </apex:outputPanel>
+        <br/>
+        <apex:pageBlock >
+<!--             <apex:form > -->
+<!--                 <div align="right"><apex:commandButton value="Tilbage til oversigt" action="{!redirectHomePage}"/></div> -->
+<!--             </apex:form> -->
+            <apex:pageBlockSection title="Kreditering ej tilknyttet" >
+                <apex:outputField value="{!Unapplied_Credit__c.Customer__c}" label="Kundenavn"/>
+                <apex:outputField value="{!Unapplied_Credit__c.Customer__r.Customer_No__c}" label="Kundenummer" />
+                <apex:outputField value="{!Unapplied_Credit__c.Name}"/>
+                <apex:outputField value="{!Unapplied_Credit__c.Date__c}" />
+                <!--  CARRIE-657 
+                <apex:outputField value="{!Unapplied_Credit__c.Credit_Reason1__c}" />
+                -->
+                <apex:outputField value="{!Unapplied_Credit__c.Credit_Reason__c}" />
+                <apex:outputField value="{!Unapplied_Credit__c.commentsLong__c}" />
+                <apex:outputField value="{!Unapplied_Credit__c.Credit_type__c}" />
+                <apex:outputField value="{!Unapplied_Credit__c.Amount__c}"/> 
+                <apex:outputField value="{!Unapplied_Credit__c.Unapplied__c}"/>
+            </apex:pageBlockSection>    
+        </apex:pageBlock>
+        <apex:form >
+        <apex:inputHidden value="{!Unapplied_Credit__c.Aria_Account__c}" id="theHiddenInput"/>
+        </apex:form>
+    </apex:pageBlock>
+</apex:page>

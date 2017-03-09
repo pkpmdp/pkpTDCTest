@@ -1,0 +1,77 @@
+<apex:page >
+<p style="MARGIN: 0cm 0cm 0pt" class="MsoNormal"><font face="Verdana,Helvetica,Sans-Serif">
+<span style="COLOR: black; FONT-SIZE: 10pt; mso-bidi-font-family: Arial"></span></font>&nbsp;</p> 
+<p style="MARGIN: 0cm 0cm 0pt" class="MsoNormal"><font face="Verdana,Helvetica,Sans-Serif">
+<span style="COLOR: black; FONT-SIZE: 10pt; mso-bidi-font-family: Arial">Kære alle,</span>
+<span style="FONT-FAMILY: Arial; COLOR: black; FONT-SIZE: 10pt">
+<!--?xml:namespace prefix = o ns = "urn:schemas-microsoft-com:office:office" /-->
+</span></font></p> <p style="MARGIN: 0cm 0cm 0pt" class="MsoNormal">
+<span style="FONT-FAMILY: Arial; COLOR: black; FONT-SIZE: 10pt">
+<font face="Verdana,Helvetica,Sans-Serif">&nbsp;
+</font></span></p> <p style="MARGIN: 0cm 0cm 0pt" class="MsoNormal">
+<font face="Verdana,Helvetica,Sans-Serif"><span style="COLOR: black; FONT-SIZE: 10pt; mso-bidi-font-family: Arial">
+Fra i dag ser klikkelikkerne lidt anderledes ud - både navne og skabeloner, men funktionaliteten er nøjagtig den samme.
+</span></font></p> <p style="MARGIN: 0cm 0cm 0pt" class="MsoNormal"><font face="Verdana,Helvetica,Sans-Serif">
+<span style="COLOR: black; FONT-SIZE: 10pt; mso-bidi-font-family: Arial"></span></font>&nbsp;</p>
+<font face="Verdana,Helvetica,Sans-Serif"><span style="COLOR: black; FONT-SIZE: 10pt; mso-bidi-font-family: Arial">
+<p style="MARGIN: 0cm 0cm 0pt" class="MsoNormal"><span style="COLOR: black; FONT-SIZE: 10pt; mso-bidi-font-family: Arial">
+<a href="http://ecm.yousee.dk/?sc_itemid={663C6842-AB1A-4A93-B615-6450ECC69744}">Klik_KS_Clear</a></span></p> 
+<p style="MARGIN: 0cm 0cm 0pt" class="MsoNormal"><span style="COLOR: black; FONT-SIZE: 10pt; mso-bidi-font-family: Arial">
+</span><span style="COLOR: black; FONT-SIZE: 10pt; mso-bidi-font-family: Arial">
+<a href="http://ecm.yousee.dk/?sc_itemid={9874C74B-7C7C-4DFA-A721-F3F99CD2D038}">Klik_KS_Bredbaand</a></span>
+</p> <p style="MARGIN: 0cm 0cm 0pt" class="MsoNormal">
+<span style="COLOR: black; FONT-SIZE: 10pt; mso-bidi-font-family: Arial"></span>
+<span style="COLOR: black; FONT-SIZE: 10pt; mso-bidi-font-family: Arial">
+<a href="http://ecm.yousee.dk/?sc_itemid={84CE41C2-9DB9-4916-86CD-57CCD66EC02B}">
+Klik_KS_Bredbaandstjenester</a></span></p> 
+<p style="MARGIN: 0cm 0cm 0pt" class="MsoNormal"><span style="COLOR: black; FONT-SIZE: 10pt; mso-bidi-font-family: Arial">
+</span><span style="COLOR: black; FONT-SIZE: 10pt; mso-bidi-font-family: Arial">
+<a href="http://ecm.yousee.dk/?sc_itemid={B9C22162-4094-4CC6-A5D2-5F93F9820C2B}">Klik_KS_Frekvenser</a> </span></p> 
+<p style="MARGIN: 0cm 0cm 0pt" class="MsoNormal"><span style="COLOR: black; FONT-SIZE: 10pt; mso-bidi-font-family: Arial">
+</span><span style="COLOR: black; FONT-SIZE: 10pt; mso-bidi-font-family: Arial">
+<a href="http://ecm.yousee.dk/?sc_itemid={EEDFB455-9242-43B5-9964-7EC3944B4F32}">Klik_KS_ Plus_fordele</a> </span></p> 
+<p style="MARGIN: 0cm 0cm 0pt" class="MsoNormal"><span style="COLOR: black; FONT-SIZE: 10pt; mso-bidi-font-family: Arial"></span>
+<span style="COLOR: black; FONT-SIZE: 10pt; mso-bidi-font-family: Arial">
+<a href="http://ecm.yousee.dk/?sc_itemid={C5E28ACD-A7A1-4D87-B12B-F46F3E024E58}">Klik_KS_Play</a> </span></p> 
+<p style="MARGIN: 0cm 0cm 0pt" class="MsoNormal"><span style="COLOR: black; FONT-SIZE: 10pt; mso-bidi-font-family: Arial"></span>
+<span style="COLOR: black; FONT-SIZE: 10pt; mso-bidi-font-family: Arial; mso-ansi-language: EN-GB" lang="EN-GB">
+<a href="http://ecm.yousee.dk/?sc_itemid={2364255B-ECBD-43F8-9017-C606A610BD95}">Klik_KS_Web-TV</a> </span></p> 
+<p style="MARGIN: 0cm 0cm 0pt" class="MsoNormal">
+<span style="COLOR: black; FONT-SIZE: 10pt; mso-bidi-font-family: Arial; mso-ansi-language: EN-GB" lang="EN-GB"></span>
+<span style="COLOR: black; FONT-SIZE: 10pt; mso-bidi-font-family: Arial; mso-ansi-language: EN-GB" lang="EN-GB">
+<a href="http://ecm.yousee.dk/?sc_itemid={46220F99-12ED-4D85-B941-D96CE92FF669}">Klik_KS_Sikkerhedspakke</a> </span></p> 
+<p style="MARGIN: 0cm 0cm 0pt" class="MsoNormal">
+<span style="COLOR: black; FONT-SIZE: 10pt; mso-bidi-font-family: Arial; mso-ansi-language: EN-GB" lang="EN-GB"></span>
+<span style="COLOR: black; FONT-SIZE: 10pt; mso-bidi-font-family: Arial; mso-ansi-language: EN-GB" lang="EN-GB">
+<a href="http://ecm.yousee.dk/?sc_itemid={7F3AB780-BF81-4648-BBFB-FF13D046E440}">Klik_KS_Mobilt_Bredbaand</a> </span></p>
+<p style="MARGIN: 0cm 0cm 0pt" class="MsoNormal">
+<span style="COLOR: black; FONT-SIZE: 10pt; mso-bidi-font-family: Arial; mso-ansi-language: EN-GB" lang="EN-GB"></span>
+<span style="COLOR: black; FONT-SIZE: 10pt; mso-bidi-font-family: Arial; mso-ansi-language: EN-GB" lang="EN-GB">
+<a href="http://ecm.yousee.dk/?sc_itemid={B3AC686C-B3DF-41FE-B693-73E751C3A6B9}">Klik_KS_Telefoni</a> </span></p> 
+<p style="MARGIN: 0cm 0cm 0pt" class="MsoNormal">
+<span style="COLOR: black; FONT-SIZE: 10pt; mso-bidi-font-family: Arial; mso-ansi-language: EN-GB" lang="EN-GB"></span>
+<span style="COLOR: black; FONT-SIZE: 10pt; mso-bidi-font-family: Arial; mso-ansi-language: EN-GB" lang="EN-GB">
+<a href="http://ecm.yousee.dk/?sc_itemid={6D118627-C5D6-4F6A-A5B3-ACA84E8D5C78}">Klik_KS_Betalingsservice</a> </span></p> 
+<p style="MARGIN: 0cm 0cm 0pt" class="MsoNormal">
+<span style="COLOR: black; FONT-SIZE: 10pt; mso-bidi-font-family: Arial; mso-ansi-language: EN-GB" lang="EN-GB"></span>
+<span style="COLOR: black; FONT-SIZE: 10pt; mso-bidi-font-family: Arial; mso-ansi-language: EN-GB" lang="EN-GB">
+<a href="http://ecm.yousee.dk/?sc_itemid={2629E88E-3441-406A-8763-AA00282442B6}">Klik_KS_Plus</a> </span></p> 
+<p style="MARGIN: 0cm 0cm 0pt" class="MsoNormal">
+<span style="COLOR: black; FONT-SIZE: 10pt; mso-bidi-font-family: Arial; mso-ansi-language: EN-GB" lang="EN-GB"></span>
+<span style="COLOR: black; FONT-SIZE: 10pt; mso-bidi-font-family: Arial">
+<a href="http://ecm.yousee.dk/?sc_itemid={AE132EEE-FBDF-4C0E-B01C-4D5E88B810E8}">Klik_KS_Favorit</a> </span></p> 
+<p style="MARGIN: 0cm 0cm 0pt" class="MsoNormal"><span style="COLOR: black; FONT-SIZE: 10pt; mso-bidi-font-family: Arial"></span>
+<span style="COLOR: black; FONT-SIZE: 10pt; mso-bidi-font-family: Arial">
+<a href="http://ecm.yousee.dk/?sc_itemid={5469CAD6-F3AD-4EF4-BC15-DFFAEFAEC8C7}">Klik_Sup_Telefoni</a> </span></p> 
+<p style="MARGIN: 0cm 0cm 0pt" class="MsoNormal"><span style="COLOR: black; FONT-SIZE: 10pt; mso-bidi-font-family: Arial"></span>
+<span style="COLOR: black; FONT-SIZE: 10pt; mso-bidi-font-family: Arial"><a href="http://ecm.yousee.dk/?sc_itemid={EED1AECF-DC91-42C4-A31F-9441A34CC9D4}">Klik_Sup_Kortlaeser</a>&nbsp;</span></p> <p style="MARGIN: 0cm 0cm 0pt" class="MsoNormal"><span style="COLOR: black; FONT-SIZE: 10pt; mso-bidi-font-family: Arial"></span><span style="COLOR: black; FONT-SIZE: 10pt; mso-bidi-font-family: Arial"><a href="http://ecm.yousee.dk/?sc_itemid={11EC5787-88C0-4E71-89BD-5B21CD147DA8}">Klik_Sup_Programkort</a> </span></p> <p style="MARGIN: 0cm 0cm 0pt" class="MsoNormal"><span style="COLOR: black; FONT-SIZE: 10pt; mso-bidi-font-family: Arial"></span><span style="COLOR: black; FONT-SIZE: 10pt; mso-bidi-font-family: Arial"><a href="http://ecm.yousee.dk/?sc_itemid={070C9E3D-DDBC-43AE-AE63-295A85D91749}">Klik_Sup_Bredbaand</a> </span></p> <p style="MARGIN: 0cm 0cm 0pt" class="MsoNormal"><span style="COLOR: black; FONT-SIZE: 10pt; mso-bidi-font-family: Arial"></span><span style="COLOR: black; FONT-SIZE: 10pt; mso-bidi-font-family: Arial"><a href=" http://ecm.yousee.dk/?sc_itemid={DD141821-6B8B-4E82-8332-876145659C58}">Klik_Sup_Plus</a> </span></p> <p style="MARGIN: 0cm 0cm 0pt" class="MsoNormal"><span style="COLOR: black; FONT-SIZE: 10pt; mso-bidi-font-family: Arial"></span><span style="COLOR: black; FONT-SIZE: 10pt; mso-bidi-font-family: Arial"><a href="http://ecm.yousee.dk/?sc_itemid={507CAACA-7BD7-452B-A59D-EE538597017C}">Klik_Sup_Clear</a> </span></p> <p style="MARGIN: 0cm 0cm 0pt" class="MsoNormal"><span style="COLOR: black; FONT-SIZE: 10pt; mso-bidi-font-family: Arial">
+</span><span style="COLOR: black; FONT-SIZE: 10pt; mso-bidi-font-family: Arial">
+<a href="http://ecm.yousee.dk/?sc_itemid={67B4B839-9FBE-479E-98F5-58F455402504}">Klik_Sup_Tvillingekort</a> </span></p> 
+<p style="MARGIN: 0cm 0cm 0pt" class="MsoNormal"><span style="COLOR: black; FONT-SIZE: 10pt; mso-bidi-font-family: Arial"></span>
+<span style="COLOR: black; FONT-SIZE: 10pt; mso-bidi-font-family: Arial"></span>
+<span style="FONT-FAMILY: Arial; COLOR: black; FONT-SIZE: 10pt"></span>&nbsp;</p> 
+<p style="MARGIN: 0cm 0cm 0pt" class="MsoNormal"><span style="COLOR: black; FONT-SIZE: 10pt; mso-bidi-font-family: Arial">
+Derudover vil I i Kampagne historikken kunne se den mail, der er sendt til kunden (i første omgang er det kun e-mail dette gælder).
+</span></p> </span></font><p style="MARGIN: 0cm 0cm 0pt" class="MsoNormal"><font face="Verdana,Helvetica,Sans-Serif"></font>&nbsp;</p>
+
+</apex:page>

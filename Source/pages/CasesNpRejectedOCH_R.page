@@ -1,0 +1,3 @@
+<apex:page standardController="Case" extensions="clsCasesNpHandlerController" action="{!rejectedByOCH_R}">
+    <apex:Messages />
+</apex:page>

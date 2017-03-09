@@ -1,0 +1,5 @@
+<apex:page standardController="Contact" extensions="clsKissContactDispatcherController" action="{!showContact}">
+    <apex:form >
+        <apex:Messages />        
+    </apex:form>
+</apex:page>

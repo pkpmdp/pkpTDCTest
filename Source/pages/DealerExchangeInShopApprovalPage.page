@@ -1,0 +1,228 @@
+<apex:page showHeader="false" sidebar="false"  controller="DealerExchangeInShop" applyHtmlTag="false" >
+<html class="cvi2015"> <!--spoc 2206-->
+<script type="text/javascript" src="https://yousee.dk/sitecore/content/data/export/export.aspx?itemguid={2AE76805-70CA-4F63-9DC4-BC2DF507483E}&functions=true"></script>
+    <!-- Added for DW 750 -->
+    <c:TopMenuComponent ></c:TopMenuComponent>
+        <script type="text/javascript">printHeader();</script>
+        <script type="text/javascript">printTopMenu();</script>
+<style>
+  .fontVerdana{font-family:verdana;}
+  .SøgBtnCls {border-width: 0;padding: 0 15px;text-transform: capitalize;margin: 0 2px;background-position: left top;background-repeat: repeat-x;border-color: -moz-use-text-color #FF4500;border-right: 1px solid #FF4500;border-style: none solid solid none;display: inline;font-family: 'Verdana','Geneva',sans-serif;font-size: 80%;color: #FFFFFF;font-weight: bold;height: 26px;background-color: #FF4500; width:76px}
+   body button, body .x-btn, body .btn, body .btnDisabled, body .btnCancel, body .menuButton .menuButtonButton {background-color:#585858;color:#FFFFFF;background:#585858;font-weight:bold;height:26px;}   
+ 
+</style>
+<title> Ombyt lejeboks </title> 
+<apex:form styleclass="fontVerdana">
+    <body>
+        <script type="text/javascript">printContentAreaBegin();</script> 
+        
+        <div class="message errorM3" id="jsErrorSection" style="display:none">
+            <table border="0" cellpadding="0" cellspacing="0" class="messageTable" style="padding:0px;margin:0px;">
+                <tr valign="top">
+                    <td>
+                        <img alt="Fejl" src="/s.gif" class="msgIcon" title="ERROR" />
+                     </td>
+                     <td class="messageCell">
+                        <div class="messageText">
+                            <span style="color:#cc0000; font-family:verdana;">
+                                <h4>Fejl:</h4>
+                            </span> 
+                            <div id="jsErrorText"></div>
+                            <br/>
+                        </div>
+                     </td>
+                </tr>
+                <tr>
+                </tr>
+            </table>
+        </div> 
+        <apex:pageblock id="pbblk"> 
+     <apex:pageMessages rendered="true" id="msg2"/>
+     <apex:actionFunction name="approve1" action="{!Approve}"/>    
+     <apex:pageBlockSection title="Ombytning af lejeboks" columns="1" collapsible="false">                      
+            <apex:OutputText id="textArea3" value="{!ToptextArea3}" escape="false" rendered="{!textAreaRendering}" style="width :500px;background: #DEFDB0;font-family:Verdana;" />                                                 
+                 <!-- <apex:pageBlockSection title="Kundeoplysninger" columns="1" collapsible="false">
+                 <apex:pageBlockSectionItem >               
+             <apex:outputLabel value="{!cCustInstAdd.Name}" id="Name" /> 
+        </apex:pageBlockSectionItem>
+         
+        <apex:pageBlockSectionItem >
+            <apex:outputLabel value="Gade/Nr./Etage/Side/DÃ¸r: " />
+            <apex:outputLabel value="{!cCustInstAdd.addr1}" /> 
+        </apex:pageBlockSectionItem>
+        
+        <apex:pageBlockSectionItem >
+            <apex:outputLabel value="Postnr./By: " />
+            <apex:outputLabel value="{!cCustInstAdd.addr2}" /> 
+        </apex:pageBlockSectionItem>
+        </apex:pageBlockSection> -->
+       
+            <apex:pageBlockSection title="Kunde Information " columns="1"  collapsible="false">                   
+                   <apex:pageBlockSectionItem >                   
+                        <apex:outputLabel value="Kunde Nr:"  styleclass="fontVerdana"/>
+                        <apex:outputLabel value="{!cCustInstAdd.customerNumber}" styleclass="fontVerdana"/>
+                    </apex:pageBlockSectionItem>    
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="Kunde Navn:" styleclass="fontVerdana"/>
+                        <apex:outputLabel value="{!cCustInstAdd.Name}" styleclass="fontVerdana"/>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="Adresse:" styleclass="fontVerdana"/>
+                        <apex:outputLabel value="{!cCustInstAdd.addr1}" styleclass="fontVerdana"/>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="Postnummer:" styleclass="fontVerdana"/>
+                        <apex:outputLabel value="{!cCustInstAdd.addr2}" styleclass="fontVerdana"/>
+                    </apex:pageBlockSectionItem>
+                </apex:pageBlockSection>
+       
+       
+       
+            <apex:pageBlockSection columns="1" collapsible="false">
+            <table width="100%" id="tableFormat"  border="0" cellpadding="0" cellspacing="5">
+             <tr>
+                 <th>
+                    <apex:outputLabel value="Serienr. på kundens defekte boks : " style="font-weight:bold; font-size:10pt;font-family:verdana;" />                  
+                     <apex:OutputText id="SerialNo" value="{!SerialNo}" styleClass="fontVerdana"/>
+                </th>
+            </tr>
+            
+            <tr>
+                <td>
+                    <apex:outputLabel value="Tilstand boksen er modtaget i :" style="font-weight:bold; font-size:10pt;font-family:verdana;" />  
+                    Boksen var {!returnBoxCond}                                                                                                                                                  
+                    <apex:OutputText id="comment" value="{!damageComment}" rendered="{!IF(returnBoxCond == 'beskadiget',true,false)}" style="width :500px;font-family:Verdana;"/> <!-- rendered="{!showComment}" -->
+                </td>   
+            </tr>
+              
+            <tr>
+                <td>                
+                    <apex:OutputText id="errmsg" value="{!ErrorValue}" rendered="{!ErrorValue != ''}" styleClass="fontVerdana"/>
+                    <apex:outputLabel value="Serienr. på den nye udleverede boks: " style="font-weight:bold; font-size:10pt;font-family:verdana;"  rendered="{!DisplayNewSerialNumber}" />                  
+                    <apex:OutputText id="newSerialNo" value="{!newSerialNo}"  rendered="{!DisplayNewSerialNumber}" styleClass="fontVerdana"/>
+                
+                </td>
+            </tr>
+            
+            <tr>
+                <td> 
+                <apex:outputLabel value="Ombyttet hos : " style="font-weight:bold; font-size:10pt;font-family:verdana;" />                  
+                 <apex:OutputText value="{!Address1}" style="font-size:10pt;font-family:verdana;" />
+                 <apex:OutputText value="{!Address2}" style="font-size:10pt;font-family:verdana;" />
+                
+                </td>
+            </tr>
+                 
+            <tr>
+                <td>
+                    <apex:outputPanel >
+                        <apex:outputLabel value="Forhandlernummer : " style="font-weight:bold; font-size:10pt;font-family:verdana;" /> &nbsp;  
+                        <apex:OutputText value="{!AgentNumber}" style="font-size:10pt;font-family:verdana;" />
+                    </apex:outputPanel>      
+                </td>
+                <td>
+                    <apex:outputPanel >
+                        <apex:outputLabel value="Sælger nummer : " style="font-weight:bold; font-size:10pt;font-family:verdana;" />   &nbsp;         
+                        <apex:inputText id="SellerNo" value="{!SellerNumber}" styleclass="fontVerdana"/>
+                    </apex:outputPanel>   
+                </td>
+            </tr>
+             
+            <tr>
+                <td>                
+                    <apex:OutputText id="textArea4" value="{!ToptextArea4}" escape="false" rendered="{!textAreaRendering}" style="width :500px; background: #DEFDB0;font-family:verdana;" />                
+                    
+                
+                </td>
+            </tr>
+    </table>
+      </apex:pageBlockSection>
+   </apex:pageBlockSection>
+ 
+  <center><apex:commandButton value=" Tilbage" action="{!BacktoSearchResultPage}" id="pgBlockButtonId"/>
+  <input type="button" value="Godkend " onclick="approval();" class="SøgBtnCls"/></center>
+  <!-- <apex:commandButton value="  Godkend  "  action="{!Approve}" status="queryStatus" rerender="out,jsErrorSection"/>  </center> <!--  -->
+ <!-- <apex:actionStatus id="mystatus1" >
+                                 <apex:facet name="start" >
+                                      <img src="{!URLFOR($Resource.loadingImage)}" border="0" height="18px" width="18px" /> please wait...
+                                 </apex:facet>
+                             </apex:actionStatus>  -->
+                <apex:actionStatus id="queryStatus"> 
+                                <apex:facet name="start">
+                                    <c:loadingComponent BackColor="#efefef" borderColor="#336699"
+                                        borderSize="3" height="50px" width="120px" 
+                                        ImageUrl="{!$Resource.loadingImage}" Message="Henter Data..." 
+                                        messageStyle="color:darkred;font-size:11pt;font-weight:bold;"/>
+                                </apex:facet>         
+                            </apex:actionStatus>    
+ </apex:pageblock>
+ <apex:outputpanel id="out">
+<script type="text/javascript">
+        var myJson = {!response};
+       var e = '{!error}';         
+            if(e != '' && e.length > 0)
+            {               
+                document.getElementById("jsErrorSection").style.display = 'block'; 
+                document.getElementById("jsErrorText").innerHTML = '{!error}';
+            }
+            else
+            {               
+                document.getElementById("jsErrorSection").style.display = 'none'; 
+            } 
+       
+       var res = {!Nextresponse};       
+      //var res = {"logistik":"Hardware skal være hos en kunde for at kunne foretage indlevering.","responsecode":"403","responsemessage":"Forbidden","ETag":"593551835"};       
+       var Appexception ='';
+       if(res != undefined){
+        //alert('res......................'+res['responsecode']);
+        if(res['responsecode'] != undefined)
+        {          
+            if((res['responsecode'] != '200') && (res['responsecode'] != '201')) 
+            {
+                //alert('inside if of 200 or 201');
+                if(res['logistik'] != undefined)
+                {
+                    if(res['logistik']['exception'] != undefined)
+                    {
+                     Appexception  = res['logistik']['exception'];
+                    //alert('Appexception    '+Appexception);
+                    }
+                    else
+                    {
+                        //alert('inside 1st else');
+                        Appexception  = res['logistik'];
+                    }
+                    document.getElementById("jsErrorSection").style.display = 'block'; 
+                    document.getElementById("jsErrorText").innerHTML = Appexception;
+                }
+            }
+            else
+            {
+                //alert('inside else   '+Appexception); 
+                 //document.getElementById("{!$Component.theform.ExchangeApproved}").value =true;
+                    redirectToCustomerReceiptPage();
+            }
+      }
+    }
+     else
+     {
+          alert('Incorrect Json'+res);
+     }
+      </script> 
+      
+      <script type="text/javascript">
+        function approval(){
+            approve1();
+        }
+     </script>
+</apex:outputpanel>
+  <apex:actionFunction name="redirectToCustomerReceiptPage" action="{!redirectToCustomerReceiptPage}"/>    
+    
+    <script type="text/javascript">printContentAreaEnd();</script>
+    <script type="text/javascript">printFooter();</script>
+    <script type="text/javascript" src="../js/click.js" charset="ISO-8859-1"></script> 
+
+</body>
+</apex:form>
+</html>
+</apex:page>

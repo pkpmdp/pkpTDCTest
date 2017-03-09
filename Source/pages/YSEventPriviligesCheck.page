@@ -1,0 +1,8 @@
+<apex:page standardController="Event" extensions="clsYSEventPriviligesCheckController" 
+	       action="{!getReDir}" tabStyle="Event">
+	       <apex:outputPanel >
+            	<apex:outputPanel layout="block">                	
+                	<apex:pageMessages />                
+            	</apex:outputPanel>
+          </apex:outputPanel>
+</apex:page>

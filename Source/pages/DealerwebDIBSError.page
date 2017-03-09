@@ -1,0 +1,20 @@
+<apex:page showHeader="false" sidebar="false" applyHtmlTag="false">
+    <html class="cvi2015"> <!--spoc 2206-->
+    <script type="text/javascript" src="https://yousee.dk/sitecore/content/data/export/export.aspx?itemguid={BD793F05-9B01-4210-BD63-F33431D1013A}&functions=true"></script>
+    <!-- Added for DW 750 -->
+    <c:TopMenuComponent ></c:TopMenuComponent>
+    <script type="text/javascript">printHeader();</script>
+    <script type="text/javascript">printTopMenu();</script>
+    <script type="text/javascript">printContentAreaBegin();</script>
+    <link class="user" href="{!$Resource.SalesFlowCSS}" rel="stylesheet" type="text/css" />  
+    
+    <c:DealerComponent ></c:DealerComponent>  
+    
+    <apex:outputText value="DIBS failed to return a Transaction Id. Please try again." /><br/>
+    <center>
+        <input type="button" value="OK" onclick="window.open('/apex/DealerCustomerSearch', '_self');" class="videreBtnCls" />
+    </center>
+    <script type="text/javascript">printContentAreaEnd();</script>
+    <script type="text/javascript">printFooter();</script>
+    </html>
+</apex:page>

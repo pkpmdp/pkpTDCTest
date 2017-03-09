@@ -1,0 +1,33 @@
+<apex:page controller="clsCustomerLogController" cache="false" showHeader="false" sidebar="false">
+    <script src="/support/console/28.0/integration.js" type="text/javascript"></script>
+    <apex:includeScript value="{!URLFOR($Resource.DynaTree_JS,'jquery/jquery.js')}"/> 
+    <script>
+        function refreshParent(){
+                parent.location.reload();
+        }
+    </script>
+    
+<style>
+body  {
+   background-color: #cfeef8;
+}
+</style>
+
+    <table>
+        <tr>
+            <td>
+                <b>{!$Label.CustomerLogLabel}</b>
+            </td>
+        </tr>
+    </table>
+    
+    <apex:form >
+    <apex:pageMessages /> 
+<!--     <apex:actionFunction name="saveLog" action="{!save}" /> -->
+        <apex:panelGrid width="100%" columns="1" style="text-align:right" >
+            <apex:inputtextarea value="{!customerLog.Text__c}" required="false" id="TextId" rows="7" cols="20" style="width:98%" disabled="{!ISBLANK(idAccount)}"/>
+<!--                    <apex:commandButton action="{!save}" value="{!$Label.Save}" disabled="{!ISBLANK(idAccount)}"/>   -->
+    <apex:commandButton action="{!save}" value="{!$Label.Save}" disabled="{!ISBLANK(idAccount)}" oncomplete="refreshParent();"/>   
+        </apex:panelGrid>
+  </apex:form>
+</apex:page>

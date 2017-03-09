@@ -1,0 +1,369 @@
+<apex:page standardController="account" extensions="clsYSAccountEditController" tabStyle="Account" id="editPage"> 
+  <!-- Begin Default Content REMOVE THIS -->
+  <apex:sectionHeader title="Rediger O-kunde" subtitle="{!account.Name}"/>
+<apex:includeScript value="{!URLFOR($Resource.DynaTree,'/DynaTree/jquery/jquery.js')}"/>
+<script>var $j15 = jQuery.noConflict(true);</script>
+  <apex:form id="frm">
+      <apex:pageBlock title="Rediger O-kunde" id="Pblock">
+          <apex:pageBlockButtons location="both">
+              <apex:commandButton value="{!$Label.Save}" action="{!saveAccount}" rerender="Pblock"/>
+              <apex:commandButton value="{!$Label.Cancel}" action="{!cancel}"/>
+          </apex:pageBlockButtons>
+          <apex:pageMessages id="ErrorMsg"/>
+          <apex:pageBlockSection title="Kunde Information" columns="2">
+              <apex:inputField value="{!account.name}"/>
+              <apex:inputField value="{!account.Home_Phone__c}"/>              
+              <apex:inputField value="{!account.parentId}" id="pid" onblur="javascript:EnableKK(this)"/>
+              <apex:inputField value="{!account.Phone}"/>
+              <!--<apex:pageBlockSectionItem >
+                    <apex:outputLabel value="{!$Label.Cable_Unit}"></apex:outputLabel>
+                    <apex:inputField value="{!cableUnit.name}" required="true" />
+              </apex:pageBlockSectionItem> -->
+              <apex:pageBlockSectionItem >                  
+                    <apex:outputLabel >Kontraktkunde</apex:outputLabel>
+                    <apex:outputpanel id="opLookUp"><apex:inputText id="kontrakunde" value="{!strHierarName}" style="align:left;width: 150px" disabled="false"/>
+                    <a id="KKLookUp" href ="" style="cursor: pointer" onClick="javascript:openAccountPopup(this.parentNode.parentNode)">
+                        <img id="buttonImage" src="/s.gif" alt="Assigned To Lookup (New Window)" class="lookupIcon" onblur="this.className = 'lookupIcon';" onfocus="this.className = 'lookupIconOn';" onmouseout="this.className = 'lookupIcon';this.className = 'lookupIcon';" onmouseover="this.className = 'lookupIconOn';this.className = 'lookupIconOn';" title="Assigned To Lookup (New Window)" />
+                    </a>    
+                    <apex:inputHidden id="kontraId" value="{!strHierarId}"/>
+                    <apex:inputHidden id="KundeId" value="{!account.id}"/> 
+                </apex:outputpanel>
+              </apex:pageBlockSectionItem>
+              <apex:inputField value="{!account.Mobile_phone__c}"/>
+              
+              <apex:pageBlockSectionItem > 
+              <apex:outputLabel value="{!$Label.YS_Installation}"></apex:outputLabel>
+              <apex:outputPanel styleClass="requiredInput" layout="block">
+              <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+              <apex:inputField value="{!cableUnit.Potential_Installations__c}" required="false" />
+              <br></br><apex:outputPanel styleClass="errorMsg" id="errCblPtIns" rendered="{!if(errCblPtInsFlag,'true','false')}">
+              {!errCblPtIns}
+              </apex:outputPanel></apex:outputPanel> 
+              </apex:pageBlockSectionItem>
+              <!--<apex:inputField value="{!cableUnit.Potential_Installations__c}" required="true" /> -->
+              <apex:inputField value="{!account.Company_Email__c}"/>
+              
+              <!--<apex:inputField value="{!account.CVR_Number__c}"/>-->
+              <apex:pageBlockSectionItem >
+              <apex:outputLabel value="{!$Label.YS_Municipaly}"></apex:outputLabel>
+              <apex:outputPanel styleClass="requiredInput" layout="block">
+              <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+              <apex:inputField value="{!cableUnit.Municipaly__c}" required="false"/>
+              <br></br><apex:outputPanel styleClass="errorMsg" id="errCblMun" rendered="{!if(errCblMunFlag,'false','true')}">
+              {!errCblMun}
+              </apex:outputPanel></apex:outputPanel>
+              </apex:pageBlockSectionItem>
+             <!--<apex:inputField value="{!cableUnit.Municipaly__c}" required="true"/>-->
+              <apex:inputField value="{!account.website}"/>
+              
+              <apex:pageBlockSectionItem >
+              <apex:outputLabel value="{!$Label.YS_PostalCode}"></apex:outputLabel>
+              <apex:outputPanel styleClass="requiredInput" layout="block">
+              <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+              <apex:inputField value="{!cableUnit.Cable_Unit_Post_Code__c}" required="false"/>
+              <br></br><apex:outputPanel styleClass="errorMsg" id="errCblPCode" rendered="{!if(errCblPCodeFlag,'true','false')}">
+              {!errCblPCode}
+              </apex:outputPanel></apex:outputPanel></apex:pageBlockSectionItem>
+         <!-- </apex:pageBlockSection>
+              <apex:inputField value="{!cableUnit.Cable_Unit_Post_Code__c}" required="true"/>-->
+              
+              <apex:pageblockSectionItem >
+                    <apex:outputLabel value="{!$Label.Expected_Customer_Satisfaction}"></apex:outputLabel>
+                    <apex:selectList id="cusSatisfactionLookupPicklist" value="{!account.Customer_Satisfaction_Lookup__c}" size="1" rendered="true">   
+                        <apex:selectOptions value="{!CustomerSatisfactions}"/>   
+                    </apex:selectList>
+              </apex:pageblockSectionItem>
+              <apex:inputField value="{!account.CVR_Number__c}"/>   
+              <apex:inputField value="{!account.Declaration_of_Intent__c}"/> 
+              <apex:inputField value="{!account.EAN_nr__c}"/>        
+              <apex:inputField value="{!account.Foreningsweb__c}"/>
+             <!-- <apex:pageblockSectionItem >
+                    <apex:outputText id="emptySpace"/>
+              </apex:pageblockSectionItem> --> 
+              <apex:inputField value="{!account.Date_of_Next_General_Meeting__c}"/>
+              <apex:inputField value="{!account.partnership__c}"/>
+              <apex:inputField value="{!account.Annual_general_meeting__c}"/>
+              <apex:pageblockSectionItem >
+                    <apex:outputText id="emptySpace"/>
+              </apex:pageblockSectionItem>
+          </apex:pageBlockSection> 
+          <apex:pageBlockSection title="{!$Label.Address}" columns="2">
+              <apex:inputField value="{!account.Street_YK__c}"/>
+              <apex:inputField value="{!account.PO_Box_alt__c}"/>              
+          </apex:pageBlockSection>
+          <apex:pageBlockSection title="{!$Label.Segments}" columns="2">
+              <apex:pageblockSectionItem >
+                    <apex:outputLabel value="{!$Label.Customer_Segment}"></apex:outputLabel>
+                        <apex:outputPanel styleClass="requiredInput" layout="block">
+                       <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+                        <apex:selectList id="cusSegmentLookupPicklist" value="{!account.Customer_Segment_Lookup__c}" size="1" rendered="true" required="false">   
+                            <apex:selectOptions value="{!CustomerSegmentOptions}"/>   
+                        </apex:selectList>
+                        <apex:outputPanel styleClass="errorMsg" id="errAccSeg" rendered="{!if(errAccSegFlag,'true','false')}">
+              {!errAccSeg}</apex:outputPanel>
+                    </apex:outputPanel>
+              </apex:pageblockSectionItem>              
+              
+              <apex:inputField value="{!account.Memberships__c}"/>
+              
+              <apex:pageblockSectionItem >
+              <apex:outputLabel value="{!$Label.Housing_Type}"></apex:outputLabel>
+              <apex:outputPanel styleClass="requiredInput" layout="block">
+                    <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+                    <apex:selectList id="HousingTypeLookupPicklist" value="{!cableUnit.Housing_Type__c}" size="1" rendered="true" required="false">   
+                        <apex:selectOptions value="{!HousingTypeOptions}"/>   
+                    </apex:selectList>
+                    <apex:outputPanel styleClass="errorMsg" layout="block" id="errCblHType" rendered="{!if(errCblHTypeFlag,'true','false')}">
+              {!errCblHType}
+              </apex:outputPanel>
+              </apex:outputPanel>
+              </apex:pageblockSectionItem>
+
+              <apex:pageblockSectionItem >
+              <apex:outputLabel value="{!$Label.Housing_Ownership}"></apex:outputLabel>
+                    <apex:outputPanel styleClass="requiredInput" layout="block">
+                    <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+                        <apex:selectList id="HousingOwnerLookupPicklist" value="{!cableUnit.Housing_Ownership__c}" size="1" rendered="true" required="false">   
+                            <apex:selectOptions value="{!HousingOwnerShipOptions}"/>   
+                        </apex:selectList>
+                         <apex:outputPanel styleClass="errorMsg" layout="block" id="errCblHOwn" rendered="{!if(errCblHOwnFlag,'true','false')}">
+              {!errCblHOwn}
+              </apex:outputPanel>
+                    </apex:outputPanel>
+              </apex:pageblockSectionItem>
+ 
+              <apex:pageblockSectionItem >
+              <apex:outputLabel value="{!$Label.Building_Type}"></apex:outputLabel>
+              <apex:outputPanel styleClass="requiredInput" layout="block">
+              <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+              <apex:selectList id="buildingTypeLookupPicklist" value="{!cableUnit.Building_Type__c}" size="1" rendered="true" required="false">   
+                <apex:selectOptions value="{!BuildingTypeOptions}"/>   
+              </apex:selectList>
+              <apex:outputPanel styleClass="errorMsg" id="errCblBType" layout="block" rendered="{!if(errCblBTypeFlag,'true','false')}">
+              {!errCblBType}
+              </apex:outputPanel>
+              </apex:outputPanel>
+              </apex:pageblockSectionItem>
+ 
+          </apex:pageBlockSection>
+          <apex:pageBlockSection title="{!$Label.Overview}" columns="2">
+              <apex:outputField value="{!cableUnit.CA_Sales_Concept__c}"/>
+              <apex:outputField value="{!cableUnit.CA_Installations__c}"/>
+          </apex:pageBlockSection>
+          <!--<apex:pageBlockSection title="{!$Label.Description}" columns="1">
+              <apex:inputField value="{!account.Description}" style="width:400px; height:100px;"/>
+          </apex:pageBlockSection> -->        
+          <apex:pageBlockSection title="DKTV" columns="1" id="pbsDKTV1" rendered="{!dktvFalg}">
+                <apex:pageBlockSectionItem id="PBS1">
+                              <apex:outputLabel value="{!$ObjectType.Account.Fields.Cable_Unit_DKTV__c.Label}" for="Cable_Unit_DKTV" id="lblDKTV"/>
+                              <apex:inputCheckbox value="{!account.Cable_Unit_DKTV__c}" id="CUDCDKTV" onclick="makeItDisable('{!$Component.CUDCDKTV}')" disabled="true"></apex:inputCheckbox>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem id="PBS2">
+                              <apex:outputLabel value="DKTV Foreningsmail" for="DKTV_Foreningsmail" id="lblDKTV_Foreningsmail" />
+                              <apex:inputField value="{!account.DKTV_Foreningsmail__c}" id="chkDKTV_Foreningsmail" onclick="checkDKTVEmail('{!$Component.chkDKTV_Foreningsmail}')" ></apex:inputField> 
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem Id="PBS3">
+                              <apex:outputLabel value="DKTV mailadresse" for="DKTV_mailadresse" id="lblDKTV_mailadresse" />
+                              <apex:inputField value="{!account.DKTV_mailadresse__c}" id="txtDKTV_mailadresse" ></apex:inputField> 
+                </apex:pageBlockSectionItem> 
+         </apex:pageBlockSection>
+         <apex:pageBlockSection title="DKTV" columns="1" id="pbsDKTV3" rendered="{!NOT(dktvFalg)}">
+                <apex:pageBlockSectionItem id="PBS4">
+                              <apex:outputLabel value="{!$ObjectType.Account.Fields.Cable_Unit_DKTV__c.Label}" for="Cable_Unit_DKTV" id="lblDKTV1"/>
+                              <apex:inputCheckbox value="{!account.Cable_Unit_DKTV__c}" id="CUDCDKTV1" onclick="makeItDisable1('{!$Component.CUDCDKTV1}')" disabled="true"></apex:inputCheckbox> 
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem id="PBS5" >
+                              <apex:outputLabel value="DKTV Foreningsmail" for="DKTV_Foreningsmail" id="lblDKTV_Foreningsmail1" style="display:none" />
+                              <apex:inputField value="{!account.DKTV_Foreningsmail__c}" id="chkDKTV_Foreningsmail1" onclick="checkDKTVEmail1('{!$Component.chkDKTV_Foreningsmail1}')" style="display:none"></apex:inputField> 
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem Id="PBS6">
+                              <apex:outputLabel value="DKTV mailadresse" for="DKTV_mailadresse" id="lblDKTV_mailadresse1" style="display:none"/>
+                              <apex:inputField value="{!account.DKTV_mailadresse__c}" id="txtDKTV_mailadresse1" style="display:none"></apex:inputField> 
+                </apex:pageBlockSectionItem>
+          </apex:pageBlockSection>  
+       </apex:pageBlock>
+  </apex:form>
+    
+ 
+  <script>
+
+  var currRow;
+    
+    var pid = '{!account.parentId}';
+    if(pid == ''){
+        document.getElementById('editPage:frm:Pblock:j_id31:j_id35:kontrakunde').disabled = true;
+        document.getElementById('KKLookUp').removeAttribute("onClick");
+    }  
+       
+    function openAccountPopup(parentNode){
+        try{
+            currRow = parentNode;         
+            var kundeid = currRow.getElementsByTagName('input')[2];        
+            var ParNode = currRow.parentNode.parentNode;
+            var parId = ParNode.getElementsByTagName('input')[2];
+            var likeString = '';
+            var KundePar = '';
+            
+            likeString = kundeid.value;   
+            if(parId!=null)
+                KundePar = parId.value; 
+            //currRow.getElementsByTagName('input')[0].value= '';
+            //currRow.getElementsByTagName('input')[1].value = '';
+         }
+         catch(ex){
+           alert(ex.message);
+         }            
+         var url ;
+         url = "Hierarki_Cust_Page?likeString="+likeString+"&KundePar="+KundePar;
+         openWind(url);
+         return false;
+    }   
+    var curPopupWindow;         
+    function openWind(URL){
+        curPopupWindow = window.open(URL, "_blank","width=500, height=400,dependent=no,resizable=yes,toolbar=no,status=no,directories=no,menubar=no,scrollbars=1", false);                
+    }                    
+            
+    function setSelectedHierAccDetails(AccId, AccName){                                
+       var HieraNameCol = currRow.getElementsByTagName('input')[0];
+       var HierAccId = currRow.getElementsByTagName('input')[1];
+       HieraNameCol.value = AccName;
+       HierAccId.value = AccId;
+       
+        if(curPopupWindow != null){
+            curPopupWindow.close();
+        }   
+        return false;
+    }
+ 
+    // To enable KontraktKunde field only if Parent Account field is not null
+    function EnableKK(Node){
+        //alert(Node.value);
+        if(Node.value==''){
+            document.getElementById('editPage:frm:Pblock:j_id31:j_id35:kontrakunde').disabled = true;
+            document.getElementById('KKLookUp').removeAttribute("onClick"); 
+            document.getElementById('editPage:frm:Pblock:j_id31:j_id35:kontrakunde').value = '';
+            document.getElementById('editPage:frm:Pblock:j_id31:j_id35:kontraId').value = '';
+        }
+        else{
+            
+            document.getElementById('editPage:frm:Pblock:j_id31:j_id35:kontrakunde').disabled = false;
+            document.getElementById('KKLookUp').setAttribute("onClick","javascript:openAccountPopup(this.parentNode.parentNode)");
+        }   
+    }
+
+  
+    function makeItDisable(selectObject){
+        var checkObj = document.getElementById(selectObject);
+        if(checkObj.checked){
+            document.getElementById('editPage:frm:Pblock:pbsDKTV1:PBS2:lblDKTV_Foreningsmail').style.display ='block';
+            document.getElementById('editPage:frm:Pblock:pbsDKTV1:PBS2:chkDKTV_Foreningsmail').style.display ='block';
+        }else{
+            document.getElementById('editPage:frm:Pblock:pbsDKTV1:PBS2:lblDKTV_Foreningsmail').style.display ='none';
+            document.getElementById('editPage:frm:Pblock:pbsDKTV1:PBS2:chkDKTV_Foreningsmail').style.display ='none';
+            document.getElementById('editPage:frm:Pblock:pbsDKTV1:PBS2:chkDKTV_Foreningsmail').checked = false;
+            document.getElementById('editPage:frm:Pblock:pbsDKTV1:PBS3:lblDKTV_mailadresse').style.display ='none';
+            document.getElementById('editPage:frm:Pblock:pbsDKTV1:PBS3:txtDKTV_mailadresse').style.display ='none';
+        }   
+    }
+    
+    function checkDKTVEmail(selectObject1){
+        var checkObj1 = document.getElementById(selectObject1);
+        if(checkObj1.checked){
+            document.getElementById('editPage:frm:Pblock:pbsDKTV1:PBS3:lblDKTV_mailadresse').style.display ='block';
+            document.getElementById('editPage:frm:Pblock:pbsDKTV1:PBS3:txtDKTV_mailadresse').style.display ='block';
+        }else{
+            
+            //$(".errorMsg").hide();
+            document.getElementById('editPage:frm:Pblock:pbsDKTV1:PBS3:lblDKTV_mailadresse').style.display ='none';
+            //document.getElementById('editPage:frm:Pblock:pbsDKTV1:PBS3:txtDKTV_mailadresse').value ='';
+            document.getElementById('editPage:frm:Pblock:pbsDKTV1:PBS3:txtDKTV_mailadresse').style.display ='none';
+        }
+        
+    }
+    
+    function makeItDisable1(selectObject){
+        var checkObj = document.getElementById(selectObject);
+        if(checkObj.checked){
+            document.getElementById('editPage:frm:Pblock:pbsDKTV3:PBS5:lblDKTV_Foreningsmail1').style.display ='block';
+            document.getElementById('editPage:frm:Pblock:pbsDKTV3:PBS5:chkDKTV_Foreningsmail1').style.display ='block';
+        }else{
+            document.getElementById('editPage:frm:Pblock:pbsDKTV3:PBS5:lblDKTV_Foreningsmail1').style.display ='none';
+            document.getElementById('editPage:frm:Pblock:pbsDKTV3:PBS5:chkDKTV_Foreningsmail1').style.display ='none';
+            document.getElementById('editPage:frm:Pblock:pbsDKTV3:PBS5:chkDKTV_Foreningsmail1').checked = false;
+            document.getElementById('editPage:frm:Pblock:pbsDKTV3:PBS6:lblDKTV_mailadresse1').style.display ='none';
+            document.getElementById('editPage:frm:Pblock:pbsDKTV3:PBS6:txtDKTV_mailadresse1').style.display ='none';
+        }
+    }
+    
+    function checkDKTVEmail1(selectObject1){
+        var checkObj1 = document.getElementById(selectObject1);
+        if(checkObj1.checked){
+            document.getElementById('editPage:frm:Pblock:pbsDKTV3:PBS6:lblDKTV_mailadresse1').style.display ='block';
+            document.getElementById('editPage:frm:Pblock:pbsDKTV3:PBS6:txtDKTV_mailadresse1').style.display ='block';
+            //document.getElementById("editPage:frm:Pblock:pbsDKTV3:PBS6:lblDKTV_mailadresse1").style.visibility ='visible';
+            //document.getElementById("editPage:frm:Pblock:pbsDKTV1:PBS3:txtDKTV_mailadresse").style.visibility ='visible';
+            //document.getElementById("editPage:frm:Pblock:pbsDKTV1:PBS3:lblDKTV_mailadresse2").style.visibility ='visible';
+            //document.getElementById("editPage:frm:Pblock:pbsDKTV1:PBS3:txtDKTV_mailadresse2").style.visibility ='visible';
+            
+        }else{
+            document.getElementById('editPage:frm:Pblock:pbsDKTV3:PBS6:lblDKTV_mailadresse1').style.display ='none';
+            document.getElementById('editPage:frm:Pblock:pbsDKTV3:PBS6:txtDKTV_mailadresse1').style.display ='none';
+        }
+        
+    }
+    window.onload = function() { 
+        var flag = {!dktvmailFlag};
+        var flag1 = {!dktvFalg};
+        /*if(flag1 == true){
+            document.getElementById('editPage:frm:Pblock:pbsDKTV1:PBS1:CUDCDKTV').disabled = true;
+        }
+        if(flag1 == false){
+            document.getElementById('editPage:frm:Pblock:pbsDKTV3:PBS4:CUDCDKTV1').disabled = true;
+        }*/
+            
+        if(flag == false){          
+            //document.getElementById('editPage:frm:Pblock:pbsDKTV1:PBS2:lblDKTV_Foreningsmail').style.display = 'none';
+            //document.getElementById('editPage:frm:Pblock:pbsDKTV1:PBS2:chkDKTV_Foreningsmail').style.display = 'none';
+       
+            if(document.getElementById('editPage:frm:Pblock:pbsDKTV1:PBS3:lblDKTV_mailadresse') != 'undefined' && document.getElementById('editPage:frm:Pblock:pbsDKTV1:PBS3:lblDKTV_mailadresse') != null){
+                document.getElementById('editPage:frm:Pblock:pbsDKTV1:PBS3:lblDKTV_mailadresse').style.display = 'none';
+                //document.getElementById('editPage:frm:Pblock:pbsDKTV3:PBS6:lblDKTV_mailadresse1').style.display = 'block';
+            }
+            if(document.getElementById('editPage:frm:Pblock:pbsDKTV1:PBS3:txtDKTV_mailadresse') != 'undefined' && document.getElementById('editPage:frm:Pblock:pbsDKTV1:PBS3:txtDKTV_mailadresse') != null){
+                document.getElementById('editPage:frm:Pblock:pbsDKTV1:PBS3:txtDKTV_mailadresse').style.display = 'none';
+                //document.getElementById('editPage:frm:Pblock:pbsDKTV3:PBS6:txtDKTV_mailadresse1').style.display = 'block';
+            }
+        }
+        
+        /*if(errorMsg.length() > 0){
+            alert('@@@@@errorMeg'+errorMsg.length());
+            document.getElementById('editPage:frm:Pblock:pbsDKTV1:PBS3:lblDKTV_mailadresse').style.display = 'block';
+            document.getElementById('editPage:frm:Pblock:pbsDKTV1:PBS3:txtDKTV_mailadresse').style.display = 'block';
+        }*/
+        
+        if ($j15('.errorMsg').length > 0 && flag1 == false){
+                //alert('@@@inside');
+                
+                //document.getElementById('editPage:frm:Pblock:pbsDKTV3:PBS4:CUDCDKTV1').checked = false;
+                document.getElementById('editPage:frm:Pblock:pbsDKTV3:PBS5:lblDKTV_Foreningsmail1').style.display = 'block';
+                document.getElementById('editPage:frm:Pblock:pbsDKTV3:PBS5:chkDKTV_Foreningsmail1').style.display = 'block';
+                document.getElementById('editPage:frm:Pblock:pbsDKTV3:PBS6:lblDKTV_mailadresse1').style.display = 'block';
+                document.getElementById('editPage:frm:Pblock:pbsDKTV3:PBS6:txtDKTV_mailadresse1').style.display = 'block';
+        }else if ($j15('.errorMsg').length > 0 && flag1 == true){
+                document.getElementById('editPage:frm:Pblock:pbsDKTV1:PBS3:lblDKTV_mailadresse').style.display = 'block';
+                document.getElementById('editPage:frm:Pblock:pbsDKTV1:PBS3:txtDKTV_mailadresse').style.display = 'block';
+        }
+        
+        
+        /*if(flag1 == false){
+            document.getElementById('editPage:frm:Pblock:pbsDKTV3:PBS6:lblDKTV_mailadresse1').style.display = 'none';
+            document.getElementById('editPage:frm:Pblock:pbsDKTV3:PBS6:txtDKTV_mailadresse1').style.display = 'none';
+        }*/
+        
+       
+        
+        
+    }
+  </script>
+  <!-- End Default Content REMOVE THIS -->
+</apex:page>

@@ -1,0 +1,90 @@
+<apex:component controller="ConsoleAlertsComponent_CT" ><!-- SPOC-2294 -->
+    <apex:attribute name="currentId2" description="This is the Account Id for displaying alerts" type="Id" required="true" assignTo="{!currentId2}"/>
+    <!-- <apex:includeScript value="{!URLFOR($Resource.jQuery160)}"/>-->
+    <apex:includeScript value="/support/console/28.0/integration.js"/>
+    
+    <style>
+        
+        <!-- fieldset
+{
+border: 1px solid #ddd;
+padding: 0 1.4em 1.4em 1.4em;
+margin: 0 0 1.5em 0;
+border-radius: 8px;
+margin: 0 5px;
+height: 100%;
+display:inline-block;
+display:inline;
+}-->
+    </style>
+    <fieldset id="alertId">
+        <legend style="color:#B8B8B8;font-family:Calibri,sans-serif;font-size:15px;">Alerts</legend>
+        <table  style="border-collapse: separate;width:100%"><!-- height="67" WIDTH="auto" height="67" CELLPADDING="3" CELLSPACING="0"-->
+            
+            <apex:outputPanel rendered="{!NOT(iscommenttextblank)}">
+                <tr width="100%">
+                    <td valign="top">
+                        <apex:image url="{!$Resource.ConsoleInfoDangerIcon}" title="{!commenttext}" style="float:left;height:16px;width:16px;margin-left:2px;" />
+                    </td>
+                    <td>&nbsp;&nbsp;
+                    </td>
+                    <td vlaign="top">
+                        <apex:outputLabel value="{!trimmedcomment}" title="{!commenttext}" style="font-size:11px;word-wrap:break-all;" />
+                    </td>
+                </tr>
+            </apex:outputPanel>
+            <!--start SPOC-2388-->
+            <apex:outputPanel rendered="{!Special_Bland_Selv_rules !=null}">
+                <tr width="100%">
+                    <td valign="top">
+                        <apex:image url="{!$Resource.ConsoleInfoDangerIcon}" title="{!Special_Bland_Selv_rules}" style="float:left;height:16px;width:16px;margin-left:2px;"/>
+                    </td>
+                    <td>&nbsp;
+                    </td>
+                    <td vlaign="top">
+                        <apex:outputLabel value="{!Special_Bland_Selv_rules}" title="{!Special_Bland_Selv_rules}" style="font-size:11px;word-wrap:break-all;" />
+                    </td>
+                </tr>
+            </apex:outputPanel>
+            <!--end SPOC-2388-->
+            <!--  <tr width="100%" >
+<td valign="top">
+<apex:image url="{!$Resource.ConsoleInfoDangerIcon}" style="float:left;height:16px;width:16px;margin-left:2px;" rendered="{!imageDisplay =='Present'}"/>
+<apex:image url="{!$Resource.Console_Success_Check}" style="float:left;height:16px;width:16px;margin-left:2px;" rendered="{!imageDisplay =='Blank'}"/>
+</td>
+<td>&nbsp;&nbsp; 
+</td>
+<td valign="top">
+<!-- <apex:outputText value="Antal åbne sager : {!countOfCases}" style="font-size:12px;"/>-->
+            <!--<apex:outputText value="{!countOfCases}" style="float:left;font-size:12px;margin-left:5%;"/>
+</td>
+</tr>
+<!--  <tr rowspan="4">
+<td colspan="3" height="4px">
+</td>
+</tr>-->
+            <tr>
+                <td valign="top">
+                    <apex:image url="{!$Resource.ConsoleInfoDangerIcon}" rendered="{!contactInfoWarning !=null}" style="float:left;height:16px;width:16px;margin-left:2px;"/>
+                </td>
+                <td >
+                </td>
+                <td width="100%" valign="top">
+                    <apex:outputText value="{!contactInfoWarning}" style="float:left;font-size:11px;" />
+                </td>
+            </tr>
+            <tr>
+                <td valign="top">
+                    <apex:image url="{!$Resource.ConsoleInfoDangerIcon}" rendered="{!BillingRatingWarning !=null}" style="float:left;height:16px;width:16px;margin-left:2px;"/>
+                </td>
+                <td >
+                </td>
+                <td width="100%" valign="top">
+                    <apex:outputText value="{!BillingRatingWarning}" style="float:left;font-size:11px;" />
+                </td>
+            </tr>
+        </table>
+        <span style="display:{!IF(BillingRatingWarning ==null,IF(Special_Bland_Selv_rules ==null,IF(contactInfoWarning ==null,IF(trimmedcomment == null,'block','none'),'none'),'none'),'none')};float:left;font-weight:bold;"><apex:toolbar style="background-color:#F0F0F0;background-image:none;"><font color="black">Ingen Alerts</font></apex:toolbar></span>  
+        
+    </fieldset>  
+</apex:component>

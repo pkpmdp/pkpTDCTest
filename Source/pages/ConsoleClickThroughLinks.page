@@ -1,0 +1,33 @@
+<apex:page ><!-- SPOC-2294 used to open click through link on primarty tab-->
+    <apex:includeScript value="/soap/ajax/30.0/connection.js" /> 
+    <apex:includeScript value="/support/console/30.0/integration.js" />
+    <apex:includeScript value="{!URLFOR($Resource.jQuery160)}"/>
+    <script>
+    var intervalId = setInterval(checkAndCloseWin, 1000);
+    function checkAndCloseWin(){
+        //alert('Test'); 
+        //console.log(sforce.console.isInCustomConsoleComponent());
+        sforce.console.isCustomConsoleComponentWindowHidden(checkWindowVisibility);
+        }
+         //alert('test2');
+        var checkWindowVisibility = function checkWindowVisibility(result) {
+                if (!result.hidden) {
+                    //alert('Is window hidden: ' + result.inCustomConsoleComponent);
+                    //clearInterval(intervalId);
+                 sforce.console.setCustomConsoleComponentWindowVisible(false);   
+                 //sforce.console.openPrimaryTab(null, 'http://teamshare.tdk.dk/sites/infospace/dokumenter/generelt/vaerktoejer/YouSee_Vaerktojskasse/yousee_vaerktojskasse_forside_2.htm', true,'Click-through', openSuccess, 'Click-through');
+                    var win=window.open('http://teamshare.tdk.dk/sites/infospace/dokumenter/generelt/vaerktoejer/YouSee_Vaerktojskasse/yousee_vaerktojskasse_forside_2.htm', '_blank');
+                    win.focus();
+                }
+        }
+
+        var openSuccess = function openSuccess(result) {
+            //Report whether opening the new tab was successful
+            if (result.success == true) {
+                // alert('Primary tab successfully opened');
+            } else {
+                //  alert('Primary tab cannot be opened');
+            }
+        };
+    </script>
+</apex:page>

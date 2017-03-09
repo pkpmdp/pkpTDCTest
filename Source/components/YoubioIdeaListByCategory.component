@@ -1,0 +1,98 @@
+<apex:component controller="IWLListviewWidgetController" layout="none" allowDml="true">
+
+    <apex:attribute name="DeveloperName" type="String" required="true" description="The Developer Name of the Widget record that will be loaded by this widget" assignTo="{!widgetDeveloperName}" />
+    <apex:attribute name="Widget" type="IWLWidget__c" required="false" description="A Pre-loaded widget record to be used as the source of information for this widget" assignTo="{!widgetRecord}" />
+    <apex:form >
+        <script>  
+          function loginInfoByCategory() {
+            alert('Du skal først logge ind');
+          }
+        </script>
+        
+        <apex:outputPanel id="jspanelByCategory"> 
+            <script>  
+              function onControllerReturn() {
+                alert('{!listViewMessage}')
+              }
+            </script>
+        </apex:outputPanel>
+        
+        <script type="text/javascript">
+            
+            var IWLListviewLoadingIconUrl{!JSENCODE(DeveloperName)} = '{!$Resource.IWLResources}/styles/images/ajax-loader.gif';
+            jQuery(document).ready(function() {
+                IWLDetailView_onLoad('{!JSENCODE(DeveloperName)}');
+                
+            });
+        </script>
+        
+        <apex:outputPanel layout="block"  rendered="{!loadWidget}">
+        </apex:outputPanel> 
+    
+        <apex:outputPanel id="IWLListviewItemsListContainer" layout="block" styleClass="">
+            <apex:repeat value="{!visualDataList}" var="visualData" id="theRepeat">
+              <apex:outputPanel layout="block" styleClass="list_item" id="singleIdeaPanelByCategory">
+                 <div class="media">
+                     <!--img src="https://cs7.salesforce.com/resource/1366117969000/youbio_comment_image" class="img"/-->
+                     <img src="{!visualData.authorImage.value}" class="img"/>                                
+                     <div class="bd">
+                         <div class="table_object">
+                             <div class="to_cell">
+                                 Af {!visualData.authorName.value} <br />
+                                 {!visualData.activityDate.value} 
+                             </div>
+                         </div>
+                     </div>
+                 </div>
+                 <div class="repel_object">
+                     <div class="ro_left">
+                         <div class="list_item_meta">
+                             <h2><a href="/apex/youbioIdeaDetail?id={!visualData.recordId.value}">{!visualData.title.value}</a></h2>
+                             <!--div class="text_object">{!visualData.content.value}</div-->
+                             <apex:outputText value="{!visualData.content.value}" escape="false" styleClass="text_object"/>                                        
+                         </div>
+                         
+                     </div>
+                     <div class="ro_right">
+                         <div class="social_box">
+                             <apex:outputPanel layout="inline" onclick="postComment('{!JSENCODE(visualData.recordId.value)}');">{!visualData.feedSize.value}<i class="icon icon_comment"></i></apex:outputPanel>
+                              <apex:outputPanel layout="inline" onclick="voteJSByCategory('{!JSENCODE(visualData.recordId.value)}');" styleClass="" rendered="{!$ObjectType.Idea.createable}">{!visualData.likes.value}<i class="{!IF(visualData.canVote,'icon icon_like','icon icon_like is-liked')}"></i></apex:outputPanel>           
+                              <apex:outputPanel layout="inline" onclick="loginInfoByCategory();" styleClass="" rendered="{!!$ObjectType.Idea.createable}">{!visualData.likes.value}<i class="icon icon_like"></i></apex:outputPanel>
+                         </div>
+                     </div>
+                 </div>
+               </apex:outputPanel>                
+            </apex:repeat>
+        </apex:outputPanel>        
+               
+        <apex:outputPanel layout="block" id="IWLListviewPaginationContainer" styleClass="IWLListviewPaginationContainer" rendered="{!ShowDetailedView && widgetRecord.showPagination__c}">
+            <apex:outputPanel layout="block" styleClass="IWLListviewPrevPage" rendered="{!hasPreviousPage}"  onclick="IWLListview_onPageChangeButtonPressed(IWLListview_showPreviousPage{!DeveloperName}, '{!DeveloperName}', IWLListviewLoadingIconUrl{!DeveloperName});">{!$Label.IWL_PAGINATION_PREVIOUS}</apex:outputPanel>
+            <apex:outputPanel layout="block" styleClass="IWLListviewNextPage" rendered="{!hasNextPage}" onclick="IWLListview_onPageChangeButtonPressed(IWLListview_showNextPage{!DeveloperName}, '{!DeveloperName}', IWLListviewLoadingIconUrl{!DeveloperName});">{!$Label.IWL_PAGINATION_NEXT}</apex:outputPanel>
+        </apex:outputPanel>
+        
+        
+ 
+         <apex:actionstatus id="voteStatusByCategory" onstop="onControllerReturn();">
+         </apex:actionstatus>         
+         <apex:actionFunction action="{!redirectToDetailPage}" name="postComment" reRender="IWLMessagePanel">
+             <apex:param name="IdeaId" assignTo="{!commentIdeaId}" value=""/>    
+         </apex:actionFunction>
+         <apex:actionFunction action="{!vote}" name="voteJSByCategory" reRender="singleIdeaPanelByCategory,IWLMessagePanel, jspanelByCategory" status="voteStatusByCategory">
+             <apex:param name="IdeaId" assignTo="{!voteIdeaId}" value="" />               
+         </apex:actionFunction>   
+         <apex:actionFunction action="{!showNextPage}" name="IWLListview_showNextPage{!DeveloperName}" rerender="IWLListviewItemsListContainer,IWLListviewPaginationContainer">
+         </apex:actionFunction>            
+         <apex:actionFunction action="{!showPreviousPage}" name="IWLListview_showPreviousPage{!DeveloperName}" rerender="IWLListviewItemsListContainer,IWLListviewPaginationContainer">
+         </apex:actionFunction>
+            
+        </apex:form>
+         
+        <!--apex:outputPanel layout="block" id="PageChangeCompleted">
+            <apex:outputPanel layout="none" id="PageChangeCompletedScript" rendered="{!pageChanged}">
+                <script type="text/javascript">
+                    IWLListview_onPageChangeCompleted('{!JSENCODE(DeveloperName)}');
+                </script>
+            </apex:outputPanel>
+        </apex:outputPanel-->
+           
+</apex:component>

@@ -1,0 +1,42 @@
+<apex:page showHeader="false" sidebar="false" controller="EditContactController" id="pageId">
+	<apex:form >
+	<script type="text/javascript">
+		function ValidateContact(){
+			alert('$Inside function$');	
+			callToController();
+		}
+	</script>
+	<apex:pageBlock mode="edit" id="blk2">
+		<apex:actionFunction name="callToController" action="{!toViewContactPage}"/>
+		<apex:pageBlockSection title="Rediger Contact" collapsible="false"></apex:pageBlockSection>
+			<table border="5" width="60%" align="Center">
+             <tr> 
+                 <td width="45%" class="headerStyle">Tilgængelige Roller</td>
+                 <td width="10%">&nbsp;&nbsp;</td>
+                 <td width="45%" class="headerStyle">Valgte Roller</td>
+             </tr>
+            <tr id='rolesDisplay' >
+                <td width="45%">   
+                    <apex:selectList value="{!availableItems}" id="list1" multiselect="true" size="5" disabled="{!isContactVisible}" style="width:150px;">
+                        <apex:selectOptions value="{!items}"/>
+                    </apex:selectList>
+                </td>
+                <td width="10%" >
+                       
+                    <input type="button" value=">>" onclick="moveToRightList('{!$Component.list1}', '{!$Component.list2}')" id="btnMoveRight" />										
+                    <input type="button" value="<<" onclick="moveToLeftList('{!$Component.list1}', '{!$Component.list2}')" id="btnMoveLeft"/> 
+                </td>
+                <td width="45%">
+                    <apex:selectList value="{!assignedItems}" id="list2" multiselect="true" size="5" disabled="{!isContactVisible}" style="width:150px;">
+                        <apex:selectOptions value="{!items}"/>
+                    </apex:selectList>  
+                </td>
+            </tr>
+            <tr> <td colspan="3"> &nbsp; </td></tr>
+          </table>
+			 <apex:commandButton onClick="ValidateFunction();" action="{!toViewContactPage}"/>
+	 </apex:pageBlock>  
+	 
+	 
+</apex:form>
+</apex:page>

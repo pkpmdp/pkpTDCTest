@@ -1,0 +1,30 @@
+<apex:page standardController="CB_Custom_Schedule__c" extensions="clsCBSchedNewCustValsController" cache="true" standardStylesheets="true" tabStyle="CB_Schedule_Template__c" title="{!$Label.CB_Admin_page_title}">
+<apex:sectionHeader title="{!$Label.CB_Admin_Title}" subtitle="{!$Label.CB_Admin_Subtitle}"/>
+  <apex:pageMessages />
+  <apex:form >
+
+    <apex:pageBlock mode="detail" id="idBlock" title="{!$Label.CB_Admin_New_Manual_Value_Button}">
+    <apex:pageBlockButtons >
+        <apex:commandButton action="{!cancel}" value="{!$Label.CB_Admin_Cancel_Button}"/>    
+        <apex:commandButton action="{!next}" value="{!$Label.CB_Admin_Next_Button}"/>
+    </apex:pageBlockButtons>
+    
+    <apex:pageBlockSection columns="2" >
+        <apex:pageBlockSectionItem >
+            <apex:outputLabel value="{!$ObjectType.CB_Custom_Schedule__c.fields.CB_date__c.label}" for="dateId"/>
+            <apex:inputField value="{!proxyObject.CB_date__c}" required="false"/>
+        </apex:pageBlockSectionItem>
+        <apex:pageBlockSectionItem >
+            <apex:outputLabel value="{!$ObjectType.CB_Custom_Schedule__c.fields.CB_type__c.label}" for="cbTypeId"/>
+            <apex:inputField value="{!caseFields.Type_Task__c}" id="typeField" style="width:200px" />
+            <!--apex:outputText value="{!cbType}" id="cbTypeId"/-->
+        </apex:pageBlockSectionItem>
+    </apex:pageBlockSection>
+
+    </apex:pageBlock>
+      <apex:panelGrid columns="1" id="theGrid" style="display:none">
+        <apex:inputField value="{!caseFields.Department__c}" id="departmentField" />
+        <apex:inputField value="{!caseFields.Product_2__c}" id="productField" />
+      </apex:panelGrid>
+  </apex:form>
+</apex:page>

@@ -1,0 +1,597 @@
+<apex:page sidebar="false" showHeader="false" id="dtvHardwareSelection" controller="DealerProductPageController3" action="{!initializeText}" applyHtmlTag="false">
+<html class="cvi2015"> <!--spoc 2206-->    
+    <!--<script type="text/javascript" src="https://yousee.dk/sitecore/content/data/export/export.aspx?itemguid={9F945BC8-CCE7-43FF-8EF3-F2C81EFF66C8}&functions=true" > </script>
+    -->
+     <script type="text/javascript"
+        src="https://yousee.dk/sitecore/content/data/export/export.aspx?itemguid={BD793F05-9B01-4210-BD63-F33431D1013A}&functions=true"> </script>
+    <!-- Added for DW 750 -->
+    <c:TopMenuComponent ></c:TopMenuComponent>
+    <script type="text/javascript">printHeader();</script>
+    <script type="text/javascript">printTopMenu();</script>
+    <script type="text/javascript">printContentAreaBegin();</script>
+    <link class="user" href="{!$Resource.SalesFlowCSS}" rel="stylesheet" type="text/css" />
+    <c:ProductOfferORcampaign ></c:ProductOfferORcampaign>
+    <c:DealerComponent ></c:DealerComponent>
+    <style>
+    .leftContent1 {float:left;overflow:hidden;width:555px;height:auto;}
+    .rightContent1 {float:left;overflow:hidden;width:370px;height:auto;}
+    </style>
+    <!--  -->
+
+    <script id="onDemandTemplate" type="text/x-jQuery-tmpl">  
+            <tr>
+                <td width="5%"><input type="checkbox" name="onDemand" value="${href}" id="${varenr}" class="prodCheckbox" ${checked} ${disabled} onClick="callKasia(this)"/> </td>
+                <td width="70%">${navn}</td>
+                <td width="10%" style="text-align:center;">${price}</td>
+                <td width="15%">${priceSuffix}</td>
+            </tr>
+        <tr><td></td><td style="text-align:left; font-size:11px;" COLSPAN="3">${productSummary}</td></tr>
+    </script>
+
+    <script id="groupChannelsTemplate" type="text/x-jQuery-tmpl">           
+        <tr><th style="text-align:left" COLSPAN="5" class="gray">${groupName}</th></tr>
+            {{each channelsArray}}
+            <tr>
+               {{if kortnavn != varenr}}    
+                    <td width="5%"><input type="checkbox" name="selectOneProduct"  value="${href}" class="prodCheckbox" ${checked} onClick="callKasia(this)" ${disabled}/></td>
+               {{else}}
+                    <td width="5%">&nbsp;</td>
+               {{/if}}  
+                <td width="40%">
+                   {{if kortnavn != varenr}}                        
+                    <a class="class1" href="javascript:void(0);" onclick="PopupCenter('/apex/DtvChannelSelectionPopup?ProductNumber='+${varenr}, 'myPop1',600,400);">                       
+                        ${kortnavn}
+                    </a>
+                    {{else}}
+                        ${kortnavn} 
+                    {{/if}}
+                </td>
+                <td  width="30%" align="right">
+                    {{if ProductOffer =="true"}}
+                        <img src="{!$Resource.ProductOffer}" >
+                    {{/if}}
+                    
+                    {{if ProductCampaign =="true"}}
+                        <img src="{!$Resource.ProductCampaign}">
+                    {{/if}}
+                    
+                </td>               
+                <td width="10%" style="text-align:right">${pris}&nbsp;&nbsp;&nbsp;</td>
+                
+                <td width="15%">${priceSuffix}</td>
+                <!-- <td >${href}</td>-->
+            </tr>
+            <tr><td></td><td style="text-align:left;font-size:11px;" COLSPAN="4">${productSummary}</td></tr>
+        {{/each}}
+    </script>
+    <apex:outputPanel id="jsonPanel">
+        <script type="text/javascript">
+                var myJSONObject={!jsonResponse};                                                        
+                var firstJSONResponse = {!firstJsonResponse}; 
+                myJSONObject=refreshFirstJSONResponse(firstJSONResponse,myJSONObject); 
+            </script>
+    </apex:outputPanel>
+    <script type="text/javascript">
+        //DW-861
+        var bsxxFlag = {!dtvtaflag};
+        //Added for BS
+        var freeChoiceFlag={!isFreeChoicePageFlag};
+        var currentKundeNumber = '{!cCustInstAdd.customerNumber}';
+        var isDtvChannelSelectionPageFlag = {!isDtvChannelSelectionPageFlag};
+        if(isDtvChannelSelectionPageFlag == true){
+            freeChoiceFlag = true; 
+        }
+        function PopupCenter(pageURL, title,w,h) {                          
+                var left = (screen.width/2)-(w/2);
+                var top = (screen.height/2)-(h/2);              
+                var targetWin = window.open (pageURL, title, 'toolbar=yes, location=yes, directories=no, status=yes, menubar=no, scrollbars=yes, resizable=no, copyhistory=no, width='+w+', height='+h+', top='+top+', left='+left);
+        }
+        
+         
+        
+        Array.prototype.unique = function () {
+            var uniqueArr = [];
+            try{
+                var arrVal = this;
+                for (var i = arrVal.length; i--; ) {
+                    var val = arrVal[i];
+                    if ($.inArray(val, uniqueArr) === -1) {
+                        uniqueArr.unshift(val);
+                    }
+                }
+             }
+            catch(err){
+                 alert("Error: in unique method: "+err.description);
+            }  
+            return uniqueArr;
+        }
+        
+        function createChannelSelectionHeaders(headers,tableId){
+         var trth = '<tr class=\"gray\">'
+         trth = trth + '<th colspan=\"5\" style=\"text-align:left; vertical-align:middle; font-weight:bold\"><b>'+headers+'</b></th>';
+         trth = trth + '</tr>';
+         $(trth).appendTo($(tableId));
+         return $(tableId);
+        }
+                                     
+        
+        //var smartCardNumber='32562540347';  
+        var smartCardNumber='{!smartCardNumber}';
+        var existingProducts;       
+        //alert(existingProducts.length);
+        //construct Chanels and gruop MAP       
+        var channels = new Array();
+        var groups = new Array();       
+        function constructChannels(productsJSON){
+            var groupChannels = {};
+            var groupChannelsArray=[];
+            var objGroupChanels={};
+            try{
+                 var clearProducts0 = productsJSON.varer;
+                 var product = new Object();
+                 $.each(clearProducts0,function(i,varerNode){
+                    if(varerNode.sorteringsgruppe != '02-0090' && varerNode.sorteringsgruppe != '02-0010' && varerNode.sorteringsgruppe != '02-0000'){
+                        if(varerNode.sorteringsgruppenavn != undefined){
+                            groups.splice(groups.length,0,varerNode.sorteringsgruppenavn);                      
+                        }else{
+                            groups.splice(groups.length,0,varerNode.varenr);
+                        }                       
+                    }
+                 });
+                 groups=groups.unique();            
+                 getproductOffers();
+                  
+                 $.each(groups,function(i,group){                   
+                    $.each(clearProducts0,function(i,varerNode){
+                        var isProductOffer='';
+                        var isProductCampaign='';
+                        var productoffervar ='';
+                        var productSummary='';
+                        var linksPresent = '';
+                        if(varerNode.sorteringsgruppe != '02-0090' && varerNode.sorteringsgruppe != '02-0010' && varerNode.sorteringsgruppe != '02-0000'){                          
+                            if(group==varerNode.sorteringsgruppenavn || group==varerNode.varenr){
+                                channels = new Array();
+                                product = new Object();
+                                
+                                product.varenr = varerNode.varenr;
+                                productoffervar = getOfferFlag(varerNode.varenr);                                                                                               
+                                if(productoffervar != undefined)
+                                {                                                               
+                                    isProductOffer = productoffervar.ProductOfferExists;
+                                    isProductCampaign = productoffervar.ProductCampaignExists;
+                                    productSummary = productoffervar.ProductSummary;
+                                }
+                                product.productSummary = productSummary;                                                            
+                                                                
+                                if(isProductOffer=='true'){
+                                    product.ProductOffer=isProductOffer;
+                                }
+                                else{
+                                    product.ProductOffer='';
+                                }
+                                if(isProductCampaign=='true'){
+                                    product.ProductCampaign=isProductCampaign;
+                                }
+                                else{
+                                    product.ProductCampaign='';
+                                }
+                                if(varerNode.navn != undefined){
+                                    product.kortnavn = varerNode.navn;
+                                }else{
+                                    product.kortnavn = varerNode.varenr;
+                                }   
+                                //product.NameForPopoUp=varerNode.kortnavn;
+                                product.sortingGroup = varerNode.sorteringsgruppenavn;
+                                
+                                //To get href
+                                //|| linkNode.rel == 'slet'
+                                linksPresent = '';
+                                if(varerNode.links != undefined){
+                                    $.each(varerNode.links, function(j,linkNode){
+                                        //if(linkNode.rel == 'opret' || linkNode.rel == 'opdater'){
+                                        if(linkNode.rel == 'opdater'){
+                                            if(linkNode.href!= undefined){
+                                                product.href = linkNode.href;
+                                                //linksPresent = linkNode.href;
+                                            }
+                                          /*  if(linkNode.rel == 'slet'){
+                                                product.checked = 'checked';
+                                            }*/
+                                        }
+                                    });
+                                }
+                                //alert('varerNode.varenr: ' +varerNode.varenr);
+                                //alert('linksPresent: ' +linksPresent);
+                                if(varerNode.varenr!= undefined && linksPresent == ''){
+                                    linksPresent = isProductSelected(varerNode.varenr,'dtv-ta-valg');
+                                    //alert('linksPresent: '+linksPresent);
+                                    if(linksPresent != ''){
+                                        product.checked = 'checked';
+                                        product.href = linksPresent;
+                                    }
+                                }
+                                if(linksPresent == ''){
+                                    //product.disabled = 'disabled';
+                                }
+                                //alert('product.varenr: '+ product.varenr);
+                                getPrice(product, product.varenr);
+                                //alert('product.pris: '+ product.pris);
+                                if(product.betalingsperiode=='maaned'){
+                                    product.priceSuffix="kr. pr. md.";
+                                }
+                                else if(product.betalingsperiode=='enkelt') {
+                                    product.priceSuffix="kr.";
+                                }
+                                //To show product checked and disabled if customer has
+                                var prod = $.grep(existingProducts, function(element,index){
+                                                return (element == varerNode.varenr);
+                                            });
+                                
+                                //product.disabled = '';
+                                //product.checked = '';
+                                $.each(prod, function(k,prodNode){  
+                                    //if(prodNode.varenr != varerNode.varenr){
+                                        product.checked = 'checked';
+                                        product.disabled = 'disabled';
+                                    //}
+                                });
+                                if(groupChannels[group]!=undefined){
+                                    channels=groupChannels[group];                                  
+                                }
+                                channels.push(product);
+                                groupChannels[group]=channels;
+                                //alert(JSON.stringify(groupChannels[group]));
+                            }
+                        }
+                    });
+                });             
+                $.each(groupChannels,function(key,groupChannelArray){
+                    objGroupChanels={};
+                    objGroupChanels["groupName"]=key;
+                    //alert(JSON.stringify(groupChannels[key]));                    
+                    objGroupChanels["channelsArray"]=groupChannels[key];
+                    // This condition is added in order to hide the Bland Selv channels On the DtvChannelSelectionPage.
+                    if(key !=  "Bland selv tv"){
+                        groupChannelsArray.push(objGroupChanels);
+                    }
+                });
+                
+                return groupChannelsArray;                           
+            }
+            catch(err){
+                 alert("Error: in constructChannels method: "+err.description);
+            }
+        }
+        var custFlag = false;
+        var newCustFlag = '{!isNewCustomer}';                
+        if(newCustFlag == "true"){
+            custFlag  = "false"; 
+        }else if(newCustFlag == "false"){
+            custFlag  = "true";
+        }
+         
+        function displayOnDemand(){
+            try{
+                //Getting product from dtv-ga-valg node
+                var productSummary = '';
+                var onDemandArray = new Array();
+                var newDtvTaValg = new Array();
+                var dtvTaValg = createProductsData('dtv-ta-valg', 'kr. pr. md.', custFlag);
+                newDtvTaValg = dtvTaValg;
+                dtvTaValg = $.grep(dtvTaValg,function(element,index){
+                                if(element != undefined && element.varenr != undefined){
+                                    return (element.varenr=='1201590'); 
+                                }
+                            });
+                $.each(dtvTaValg, function(i, varerNode){                                                 
+                   var productoffervar = getOfferFlag(varerNode.varenr);                                                                                                
+                   if(productoffervar != undefined){                                                                
+                      isProductOffer = productoffervar.ProductOfferExists;
+                      isProductCampaign = productoffervar.ProductCampaignExists;
+                      productSummary = productoffervar.ProductSummary;
+                   }
+                   varerNode.productSummary = productSummary;
+                   onDemandArray[i] = varerNode;
+                });
+                if(onDemandArray.length > 0){
+                    var basicHeader = "On-Demand";
+                    $( "#onDemandTemplate").tmpl(dtvTaValg).appendTo(createChannelSelectionHeaders(basicHeader, $("#onDemandTable")) );
+                }
+            }
+            catch(err){
+                 alert("Error: in displayOnDemand method: "+err.description);
+            }
+        }
+        
+        function displayGroupAndChannels(){
+            try{
+                groupChannels={};               
+                $("#groupChanelsTable").replaceWith('<table id=\"groupChanelsTable\" class=\"zebra\" width=\"100%\" border=\"1\" ></table>');
+                if(myJSONObject['dtv-ta-valg']!= null) {
+                    var groupChannels = [];
+                    //alert('Before calling construct Channels method');                    
+                    groupChannels=constructChannels(myJSONObject['dtv-ta-valg']);
+                    //alert('After calling construct Channels method');  
+                    $( "#groupChannelsTemplate").tmpl( groupChannels ).appendTo( $("#groupChanelsTable") );
+                }
+            }
+            catch(err){
+                alert("Error: in displayGroupAndChannels method: "+err.description);
+            }
+        }
+        
+         //Check whether any program is selected or not
+        function validateProgramSelection(){
+            try{    
+                var dtvFlag={!plusFlag};
+                var fcFlag={!ekstrakanalerFlag}; 
+                //alert('dtvFlag: '+dtvFlag);           
+                //alert('fcFlag: '+fcFlag);
+                if(dtvFlag==true && fcFlag==true){
+                    bringFCChanelSelectionPage();
+                }else if(dtvFlag==true && fcFlag==false){
+                    bringFCChanelSelectionPage();
+                }
+                else if(dtvFlag==false && fcFlag==true){
+                    /*if(myJSONObject['kunde-data']['valgt']!=undefined){
+                        bringCustomerInfoPage();
+                    }else{
+                        var errMsg = 'Vælg kanaler.';        
+                        $("#errorBlock").html(errMsg);
+                    }*/
+                    bringCustomerInfoPage();
+                }
+                /*var selectedPrograms = $("#groupChanelsTable input:checked");             
+                if(selectedPrograms.length == 0){
+                    //alert('If length is zero.');
+                    var errMsg = 'Vælg kanaler.';        
+                    $("#errorBlock").html(errMsg);
+                }
+                else if (selectedPrograms.length > 0){  
+                    bringCustomerInfoPage();
+                }*/
+            }
+            catch(err){
+                 alert("Error: in validateCardSelection method: "+err.description);
+            }
+        }
+        
+        function callKasia(element){
+          var url = '';
+          url = element.value;
+          // Code added for DW-797 to make successful kasia call
+          if(url == undefined)
+          url = element;
+          //code ended for DW-797
+          //alert('url: '+url);
+          var kundeData = JSON.stringify(myJSONObject['kunde-data']);
+          var arrayInit = myJSONObject['array-init'];
+          var etag =   myJSONObject['ETag'];
+          if(url!=''  && url!=undefined && etag!='' && etag!=undefined && arrayInit!='' && arrayInit!=undefined && kundeData!='' && kundeData!=undefined)
+            callToKasia(url, etag, kundeData, arrayInit);
+          else
+            alert('Parameters to call Kasia is not correct.');
+        }
+        
+        //Start - Added for DEALERWEB - 797
+        
+        function getWarningMessage(warning) {
+        try{
+            var warningLinks = warning.links;
+            var responseNode = myJSONObject['dtv-ta-valg'].varer;
+            warningMessage='';
+            $.each(warning, function(j, node){
+                if(j == 'CLEAR1ST'){
+                    if(warningMessage != '')
+                        warningMessage += ',  ';
+                    warningMessage += displayProductName(warning.CLEAR1ST, responseNode);
+                    warningMessage += ' er inkluderet i FP'
+                }else if(j == 'CLEAR1LT'){
+                    if(warningMessage != '')
+                        warningMessage += ',  ';
+                    warningMessage += displayProductName(warning.CLEAR1LT, responseNode);
+                    warningMessage += ' er inkluderet i MP';
+                }else if(j == 'CLEAR1GP'){
+                    if(warningMessage != '')
+                        warningMessage += ',  ';
+                    warningMessage += displayProductName(warning.CLEAR1GP, responseNode);
+                    warningMessage += ' er inkluderet i GP';
+                }else{
+                   if(j != 'links'){
+                     if(warningMessage != '')
+                        warningMessage += ',  ';
+                     warningMessage += displayProductName(node, responseNode);
+                     warningMessage += ' er inkluderet i ';
+                     $.each(responseNode, function(i, varerNode){
+                       if(varerNode.varenr != undefined && varerNode.varenr == j){
+                                warningMessage += varerNode.navn;                       
+                       }
+                     });
+                   }    
+                }
+            });
+            $.each(warningLinks,function(i,linksNode){
+                if(linksNode.rel == 'fjern-advarsler'){                  
+                    removeConflictLink = '<input type=\"button\"  onclick=\"callKasia(\''+linksNode.href+'\', \'conflict\')\" value=\"Fjern Konflikt\" style=\"background-color:lightblue\" />';   
+                }
+            }); 
+        }catch(err){
+            //alert("Error: in getWarningMessage method: "+err.description);
+        }
+    }
+    
+    function displayProductName(productNumberNode, productNameNode){
+        var productNames = '';
+        try{
+            $.each(productNumberNode, function(j, clearNode){
+                $.each(productNameNode, function(i, varerNode){
+                    if(varerNode.varenr != undefined){
+                         if (varerNode.varenr == clearNode) {
+                            if (productNames == null || productNames == '')
+                                productNames = varerNode.navn + ' ';
+                            else 
+                                productNames += ',' + ' ' + varerNode.navn;
+                         }
+                     }
+                 });
+            });     
+        }catch(err){
+            //alert("Error: in displayProductName method: "+err.description);
+        }
+        return productNames;
+    }
+    
+    // End of DEALERWEB - 797
+        
+       // getproductOffers();
+    </script>
+    <style type="text/css">
+.errorMessage {
+    color: red;
+    font-weight: bold;
+}
+
+.gray {
+    background-color: #c0c0c0 !important;
+    font: bold 14px Arial, Helvetica, sans-serif !important;
+}
+
+.mailError {
+    color: red;
+    border-bottom: #000000 1px solid;
+    border-left: #000000 1px solid;
+    padding-bottom: 1px;
+    background-color: #f1f1f1;
+    padding-left: 4px;
+    padding-right: 4px;
+    font-family: Verdana;
+    font-size: 9pt;
+    border-top: #000000 1px solid;
+    border-right: #000000 1px solid;
+    padding-top: 1px;
+}
+
+a.class1:visited {
+    text-decoration: underline;
+}
+
+a.class1:link {
+    text-decoration: underline;
+}
+
+<!--
+a.class1:hover {
+    color: purple;
+    font-size: 15px;
+    font-family: serif;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    word-spacing: 6px;
+    font-weight: normal;
+    text-decoration: none;
+    border-bottom: 2px dashed purple;
+}
+-->
+}
+</style>
+    <body>
+        <apex:form id="theform" styleclass="fontVerdana">
+        <apex:outputText value="{!salesFlowObj.messages[0]}" escape="false" />
+            <apex:outputPanel id="errorMessage" >
+                <apex:messages globalOnly="true" styleClass="mailError" />
+            </apex:outputPanel>
+            <!-- Changes done for DW-797 to show warning message -->
+            <div id="warningBox" style="display:none;">
+                <apex:image url="{!$Resource.warningIcon}" width="30" style="float:left;" />
+                    <p id="warningMessage" style="color:blue; font-weight:bold"></p>
+                    <p id="conflictLink"></p>
+            </div>
+            <div id="errorBlock" class="errorMessage"></div>
+            <apex:panelGrid columns="2" columnClasses="leftContent1,rightContent1" width="100%">
+            <!-- <apex:panelGroup id="columnA"> -->
+            <apex:outputPanel styleClass="leftContent1" >
+                <apex:pageBlock id="dtvChanelelectionPB">
+                    <!--  <apex:inputHidden value="{!error}" id="thehidden" ></apex:inputHidden> {!error}
+                        <div id="divPrograms"></div>
+                        <center></center>
+                        <apex:pageBlockSection title="Does Customer want On-Demand on his YouSee kort?" collapsible="false" columns="1" rendered="{!hardwareSelection!='1201504'}"></apex:pageBlockSection>
+                        <br></br>-->
+                    <apex:pageBlockSection title="Vælg digital(e) tv-pakke(r)" collapsible="false" columns="1">
+                        <apex:outputPanel id="outputPanelOnDemand"  rendered="{!hardwareSelection!='1201504'}">
+                        <!--<hr></hr>                       
+                        -->
+                        <table id="onDemandTable" class="zebra" width="100%" border="1"></table>
+                    </apex:outputPanel> 
+                        <table id="groupChanelsTable" class="zebra" width="100%" border="1"></table>
+                    </apex:pageBlockSection>                    
+                    <apex:pageBlockButtons location="bottom">
+                        <apex:commandButton action="{!cancel}" value="Annuller" style="margin-right:250px;" />
+                        <apex:commandButton action="{!backFlow}" value="Tilbage" />
+                        <!-- <apex:commandButton action="{!nextFlow}"  value="Videre" />  -->
+                        <input type="button" value="Videre" onclick="validateProgramSelection();" class="videreBtnCls" />
+                    </apex:pageBlockButtons>
+                </apex:pageBlock>
+                </apex:outputPanel>
+                <!-- </apex:panelGroup>
+                <apex:panelGroup id="columnB"> -->
+                 <apex:outputPanel styleClass="rightContent1">
+                <c:CustomerAndProductComponent isNewKunde="{!isNewCustomer}"
+                    kundeNumber="{!cCustInstAdd.customerNumber}"
+                    kundeName="{!cCustInstAdd.firstName} {!cCustInstAdd.lastName}"
+                    Adresse="{!cCustInstAdd.addr1}" Postnummer="{!cCustInstAdd.addr2}">
+                </c:CustomerAndProductComponent>
+                </apex:outputPanel>
+                <!-- </apex:panelGroup> -->
+            </apex:panelGrid>
+            <apex:actionFunction name="bringFCChanelSelectionPage"
+                action="{!RedirectToFreeChoiceChannelSelectionPage}"></apex:actionFunction>
+            <apex:actionFunction name="bringCustomerInfoPage"
+                action="{!RedirectToCustomerInfoPage}"></apex:actionFunction>
+            <apex:actionFunction action="{!callToKasia}" name="callToKasia" reRender="jsonPanel,dtvChanelelectionPB,jspanel,errorMessage" status="queryStatus">
+                <apex:param name="url" assignTo="{!url}" value="" />
+                <apex:param name="etag" assignTo="{!etag}" value="" />
+                <apex:param name="kundeData" assignTo="{!kundeData}" value="" />
+                <apex:param name="arrayInit" assignTo="{!arrayInit}" value="" />
+            </apex:actionFunction>
+            <apex:actionStatus id="queryStatus">
+                <apex:facet name="start">
+                    <c:loadingComponent BackColor="#efefef" borderColor="#336699"
+                        borderSize="3" height="50px" width="120px"
+                        ImageUrl="{!$Resource.Loading}" Message="Loading..."
+                        messageStyle="color:darkred;font-size:11pt;font-weight:bold;" />
+                </apex:facet>
+            </apex:actionStatus>
+         </apex:form>
+    </body>
+    <apex:outputPanel id="jspanel">
+        <script type="text/javascript">
+                        removeConflictLink = ''; //Added for DEALERWEB - 797
+                        document.getElementById('warningBox').style.display='none'; //Added for DEALERWEB - 797
+                        myJSONObject={!jsonResponse};
+                        var kundeId='{!cCustInstAdd.customerNumber}';
+                        var serialNumber = {!dummySerialNo};
+
+                        //Start for DEALERWEB - 797
+                        if(myJSONObject['advarsler'] != undefined) {
+                            getWarningMessage(myJSONObject['advarsler']);
+                            $("#warningMessage").html(warningMessage);
+                            $("#conflictLink").html(removeConflictLink);
+                            document.getElementById('warningBox').style.display='block';
+                            window.scrollTo(0,0);
+                        }else{
+                        document.getElementById('warningBox').style.display ='none';
+                        }
+                        //End for DEALERWEB - 797
+                        firstJSONResponse = {!firstJsonResponse};
+                        myJSONObject=refreshFirstJSONResponse(firstJSONResponse,myJSONObject); 
+                        existingProducts=fetchExistingProductsForSerieNummer(smartCardNumber, kundeId);
+                        displayGroupAndChannels();
+                        displayOnDemand();
+                        displayBasket();
+                    </script>
+    </apex:outputPanel>
+    <script type="text/javascript">printContentAreaEnd();</script>
+    
+    <script type="text/javascript">printFooter();</script>
+    </html>
+</apex:page>

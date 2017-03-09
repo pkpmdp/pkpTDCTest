@@ -1,0 +1,779 @@
+<apex:page standardController="Aria_Account__c" extensions="CarrieBillingBatchController" id="apexPage" sidebar="False"  showHeader="False"  tabStyle="Invoice_Usage__c" action="{!refreshNewAccounts}">
+    <apex:includeScript value="{!URLFOR($Resource.DynaTree_JS,'jquery/jquery.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.jQueryUI)}"/> 
+    <apex:stylesheet value="{!URLFOR($Resource.jqueryuicss)}"/>
+    <apex:includeScript value="{!URLFOR($Resource.jPaginator,'jpaginator-master/jPaginator.js')}"/> 
+    <apex:includeScript value="{!URLFOR($Resource.jPaginator,'jpaginator-master/jPaginator-min.js')}"/> 
+    <apex:stylesheet value="{!URLFOR($Resource.jPaginator,'jpaginator-master/jPaginator.css')}"/> 
+
+    <style>
+        .bPageBlock .detailList .labelCol {
+            width:0%;
+        }
+        .Betalings {
+            color: #4a4a56;
+            white-space: normal;
+            position: relative;
+            right:45px;
+            //padding-left: 2px;
+            //text-align: left;
+            font-size: 91%;
+            font-weight: bold;
+        }
+        .BetalingValue {
+            position: relative;
+            right:30px;
+        }
+    </style>
+    <script type="text/javascript">
+        
+        window.resizeTo(1000,1000);
+        var previouseSelectedAccount='';
+        var previouseSelectedId='';
+        function linkToTriple() {           
+            //var AriaAcc = {!Aria_Account__c.Customer_No__c};
+            var AriaAcc = {!Aria_Account__c.Account__r.Customer_No__c};
+            //alert(AriaAcc);
+            //var url =  'http://pico4.int.yousee.dk:40002/?customerId=' + {!Aria_Account__c.Customer_No__c}
+            var url =  'http://pico4.int.yousee.dk:40002/?customerId=' + AriaAcc;
+            //alert(url);
+            window.open(url, 'triple');
+        }
+        function linkToCasper() {
+            //alert('in here');
+            callToCasper();
+        } 
+        function radioClick(){
+            this.blur();
+            this.focus(); 
+        }
+        function switchToProduct(name){
+            var id = "";
+            for (i = 0; i < document.getElementsByName(name).length; i++) {
+                if (document.getElementsByName(name)[i].checked) {
+                    id = document.getElementsByName(name)[i].value;
+                }
+            }        
+            // Get the current page
+            var curr_page = window.location.href,
+            next_page = "";
+            // If current page has a query string, append action to the end of the query string, else
+            // create our query string
+            if(curr_page.indexOf("?") > -1) {
+                next_page = curr_page.substring(0,curr_page.indexOf("?")+1)+"id="+id;
+            } else {
+                next_page = curr_page+"?id="+id;
+            }
+            // Redirect to next page
+            window.location = next_page;
+        } 
+
+        //start of carrie-1116
+        function displayTilbage() {
+            if(document.referrer.indexOf('CarrieAccountSelectPageBatch')!=-1 && window.history.length > 1){ 
+                $('#tilbage').show();
+            } 
+        } 
+        function goBack(){
+            window.history.go(-1);
+        }
+        //end of carrie-1116
+
+        function openPopup(recId){          
+            var newWin = null;
+            var url = "";
+            url=recId;
+            var popupname='';
+            if(recId.indexOf('Invoice') != -1){
+                popupname = 'invoice';
+            }
+            if(recId.indexOf('Payment') != -1){
+                popupname = 'payment';
+            }
+            if(recId.indexOf('Unapplied') != -1){
+                popupname = 'unapplied';
+            }
+            if(recId.indexOf('Applied') != -1){
+                popupname = 'applied';
+            }
+            newWin=window.open(url,popupname,'height=800,width=800 ,left=100,top=100,resizable=yes,scrollbars=yes,toolbar=no,status=no');
+            newWin.focus();
+            return false;
+        }
+    </script>
+    <apex:outputPanel id="scriptPanel">
+    <script type="text/javascript">     
+        $(document).ready(function(){ 
+            var showForbrug = {!showForbrug};
+            
+            //Transaction Section Start
+            var transSize = {!transTotalSize};
+            var translistSize = Math.ceil(transSize/5);
+            //alert('transSize ' + transSize + ' translistSize ' + translistSize);
+            if(translistSize <= 1){
+                $("#pagePanelTrans").hide();
+            }
+            else{
+                var transCounter = document.getElementById("{!$Component.apexPage.apexPageBlock.form1.transCounter}");
+                var transRows = document.getElementById("{!$Component.apexPage.apexPageBlock.form1.transRows}");
+                //alert('transCounter ' +transCounter.value + ' transRows ' + transRows.value);
+                $("#pagePanelTrans").jPaginator({ 
+                    nbPages: translistSize,
+                    nbVisible: 10, 
+                    selectedPage:1,
+                    overBtnLeft:'#pagePanelTrans_o_left', 
+                    overBtnRight:'#pagePanelTrans_o_right', 
+                    maxBtnLeft:'#pagePanelTrans_m_left', 
+                    maxBtnRight:'#pagePanelTrans_m_right',
+                    minSlidesForSlider:1, 
+                    onPageClicked: function(a,num) { 
+                        if(isNaN(num)){
+                            transCounter.value = 0;
+                            transRows.value = transSize;
+                        }
+                        else{
+                            transCounter.value = parseInt(num-1)*5;
+                            transRows.value = 5;
+                        }
+                        getTransactionList();
+                        if(isNaN(num) && transRows.value == transSize){
+                            $('#trnPages').html(' Showing records ' + transSize + ' of ' + transSize);
+                        }
+                        else if(translistSize == num){
+                            $('#trnPages').html(' Showing records ' + (parseInt(transCounter.value) +1) + ' - ' +transSize + ' of ' + transSize);
+                        }
+                        else{
+                            $('#trnPages').html(' Showing records ' + (parseInt(transCounter.value) +1) + ' - ' +(parseInt(transCounter.value) +5) + ' of ' + transSize);
+                        }
+                    }
+                });
+                $('#trnPages').html(' Showing records ' + (parseInt(transCounter.value) +1) + ' - ' +(parseInt(transCounter.value) +5) + ' of ' + transSize);
+            }
+            //Transaction Section End
+
+            //Invoice Section Start
+            var invSize = {!invoiceTotalSize};
+            var invlistSize = Math.ceil(invSize/5);
+            if(invlistSize <= 1){
+                $("#pagePanelInv").hide();
+            }
+            else{
+                var invoiceCounter = document.getElementById("{!$Component.apexPage.apexPageBlock.form1.invoiceCounter}");
+                var invoiceRows = document.getElementById("{!$Component.apexPage.apexPageBlock.form1.invoiceRows}");
+                $("#pagePanelInv").jPaginator({ 
+                    nbPages: invlistSize,
+                    nbVisible: 10,
+                    selectedPage:1,
+                    overBtnLeft:'#pagePanelInv_o_left', 
+                    overBtnRight:'#pagePanelInv_o_right', 
+                    maxBtnLeft:'#pagePanelInv_m_left', 
+                    maxBtnRight:'#pagePanelInv_m_right',
+                    minSlidesForSlider:1, 
+                    onPageClicked: function(a,num) {
+                        
+                        if(isNaN(num)){
+                            invoiceCounter.value = 0;
+                            invoiceRows.value = invSize;
+                        }
+                        else{
+                            invoiceCounter.value = parseInt(num-1)*5;
+                            invoiceRows.value = 5;
+                        }
+                        getInvoiceList();
+                        if(isNaN(num) && invoiceRows.value == invSize){
+                            $('#InvPages').html(' Showing records ' + invSize + ' of ' + invSize);
+                        }
+                        else if(invlistSize == num){
+                            $('#InvPages').html(' Showing records ' + (parseInt(invoiceCounter.value) +1) + ' - ' +invSize + ' of ' + invSize);
+                        }
+                        else{
+                            $('#InvPages').html(' Showing records ' + (parseInt(invoiceCounter.value) +1) + ' - ' +(parseInt(invoiceCounter.value) +5) + ' of ' + invSize);
+                        }
+                    }
+                }); 
+                $('#InvPages').html(' Showing records ' + (parseInt(invoiceCounter.value) +1) + ' - ' +(parseInt(invoiceCounter.value) +5) + ' of ' + invSize);             
+            }
+            //Invoice Section End
+
+            //Payment Section Start
+            var paySize = {!paymentTotalSize};
+            var paylistSize = Math.ceil(paySize/5);
+            if(paylistSize <= 1){
+                $("#pagePanelPay").hide();
+            }
+            else{
+                var paymentCounter = document.getElementById("{!$Component.apexPage.apexPageBlock.form1.paymentCounter}");
+                var paymentRows = document.getElementById("{!$Component.apexPage.apexPageBlock.form1.paymentRows}");
+                $("#pagePanelPay").jPaginator({ 
+                    nbPages: paylistSize,
+                    nbVisible: 10,
+                    selectedPage:1,
+                    overBtnLeft:'#pagePanelPay_o_left', 
+                    overBtnRight:'#pagePanelPay_o_right', 
+                    maxBtnLeft:'#pagePanelPay_m_left', 
+                    maxBtnRight:'#pagePanelPay_m_right',
+                    minSlidesForSlider:1, 
+                    onPageClicked: function(a,num) {
+                        //alert('kjhjhk'+num); 
+                        if(isNaN(num)){
+                            paymentCounter.value = 0;
+                            paymentRows.value = paySize;
+                        }
+                        else{
+                            paymentCounter.value = parseInt(num-1)*5;
+                            paymentRows.value = 5;
+                        }
+                        getPaymentList();
+                        if(isNaN(num) && paymentRows.value == paySize){
+                            $('#payPages').html(' Showing records ' + paySize + ' of ' + paySize);
+                        }
+                        else if(paylistSize == num){
+                            $('#payPages').html(' Showing records ' + (parseInt(paymentCounter.value) +1) + ' - ' +paySize + ' of ' + paySize);
+                        }
+                        else{
+                            $('#payPages').html(' Showing records ' + (parseInt(paymentCounter.value) +1) + ' - ' +(parseInt(paymentCounter.value) +5) + ' of ' + paySize);
+                        }
+                    }
+                }); 
+                $('#payPages').html(' Showing records ' + (parseInt(paymentCounter.value) +1) + ' - ' +(parseInt(paymentCounter.value) +5) + ' of ' + paySize);
+            }
+            //Payment Section End
+
+            if(showForbrug == true){
+                //Hide youbio credit pagination section
+                $("#pagePanelyc").hide();
+
+                //Unapplied credit Section Start
+                var ucSize = {!unappCredTotalSize};
+                var uclistSize = Math.ceil(ucSize/5);
+                if(uclistSize <= 1){
+                    $("#pagePaneluc").hide();
+                }
+                else{
+                    var unappCredCounter = document.getElementById("{!$Component.apexPage.apexPageBlock.form1.unappCredCounter}");
+                    var unappCredRows = document.getElementById("{!$Component.apexPage.apexPageBlock.form1.unappCredRows}");
+                    $("#pagePaneluc").jPaginator({ 
+                        nbPages: uclistSize,
+                        nbVisible: 10,
+                        selectedPage:1,
+                        overBtnLeft:'#pagePaneluc_o_left', 
+                        overBtnRight:'#pagePaneluc_o_right', 
+                        maxBtnLeft:'#pagePaneluc_m_left', 
+                        maxBtnRight:'#pagePaneluc_m_right',
+                        minSlidesForSlider:1, 
+                        onPageClicked: function(a,num) { 
+                            if(isNaN(num)){
+                                unappCredCounter.value = 0;
+                                unappCredRows.value = ucSize;
+                            }
+                            else{
+                                unappCredCounter.value = parseInt(num-1)*5;
+                                unappCredRows.value = 5;
+                                }
+                            getunCredList();
+                            if(isNaN(num) && unappCredRows.value == ucSize){
+                                $('#ucPages').html(' Showing records ' + ucSize + ' of ' + ucSize);
+                            }
+                            else if(uclistSize == num){
+                                $('#ucPages').html(' Showing records ' + (parseInt(unappCredCounter.value) +1) + ' - ' +ucSize + ' of ' + ucSize);
+                            }
+                            else{
+                                $('#ucPages').html(' Showing records ' + (parseInt(unappCredCounter.value) +1) + ' - ' +(parseInt(unappCredCounter.value) +5) + ' of ' + ucSize);
+                            }
+                        }
+                    }); 
+                    $('#ucPages').html(' Showing records ' + (parseInt(unappCredCounter.value) +1) + ' - ' +(parseInt(unappCredCounter.value) +5) + ' of ' + ucSize);
+                }
+                //Unapplied credit Section End
+
+                //Applied credit Section Start
+                var appcrSize = {!appCredTotalSize};
+                var appcrlistSize = Math.ceil(appcrSize/5);
+                if(appcrlistSize <= 1){
+                    $("#pagePanelcr").hide();
+                }
+                else{
+                    var appCredCounter = document.getElementById("{!$Component.apexPage.apexPageBlock.form1.appCredCounter}");
+                    var appCredRows = document.getElementById("{!$Component.apexPage.apexPageBlock.form1.appCredRows}");
+                    $("#pagePanelcr").jPaginator({ 
+                        nbPages: appcrlistSize,
+                        nbVisible: 10,
+                        selectedPage:1,
+                        overBtnLeft:'#pagePanelcr_o_left', 
+                        overBtnRight:'#pagePanelcr_o_right', 
+                        maxBtnLeft:'#pagePanelcr_m_left', 
+                        maxBtnRight:'#pagePanelcr_m_right',
+                        minSlidesForSlider:1, 
+                        onPageClicked: function(a,num) { 
+                            if(isNaN(num)){
+                                appCredCounter.value = 0;
+                                appCredRows.value = appcrSize;
+                            }
+                            else{
+                                appCredCounter.value = parseInt(num-1)*5;
+                                appCredRows.value = 5;
+                            }
+                            getappCredList();
+                            if(isNaN(num) && appCredRows.value == appcrSize){
+                                $('#cPages').html(' Showing records ' + appcrSize + ' of ' + appcrSize);
+                            }
+                            else if(appcrlistSize == num){
+                                $('#cPages').html(' Showing records ' + (parseInt(appCredCounter.value) +1) + ' - ' +appcrSize + ' of ' + appcrSize);
+                            }
+                            else{
+                                $('#cPages').html(' Showing records ' + (parseInt(appCredCounter.value) +1) + ' - ' +(parseInt(appCredCounter.value) +5) + ' of ' + appcrSize);
+                            }
+                        }
+                    }); 
+                    $('#cPages').html(' Showing records ' + (parseInt(appCredCounter.value) +1) + ' - ' +(parseInt(appCredCounter.value) +5) + ' of ' + appcrSize);
+                }
+                //Applied credit Section End
+            }
+
+            if(showForbrug == false){
+                //Hide unapplied and applied credit section
+                $("#pagePaneluc").hide();
+                $("#pagePanelcr").hide();
+
+                //Credit youbio Section Start
+                var ybcrSize = {!ybCredTotalSize};
+                var ybcrlistSize = Math.ceil(ybcrSize/5);
+                if(ybcrlistSize <= 1){
+                    $("#pagePanelyc").hide();
+                }
+                else{
+                    var ybCredCounter = document.getElementById("{!$Component.apexPage.apexPageBlock.form1.ybCredCounter}");
+                    var ybCredRows = document.getElementById("{!$Component.apexPage.apexPageBlock.form1.ybCredRows}");
+                    $("#pagePanelyc").jPaginator({ 
+                        nbPages: ybcrlistSize,
+                        nbVisible: 10,
+                        selectedPage:1,
+                        overBtnLeft:'#pagePanelyc_o_left', 
+                        overBtnRight:'#pagePanelyc_o_right', 
+                        maxBtnLeft:'#pagePanelyc_m_left', 
+                        maxBtnRight:'#pagePanelyc_m_right',
+                        minSlidesForSlider:1, 
+                        onPageClicked: function(a,num) { 
+                            if(isNaN(num)){
+                                ybCredCounter.value = 0;
+                                ybCredRows.value = ybcrSize;
+                            }
+                            else{
+                                ybCredCounter.value = parseInt(num-1)*5;
+                                ybCredRows.value = 5;
+                            }
+                            getybCredList();
+                            if(isNaN(num) && ybCredRows.value == ybcrSize){
+                                $('#ycPages').html(' Showing records ' + ybcrSize + ' of ' + ybcrSize);
+                            }
+                            else if(ybcrlistSize == num){
+                                $('#ycPages').html(' Showing records ' + (parseInt(ybCredCounter.value) +1) + ' - ' +ybcrSize + ' of ' + ybcrSize);
+                            }
+                            else{
+                                $('#ycPages').html(' Showing records ' + (parseInt(ybCredCounter.value) +1) + ' - ' +(parseInt(ybCredCounter.value) +5) + ' of ' + ybcrSize);
+                            }
+                        }
+                    }); 
+                    $('#ycPages').html(' Showing records ' + (parseInt(ybCredCounter.value) +1) + ' - ' +(parseInt(ybCredCounter.value) +5) + ' of ' + ybcrSize);
+                }
+                //Credit Youbio Section End
+            }
+
+            $(".allRecords").click(function(){
+                $(this).addClass("selected");
+            });
+        });
+    </script>
+    </apex:outputPanel>
+    <div></div> 
+    <div></div>
+    <div align="center"> <h1 style="font-size:12pt" ><i>Fakturerings Oplysninger</i></h1></div>
+    <div id="loader">
+        <c:CarrieHenterData BackColor="#efefef" borderColor="#336699" borderSize="3" height="50px" width="180px" ImageUrl="{!$Resource.CarrieLoading}" Message="Henter Data..." messageStyle="color:darkred;font-size:11pt;font-weight:bold;" id="loader"/>
+    </div>
+    <apex:outputPanel id="error"> 
+        <apex:pageMessages />
+    </apex:outputPanel>
+    <br/>
+    <apex:pageBlock id="apexPageBlock">
+        <apex:form id="form1"> 
+            <apex:actionFunction action="{!callToCasper}" name="callToCasper" reRender="error">
+                <apex:param name="accountID" assignTo="{!accountID}" value="" />
+            </apex:actionFunction>  
+            <!-- Pagination variables and action functions starts -->
+            <apex:inputHidden value="{!transCounter}" id="transCounter"/>
+            <apex:inputHidden value="{!invoiceCounter}" id="invoiceCounter"/>
+            <apex:inputHidden value="{!paymentCounter}" id="paymentCounter"/>
+            <apex:inputHidden value="{!unappCredCounter}" id="unappCredCounter"/>
+            <apex:inputHidden value="{!appCredCounter}" id="appCredCounter"/>
+            <apex:inputHidden value="{!ybCredCounter}" id="ybCredCounter"/>
+
+            <apex:inputHidden value="{!transRows}" id="transRows"/>
+            <apex:inputHidden value="{!invoiceRows}" id="invoiceRows"/>
+            <apex:inputHidden value="{!paymentRows}" id="paymentRows"/>
+            <apex:inputHidden value="{!unappCredRows}" id="unappCredRows"/>
+            <apex:inputHidden value="{!appCredRows}" id="appCredRows"/>
+            <apex:inputHidden value="{!ybCredRows}" id="ybCredRows"/>
+
+            <apex:actionFunction name="getTransactionList" rerender="transBlock" focus="transBlock"/>
+            <apex:actionFunction name="getPaymentList" rerender="payBlock" focus="payBlock" />
+            <apex:actionFunction name="getInvoiceList" rerender="invBlock" focus="invBlock" />
+            <apex:actionFunction name="getunCredList" rerender="unCredBlock" focus="unCredBlock"/>
+            <apex:actionFunction name="getappCredList" rerender="credBlock" focus="credBlock"/>
+            <apex:actionFunction name="getybCredList" rerender="ybCredBlock" focus="ybCredBlock"/>
+            <!--Pagination variables and action functions ends -->          
+
+            <apex:selectRadio value="{!selectAccount}" label="Products" id="selectAccountRadio"  onclick="radioClick()"  onchange="switchToProduct('{!$Component.selectAccountRadio}')" rendered="true"   >
+                <apex:selectOptions value="{!SelectAccounts}" />
+            </apex:selectRadio>
+
+            <script>
+                previouseSelectedAccount ="{!$Component.selectAccountRadio}";
+                var length1 = {!SelectAccounts.size};
+                if(length1 > 1){
+                    for (i = 0; i < document.getElementsByName(previouseSelectedAccount).length; i++) {
+                        if (document.getElementsByName(previouseSelectedAccount)[i].checked) {
+                            previouseSelectedId = document.getElementsByName(previouseSelectedAccount)[i].id;
+                        }
+                    } 
+                }
+            </script>
+            <div align="right">
+                <b>Last Modified Date: </b><apex:outputField value="{!ariaAcc.LastModifiedDateAria__c}" />
+                <br/>
+                <apex:commandButton value="Refresh" action="{!refreshAriaAccount}" />
+                <apex:commandButton value="Vis Forbrug" action="{!redirectUsage}" rendered="{!showForbrug}" />
+                <input type="button" value="Triple" onClick="linkToTriple()" class="btn" />
+                <input type="button" value="Casper" onClick="linkToCasper()" class="btn" />
+                <input id="tilbage" type="button" value="Tilbage" onClick="goBack()" class="btn"/> 
+                <c:CarrieCloseButton ></c:CarrieCloseButton>
+            </div>
+            
+            <script>
+                $('#tilbage').hide();
+                displayTilbage();
+            </script>
+            
+            <apex:pageBlock >
+                <apex:pageBlockSection title="Regningsstatus" id="Regningsstatus" columns="3">
+                    <apex:outputText value="{!Aria_Account__c.Account__r.name}" label="Kundenavn" />
+                     <!-- start of spoc-1874-->
+                    <apex:outputText id="accountRegningsstatus" value="{!ariaAcc.Regningsstatus__c}" rendered="{!IsBB}"/> 
+                    <apex:outputField value="{!ariaAcc.Faktureret1__c}"  rendered="{!IsBB}"/>
+                     <!-- end of spoc-1874-->
+            
+                    <apex:outputField value="{!Aria_Account__c.Account__r.Customer_No__c}" label="Kundenummer/Juridisk" />          
+               <!-- start of spoc-1874-->
+                    <apex:outputField value="{!ariaAcc.Rykkerstatus__c}" rendered="{!IsBB}"/>
+                    <apex:outputField value="{!ariaAcc.Indbetalt__c}" rendered="{!IsBB}"/>
+             <!-- end of spoc-1874-->
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="Betaler" for="nsBetaler"/>
+                        <apex:outputPanel >
+                        <span style="{!if(Aria_Account__c.Account__r.Customer_No__c==ariaAcc.Betaler__c,'','color:red; font-weight: bold')}">
+                        <apex:outputField value="{!ariaAcc.Betaler__c}" id="nsBetaler"/>
+                        </span>
+                        </apex:outputPanel> 
+                    </apex:pageBlockSectionItem>
+                     <!-- start of spoc-1874-->
+                    <apex:outputField value="{!ariaAcc.Rykkerdato__c}" rendered="{!IsBB}"/>      
+                    <!--  <apex:outputField value="{!ariaAcc.Aria_Pay_Method__c}"/>  -->   
+                     <!-- end of spoc-1874-->
+                    <apex:outputpanel > 
+                        <!--<apex:outputlink value="{!strURLAriaAcc}" target="_blank">-->
+                         <!-- start of spoc-1874-->
+                        <apex:outputlabel styleclass="Betalings" value="Betalingsmetode" title="Click To View  History" rendered="{!IsBB}"/><!--</apex:outputlink>-->
+                        <apex:outputlabel styleclass="BetalingValue" value="{!ariaAcc.Aria_Pay_Method__c}" rendered="{!IsBB}"/>  
+                        <apex:outputlink value="" onclick="openBet();" rendered="{!IsBB}" >Vis Historik</apex:outputlink>     
+                         <!-- end of spoc-1874-->    
+                    </apex:outputpanel>
+                    <apex:outputField value="{!Aria_Account__c.Name}" label="Betaler ID" />   
+                     <!-- start of spoc-1874-->
+                    <apex:outputField value="{!ariaAcc.Days_in_Dunning__c}" rendered="{!IsBB}"/>
+                    <apex:outputField value="{!ariaAcc.CurrentSaldo__c}" rendered="{!IsBB}"/>
+                    <!-- end of spoc-1874-->
+                    <apex:outputlabel ></apex:outputlabel>
+                    <apex:outputlabel ></apex:outputlabel>
+                    <!--  <apex:outputpanel style="float:left;">    
+                        <apex:outputlink value="{!strURLAriaAcc}" target="_blank"><apex:outputlabel styleclass="labelCol vfLabelColTextWrap  last" value="Betalingsmetode History"/></apex:outputlink>
+                    </apex:outputpanel>-->
+                </apex:pageBlockSection>
+            </apex:pageBlock>
+        </apex:form>  
+    </apex:pageBlock>
+    <br/>
+    
+<!--    <c:CarrieHenterData BackColor="#efefef" borderColor="#336699" borderSize="3" height="50px" width="180px" ImageUrl="{!$Resource.CarrieLoading}" Message="Henter Data..." messageStyle="color:darkred;font-size:11pt;font-weight:bold;" id="loader"/> -->
+    <apex:pageBlock title="Transaktioner" id="transBlock">
+        <apex:pageBlockTable value="{!transList}" var="trans" rendered = "{!transList.size > 0}" first="{!transCounter}" rows = "{!transRows}">
+            <apex:column value="{!trans.Name}" />
+            <apex:column value="{!trans.Posting_Date__c}" />
+            <apex:column value="{!trans.Description__c}" />
+         <!-- start of spoc-1874-->   <apex:column value="{!trans.Start_Balance__c}" rendered="{!IsBB}"/> 
+         <!-- end of spoc-1874-->
+            <apex:column value="{!trans.Charge_Amt__c}" />
+            <apex:column value="{!trans.Credit_Amt__c}" />
+            <apex:column value="{!trans.End_Balance__c}"/>
+        </apex:pageBlockTable>
+        <apex:outputLabel value="Ingen registreringer at vise" rendered="{!(transList.size ==0)}" styleClass="noRowsHeader"></apex:outputLabel>
+    </apex:pageBlock>
+
+    <div id="pagePanelTrans">         
+        <!-- optional left control buttons --> 
+        <a id="pagePanelTrans_m_left"></a><a id="pagePanelTrans_o_left"></a>     
+        <a class='paginator_p allRecords' id="allTrans">All</a>
+        <div class='paginator_p_wrap'> 
+            <div class='paginator_p_bloc'> 
+                <!--<a class='paginator_p'></a> // page number : dynamically added --> 
+            </div> 
+        </div>    
+        <div id="trnPages"></div> 
+        <!-- optional right control buttons --> 
+        <a id="pagePanelTrans_o_right"></a><a id="pagePanelTrans_m_right"></a>         
+        <!-- slider --> 
+        <div class='paginator_slider ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all'> 
+            <a class='ui-slider-handle ui-state-default ui-corner-all' href='#'></a> 
+        </div>   
+        <br/><br/> 
+    </div>
+    
+    <apex:form >
+        <apex:pageBlock title="Fakturaer" id="invBlock">
+                        <!--title="Fakturaer" id="invBlock" -->
+            <apex:pageBlockTable value="{!invoicePaymentList}" var="item" rendered="{!(invoicePaymentList.size >0)}" first="{!invoiceCounter}" rows = "{!invoiceRows}">
+                <apex:column value="{!item.Invoice_Statement__c}" style="{!if(item.isVoid__c=='Voided','background-color:#FCE3E3','')}"/>
+                <apex:column headerValue="Faktura" style="{!if(item.isVoid__c=='Voided','background-color:#FCE3E3','')}"> 
+                    <a id="{!item.Faktura__c}" href="#" onclick="return openPopup('/apex/CarrieInvoicePage?Id='+'{!item.Faktura__c}')" onblur="LookupHoverDetail.getHover('{!item.Faktura__c}').hide();" onfocus="LookupHoverDetail.getHover('{!item.Faktura__c}', '/{!item.Faktura__c}/m?retURL=%2Fapex%2FCarrieBillingBatchPage%3Fid%3D{!ariaAcc.Id}&isAjaxRequest=1').show();" onmouseout="LookupHoverDetail.getHover('{!item.Faktura__c}').hide();" onmouseover="LookupHoverDetail.getHover('{!item.Faktura__c}', '/{!item.Faktura__c}/m?retURL=%2Fapex%2FCarrieBillingBatchPage%3Fid%3D{!ariaAcc.Id}&isAjaxRequest=1').show();">{!item.Faktura__r.Name}</a>
+                </apex:column>
+                
+                <!-- <apex:column value="{!item.Titel__c}"  style="{!if(item.isVoid__c=='Voided','background-color:#FCE3E3','')}"rendered="{!IsBBs}" />     -->
+             <!--start of spoc-1874 -->
+                 <apex:column value="{!item.Titel__c}" style="{!if(item.isVoid__c=='Voided','background-color:#FCE3E3','')}" rendered="{!IsBBs}"/> <!--end of spoc-1874 -->
+<!--start of spoc-1874 -->                 <apex:column value="{!item.Datoforudskrift__c}"  styleClass="dataCell  CurrencyElement" headerClass="CurrencyElement zen-deemphasize" style="{!if(item.isVoid__c=='Voided','background-color:#FCE3E3','')}"/>
+                <apex:column value="{!item.Betalingsfrist__c}" style="{!if(item.isVoid__c=='Voided','background-color:#FCE3E3','')}"  rendered="{!IsBB}"/>       <!--end of spoc-1874 -->   
+                <apex:column value="{!item.Fakturabelob__c}" style="{!if(item.isVoid__c=='Voided','background-color:#FCE3E3','')}"/>
+<!--start of spoc-1874 -->                <apex:column value="{!item.Service_Credit__c}" style="{!if(item.isVoid__c=='Voided','background-color:#FCE3E3','')}" rendered="{!IsBB}"/>
+               <apex:column value="{!item.Refund__c}" style="{!if(item.isVoid__c=='Voided','background-color:#FCE3E3','')}" rendered="{!IsBBs}"/>                
+               <apex:column value="{!item.Remaining_coupons__c}" style="{!if(item.isVoid__c=='Voided','background-color:#FCE3E3','')}" rendered="{!IsBBs}"/>  
+            <!--end of spoc-1874 -->
+         
+    
+                
+                <apex:column value="{!item.Amount_Applied__c}" styleClass="dataCell  CurrencyElement" headerClass="CurrencyElement zen-deemphasize" style="{!if(item.isVoid__c=='Voided','background-color:#FCE3E3','')}"/>
+                <apex:column value="{!item.Balance__c}" styleClass="dataCell  CurrencyElement" headerClass="CurrencyElement zen-deemphasize" style="{!if(item.isVoid__c=='Voided','background-color:#FCE3E3','')}"/>
+          /* start of SPOC-1874*/
+                     <apex:column >
+                <apex:facet name="header"></apex:facet>
+                        <apex:commandButton action="{!redirectSamplePage}" value="Sample Button" rendered="{!IsBBs}"></apex:commandButton> 
+            </apex:column>
+                        
+                /*end of SPOC-1874*/
+<!--                <apex:column headerValue="" styleClass="dataCell  CurrencyElement" headerClass="CurrencyElement zen-deemphasize" style="{!if(item.isVoid__c=='Voided','background-color:#FCE3E3','')}"> -->
+<!--                <apex:outputField value="{!item.Saldo__c}" rendered="{!item.isVoid__c != 'Voided'}" styleClass="dataCell  CurrencyElement zen-deemphasize"/> -->
+<!--                <apex:outputLabel rendered="{!item.isVoid__c == 'Voided'}" ></apex:outputLabel> -->
+<!--                </apex:column>    -->
+                <apex:column value="{!item.isVoid__c}" headerValue="" style="{!if(item.isVoid__c=='Voided','background-color:#FCE3E3','')}"/>
+            </apex:pageBlockTable>
+            <apex:outputLabel value="Ingen registreringer at vise" rendered="{!(invoicePaymentList.size ==0)}" styleClass="noRowsHeader"></apex:outputLabel>  
+        </apex:pageBlock> 
+        
+  <!--            <div id="showCreditButton"  style="padding-right:5px;padding-bottom:25px;overflow: hidden"> 
+                    <apex:commandButton action="{!redirectCreateCredit}" value="Sample Button" rendered="{!IsBBs}"></apex:commandButton>
+                </div>              -->    
+</apex:form>
+    
+    <div id="pagePanelInv">         
+        <!-- optional left control buttons --> 
+        <nav id="pagePanelInv_m_left"></nav><nav id="pagePanelInv_o_left"></nav>    
+        <a class='paginator_p allRecords' id="allInv">All</a> 
+        <div class='paginator_p_wrap'> 
+            <div class='paginator_p_bloc'> 
+                <!--<a class='paginator_p'></a> // page number : dynamically added --> 
+            </div> 
+        </div>     
+        <div id="InvPages"></div> 
+        <!-- optional right control buttons --> 
+        <nav id="pagePanelInv_o_right"></nav><nav id="pagePanelInv_m_right"></nav>         
+        <!-- slider --> 
+        <div class='paginator_slider ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all'> 
+            <a class='ui-slider-handle ui-state-default ui-corner-all' href='#'></a> 
+        </div> 
+        <br/><br/>    
+    </div>
+    
+    <apex:form >
+        <apex:pageBlock title="Indbetalinger" id="payBlock">
+            <!--title="Indbetalinger" id="payBlock" -->
+            <apex:pageBlockTable value="{!paymentInvoiceList}" var="item" rendered="{!(paymentInvoiceList.size >0)}" first="{!paymentCounter}" rows = "{!paymentRows}">
+                <apex:column headerValue="Indbetalings ID" style="{!if(item.isVoid__c=='Voided','background-color:#FCE3E3','')}"> 
+                    <a id="{!item.Payment__c}" href="#" onclick="return openPopup('/apex/CarriePaymentPage?Id='+'{!item.Payment__c}')" onblur="LookupHoverDetail.getHover('{!item.Payment__c}').hide();" onfocus="LookupHoverDetail.getHover('{!item.Payment__c}', '/{!item.Payment__c}/m?retURL=%2Fapex%2FCarrieBillingBatchPage%3Fid%3D{!ariaAcc.Id}&isAjaxRequest=1').show();" onmouseout="LookupHoverDetail.getHover('{!item.Payment__c}').hide();" onmouseover="LookupHoverDetail.getHover('{!item.Payment__c}', '/{!item.Payment__c}/m?retURL=%2Fapex%2FCarrieBillingBatchPage%3Fid%3D{!ariaAcc.Id}&isAjaxRequest=1').show();">{!item.Payment__r.Name}</a>
+                </apex:column>
+                <apex:column value="{!item.Payment_Date__c}" style="{!if(item.isVoid__c=='Voided','background-color:#FCE3E3','')}"/>
+                <apex:column value="{!item.Amount__c}"  styleClass="dataCell  CurrencyElement" headerClass="CurrencyElement zen-deemphasize" style="{!if(item.isVoid__c=='Voided','background-color:#FCE3E3','')}"/>
+                <apex:column value="{!item.Payment_Type__c}" style="{!if(item.isVoid__c=='Voided','background-color:#FCE3E3','')}" />
+                <apex:column value="{!item.Fakturanummer__c}" style="{!if(item.isVoid__c=='Voided','background-color:#FCE3E3','')}"/>
+                <apex:column value="{!item.Amount_Applied__c}" styleClass="dataCell  CurrencyElement" headerClass="CurrencyElement zen-deemphasize" style="{!if(item.isVoid__c=='Voided','background-color:#FCE3E3','')}"/>
+                <apex:column value="{!item.isVoid__c}" headerValue="" style="{!if(item.isVoid__c=='Voided','background-color:#FCE3E3','')}"/>
+            </apex:pageBlockTable>
+            <apex:outputLabel value="Ingen registreringer at vise" rendered="{!(paymentInvoiceList.size ==0)}" styleClass="noRowsHeader"></apex:outputLabel>  
+        </apex:pageBlock> 
+    </apex:form>
+    
+    <div id="pagePanelPay">         
+        <!-- optional left control buttons --> 
+        <nav id="pagePanelPay_m_left"></nav><nav id="pagePanelPay_o_left"></nav>     
+        <a class='paginator_p allRecords' id="allPay">All</a>
+        <div class='paginator_p_wrap'> 
+            <div class='paginator_p_bloc'> 
+                <!--<a class='paginator_p'></a> // page number : dynamically added --> 
+            </div> 
+        </div>     
+        <div id="payPages"></div> 
+        <!-- optional right control buttons --> 
+        <nav id="pagePanelPay_o_right"></nav><nav id="pagePanelPay_m_right"></nav>         
+        <!-- slider --> 
+        <div class='paginator_slider ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all'> 
+            <a class='ui-slider-handle ui-state-default ui-corner-all' href='#'></a> 
+        </div> 
+        <br/><br/>    
+    </div>
+
+    <apex:form >
+        <div style="overflow: hidden;">
+            <div align="left" style="padding-left:10px;float:left;"> 
+                <h1 style="font-size:12pt" ><i>Kreditering</i></h1>
+            </div> 
+            <div align="right"> 
+                <div id="showCreditButton"  style="padding-right:10px;padding-bottom:5px;overflow: hidden"> 
+                <!-- start of spoc-1874-->
+                    <apex:commandButton action="{!redirectCreateCredit}" value="Ny Kreditering" rendered="{!IsBB}"></apex:commandButton>
+                     <!-- end of spoc-1874-->
+                </div>
+            </div>
+        </div>
+    </apex:form>
+    
+    <apex:form >
+        <apex:pageBlock title="Kreditering ej tilknyttet" rendered="{!showForbrug}" id="unCredBlock">
+            <apex:pageBlockTable value="{!unappCreditList}" var="unApp" rendered = "{!unappCreditList.size > 0}" first="{!unappCredCounter}" rows = "{!unappCredRows}">
+                <apex:column headerValue="Kreditering ID" style="{!if(unApp.isVoid__c=='Voided','background-color:#FCE3E3','')}"> 
+                    <a id="{!unApp.Id}" href="#" onclick="return openPopup('/apex/CarrieUnappliedCreditsPage?Id='+'{!unApp.Id}')" onblur="LookupHoverDetail.getHover('{!unApp.Id}').hide();" onfocus="LookupHoverDetail.getHover('{!unApp.Id}', '/{!unApp.Id}/m?retURL=%2Fapex%2FCarrieBillingBatchPage%3Fid%3D{!ariaAcc.Id}&isAjaxRequest=1').show();" onmouseout="LookupHoverDetail.getHover('{!unApp.Id}').hide();" onmouseover="LookupHoverDetail.getHover('{!unApp.Id}', '/{!unApp.Id}/m?retURL=%2Fapex%2FCarrieBillingBatchPage%3Fid%3D{!ariaAcc.Id}&isAjaxRequest=1').show();">{!unApp.Name}</a>
+                </apex:column>
+                <apex:column value="{!unApp.Date__c}" style="{!if(unApp.isVoid__c=='Voided','background-color:#FCE3E3','')}"/>
+                <apex:column value="{!unApp.Credit_type__c}" style="{!if(unApp.isVoid__c=='Voided','background-color:#FCE3E3','')}"/>
+                <apex:column value="{!unApp.Amount__c}" style="{!if(unApp.isVoid__c=='Voided','background-color:#FCE3E3','')}"/>
+                <apex:column value="{!unApp.Credit_Reason__c}" style="{!if(unApp.isVoid__c=='Voided','background-color:#FCE3E3','')}"/>
+                <apex:column value="{!unApp.commentsLong__c}" style="{!if(unApp.isVoid__c=='Voided','background-color:#FCE3E3','')}"/>
+                <apex:column value="{!unApp.Unapplied__c}" style="{!if(unApp.isVoid__c=='Voided','background-color:#FCE3E3','')}"/>
+                <apex:column value="{!unApp.isVoid__c}" headerValue="" style="{!if(unApp.isVoid__c=='Voided','background-color:#FCE3E3','')}" />
+            </apex:pageBlockTable>
+            <apex:outputLabel value="Ingen registreringer at vise" rendered="{!(unappCreditList.size == 0)}" styleClass="noRowsHeader"></apex:outputLabel>
+        </apex:pageBlock>
+    </apex:form>
+    
+    <div id="pagePaneluc">         
+        <!-- optional left control buttons --> 
+        <nav id="pagePaneluc_m_left"></nav><nav id="pagePaneluc_o_left"></nav>     
+        <a class='paginator_p allRecords' id="allunappCred">All</a>
+        <div class='paginator_p_wrap'> 
+            <div class='paginator_p_bloc'> 
+                <!--<a class='paginator_p'></a> // page number : dynamically added --> 
+            </div> 
+        </div>     
+        <div id="ucPages"></div> 
+        <!-- optional right control buttons --> 
+        <nav id="pagePaneluc_o_right"></nav><nav id="pagePaneluc_m_right"></nav>         
+        <!-- slider --> 
+        <div class='paginator_slider ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all'> 
+            <a class='ui-slider-handle ui-state-default ui-corner-all' href='#'></a> 
+        </div>  
+        <br/><br/>   
+    </div>
+    
+    <apex:form >
+        <apex:pageBlock title="Tilknyttet kreditering" rendered="{!showForbrug}" id="credBlock">
+            <apex:pageBlockTable value="{!appCreditList}" var="app" rendered = "{!appCreditList.size > 0}" first="{!appCredCounter}" rows = "{!appCredRows}">
+                <apex:column headerValue="Kreditering ID" style="{!if(app.isVoid__c=='Voided','background-color:#FCE3E3','')}"> 
+                    <a id="{!app.Id}" href="#" onclick="return openPopup('/apex/CarrieAppliedCreditsPage?Id='+'{!app.Id}')" onblur="LookupHoverDetail.getHover('{!app.Id}').hide();" onfocus="LookupHoverDetail.getHover('{!app.Id}', '/{!app.Id}/m?retURL=%2Fapex%2FCarrieBillingBatchPage%3Fid%3D{!ariaAcc.Id}&isAjaxRequest=1').show();" onmouseout="LookupHoverDetail.getHover('{!app.Id}').hide();" onmouseover="LookupHoverDetail.getHover('{!app.Id}', '/{!app.Id}/m?retURL=%2Fapex%2FCarrieBillingBatchPage%3Fid%3D{!ariaAcc.Id}&isAjaxRequest=1').show();">{!app.Name}</a>
+                </apex:column>
+                <apex:column value="{!app.Date__c}" style="{!if(app.isVoid__c=='Voided','background-color:#FCE3E3','')}"/>
+                <apex:column value="{!app.credit_type__c}" style="{!if(app.isVoid__c=='Voided','background-color:#FCE3E3','')}"/>
+                <apex:column value="{!app.credit_formula1__c}" style="{!if(app.isVoid__c=='Voided','background-color:#FCE3E3','')}"/>
+                <apex:column value="{!app.Credit_Reason__c}" style="{!if(app.isVoid__c=='Voided','background-color:#FCE3E3','')}"/>
+                <apex:column value="{!app.CommentsLong__c}" style="{!if(app.isVoid__c=='Voided','background-color:#FCE3E3','')}"/>
+                <apex:column value="{!app.Faktura_link__c}" style="{!if(app.isVoid__c=='Voided','background-color:#FCE3E3','')}"/>
+                <apex:column value="{!app.Applied_Against__c}" style="{!if(app.isVoid__c=='Voided','background-color:#FCE3E3','')}" />
+                <apex:column value="{!app.Amount__c}" style="{!if(app.isVoid__c=='Voided','background-color:#FCE3E3','')}"/>
+                <apex:column value="{!app.isVoid__c}" headerValue="" style="{!if(app.isVoid__c=='Voided','background-color:#FCE3E3','')}" />
+            </apex:pageBlockTable>
+            <apex:outputLabel value="Ingen registreringer at vise" rendered="{!(appCreditList.size == 0)}" styleClass="noRowsHeader"></apex:outputLabel>    
+        </apex:pageBlock>
+    </apex:form>
+    
+    <div id="pagePanelcr">         
+        <!-- optional left control buttons --> 
+        <nav id="pagePanelcr_m_left"></nav><nav id="pagePanelcr_o_left"></nav>   
+        <a class='paginator_p allRecords' id="allappCred">All</a>  
+        <div class='paginator_p_wrap'> 
+            <div class='paginator_p_bloc'> 
+                <!--<a class='paginator_p'></a> // page number : dynamically added --> 
+            </div> 
+        </div>     
+        <div id="cPages"></div> 
+        <!-- optional right control buttons --> 
+        <nav id="pagePanelcr_o_right"></nav><nav id="pagePanelcr_m_right"></nav>         
+        <!-- slider --> 
+        <div class='paginator_slider ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all'> 
+            <a class='ui-slider-handle ui-state-default ui-corner-all' href='#'></a> 
+        </div> 
+        <br/><br/>    
+    </div>
+    
+    <apex:form >
+        <apex:pageBlock title="Krediteringer"  rendered="{!NOT(showForbrug)}" id="ybCredBlock"> 
+            <apex:pageBlockTable value="{!paymentCreditList}" var="ybCred" rendered="{!(paymentCreditList.size >0)}" first="{!ybCredCounter}" rows = "{!ybCredRows}"> 
+                <apex:column headerValue="Kreditering ID" > 
+                    <a id="{!ybCred.Id}" href="#" onclick="return openPopup('/apex/CarriePaymentPage?Id='+'{!ybCred.Id}')" onblur="LookupHoverDetail.getHover('{!ybCred.Id}').hide();" onfocus="LookupHoverDetail.getHover('{!ybCred.Id}', '/{!ybCred.Id}/m?retURL=%2Fapex%2FCarrieBillingBatchPage%3Fid%3D{!ariaAcc.Id}&isAjaxRequest=1').show();" onmouseout="LookupHoverDetail.getHover('{!ybCred.Id}').hide();" onmouseover="LookupHoverDetail.getHover('{!ybCred.Id}', '/{!ybCred.Id}/m?retURL=%2Fapex%2FCarrieBillingBatchPage%3Fid%3D{!ariaAcc.Id}&isAjaxRequest=1').show();">{!ybCred.transaction_source_id__c}</a>
+                </apex:column> 
+                <apex:column value="{!ybCred.Payment_Date__c}" headerValue="Dato"/>
+                <apex:column value="{!ybCred.youbioCredit__c}" headerValue="Type"/>
+                <apex:column value="{!ybCred.Credit_Reason__c}" headerValue="Årsag"/>
+                <apex:column value="{!ybCred.Comments__c}" headerValue="Bemærkning" width="20%"/>                                
+                <apex:column value="{!ybCred.Amount__c}" headerValue="Beløb" styleClass="dataCell  CurrencyElement" headerClass="CurrencyElement zen-deemphasize"/>
+            </apex:pageBlockTable>
+            <apex:outputLabel value="Ingen registreringer at vise" rendered="{!(paymentCreditList.size == 0)}" styleClass="noRowsHeader"></apex:outputLabel>
+        </apex:pageBlock>
+    </apex:form>
+    
+    <div id="pagePanelyc">         
+        <!-- optional left control buttons --> 
+        <nav id="pagePanelyc_m_left"></nav><nav id="pagePanelyc_o_left"></nav>     
+        <a class='paginator_p allRecords' id="allybCred">All</a>
+        <div class='paginator_p_wrap'> 
+            <div class='paginator_p_bloc'> 
+            <!--<a class='paginator_p'></a> // page number : dynamically added --> 
+            </div> 
+        </div>     
+        <div id="ycPages"></div> 
+        <!-- optional right control buttons --> 
+        <nav id="pagePanelyc_o_right"></nav><nav id="pagePanelyc_m_right"></nav>         
+        <!-- slider --> 
+        <div class='paginator_slider ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all'> 
+            <a class='ui-slider-handle ui-state-default ui-corner-all' href='#'></a> 
+        </div>  
+        <br/><br/>   
+    </div>
+    <script>
+        $(window).load(function(){
+            //hide loader div here
+            $("#loader").hide();
+        });
+        
+        function openBet(){        
+            var newWin = null;
+            newWin=window.open('/apex/CarrieBetalingHistory?Ariaacc='+'{!Aria_Account__c.Name}','BetalingsHistory','height=500,width=800 ,left=100,top=100,resizable=yes,scrollbars=yes,toolbar=no,status=no');
+            newWin.focus();
+            return false;
+        }
+    </script>
+</apex:page>

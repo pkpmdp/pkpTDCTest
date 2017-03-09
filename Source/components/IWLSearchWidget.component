@@ -1,0 +1,70 @@
+<apex:component controller="IWLSearchWidgetController" layout="none" >
+
+    <apex:attribute name="DeveloperName" type="String" required="true" description="The developerName__c of the IWLWidget record that will be loaded by this widget" assignTo="{!widgetDeveloperName}" />
+	<apex:attribute name="Widget" type="IWLWidget__c" required="false" description="A Pre-loaded widget record to be used as the source of information for this widget" assignTo="{!widgetRecord}" />
+    <apex:outputPanel layout="block" id="IWLSearchWidgetView" styleClass="yui3-cssreset IWLSearchWidgetView IWLSearchWidgetView{!DeveloperName}" rendered="{!loadWidget}">
+
+    	<!-- This panel renders when the widget has been correctly loaded -->
+    
+		<!-- BEGINS WIDGET STYLING -->
+		
+		<apex:outputPanel rendered="{!widgetRecord.CSSFileUrl__c != null}" layout="none">
+	    	<!-- Custom Widget Style -->
+	        <link href="{!widgetRecord.CSSFileUrl__c}" rel="stylesheet" type="text/css" />
+        </apex:outputPanel>
+
+        <apex:outputPanel rendered="{!widgetRecord.overrideCSS__c}">
+        	<!-- CSS override rules -->
+            <style>
+                .IWLSearchWidgetView{!DeveloperName} {
+                    color: #{!widgetRecord.fontColor__c};
+                    font-family: {!widgetRecord.FontFamily__c};
+                    width: {!widgetRecord.width__c}px;
+                    height: {!widgetRecord.height__c}px;
+                    background-color: #{!widgetRecord.backgroundColor__c};
+                }
+                .IWLSearchWidgetView{!DeveloperName} .IWLSearchTitle {
+                    color: #{!widgetRecord.titleColor__c};
+                }
+            </style>
+
+		</apex:outputPanel>
+
+		<!-- The next form contains all the elements to make the search work -->
+		<apex:form >
+			<apex:actionFunction action="{!searchIdea}" name="goSearchIdea{!DeveloperName}" 
+				rerender="IWLSearchShowstate" oncomplete="jQuery('.IWLSearchShowstate').removeClass('loadImage');" >
+					<apex:param name="query" assignTo="{!query}" value="" />
+			</apex:actionFunction>
+			
+			<apex:outputPanel layout="block" id="IWLSearchWrapper" styleClass="IWLSearchWrapper">
+				<table>
+					<tr>
+						<td><apex:inputText value="{!s}" id="query" styleClass="IWLSearchQueryInput"  
+							onfocus="if(jQuery(this).attr('value') == '{!JSENCODE(widgetRecord.Title__c)}') jQuery(this).attr('value', '');" 
+							onblur="if(jQuery(this).attr('value') == '') jQuery(this).attr('value', '{!JSENCODE(widgetRecord.Title__c)}');" onkeypress="if(event.which == 13) { goSearchIdea{!JSENCODE(DeveloperName)}(); jQuery('.IWLSearchShowstate').html('').addClass('loadImage'); return false; }"/>
+						</td>
+						<td><a onclick="goSearchIdea{!JSENCODE(DeveloperName)}(); jQuery('.IWLSearchShowstate').html('').addClass('loadImage'); return false;" 
+					title="{!$Label.IWL_SEARCH}" class="IWLSearchButton"> &nbsp;&nbsp; </a></td>
+					</tr>
+				</table>
+			</apex:outputPanel>
+		</apex:form>
+		
+			
+		<!-- This is the panel where the search results are shown -->
+		<apex:outputPanel layout="block" id="IWLSearchShowstate" styleClass="IWLSearchShowstate">
+				<c:IWLStatusRenderer StatusMessagesWrap="{!statusMessagesWrap}" />
+				<apex:repeat value="{!ItemsList}" var="i" id="IdeasList">
+				<a href="/ideas/viewIdea.apexp?id={!HTMLENCODE(i.Id)}" class="IWLSearchResultLink"><h3 class="IWLSearchResultText">{!i.Title}</h3></a>
+				<p class="IWLSearchResultBody">{!i.Body}</p>
+				</apex:repeat>
+		</apex:outputPanel>
+
+    </apex:outputPanel>
+    
+    <apex:outputPanel rendered="{!!loadWidget}" styleClass="IWLLoadErrorMessage IWLSearchLoadErrorMessage IWLSearchLoadErrorMessage{!DeveloperName}">
+		<c:IWLStatusRenderer StatusMessagesWrap="{!statusMessagesWrap}" />
+    </apex:outputPanel>
+
+</apex:component>

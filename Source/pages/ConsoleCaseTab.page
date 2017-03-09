@@ -1,0 +1,8 @@
+<apex:page standardController="Account" showHeader="true" sidebar="false" cache="true">
+    <apex:pageMessages />
+    <apex:pageBlock >   
+        <apex:pageBlockSection columns="1" title="{!$Label.CO_Cases}"> 
+            <apex:relatedList list="Cases" subject="{!account}"></apex:relatedList>
+        </apex:pageBlockSection>
+    </apex:pageBlock>       
+</apex:page>

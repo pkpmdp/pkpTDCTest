@@ -1,0 +1,42 @@
+<apex:page standardController="Customer_Information_Request__c" extensions="CustomerInformationRequestController">
+    <apex:sectionHeader title="{!$Label.CL_CustomerInformationRequestNew}"> </apex:sectionHeader>
+    <apex:form >
+        <apex:pageBlock >
+        <apex:pageMessages />
+            <apex:pageBlockButtons >
+                <apex:commandButton action="{!save}" value="{!$Label.CL_Send}" />
+                <apex:commandButton action="{!cancel}" value="{!$Label.Cancel}"/>
+            </apex:pageBlockButtons>
+            <apex:pageBlockSection title="{!$Label.Customer}" columns="2"  >
+                <apex:outputField value="{!Customer_Information_Request__c.Account__c}"/>
+                <apex:inputField required="true" value="{!Customer_Information_Request__c.Email__c}"/>
+                <!-- <apex:inputField value="{!Customer_Information_Request__c.Send__c}"/> -->  
+            </apex:pageBlockSection>
+            <!--
+            <apex:pageBlockSection title="{!$Label.CL_Video}" columns="1" rendered="{!$Profile.Name =='YouSee System Administrator' || $Profile.Name =='System Administrator'}">
+                <apex:outputPanel > Send en hjælpevideo til kunden, hvis det kan løse kundens problem eller afværge evt. genkald. 
+Hvis videoen ikke hjalp dem, kan de ringe direkte ind igen, hvis vi yder tlf. support. Det belaster IKKE din FTR.
+Du kan sende hjælpevideoer via e-mail eller via SMS. Selvom kunden kun ønsker hjælpevideoen tilsendt via e-mail, 
+skal du også indtaste et telefon nr. På den måde kan vi ’genkende’ kunden på videosupporten, hvis de ringer tilbage og stille dem uden om køen – en service, kunde kan benytte i optil 3 dage.</apex:outputPanel>
+                <apex:iframe src="{!actimoURL}" id="theFrame" height="250"/>
+            </apex:pageBlockSection>
+            -->
+            <apex:pageBlockSection collapsible="false"  title="{!$Label.CL_EmailTemplates}" columns="2" />
+            <!-- <hr style="width:100%; color:#ECECEC; height:1px; background-color:#ECECEC; border:0px" /> -->
+            <apex:panelGrid style="margin:5px 5px 0% 5%;  text-align:left;" cellpadding="0px" cellspacing="0px" title="{!$Label.CL_EmailTemplates}" width="100%" columns="6" id="theGrid">
+                <apex:outputText rendered="{!beforeSaleTemplates.render}" styleClass="labelCol first" value="{!$Label.CL_BeforeSale}"/>
+                <apex:selectCheckboxes label="{!$Label.CL_BeforeSale}"  value="{!beforeSaleTemplates.templates}" layout="pageDirection">
+                    <apex:selectOptions value="{!beforeSaleTemplates.items}"/>
+                </apex:selectCheckboxes>
+                <apex:outputText rendered="{!afterSaleTemplates.render}" styleClass="labelCol first" value="{!$Label.CL_AfterSale}"/>
+                <apex:selectCheckboxes label="{!$Label.CL_AfterSale}" value="{!afterSaleTemplates.templates}" layout="pageDirection">
+                    <apex:selectOptions value="{!afterSaleTemplates.items}"/>
+                </apex:selectCheckboxes>
+                <apex:outputText rendered="{!campainTemplates.render}" styleClass="labelCol first" value="{!$Label.CL_Kampagne}"/>
+                <apex:selectCheckboxes label="{!$Label.CL_Kampagne}" value="{!campainTemplates.templates}" layout="pageDirection">
+                    <apex:selectOptions value="{!campainTemplates.items}"/>
+                </apex:selectCheckboxes>
+            </apex:panelGrid>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

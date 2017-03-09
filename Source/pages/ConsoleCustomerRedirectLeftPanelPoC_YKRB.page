@@ -1,0 +1,13 @@
+<apex:page controller="clsConsoleCustomerRedirectController" action="{!RedirectToCustomerpanel}">
+<!--  <div id="urlParam" style="display:none">{!$CurrentPage.parameters.Id}</div> -->
+<br/><br/>
+<div id="mess">{!mess}</div>
+  <script> 
+
+//  var vfid =document.getElementById("urlParam").innerHTML;  
+//  if(vfid!=null && vfid.length>4 && vfid.substring(0,3)=='001')
+ //  window.location = '/apex/ConsoleCustomerLeftPanelPoC_YKRB?id=vfid';
+ // else
+ // document.getElementById("mess").style.display='block';
+  </script>
+</apex:page>

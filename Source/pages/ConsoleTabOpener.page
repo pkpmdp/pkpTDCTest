@@ -1,0 +1,60 @@
+<apex:page standardController="Account" showHeader="false" sidebar="false">
+ <apex:includeScript value="/support/console/25.0/integration.js"/>
+   <script type="text/javascript">
+     var idPrimaryTab = null;
+     var intervalTimeout = 200;
+     
+     var openNewSubtab = function () {
+     
+       // Use the results primary tab id and open a new subtab 
+       var getPrimaryTabId = function(result) {
+         idPrimaryTab = result.id;
+       };
+       
+       if (idPrimaryTab){
+         sforce.console.openSubtab(idPrimaryTab , '{!$Site.Domain}'+ '/apex/ConsoleSaleTab?id={!Account.Id}',true,'{!$Label.CO_Focus}',null,onSaleOpened,'Sale');
+       } else {
+         // Get the enclosing primary tab id. The openSubtab method is set as the callback
+         sforce.console.getEnclosingPrimaryTabId(getPrimaryTabId);
+         setTimeout(openNewSubtab, intervalTimeout);
+       }
+     }
+     
+     var onSaleOpened = function onSaleOpened(result) {
+         sforce.console.openSubtab(idPrimaryTab , '{!$Site.Domain}'+ '/apex/ConsoleK2GuiTab?id={!Account.Id}',false,'{!$Label.CO_SPOCSale}', null, onK2GuiOpened,'K2Gui');
+     };
+     
+     var onK2GuiOpened = function onK2GuiOpened(result) {
+         sforce.console.openSubtab(idPrimaryTab , '{!$Site.Domain}'+ '/apex/ConsoleExistingProductsTab?id={!Account.Id}',false,'{!$Label.Existing_Products}', null, onExistingProdutsOpened,'Existing Products');
+     };
+
+     var onExistingProdutsOpened = function onExistingProdutsOpened(result) {
+         sforce.console.openSubtab(idPrimaryTab , '{!$Site.Domain}'+ '/apex/ConsoleSendTab?id={!Account.Id}',false,'{!$Label.CO_CommunicationWithCustomer}', null, onSendOpened ,'Send');
+     }; 
+
+     var onSendOpened = function onSendOpened(result) {
+         sforce.console.openSubtab(idPrimaryTab , '{!$Site.Domain}'+ '/apex/ConsoleUsageTab?id={!Account.Id}',false,'{!$Label.CO_Usage}',null,onUsageOpened,'Usage');
+     };
+     
+     var onUsageOpened = function onUsageOpened(result) {
+         sforce.console.openSubtab(idPrimaryTab , '{!$Site.Domain}'+ '/apex/ConsoleCaseTab?id={!Account.Id}',false,'{!$Label.CO_Cases}',null, onCasesOpened,'Cases');
+     };
+
+     var onCasesOpened = function onCasesOpened(result) {
+         sforce.console.openSubtab(idPrimaryTab ,'{!$Site.Domain}'+ '/apex/ConsoleSaveSurveysTab?id={!Account.Id}',false,'{!$Label.CO_SaveSurvey}',null, onSurveyOpened,'Save Survey');
+     };
+     
+     var onSurveyOpened = function onSurveyOpened(result) {
+         sforce.console.openSubtab(idPrimaryTab , '{!$Site.Domain}'+ '/apex/ConsoleHistoryTab?id={!Account.Id}',false,'{!$Label.CO_History}', null, onHistoryOpened,'History');
+     }; 
+     
+     var onHistoryOpened = function onHistoryOpened(result) {
+         sforce.console.openSubtab(idPrimaryTab , '{!$Site.Domain}'+ '/apex/FritValgSpoc?id={!Account.Id}',false,'{!$Label.CO_ExtraChannel}', null, null,'Extra channel');
+     };
+
+     if (sforce.console.isInConsole()) {
+       setTimeout(openNewSubtab, intervalTimeout);
+     }
+   </script>
+
+</apex:page>

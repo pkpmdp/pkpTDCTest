@@ -1,0 +1,336 @@
+<apex:page standardController="Contact" extensions="DealerWebConferenceRegisterController" sidebar="false"  showHeader="false" id="registrationPage" applyHtmlTag="false"> 
+<html class="cvi2015"><!--SPOC 2206-->
+<head>  
+    <meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+</head>
+<style>  
+ .fontVerdana{ font-family: 'Verdana'; }
+ #topbanner {
+        margin-right: 0px;
+    }
+    .Clear{background-color: white;}
+</style>
+ 
+<script type="text/javascript" src="https://yousee.dk/sitecore/content/data/export/export.aspx?itemguid={F545894B-61F9-4C9D-BC1C-833B7DB0853F}&functions=true" > </script> 
+<!-- Added for DW 750 -->
+<c:TopMenuComponent ></c:TopMenuComponent>
+<script type="text/javascript" language="javascript">printHeader();</script>
+    <script type="text/javascript">printTopMenu();</script>
+<script type="text/javascript">printContentAreaBegin();</script>
+<script>
+    var selectedPoint = '';
+    var selectedRoute = '';
+    var selectetRadio = {!myFlag};
+    function displayText(){
+        var valSelected = document.getElementById('{!$Component.registrationPage.regFrom.pageBlockId.formSection.transportReqId}').value; 
+        if(valSelected == 'Ja'){  
+            document.getElementById('textIn').style.display = 'block';
+            twistRouteSections();
+        }           
+        else{
+            document.getElementById('textIn').style.display = 'none';
+            twistRouteSections();
+        }   
+        var err = document.getElementById('{!$Component.registrationPage.error}').innerHTML;
+        if(err.length == 0) {
+            var allRadioButtons = document.getElementsByName('conference');           
+            for (var i=0; i < allRadioButtons.length; i++){
+                if (allRadioButtons[i].checked){
+                    allRadioButtons[i].checked = false;
+                }
+            } 
+            selectedPoint = '';
+            selectedRoute = '';
+        } 
+        else{
+            window.scrollTo(0,0);
+        }
+                     
+    }
+    
+    function twistRouteSections(){
+        if(document.getElementById('{!$Component.registrationPage.regFrom.pageBlockId.rute1}').childNodes[0].childNodes[0].className == 'hideListButton')       
+            twistSection(document.getElementById('{!$Component.registrationPage.regFrom.pageBlockId.rute1}').childNodes[0].childNodes[0]);      
+        if(document.getElementById('{!$Component.registrationPage.regFrom.pageBlockId.rute2}').childNodes[0].childNodes[0].className == 'hideListButton')       
+            twistSection(document.getElementById('{!$Component.registrationPage.regFrom.pageBlockId.rute2}').childNodes[0].childNodes[0]);
+        if(document.getElementById('{!$Component.registrationPage.regFrom.pageBlockId.rute3}').childNodes[0].childNodes[0].className == 'hideListButton')
+            twistSection(document.getElementById('{!$Component.registrationPage.regFrom.pageBlockId.rute3}').childNodes[0].childNodes[0]);
+        if(document.getElementById('{!$Component.registrationPage.regFrom.pageBlockId.rute4}').childNodes[0].childNodes[0].className == 'hideListButton') 
+            twistSection(document.getElementById('{!$Component.registrationPage.regFrom.pageBlockId.rute4}').childNodes[0].childNodes[0]);
+        if(document.getElementById('{!$Component.registrationPage.regFrom.pageBlockId.rute5}').childNodes[0].childNodes[0].className == 'hideListButton')
+            twistSection(document.getElementById('{!$Component.registrationPage.regFrom.pageBlockId.rute5}').childNodes[0].childNodes[0]);
+        if(document.getElementById('{!$Component.registrationPage.regFrom.pageBlockId.rute6}').childNodes[0].childNodes[0].className == 'hideListButton')
+            twistSection(document.getElementById('{!$Component.registrationPage.regFrom.pageBlockId.rute6}').childNodes[0].childNodes[0]);      
+        }
+    
+    function validateNum(varType){
+        if(selectetRadio){
+            var valTransport = document.getElementById('{!$Component.registrationPage.regFrom.pageBlockId.formSection.transportReqId}').value;
+            var allRadioButtons = document.getElementsByName('conference');             
+            if(valTransport == 'Ja'){
+                           
+                for (var i=0; i < allRadioButtons.length; i++){
+                    if (allRadioButtons[i].checked){
+                        selectedPoint = allRadioButtons[i].value; 
+                        if(i >= 0 && i <= 2)
+                            selectedRoute = 'Frederikshavn-Aalborg-Randers';
+                        else if(i >=3 && i <= 6)
+                            selectedRoute = 'Struer-Holstebro-Herning-Vejle';
+                        else if(i >= 7 && i <= 9)
+                            selectedRoute = 'Skive-Viborg-Silkeborg';
+                        else if(i >= 10 && i <= 13)
+                            selectedRoute = 'Skjern-Varde-Esbjerg-Fredericia';
+                        else if(i >= 14 && i <= 17)
+                            selectedRoute = 'Aabenraa-Haderslev-Kolding-Nyborg';
+                        else    
+                            selectedRoute = 'Århus-Horsens-Odense';
+                    }
+                }
+                if(selectedRoute == ''){  
+                    alert ("Du skal vælge en opsamlings by");
+                    document.getElementById('{!$Component.registrationPage.regFrom.pageBlockId.errorsId}').value = 'Du skal vælge en opsamlings by'; 
+                    return false;
+                }  
+                else{
+                    document.getElementById('{!$Component.registrationPage:regFrom:pageBlockId:pickupVal}').value = selectedPoint;
+                    document.getElementById('{!$Component.registrationPage.regFrom.pageBlockId.pickupRoute}').value = selectedRoute;     
+                    document.getElementById('{!$Component.registrationPage.regFrom.pageBlockId.errorsId}').value = '';
+                }               
+            }
+        }        
+        return true;
+    }
+            
+    function editContact(showTransport, route,recordNum){
+        document.getElementById('{!$Component.registrationPage.form2.block2.rowsId}').value = recordNum;   
+        if(showTransport != 'Ja'){  
+            document.getElementById('textIn').style.display = 'none';
+            twistRouteSections();
+        }
+        if(showTransport == 'Ja'){
+            document.getElementById('textIn').style.display = '';
+            var allRadioButtons = document.getElementsByName('conference');
+            for (var i=0; i < allRadioButtons.length; i++)
+            {
+                if (allRadioButtons[i].value == route)
+                {   
+                  twistRouteSections();
+                  allRadioButtons[i].checked = true;
+                } 
+            }
+        }       
+    }
+    
+    function deleteContact(recordNum){
+        document.getElementById('{!$Component.registrationPage.form2.block2.rowsId}').value = '';
+        var contactDelete = false;
+        contactDelete = confirm('Er du sikker på at du vil slette?');
+        if(contactDelete){
+            document.getElementById('{!$Component.registrationPage.form2.block2.rowsId}').value = recordNum;
+        }
+    }
+    var invalidNumber = false;
+    function validateEmail(){
+        if(!invalidNumber){
+            var emailFieldValue = document.getElementById('{!$Component.registrationPage.regFrom.pageBlockId.formSection.emailFieldId}').value;
+            var myRegExp = new RegExp(/^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$/);
+            if(emailFieldValue.match(myRegExp)== null){
+                alert("Ugyldig e-mail-adresse"); 
+                document.getElementById('{!$Component.registrationPage.regFrom.pageBlockId.formSection.emailFieldId}').focus();
+                return false;
+            }
+        }
+    }
+    
+    function validateMobileNumber(){
+        var mobileNumber = document.getElementById('{!$Component.registrationPage.regFrom.pageBlockId.formSection.MobilePhoneID}').value;
+        if(isNaN(mobileNumber) || mobileNumber.length < 8){
+            alert('Please enter a valid mobile number with 8 digits');
+            invalidNumber = true;
+            document.getElementById('{!$Component.registrationPage.regFrom.pageBlockId.formSection.MobilePhoneID}').focus();
+            return false;
+        }
+        else{
+            invalidNumber = false;
+        }
+        
+    }
+    // Restrict input to 34 characters only.
+    function characterLengthValidation(myId){
+     var idValue = '{!$Component.registrationPage.regFrom.pageBlockId.formSection}'+'\:'+myId; 
+     var fieldValue ='';
+     fieldValue = document.getElementById(idValue).value;
+     if(fieldValue.length >33){
+        document.getElementById(idValue).value =fieldValue.substring(0, 33);
+     }  
+   }   
+</script>
+<apex:pagemessages id="error" escape="false"/>     
+<apex:outputText value="{!youseeConferenceInfo}" escape="false"></apex:outputText>
+<apex:form id="regFrom">    
+    <apex:pageBlock id="pageBlockId">   
+        <apex:inputHidden value="{!pickupVal}" id="pickupVal" />
+        <apex:inputHidden value="{!pickupRoute}" id="pickupRoute"/>
+        <apex:inputHidden value="{!errors}" id="errorsId"/>  
+             
+        <apex:pageBlockSection columns="2" id="formSection">        
+            <apex:inputField value="{!wrapCons.contact.FirstName}" label="Fornavn: " required="true" id="firstNameId" onblur="return characterLengthValidation('firstNameId')"/>
+            <apex:inputField value="{!wrapCons.contact.LastName}" label="Efternavn: "  id="lastNameId" onblur="return characterLengthValidation('lastNameId')" /> 
+            
+            <apex:inputField value="{!wrapCons.contact.Conference_Mobile_Phone__c}" label="Mobilnummer: " required="true" id="MobilePhoneID" />
+            <apex:inputField value="{!wrapCons.contact.Email}" label="E-mail-adresse : " required="true" id="emailFieldId"/>
+            
+            <apex:inputField value="{!wrapCons.contact.Stillingsbetegnelse__c}" label="Stillingsbetegnelse: " required="true" id="jobTitleId"/> 
+            <apex:inputCheckBox value="{!wrapCons.contact.Onskes_programplanen__c}" label="Dit program for dagen " disabled="true"/>              
+            
+            <apex:inputField value="{!wrapCons.contact.Transportation_Required__c}" id="transportReqId" label="Ønsker du fællesbustransport: " rendered="{!myFlag}" onchange="displayText()" required="true"/>          
+            <br/>
+        </apex:pageBlockSection> 
+        
+        <apex:outputPanel id="transportText" >
+            <div id="textIn">
+            <apex:pageBlockSection title="Rute 1 - Frederikshavn-Aalborg-Randers" collapsible="true" columns="1" id="rute1">
+                <apex:pageBlockSectionItem >
+                    <table width="100%">
+                               <tr><td>&nbsp;</td> <td>Afgang tid</td> <td>Hjemkomst tid</td></tr>
+                               <tr><td width="60%"><input type="radio" value="Frederikshavn Banegård" name="conference" id="Frederikshavn Banegård"/>Frederikshavn Banegård</td><td width="20%">Kl. 05.15 &nbsp;&nbsp;&nbsp;&nbsp; </td><td width="20%">KI. 23.45 </td></tr>
+                               <tr><td width="60%"><input type="radio" value="Ålborg Hallens P-Plads" name="conference" id="Ålborg Hallens P-Plads"/>Ålborg Hallens P-Plads </td><td width="20%">Kl. 06.15 &nbsp;&nbsp;&nbsp;&nbsp; </td> <td width="20%">KI. 22.15 </td></tr>
+                               <tr><td width="60%"><input type="radio" value="Randers Hallens P-Plads – Skyline Arena" name="conference" id="Randers Hallens P-Plads – Skyline Arena"/>Randers Hallens P-Plads – Skyline Arena</td><td width="20%">Kl. 07.30 &nbsp;&nbsp;&nbsp;&nbsp; </td> <td width="20%">KI. 21.00 </td></tr>
+                    </table>
+                    </apex:pageBlockSectionItem>  
+                    
+            </apex:pageBlockSection>
+            <apex:pageBlockSection title="Rute 2 - Struer-Holstebro-Herning-Vejle" collapsible="true" columns="1" id="rute2"> 
+                <apex:pageBlockSectionItem >
+                    <table width="100%"> 
+                               <tr><td>&nbsp;</td> <td>Afgang tid</td> <td>Hjemkomst tid</td></tr>  
+                               <tr><td width="60%"><input type="radio" value="Struer Banegård" name="conference" id="Struer Banegård"/>Struer Banegård</td><td width="20%">Kl. 06.30 &nbsp;&nbsp;&nbsp;&nbsp; </td><td width="20%">KI. 23.00 </td></tr>
+                               <tr><td width="60%"><input type="radio" value="Holstebro Banegård" name="conference" id="Holstebro Banegård"/>Holstebro Banegård </td><td width="20%">Kl. 07.00 &nbsp;&nbsp;&nbsp;&nbsp; </td> <td width="20%">KI. 22.30 </td></tr>
+                               <tr><td width="60%"><input type="radio" value="Herning Banegård" name="conference" id="Herning Banegård"/>Herning Banegård</td><td width="20%">Kl. 07.30 &nbsp;&nbsp;&nbsp;&nbsp; </td> <td width="20%">KI. 22.00 </td></tr>
+                               <tr><td width="60%"><input type="radio" value="Vejle Banegård" name="conference" id="Vejle Banegård"/>Vejle Banegård</td><td width="20%">Kl. 08.30 &nbsp;&nbsp;&nbsp;&nbsp; </td> <td width="20%">KI. 21.00  </td></tr>
+                        </table>
+                </apex:pageBlockSectionItem>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection title="Rute 3 - Skive-Viborg-Silkeborg" collapsible="true" columns="1" id="rute3">
+                <apex:pageBlockSectionItem >
+                    <table width="100%">
+                                <tr><td>&nbsp;</td> <td>Afgang tid</td> <td>Hjemkomst tid</td></tr> 
+                               <tr><td width="60%"><input type="radio" value="Skive Banegård" name="conference" id="Skive Banegård"/>Skive Banegård </td><td width="20%">Kl. 06.00 &nbsp;&nbsp;&nbsp;&nbsp; </td><td width="20%">KI. 22.15 </td></tr>
+                               <tr><td width="60%"><input type="radio" value="Viborg Banegård" name="conference" id="Viborg Banegård"/>Viborg Banegård </td><td width="20%">Kl. 06.30 &nbsp;&nbsp;&nbsp;&nbsp; </td> <td width="20%">KI. 21.45 </td></tr>
+                               <tr><td width="60%"><input type="radio" value="Silkeborg Banegård" name="conference" id="Silkeborg Banegård"/>Silkeborg Banegård </td><td width="20%">Kl. 07.00 &nbsp;&nbsp;&nbsp;&nbsp; </td> <td width="20%">KI. 21.15 </td></tr>
+                        </table>
+                </apex:pageBlockSectionItem>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection title="Rute 4 - Skjern-Varde-Esbjerg-Fredericia" collapsible="true" columns="1" id="rute4"> 
+                <apex:pageBlockSectionItem >
+                    <table width="100%"> 
+                                <tr><td>&nbsp;</td> <td>Afgang tid</td> <td>Hjemkomst tid</td></tr>
+                               <tr><td width="60%"><input type="radio" value="Skjern Banegård" name="conference" id="Skjern Banegård"/>Skjern Banegård</td><td width="20%">Kl. 06.00 &nbsp;&nbsp;&nbsp;&nbsp; </td><td width="20%">KI. 22.00 </td></tr>
+                               <tr><td width="60%"><input type="radio" value="Varde Banegård" name="conference" id="Varde Banegård"/>Varde Banegård </td><td width="20%">Kl. 06.35 &nbsp;&nbsp;&nbsp;&nbsp; </td> <td width="20%">KI. 21.30 </td></tr>
+                               <tr><td width="60%"><input type="radio" value="Esbjerg Banegård" name="conference" id="Esbjerg Banegård"/>Esbjerg Banegård</td><td width="20%">Kl. 07.00 &nbsp;&nbsp;&nbsp;&nbsp; </td> <td width="20%">KI. 21.10 </td></tr>
+                               <tr><td width="60%"><input type="radio" value="Fredericia Banegård" name="conference" id="Fredericia Banegård"/>Fredericia Banegård</td><td width="20%">Kl. 08.15 &nbsp;&nbsp;&nbsp;&nbsp; </td> <td width="20%">KI. 20.00 </td></tr>
+                        </table>
+                </apex:pageBlockSectionItem>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection title="Rute 5 - Aabenraa-Haderslev-Kolding-Nyborg" collapsible="true" columns="1" id="rute5"> 
+                <apex:pageBlockSectionItem >
+                    <table width="100%">
+                                <tr><td>&nbsp;</td> <td>Afgang tid</td> <td>Hjemkomst tid</td></tr> 
+                               <tr><td width="60%"><input type="radio" value="Aabenraa Afkørsel ved Mc Donalds" name="conference" id="Aabenraa Afkørsel ved Mc Donalds"/>Aabenraa Afkørsel ved Mc Donalds </td><td width="20%">Kl. 06.45 &nbsp;&nbsp;&nbsp;&nbsp; </td><td width="20%">KI. 21.15 </td></tr>
+                               <tr><td width="60%"><input type="radio" value="Haderslev busstation" name="conference" id="Haderslev busstation"/>Haderslev busstation </td><td width="20%">Kl. 07.15 &nbsp;&nbsp;&nbsp;&nbsp; </td> <td width="20%">KI. 20.45 </td></tr>
+                               <tr><td width="60%"><input type="radio" value="Kolding Banegård" name="conference" id="Kolding Banegård"/>Kolding Banegård</td><td width="20%">Kl. 07.45 &nbsp;&nbsp;&nbsp;&nbsp; </td> <td width="20%">KI. 20.15 </td></tr>
+                               <tr><td width="60%"><input type="radio" value="Nyborg Banegård" name="conference" id="Nyborg Banegård"/>Nyborg Banegård</td><td width="20%">Kl. 09.00 &nbsp;&nbsp;&nbsp;&nbsp; </td> <td width="20%">KI. 19.00 </td></tr>
+                        </table>
+                </apex:pageBlockSectionItem>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection title="Rute 6 - Århus-Horsens-Odense" collapsible="true" columns="1" id="rute6">
+                <apex:pageBlockSectionItem >
+                    <table width="100%"> 
+                                <tr><td>&nbsp;</td> <td>Afgang tid</td> <td>Hjemkomst tid</td></tr> 
+                               <tr><td width="60%"><input type="radio" value="Aarhus ved Musikhuset" name="conference" id="Aarhus ved Musikhuset"/>Aarhus ved Musikhuset</td><td width="20%">Kl. 06.30 &nbsp;&nbsp;&nbsp;&nbsp; </td><td width="20%">KI. 21.30 </td></tr>
+                               <tr><td width="60%"><input type="radio" value="Horsens ved afkørsel 56 - den ved Burger King" name="conference" id="Horsens ved afkørsel 56 - den ved Burger King"/>Horsens ved afkørsel 56 - den ved Burger King </td><td width="20%">Kl. 08.00 &nbsp;&nbsp;&nbsp;&nbsp; </td> <td width="20%">KI. 20.30 </td></tr>
+                               <tr><td width="60%"><input type="radio" value="Odense Banegård ved posthuset" name="conference" id="Odense Banegård ved posthuset"/>Odense Banegård ved posthuset </td><td width="20%">Kl. 09.00 &nbsp;&nbsp;&nbsp;&nbsp; </td> <td width="20%">KI. 19.30 </td></tr>
+                        </table>
+                </apex:pageBlockSectionItem>
+            </apex:pageBlockSection>
+             
+            <br/>
+            <apex:outputText value="{!transportInfo}" escape="false"></apex:outputText>               
+            </div>
+        </apex:outputPanel> 
+        <center>  
+        <apex:outputPanel id="btns">
+            <apex:commandButton value="Videre" id="addBtnId" onclick="validateNum('add');" rendered="{!!isEditMode}" disabled="{!wrapList.size>9}" oncomplete="displayText();" action="{!AddMoreAttendees}" rerender="btns,error,formSection,addedContacts" />
+            <apex:commandButton value="Gem"  onclick="validateNum('edit')"  id="editBtnId" rendered="{!isEditMode}" action="{!editAndSave}" oncomplete="displayText();" rerender="btns,error,formSection,addedContacts" status="queryStatus"/>
+            <apex:commandButton value="Annuler" id="cancelBtnId" rendered="{!isEditMode}" action="{!cancelEdit}" oncomplete="displayText();" rerender="btns,error,formSection,addedContacts" />
+            </apex:outputPanel>          
+        </center> 
+    </apex:pageBlock>  
+      <apex:actionStatus id="queryStatus"> 
+                        <apex:facet name="start">
+                        <c:loadingComponent BackColor="#efefef" borderColor="#336699"
+                         borderSize="3" height="50px" width="120px" 
+                         ImageUrl="{!$Resource.Loading}" Message="Loading..." 
+                         messageStyle="color:darkred;font-size:11pt;font-weight:bold;"/>
+                        </apex:facet>         
+      </apex:actionStatus>          
+    </apex:form>
+    <apex:form id="form2">          
+    <apex:outputPanel id="addedContacts"> 
+    <apex:pageBlock title="Liste af tilmeldte"  rendered="{!wrapList.size>0}" id="block2">   
+    <apex:inputHidden value="{!rowsId}" id="rowsId"/>
+         <apex:variable value="{!0}" var="count"/>
+        <table id="claims" class="list" border="0" cellspacing="0" cellpadding="0" width="100%" style="word-wrap:break-word;
+              table-layout: fixed;">
+            <tr >
+                  <th width="20%">Handling</th>
+                  <th width="20%">Fornavn</th>  
+                  <th width="20%">Efternavn</th>
+                  <th width="20%">Mobilnummer</th>    
+                  <th width="20%">E-mail-adresse</th>       
+            </tr>   
+            <apex:repeat value="{!wrapList}" var="c"> 
+               
+            <tr >
+                 <td width="20%">
+                    <apex:commandLink value="Rediger" id="editRow" action="{!editRow}" onclick="editContact('{!c.contact.Transportation_Required__c}', '{!c.contact.Valg_opsamlingsby__c}','{!c.rowCount}');" rerender="btns,error,formSection,addedContacts" />
+                    | &nbsp;
+                    <apex:commandLink value="Slet" id="deleteRow" action="{!deleteRow}" onclick="deleteContact('{!c.rowCount}');" rerender="btns,error,formSection,addedContacts"/>                    
+                 </td>
+                   
+                  <td width="20%">          
+                    <apex:outputText value="{!c.contact.FirstName}" style="word-wrap:break-word;" />         
+                  </td> 
+                   
+                  <td width="20%">
+                    <apex:outputText value="{!c.contact.LastName}" />
+                  </td>
+                  
+                  <td width="20%"> 
+                    <apex:outputText value="{!c.contact.Conference_Mobile_Phone__c}" />
+                  </td>
+                    
+                  <td width="20%">
+                    <apex:outputText value="{!c.contact.Email}" />  
+                  </td>
+                   
+            </tr>  
+            </apex:repeat> 
+            </table><br/>
+            <center>
+                <apex:commandButton value="Tilmeld" action="{!RegisterAttendees}" id="tilmeldBtn"/>
+            </center>
+        </apex:pageBlock> 
+    </apex:outputPanel>
+
+
+</apex:form>
+<br/>
+<apex:pageBlock >
+        <apex:outputText value="{!dayProgram}" escape="false"></apex:outputText>
+</apex:pageBlock>
+<script>
+document.getElementById('textIn').style.display = 'none';
+</script>
+ </html>
+</apex:page>

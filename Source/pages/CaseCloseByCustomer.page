@@ -1,0 +1,37 @@
+<apex:page cache="false" sidebar="false" showHeader="false" standardController="Case" extensions="clsCaseCloseByCustomerController" applyHtmlTag="false">
+<html class="cvi2015"><!--SPOC 2206 -->
+<style>#topbanner img{display: none;}</style>
+<apex:composition template="{!$Site.Template}">
+<apex:define name="body">
+<script type="text/javascript">printContentAreaBegin();</script>    
+    <apex:outputPanel styleclass="luksag" id="caseDetail" layout="block" style="overflow-x:hidden;overflow-y:auto; min-height:405px; width:100%; background-color: #ffffff;font-family: Arial,Helvetica,Sans-Serif;font-size: 13px;">    
+        <apex:form >
+            <apex:outputText escape="false" rendered="{!closeAction ==false}" value="<DIV id=topbanner><IMG alt=Support src='http://yousee.dk/Hjaelp_og_Support/~/media/Images/Topbannere_696x210/Topbannere_Hjaelp_Support_696x210/HS_696x210_topbanner_support.ashx' width=696 height=210><DIV class='content TextBlack'><STRONG class=topbannerheader>YouSee selvbetjening</STRONG><P>Du kan lukke din sag ved at klikke på knappen <strong>Luk sag</strong> nedenfor</P></DIV></DIV>"/>
+            <apex:outputText escape="false" rendered="{!closeAction ==true}" value="<DIV id=topbanner><IMG alt=Support src='http://yousee.dk/Hjaelp_og_Support/~/media/Images/Topbannere_696x210/Topbannere_Hjaelp_Support_696x210/HS_696x210_topbanner_support.ashx' width=696 height=210><DIV class='content TextBlack'><STRONG class=topbannerheader>YouSee selvbetjening</STRONG><P>Din sag er nu lukket og du vil ikke få et svar fra YouSee Support.<br />Skulle du få brug for hjælp en anden gang er du velkommen til at kontakte os igen.<br /><br /></P></DIV></DIV>"/>           
+            <apex:pageBlock >
+                <apex:pageBlockButtons location="bottom" rendered="{!closeAction == false}">              
+                    <apex:commandButton value="Luk sag" action="{!closeCase}" rerender="caseDetail" />
+                </apex:pageBlockButtons>                
+                <apex:pageBlockSection title="Sagsoplysninger" columns="1" collapsible="false">                 
+                    <apex:pageblockSectionItem >            
+                        <apex:outputLabel value="Sagsnummer"></apex:outputLabel>
+                        <apex:outputText value="{!caseNo}"/>
+                    </apex:pageblockSectionItem>
+                    <apex:pageblockSectionItem >            
+                        <apex:outputLabel value="Beskrivelse"></apex:outputLabel>
+                        <apex:outputText value="{!subject}"/>
+                    </apex:pageblockSectionItem> 
+                    <apex:pageblockSectionItem >            
+                        <apex:outputLabel value="Status"></apex:outputLabel>
+                        <apex:outputText value="{!IF(caseStatus == 'Closed','Lukket','Under behandling') }" />
+                    </apex:pageblockSectionItem>                
+              </apex:pageBlockSection>            
+            </apex:pageBlock> 
+    </apex:form>    
+  </apex:outputPanel> 
+<script type="text/javascript">printContentAreaEnd();</script>
+<script type="text/javascript">printFooter();</script>
+</apex:define>
+</apex:composition>
+</html>
+</apex:page>

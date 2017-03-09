@@ -1,0 +1,45 @@
+<apex:page sidebar="false" showHeader="false" controller="DealerProductPageController3" action="{!generateMD5Key}" applyHtmlTag="false">
+<html class="cvi2015"> <!--spoc 2206-->
+    <head>
+        <title>DIBS Payment form</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta http-equiv="Content-Script-Type" content="text/javascript" />
+        <meta http-equiv="Content-Style-Type" content="text/css" />
+    </head>
+     
+    <body>
+        <form name="payform" method="post" action="https://payment.architrade.com/paymentweb/start.action">
+          <input type="hidden" name="merchant" value="{!$Setup.DIBS_Settings__c.Merchant_Id__c}" />
+          <input type="hidden" id="orderid" name="orderid" value="{!orderId}" />
+          <input type="hidden" name="lang" value="{!$Setup.DIBS_Settings__c.Language__c}" />
+          <input type="hidden" name="amount" value="" id="amount"/>
+<!--           <input type="hidden" name="test" value="1" /> -->
+          <apex:outputPanel rendered="{!$Setup.DIBS_Settings__c.Test__c == '1'}" >
+            <input type="hidden" name="test" value="{!$Setup.DIBS_Settings__c.Test__c}" />
+          </apex:outputPanel>
+          <input type="hidden" name="currency" value="{!$Setup.DIBS_Settings__c.Currency__c}" />
+          <input type="hidden" name="accepturl" value="{!$Setup.DIBS_Settings__c.Accept_URL__c}" />
+          <input type="hidden" name="preauth" value="true" />
+          <input type="hidden" name="md5key" value="{!md5Coded2}" />
+           <input type="hidden" name="account" value="YouBio" /> 
+        </form>
+    </body>
+    <script type="text/javascript">
+        /*var orderId = new Date().getTime();
+        document.getElementById('orderid').value += orderId;
+        */
+         //Added for BS
+        var freeChoiceFlag={!isFreeChoicePageFlag};
+        var currentKundeNumber = '{!cCustInstAdd.customerNumber}';
+        window.onload = function (evt) { 
+            var params = location.search;
+            document.payform.submit(); 
+            /*var amount = params.substring(params.indexOf('?price=') + 7);
+            if(amount != '' && amount != null){
+                document.getElementById('amount').value = amount;
+                document.payform.submit(); 
+            }*/
+        }
+    </script>
+    </html>
+</apex:page>

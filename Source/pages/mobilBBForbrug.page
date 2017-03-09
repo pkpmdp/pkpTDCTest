@@ -1,0 +1,36 @@
+<apex:page standardController="Account" extensions="clsMobilBBForbrug">
+  <apex:pageMessages ></apex:pageMessages>
+  <apex:form >
+      <apex:sectionHeader title="Vis Mobilt BredBånds Forbrug"/>
+      <apex:inputHidden value="{!Account.Customer_No__c}"/>
+      <apex:pageBlock >
+        <apex:pageBlockSection > 
+                  <apex:outputField value="{!Account.Customer_No__c}"/>
+                  <apex:pageblockSectionItem >
+                  <apex:outputLabel value="Produkt"/> <apex:outputText value="{!customer.product}"/>
+                  </apex:pageblockSectionItem>
+                  <apex:pageblockSectionItem >
+                  <apex:outputLabel value="Samlet forbrug i denne måned"/> <apex:outputText value="{!currentMonthTotalFormatted} MB"/>
+                  </apex:pageblockSectionItem>
+                  <apex:pageblockSectionItem >
+                  <apex:outputLabel value="Forbrug i procent"/> <apex:outputText value="{!customerUsage.percentageUsage}"/>
+                  </apex:pageblockSectionItem>
+                  <apex:pageblockSectionItem >
+                  <apex:outputLabel value="Max forbrug pr. måned"/> <apex:outputText value="{!maxLimitFormatted} GB"/>
+                  </apex:pageblockSectionItem>
+                  <apex:pageblockSectionItem >
+                  <apex:outputLabel value="Status"/> <apex:outputText value="{!customerUsage.status}"/>
+                  </apex:pageblockSectionItem>  
+        </apex:pageBlockSection>
+      </apex:pageBlock>
+      <apex:pageBlock > 
+          <apex:pageBlockTable value="{!customerUsage}" var="mobbUsage" id="customerUsage" rules="rows">
+              <!--apex:column headerValue="Max forbrug pr. måned" value="{!mobbUsage.maxLimit} GB"/>
+              <apex:column headerValue="Det samlede forbrug i denne måned" value="{!mobbUsage.currentMonthTotalUsage.total} MB"/>
+              <apex:column headerValue="Procent" value="{!mobbUsage.percentageUsage}"/-->
+           </apex:pageBlockTable>
+           <c:ColumnChart jsondata="{!dailyUsage}" title="Det Daglige forbrug" legend="none" vAxisTitle="Forbrug i GB"/>
+           <c:ColumnChart jsondata="{!previousThreeMonthsUsage}" title="Forbrug i de seneste 3 måneder " legend="none" vAxisTitle="Forbrug i GB"/>
+       </apex:pageBlock>
+        </apex:form>
+</apex:page>

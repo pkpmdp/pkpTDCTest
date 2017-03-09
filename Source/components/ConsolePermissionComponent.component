@@ -1,0 +1,100 @@
+<apex:component controller="PermissionController" allowDML="true">
+<apex:attribute name="acctId" assignTo="{!AccStrId}" type="String" description="Account Id"/>
+ <apex:form id="theform" >
+ <apex:actionFunction action="{!invokePermission}" name="invokePermission" rerender="thepageblock" />
+
+      <B>PERMISSIONS</B>
+        <apex:pageBlock id="thepageblock" >
+            <apex:pageMessages />
+            <!-- <div style="display:none;" id="emailValidationMessage">
+                 <apex:pageMessage summary="{!$Label.emailNecessaryForEcommAgreement}" severity="error" strength="3"/>
+            </div> -->
+            <apex:pageBlockSection id="thepageblocksection" columns="2"> 
+             <apex:pageBlockSectionItem >
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="{!$ObjectType.Permission__c.fields.Marketing_Permission__c.label}  " style="padding-right:5px"/>
+                    <apex:inputField value="{!Permission.Marketing_Permission__c}"/>
+                </apex:pageBlockSectionItem>
+                <apex:outputLabel value="{!PermissionUpdatedDate}" />
+            </apex:pageBlockSectionItem>  
+                
+            <apex:pageBlockSectionItem >
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="{!$ObjectType.Address__c.fields.Robinson__c.label}  " style="padding-right:5px"/>
+                    <apex:outputField value="{!Permission.Robinsonlisten__c}"/>
+                </apex:pageBlockSectionItem>
+                <apex:outputLabel value="" />
+            </apex:pageBlockSectionItem>
+         
+            
+            <apex:pageBlockSectionItem >
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="{!$ObjectType.Permission__c.fields.Nej_til_markedsforing__c.label}  " style="padding-right:5px"/>
+                    <apex:inputField value="{!Permission.Nej_til_markedsforing__c}"/>
+                </apex:pageBlockSectionItem>
+                <apex:outputLabel value="{!NoThankyouUpdatedDate}" />
+            </apex:pageBlockSectionItem>
+            
+            <apex:pageBlockSectionItem >
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="{!$ObjectType.Permission__c.fields.Driftsinfo_pa_email__c.label}  " style="padding-right:5px"/>
+                    <apex:inputField value="{!Permission.Driftsinfo_pa_email__c}" id="drift_email"/>
+                 </apex:pageBlockSectionItem>
+                <apex:outputLabel value="{!DriftEmailUpdatedDate}" />
+            </apex:pageBlockSectionItem>
+            
+            <apex:pageBlockSectionItem >
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="{!$ObjectType.Permission__c.fields.Nej_til_Telefonopkald__c.label}  " style="padding-right:5px"/>
+                    <apex:inputField value="{!Permission.Nej_til_Telefonopkald__c}"/>
+                </apex:pageBlockSectionItem>
+                <apex:outputLabel value="{!TelefonopkaldUpdatedDate}" />
+            </apex:pageBlockSectionItem>
+            
+            <apex:pageBlockSectionItem >
+                 <apex:pageBlockSectionItem >
+                     <apex:outputLabel value="{!$ObjectType.Permission__c.fields.Driftsinfo_pa_SMS__c.label}  " style="padding-right:5px"/>
+                     <apex:inputField value="{!Permission.Driftsinfo_pa_SMS__c}" id="drift_sms"/>
+                 </apex:pageBlockSectionItem>
+                 <apex:outputLabel value="{!DriftSMSUpdatedDate}" />
+            </apex:pageBlockSectionItem>
+            
+         </apex:pageBlockSection>
+            
+            <!--<apex:pageBlockButtons location="bottom" style="margin-top:0px"> --> 
+            <div class="pbBottomButtons" style="margin-top: 0px;">
+                <table cellspacing="0" cellpadding="0" border="0">
+                    <tbody>
+                        <tr>
+                            <td></td>   
+                            <td class="pbTitle">&nbsp;</td>
+                            <td class="pbButtonb " id="j_id0:j_id1:j_id2:j_id37:bottom">
+                                <apex:commandButton action="{!save}" value="{!if(updateFlag,'Update','Save')}" />
+                            </td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <!--</apex:pageBlockButtons>-->
+        </apex:pageBlock>
+    </apex:form>
+    <script type="text/javascript">
+       window.setTimeout(invokePermission,50);
+        function callCheckbox(){
+                var checkedValue = document.getElementById('drift').checked;
+                if(checkedValue){
+                    document.getElementById("{!$Component.theform.thepageblock.thepageblocksection.drift_email}").checked=true;
+                    document.getElementById("{!$Component.theform.thepageblock.thepageblocksection.drift_email}").disabled= true;
+                    document.getElementById("{!$Component.theform.thepageblock.thepageblocksection.drift_sms}").disabled= true;
+                    document.getElementById("{!$Component.theform.thepageblock.thepageblocksection.drift_sms}").checked=true;
+                }else{
+                    document.getElementById("{!$Component.theform.thepageblock.thepageblocksection.drift_email}").disabled= false;
+                    document.getElementById("{!$Component.theform.thepageblock.thepageblocksection.drift_sms}").disabled= false;
+            }
+        }
+    </script>
+</apex:component>

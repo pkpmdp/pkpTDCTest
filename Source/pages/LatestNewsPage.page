@@ -1,0 +1,3 @@
+<apex:page sidebar="false" showHeader="false">
+   <c:LatestNewsComponent />
+</apex:page>

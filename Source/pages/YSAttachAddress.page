@@ -1,0 +1,27 @@
+<apex:page controller="clsYSAttachAddressController" tabStyle="Address__c">
+<apex:pagemessages />
+	<apex:form >  
+	  <apex:sectionHeader title="Tilknyt addresser" />  
+	  <apex:pageBlock >
+	  	<apex:pageBlockButtons location="both">
+	   		<apex:commandButton value="{!$Label.Save}" action="{!save}" />
+	  	</apex:pageBlockButtons>
+	  		<apex:pageBlockSection title="Adresse" columns="2">	    	
+	        <apex:pageblockSectionItem >           
+	        	<apex:outputText value="{!addressString}"></apex:outputText>   
+	        </apex:pageblockSectionItem>
+	   </apex:pageBlockSection>	
+	    	<apex:pageBlockSection title="Kontakter" columns="2">
+	    		<apex:pageblockSectionItem >            
+	        		<apex:inputField required="false" value="{!accountContactRole.Contact__c}"/>   
+	       		</apex:pageblockSectionItem>
+	   		</apex:pageBlockSection>
+	   		
+	   	<apex:pageBlockSection title="Kunder" columns="2">
+	    	<apex:pageblockSectionItem >           
+	        	<apex:inputField required="false" value="{!accountContactRole.Customer__c}"/>   
+	        </apex:pageblockSectionItem>
+	   </apex:pageBlockSection>	   
+	  </apex:pageBlock> 
+	</apex:form>  
+</apex:page>

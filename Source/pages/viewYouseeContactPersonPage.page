@@ -1,0 +1,108 @@
+<apex:page controller="UploadYouSeeContactImages" showHeader="false" cache="true" applyHtmlTag="false">
+<html class="cvi2015"><!--SPOC 2206-->
+<head>
+  <!--  <script type="text/javascript" src="{!siteCoreUrl}/sitecore/content/data/export/export.aspx?itemguid={B069B0AE-5704-4CFD-820C-223D9F518440}&amp;functions=true"></script>-->  
+<script type="text/javascript" src="{!siteCoreUrl}/sitecore/content/data/export/export.aspx?itemguid={B069B0AE-5704-4CFD-820C-223D9F518440}&functions=true"></script>    
+</head>
+    <body id="servicepage">
+<apex:form >
+<script type="text/javascript">printHeader();</script>
+<script type="text/javascript">printTopMenu();</script>
+<script type="text/javascript">printContentAreaBegin();</script>
+<script type="text/javascript"> var portalBrugerRole = '{!portalBrugerRole}'; </script>
+<c:SCLinksComponent CableUnitName="{!cableUnitName}" PortalBrugerRole="{!portalBrugerRole}"></c:SCLinksComponent>
+<style>
+.container{ overflow-x:hidden;overflow-y:auto; height:100%; width:100%; } 
+</style>
+
+<div class="bullets">
+<ul>
+<li><apex:outputText value="{!$Label.SC_YouSeeConsultantHeader}" /> </li> 
+</ul>   
+</div>
+
+<apex:pageBlock rendered="{!renderSection}">
+    <apex:PageBlock >
+        <apex:pageBlockSection collapsible="false" title="YouSee kontaktperson for kunde" columns="2">      
+               <apex:pageBlockSectionItem dataStyle="width:70%; height:100%">
+                    <apex:outputPanel style="padding:5px;">
+                            <apex:image url="{!mainImage}" alt="my picture" height="152" width="152" rendered="{!mainImage != null}"/>
+                            <apex:image url="{!$Resource.Dummyimage_youseeupload}" height="152px" width="152px" rendered="{!mainImage == null}" />
+                   </apex:outputPanel>
+                   <apex:outputPanel >
+                           <apex:pageBlockSection columns="2" collapsible="false">
+                                 <apex:pageBlockSectionItem >
+                                     <apex:outputLabel value="Navn: " />
+                                     <apex:outputLabel value="{!YouSeeContactName}" />
+                                 </apex:pageBlockSectionItem>
+                                 <apex:pageBlockSectionItem >
+                                     <apex:outputLabel value="Telefon: " />
+                                     <apex:outputLabel value="{!YouSeeContactTelephone}" />
+                                 </apex:pageBlockSectionItem>
+                                 <apex:pageBlockSectionItem >
+                                     <apex:outputLabel value="Email: " />
+                                     <apex:outputLabel value=" {!YouSeeContactEmail}" /> 
+                                 </apex:pageBlockSectionItem>
+                           </apex:pageBlockSection>
+                           <apex:pageBlockSection columns="1" collapsible="false">
+                                <apex:pageBlockSectionItem >
+                                    <apex:outputLabel value="Kontakt mandag til torsdag fra 8.30 til 16.00 og fredag fra 8.30 til 15.00" /> 
+                                </apex:pageBlockSectionItem> 
+                            </apex:pageBlockSection>
+                            &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 
+                  <apex:outputPanel style="spacing:15px;">
+                        <apex:pageBlockSection columns="1" collapsible="false">
+                              <apex:pageBlockSectionItem >
+                                    <apex:outputLabel value=" " />
+                                    <apex:commandButton action="{!writeToConsultant}" value="{!$Label.SC_ViewAgreements_WriteToConsultant}" styleClass="dialogbutton_orange">
+                                    <apex:param name="accountId" value="{!accId}" />
+                                    </apex:commandButton>
+                               </apex:pageBlockSectionItem>
+                       </apex:pageBlockSection>
+                  </apex:outputPanel>
+          </apex:outputPanel>    
+      </apex:pageBlockSectionItem>
+   </apex:pageBlockSection>
+</apex:PageBlock>       
+                                    <br/>
+            
+            <apex:outputPanel style="spacing:35px;">           
+                <h2 style="font-size:medium;"><b>{!$Label.SC_YouSeeConsultantSubHeader1}</b></h2>
+                    <br/>&nbsp;<br/>
+                        <table border="0">
+                            <tr><td>&nbsp;&nbsp;{!$Label.SC_YSConsultantList1}</td></tr>
+                            <tr><td><div class="bullets">
+                            <ul>
+                                <li> {!$Label.SC_YSConsultantContactNumber}</li>
+                                <li><a href="mailto:foreningsservice@yousee.dk">{!$Label.SC_YSConsultantEmail}</a></li>
+                            </ul>
+                            </div></td>
+                            </tr>
+                        </table>
+            </apex:outputPanel>
+                            <br/> &nbsp; <br/>
+            <apex:outputPanel style="spacing:15px;">
+                <h2 style="font-size:medium;"><b>{!$Label.SC_YouSeeConsultantSubHeader2}</b></h2>
+                    <br/> &nbsp; <br/>
+                <table border="0">
+                <tr><td> &nbsp; &nbsp;  {!$Label.SC_YSConsultantList2} </td> </tr>
+                <tr>
+                    <td>
+                        <div class="bullets"> 
+                            <ul>
+                                <li> <apex:outputText value="{!$Label.SC_YSConsultantTechContactNumber}" /> </li>
+                                <li> <a href="mailto:fejlservice@yousee.dk">{!$Label.SC_YSConsultantTechEmail} </a> </li>
+                            </ul>
+                        </div>
+                    </td>
+                </tr>
+                </table>
+            </apex:outputPanel>
+</apex:pageBlock>
+<apex:pageMessage detail="{!$Label.CableUnitNotMatched}" rendered="{!!renderSection}" severity="error"></apex:pageMessage>
+<script type="text/javascript">printContentAreaEnd();</script>
+<script type="text/javascript">printFooter();</script>
+ </apex:form>
+ </body>
+ </html>
+</apex:page>

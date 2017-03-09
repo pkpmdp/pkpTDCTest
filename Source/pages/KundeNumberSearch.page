@@ -1,0 +1,98 @@
+<apex:page controller="KundeNumberSearchController" showHeader="false" sidebar="false" cache="false"> 
+   <style>
+           #DIV_Container{padding: 0; margin: 0; background-color: #CBECF5;}
+
+    </style>
+    <div id="DIV_Container">
+        <apex:form id="frm">
+            <apex:Messages />
+           Kundenummer: <apex:inputtext label="Kundenummer" value="{!KundeNumber}" id="custno" onkeypress="return enterSearch(event)" /> <br></br><br></br>
+            <apex:commandButton value="Søg" onclick="search()" reRender="frm"/>
+            <!--<input type="button" id="searchb" value="Søg" onClick="search()" oncomplete="onControllerReturn()"/> -->
+            <apex:actionFunction name="callAction1" action="{!showAccountbykundenumber}" oncomplete="onControllerReturn('{!result}','{!accId}','{!KundeNumber}')"></apex:actionFunction>
+            <br></br>
+            Klik på "Søg" for at finde kunden med det indtastede kundenr.
+        </apex:form>
+    </div>
+<script type="text/javascript">
+            function  enterSearch(event){
+              //alert('Inside enter search');
+              //alert(window.event.keyCode);
+              if(window.event && window.event.keyCode == 13 || event.which == 13){
+                //  alert('Inside if');
+                  search();
+                  //alert(document.getElemenById("searchb"));
+                  //var eleId = document.getElemenById("searchb");
+                  
+                  //eleId.click();
+                  return false;
+              }
+              else{
+                  //alert('Inside else');
+                  true;
+              }    
+          }
+
+            function search()
+            {
+                //alert('search');
+                //var kundeno=document.getElementById("custno").value;
+                callAction1();
+            }
+             function onControllerReturn(result,accId,kundeno){
+                 //alert('result' +result);
+                 //alert('onControllerReturn ');
+                 var res = result;
+                 //  alert('res'+res);
+              var url1=document.referrer;
+              if(res == 'positive')
+               {
+                   //alert('inside positive');
+                   var index = url1.indexOf(".com");
+                   var strurl =url1.substring(0,index+5);
+                   strurl =strurl + accId ;
+                   //alert('URl' + strurl )
+                   window.open(strurl,'_top');
+               }
+               else{
+                   //alert('inside else');
+                   
+                   var index = url1.indexOf(".com");
+                   var strurl =url1.substring(0,index+5);
+                   //alert(strurl);
+                   strurl =strurl + 'apex/ErrorComponentpage?Kundenummer='+kundeno;
+                   window.open(strurl,'_top');
+               }
+         }
+function addLoadEvent(func) { 
+          
+              var oldonload = window.onload; 
+              
+              if (typeof window.onload != 'function')
+               { 
+                   window.onload = func; 
+               } 
+              else 
+              { 
+                  window.onload = function() {
+                       if (oldonload) { oldonload(); } func();
+                   } 
+              }
+          }
+          
+          function init() 
+          { 
+              var elem_sbstr = document.getElementById("custno"); 
+              if (elem_sbstr) elem_sbstr.focus();
+          }
+           
+          addLoadEvent(init);
+           
+</script>
+    <script>
+    function theFlowIWantToCall(){ 
+        window.location= '/flow/Customer_Search_Test';
+    }
+</script> 
+
+</apex:page>

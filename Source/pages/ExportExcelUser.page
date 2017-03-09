@@ -1,0 +1,43 @@
+<apex:page cache="true" standardStylesheets="false" contentType="application/vnd.ms-excel#PortalUser.xls" controller="ManagePortalUserController" showheader="false">
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+</head>
+<style>
+.colAlign{
+ align:left;
+}
+</style>
+<apex:pageBlock >
+   <table border="1">
+   	<thead>
+   		<tr>
+   		  <!-- <th style="text-align:left;">Navn</th> -->
+		  <th style="text-align:left;">Fornavn</th>
+   		  <th style="text-align:left;">Efternavn</th>
+   		  <th style="text-align:left;">Email</th>
+   		  <th style="text-align:left;">Arb. tlf</th>
+   		  <th style="text-align:left;">Mobil</th>
+   		  <th style="text-align:left;">Privat tlf.</th>
+   		  <th style="text-align:left;">Adresse</th>
+		  <th style="text-align:left;">Brugertype</th>
+   		</tr>
+   	</thead>
+   	<tbody> 
+		<apex:repeat value="{!ListExport}" var="cuList">
+             <tr>
+             	<!-- <td style="text-align:left;width:150px">{!cuList.contact.FirstName}&nbsp;{!cuList.contact.LastName}</td> -->
+             	<td style="text-align:left;width:150px">{!cuList.contact.FirstName}</td>
+	            <td style="text-align:left;width:150px">{!cuList.contact.LastName}</td>
+                <td style="text-align:left;width:150px">{!cuList.contact.Email}</td>
+                <td style="text-align:left;">{!cuList.contact.Phone}</td>
+				<td style="text-align:left;">{!cuList.contact.MobilePhone}</td>
+                <td style="text-align:left;">{!cuList.contact.HomePhone}</td>
+				<td style="text-align:left;width:150px">{!cuList.contact.Address_merge_field__c}</td>
+				<!-- <td style="text-align:left;">{!if(cuList.contact.Street_P__r.Name!=null,cuList.contact.Street_P__r.Name+',','')}{!if(cuList.contact.Street_P__r.House_No__c!=null,cuList.contact.Street_P__r.House_No__c+',','')}{!if(cuList.contact.Entrance_P__c!=null,cuList.contact.Entrance_P__c+',','')}{!if(cuList.contact.Floor_No_P__c!=null,cuList.contact.Floor_No_P__c+',','')}{!if(cuList.contact..Side_P__c!=null,cuList.contact.Side_P__c+',','')}{!if(cuList.contact.Post_Code_P__c!=null,cuList.contact.Post_Code_P__c+',','')}{!if(cuList.contact.Town_P__c!=null,cuList.contact.Town_P__c,'')}</td> -->
+             	<td style="text-align:left;width:130px">{!cuList.UserType}</td>
+             </tr>	      
+      </apex:repeat>    		
+   	</tbody>
+   </table>
+</apex:pageBlock>
+</apex:page>

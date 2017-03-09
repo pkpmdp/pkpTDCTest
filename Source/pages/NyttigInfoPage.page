@@ -1,0 +1,43 @@
+<apex:page controller="DealerwebInformationController" sidebar="false" showHeader="false" applyHtmlTag="false" >
+<html class="cvi2015"> <!--spoc 2206-->
+
+<head>
+
+<style>
+ .fontVerdana{ font-family: 'Verdana'; }
+</style>
+</head>
+<apex:form rendered="{!$Label.DE_Login_Access}">
+    <center>
+    <apex:image url="{!$Resource.DW_Maintenance_Image_2}" width="400" height="400"/>
+        <br></br>
+    <apex:outputText style="color: #629E00;font-size: large;" value="{!$Label.DW_Maintenance_message}">
+        
+    </apex:outputText>
+    <br></br>
+    <a class="dialogbutton_orange Right" href="/secur/logout.jsp" style="position: relative; left: -15px;"><span>Back</span></a>
+    </center>
+    </apex:form>
+<apex:form rendered="{! If($Label.DE_Login_Access =='False' ,true,false) }" >
+<script type="text/javascript"  src="https://yousee.dk/sitecore/content/data/export/export.aspx?itemguid={9BCB77D6-2416-42FD-BC92-57623D728568}&functions=true"></script>
+<!-- Added for DW 750 -->
+<c:TopMenuComponent ></c:TopMenuComponent> 
+<script type="text/javascript">printHeader();</script>
+<script type="text/javascript">printTopMenu();</script>
+<script type="text/javascript">printContentAreaBegin();</script>
+
+<body> 
+<apex:pageBlock >   
+     <apex:PageBlockSection title="{!pageHeaderValue}" collapsible="false" columns="1" >
+          <apex:dataTable value="{!information}" var="info"  cellspacing="5"> 
+              <apex:column value="{!info.Description__c}" styleClass="fontVerdana"/>
+          </apex:dataTable>
+    </apex:PageBlockSection>  
+</apex:pageBlock>
+<script type="text/javascript">printContentAreaEnd();</script>
+<script type="text/javascript">printFooter();</script>
+<script type="text/javascript" src="js/click.js" charset="ISO-8859-1"></script>
+</body>
+</apex:form>
+</html>
+</apex:page>

@@ -1,0 +1,36 @@
+<apex:page standardController="Account" extensions="clsConsoleUsageTabController" action="{!pageAction}" showHeader="true" sidebar="false" cache="true">
+  <apex:pageMessages />
+  <apex:form id="form">      
+    <apex:pageBlock id="productPageBlock">
+      <apex:inputHidden value="{!Account.Customer_No__c}"/>
+      <apex:inputHidden value="{!Account.Currency_Format__c}"/>
+      <apex:outputField value="{!Account.Street_YK__r.External_Id__c}" rendered="false"/>
+      
+      <apex:pageBlockSection columns="1" title="{!$Label.Latest_Product_Usage}">
+        <apex:panelGrid columns="2" id="idGrid" width="100%" styleClass="latestUsageGrid">
+        <!-- <span style="vertical-align:top"> -->
+          <apex:panelGrid columns="1" id="idGrid2" width="100%" cellpadding="0px" cellspacing="0px">
+            <apex:pageBlockTable var="usage" value="{!productUsage}"  id="productUsageTable" rules="none">
+              <apex:column headerValue="{!$Label.BB_Product}">
+                  <apex:outputLink rendered="{!IF(usage.forbrugUrl != '', true, false)}" value="{!usage.forbrugUrl}" id="scriptLink" styleClass="viewLink">{!usage.productName}</apex:outputLink>
+                  <apex:outputText rendered="{!IF(usage.forbrugUrl == '', true, false)}" styleClass="viewLink" value="{!usage.productName}" />
+              </apex:column>               
+              <apex:column headerValue="{!$Label.BB_Max_forbrug}" value="{!usage.maxLimit}"  />
+              <apex:column headerValue="{!$Label.BB_Samlet_forbrug}" value="{!usage.usage} GB"  />
+              <apex:column headerValue="{!$Label.BB_Forbrug_percent}" value="{!usage.percentUse} %" />
+            </apex:pageBlockTable>
+            <apex:pageBlockTable value="{!returnPathActivated}" var="rp" id="returnPathActivatedTable" rules="none">
+              <apex:column headerValue="{!$Label.BB_Boxusefirstdate}" value="{!rp.boxUseFirstDate}"/>
+              <apex:column headerValue="{!$Label.BB_Return_path_activated}" value="{!rp.returnPathDate}"/>
+            </apex:pageBlockTable>
+          </apex:panelGrid>
+          <!-- </span> -->
+          <apex:pageBlockTable value="{!latestProductUsage}" var="latest" id="latestProductUsageTable" rules="none">
+            <apex:column headerValue="{!$Label.Column_Service}" value="{!latest.service}"/>
+            <apex:column headerValue="{!$Label.Column_Date}" value="{!latest.latestUsage}"/>
+          </apex:pageBlockTable>             
+        </apex:panelGrid>
+      </apex:pageBlockSection>
+    </apex:pageBlock>       
+  </apex:form>
+</apex:page>

@@ -1,0 +1,21 @@
+<apex:component controller="PortalUserMailService" access="global">
+<form>
+<apex:outputPanel >
+<br/>
+<apex:outputText value="Fornavn:"/>&nbsp;
+<apex:outputText value="{!con.firstname}"/><br/><br/>
+<apex:outputText value="Efternavn:"/>&nbsp;
+<apex:outputText value="{!con.lastname}"/><br/><br/>
+<apex:outputText value="E-mail:"/>&nbsp;
+<apex:outputText value="{!con.email}"/><br/><br/>
+<apex:outputText value="Adresse:"/>&nbsp;
+<apex:outputText value="{!con1.Address_merge_field__c}"/><br/><br/>
+<apex:outputText value="Arb. tlf.:"/>&nbsp;
+<apex:outputText value="{!con.homephone}"/><br/><br/>
+<apex:outputText value="Privat tlf.:"/>&nbsp;
+<apex:outputText value="{!con.phone}"/><br/><br/>
+<apex:outputText value="Mobil:"/>&nbsp;
+<apex:outputText value="{!con.mobilephone}"/><br/><br/>
+</apex:outputPanel>
+</form>
+</apex:component>

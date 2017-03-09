@@ -1,0 +1,95 @@
+<apex:component >
+<style>
+.listAlign { margin: 0px 0px; display: block; } 
+.profileDisplay{display: none;}
+.topAlign {  margin:2px 0px 1px 2px; display: block;}
+.parenttopAlign {  margin:1px 0px 1px 2px; display: block;} 
+</style>
+
+<apex:stylesheet value="{!URLFOR($Resource.scStyleCss,'myStyle/myStyle.css')}"/>
+
+<apex:attribute name="PortalBrugerRole" description="This is the value of Bruger Role populating from custom setting in component." type="String" required="false"/>
+
+<script type="text/javascript"> 
+var cableunitnumber = '{!$CurrentPage.parameters.cableunitnumber}';
+var accountId = '{!$CurrentPage.parameters.accountId}';
+var dataSyncLogId = '{!$CurrentPage.parameters.dataSyncLogId}';
+var userProfile  = '{!$Profile.Name}';
+var contactRoleName = '{!$CurrentPage.parameters.loggedInUserRoleName}';
+var portalAdminUser = '{!$CurrentPage.parameters.portalAdminUser}';
+
+
+function checkProfile(){
+     //alert('inside checkprofile');
+     var newURL;
+     newURL = window.location.protocol + "//" + (window.location.host).replace("//","/")+'{!$Site.Prefix}';
+     var exURL;
+     
+     setParentMenu();
+     //alert('role is :#'+contactRoleName+'#');
+     var profileList=document.getElementById('productnavigation').childNodes;
+     
+     for (var p=0; p < profileList.length; p++){
+        var listcount = 0;
+        if(profileList[p].nodeName=='UL'){
+                  var mUL=profileList[p].childNodes;
+                  for (var i=0; i < mUL.length; i++){
+                     if(mUL[i].nodeName == 'LI' ){
+                            mUL[i].className='listAlign';
+                            if(contactRoleName != null || contactRoleName != ''){
+                                   if(userProfile  != portalAdminUser && i == 1 && contactRoleName == portalBrugerRole) {
+                                     //  listcount = listcount + 1;
+   	                                  mUL[i].className+=' profileDisplay';
+                                   }
+                                   listcount = listcount + 1;
+                                   var mA = mUL[i].childNodes;
+                                   for(a=0; a< mA.length; a++){
+                                   var mB = mA[a].childNodes;
+                                      switch(listcount){
+					                   case 1 : 
+					                   	      exURL = newURL + '/apex/ViewCableUnitsHomePage';
+					                          mA[a].setAttribute('href',exURL);
+					                          break;
+					                   case 2 : 
+					                         exURL = newURL + '/apex/ManagePortalUsersPage';
+					                         mA[a].setAttribute('href',exURL);
+					                     	 break;
+					                    case 3 : 
+					                         exURL = newURL + '/apex/EditContactDispatcherPage?loggedInUserRoleName='+ contactRoleName;
+					                       	 mA[a].setAttribute('href',exURL);
+					                       	 break;
+					                    case 4 : 
+					                         exURL = newURL + '/secur/logout.jsp';
+					                         mA[a].setAttribute('href',exURL);
+					                    	break;   
+					               }
+       
+                                   }
+                             }
+                       }
+                   }
+          }
+   }
+    
+ }
+
+function setParentMenu(){
+   var myParentlist=document.getElementById('inunion').childNodes;
+   for (p=0; p<myParentlist.length; p++){
+         var mP=myParentlist[p].childNodes;
+        for (j=0; j<mP.length; j++){
+            var mS=mP[j].childNodes;
+            if(mP[j].nodeName=="LI"){
+              mP[j].className='parenttopAlign ';
+            }
+        }
+    }
+}
+
+function changeLink(){
+	checkProfile();
+	setParentMenu();
+	}
+ document.onload = changeLink();
+</script>
+</apex:component>

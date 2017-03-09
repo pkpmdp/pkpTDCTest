@@ -1,0 +1,67 @@
+<apex:page controller="clsCasesTabController" tabStyle="Case" action="{!retrieveNextCaseInConsoleLukOgnaeste}" showHeader="false" sidebar="false">
+<apex:includeScript value="{!URLFOR($Resource.jQuery160)}"/>
+<apex:includeScript value="/support/console/28.0/integration.js"/>
+
+<!-- This Page is developed for spoc-1717, to close a case and open next case from logged in users queue in console -->
+<script type="text/javascript">
+
+    var j$ = jQuery.noConflict();
+    j$(document).ready(function() {
+        var accId = '{!newAccountTabID}';   // Next Case's AccountId       
+        var caseId = '{!newCaseTabID}'      // Next Case Id
+        var closeAccId = '{!CloseCaseAccId}'; // Previous Case AccountId
+        var oldcase = '{!CaseId}';
+        var myValues = new Array();
+        //If the Next Case does not have any Account associated with it, it will open the next case in the Primary tab
+        if(accId == ''){       
+            var url = '/' + caseId;
+            //alert('Case does not have an account');
+            sforce.console.getPrimaryTabIds(function(showTabId){
+                    myValues=showTabId.ids;
+                    //alert('Primary tab Id' +showTabId.ids);
+                    for(var i = 0;i < myValues.length; i++){
+                        sforce.console.openPrimaryTab(myValues[i],'/'+oldcase,true,'',function(success){
+                            //alert(sucess.success);
+                        });
+                    }   
+                
+                });
+                
+            sforce.console.openPrimaryTab(null, url , true);
+            }
+        //If it has a Account associated , it will open the Account in the primary tab and the case under it as a subtab
+        else{                   
+            var url = '/' + accId;
+            var caseURL = '/' + caseId;
+                
+                // If the Next Case has the same Account as the Close Case's Account, it will open as a subtab to the previous Account's subtab              
+                if(accId == closeAccId){
+                    //alert('Case has same account');
+                     sforce.console.getEnclosingPrimaryTabId(function(obj){
+                        sforce.console.openSubtab(obj.id, caseURL , true);
+                    });             
+                }      
+                else{
+                    //alert ('case has a different account');
+                    sforce.console.getPrimaryTabIds(function(showTabId){
+                    myValues=showTabId.ids;
+                    //alert('Primary tab Id' +showTabId.ids);
+                    for(var i = 0;i < myValues.length; i++){
+                        
+                        
+                        sforce.console.openPrimaryTab(myValues[i],'/'+oldcase,true,'',function(success){
+                            //alert(sucess.success);
+                            //alert('Refresh the closed case sub tab');
+                        });
+                    }   
+                
+                    });
+                     sforce.console.openPrimaryTab(null, caseURL ,true);  
+                  
+                }                                                          
+            }  
+            
+                            
+        });            
+</script>
+ </apex:page>

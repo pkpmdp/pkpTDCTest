@@ -1,0 +1,58 @@
+<apex:component controller="spoc2019compController">
+<apex:attribute type="spoc2019cmp_cls" name="Caseobj" description="Selected case" assignTo="{!objwrap}"/>
+<apex:pageBlock mode="maindetail">          
+            <apex:pageBlockSection showHeader="false" columns="1">
+                <apex:pageBlockSectionItem >
+                    Hvilken film/trailer/preview drejer henvendelsen sig om?
+                     <apex:outputpanel >
+                       <div class="requiredInput">
+                          <div class="requiredBlock"></div>
+                            <apex:inputText id="brwser" value="{!objWrap.selectMovie}"/>
+                         </div>
+                    </apex:outputpanel>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    Omhandler din henvendelse fejl på billede eller lyd?
+                     <apex:outputpanel >
+                       <div class="requiredInput">
+                          <div class="requiredBlock"></div>
+                            <apex:selectList value="{!objWrap.selectVidAud}" multiselect="false" size="1">
+                                <apex:selectOptions value="{!objWrap.listAudVidMac}"/>
+                            </apex:selectList>
+                         </div>
+                    </apex:outputpanel>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    Tidspunkt for hændelse i filmen
+                     <apex:outputpanel >
+                       <div class="requiredInput">
+                          <div class="requiredBlock"></div>
+                            <apex:inputText value="{!objWrap.TimeOfInciMv}"/>
+                         </div>
+                    </apex:outputpanel>
+                </apex:pageBlockSectionItem>
+                
+                <apex:pageBlockSectionItem >
+                    Tidspunkt for hændelse på dagen
+                     <apex:outputpanel >
+                       <div class="requiredInput">
+                          <div class="requiredBlock"></div>
+                            <apex:inputText value="{!objWrap.TimeOfInciday}"/>
+                         </div>
+                    </apex:outputpanel>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    Er din telefon/tablet forbundet til internettet via mobilnetværk eller Wifi?
+                     <apex:outputpanel >
+                       <div class="requiredInput">
+                          <div class="requiredBlock"></div>
+                            <apex:selectList value="{!objWrap.selectIntCnType}" multiselect="false" size="1">
+                                <apex:selectOptions value="{!objWrap.listIntConTypeMac}"/>
+                            </apex:selectList>
+                         </div>
+                    </apex:outputpanel>
+                </apex:pageBlockSectionItem>
+            </apex:pageBlockSection>
+            
+        </apex:pageBlock>   
+</apex:component>

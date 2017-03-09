@@ -1,0 +1,7 @@
+<apex:page sidebar="false" controller="Amazon_ViewFile_CT" action="{!doPageLoad}" showHeader="false">
+       <script language = "javascript">
+    		//window.location.href = "data:{!contentType};base64,{!fileData}"; 
+    		window.location.href = '{!url}';
+       </script>
+    
+</apex:page>

@@ -1,0 +1,121 @@
+<apex:page controller="YouSee_O_customers_W2L" title="Registrer medlemmer" showHeader="false" standardStylesheets="true">
+<script type="text/javascript" src="{!siteCoreUrl}/sitecore/content/data/export/export.aspx?itemguid={5D058968-B99A-409A-842E-4D5EF8A2C929}&functions=true"></script>
+<body id="servicepage">
+
+
+   <apex:form >
+
+    <!--  <apex:messages id="error" styleClass="errorMsg" layout="table" style="margin-top:1em;"/> -->
+    
+    <style>
+        outputLabel { width:100%; }
+        table.errort td { color: #6ba912; font-weight:bold; }
+        .btn{margin-left: -75px;  margin-right: 80px;}
+    </style>
+    <script type="text/javascript">printHeader();</script>
+    <script type="text/javascript">printTopMenu();</script>
+    <script type="text/javascript">printContentAreaBegin();</script>
+    <c:SCLinksComponent CableUnitName="{!cableUnitName}" PortalBrugerRole="{!portalBrugerRole}" />  
+  
+    
+       <div class="bullets">
+           <ul>
+               <li>
+                    Når du registrerer et nyt medlem i din forening bliver der automatisk sendt en mail til den indtastede e-mail. 
+                    Mailen vil blive sendt fra dig og give dit medlem mulighed for gennem NemID at oprette sig på MitYouSee og få endnu mere ud af YouSee. 
+                    Samtidig vil du på selvbetjeningen have en opdateret medlemsliste og kunne se, hvem der har tilmeldt sig.
+               </li>
+           </ul>
+    </div>
+          <apex:pageBlock rendered="{!renderSection}"> 
+        <apex:pageBlock title="Registrer medlem"  >
+
+          <apex:pageBlockButtons location="bottom" >
+
+           <apex:commandButton value="Gem og send" action="{!saveLead}" reRender="form,msg" status="queryStatus" styleClass="dialogbutton_orange"/>
+
+        </apex:pageBlockButtons> 
+
+        <apex:pageBlockSection collapsible="false" columns="1" id="form"  >
+
+          <apex:pageBlockSectionItem rendered="{!errormsg}">  
+              <apex:messages id="error" styleClass="errort"  layout="table" style="margin-top:1em;"/>
+              <!--<apex:outputPanel rendered="{!resend}">
+                  <div>
+                  <apex:commandButton value="Gensend" action="{!Resendemail}" />
+                  <apex:commandButton value="Nej" action="{!clearForm}" reRender="form" />
+                  </div>
+              </apex:outputPanel> -->
+          </apex:pageBlockSectionItem>
+          <apex:pageBlockSectionItem rendered="{!resend}">    
+                  <apex:outputPanel layout="block">
+                  <div style="margin-left:205px;" >
+                  <apex:commandButton value="Gensend" action="{!Resendemail}" styleClass="dialogbutton_orange"/>
+                  <apex:commandButton value="Nej" action="{!clearForm}" reRender="form" styleClass="dialogbutton_orange"/>
+                  </div> 
+              </apex:outputPanel> 
+          </apex:pageBlockSectionItem>
+          <apex:pageBlockSectionItem rendered="{!NOT errormsg}">
+          <apex:outputText id="msg" value="{!successmsg}" style="color: #6ba912;font-weight:bold;"  ></apex:outputText> 
+          </apex:pageBlockSectionItem>
+         <apex:actionStatus id="queryStatus">
+            <apex:facet name="start">
+                <c:SC_LoadingComponent BackColor="#efefef" borderColor="#336699" borderSize="3" height="50px" width="120px" 
+                ImageUrl="{!$Resource.Loading}" Message="Loading..." messageStyle="color:darkred;font-size:11pt;font-weight:bold;" />
+            </apex:facet>
+        </apex:actionStatus>
+         
+        <!-- <apex:pageBlockSectionItem >
+         <apex:outputLabel value="Titel"></apex:outputLabel>
+         <apex:inputText value="{!title}"/>
+         </apex:pageBlockSectionItem> -->
+         <apex:pageBlockSectionItem >
+         
+         <apex:outputLabel value="Fornavn"></apex:outputLabel>
+         <apex:outputPanel >
+         <div class="requiredInput">
+         <div class="requiredBlock"></div>
+         <apex:inputText value="{!firstName}" />
+         </div>
+         </apex:outputPanel>
+         </apex:pageBlockSectionItem>
+         <apex:pageBlockSectionItem >
+         <apex:outputLabel value="Efternavn"></apex:outputLabel>
+         <apex:outputPanel >
+         <div class="requiredInput">
+         <div class="requiredBlock"></div>
+         <apex:inputText value="{!lastName}" />
+         </div>
+         </apex:outputPanel>
+         </apex:pageBlockSectionItem>
+         <apex:pageBlockSectionItem >
+         <apex:outputLabel value="Email"></apex:outputLabel>
+         <apex:outputPanel >
+         <div class="requiredInput">
+         <div class="requiredBlock"></div>
+         <apex:inputText value="{!email}" />
+         </div>
+         </apex:outputPanel>
+         </apex:pageBlockSectionItem>
+         <apex:pageBlockSectionItem >
+         <apex:outputLabel value="Mobil" ></apex:outputLabel>
+         <apex:inputText value="{!telephone}" />
+         </apex:pageBlockSectionItem>
+         <apex:pageBlockSectionItem >
+         <apex:outputLabel value="Kundenr"></apex:outputLabel>
+         <apex:outputText value="{!cableUnitNumber}"/>
+        </apex:pageBlockSectionItem>
+        </apex:pageBlockSection>
+     </apex:pageBlock>
+              </apex:pageBlock> 
+    <apex:pageMessage detail="{!$Label.CableUnitNotMatched}" rendered="{!!renderSection}" severity="error"></apex:pageMessage>
+          <!--  <apex:outputText id="msg" value="{!successmsg}" rendered="{!NOT errormsg}" ></apex:outputText> -->  
+    <script type="text/javascript">printContentAreaEnd();</script>
+    <script type="text/javascript">printFooter();</script>
+   </apex:form>
+
+ 
+
+  
+</body>
+</apex:page>

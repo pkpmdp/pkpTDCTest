@@ -1,0 +1,276 @@
+<apex:page standardController="Contact" extensions="POContactPermissionELQController" showHeader="false" sidebar="false">
+    
+<head>
+<!-- StartSystemHeader -->
+<style type="text/css">
+html,body { overflow: hidden; }.sc-view {cursor:default; margin:0; overflow:hidden; position:absolute;}.sc-view-overflow {overflow: auto;}.sc-container-view{} .overlays-active{} .inline-styled-view{} .sc-image-view{} .hidden-border{}.sc-regular-size{} .footer{} .remove-absolute{} .field{} .desc{} .input{} .header{} .column1{} .main{} .sc-static-layout, .sc-view.sc-static-layout { position: relative; }.main{overflow-y: scroll; top: 0px; bottom: 0px; left: 0px; right: 0px; position: absolute;}.elq-form.standard{overflow: visible !important;}.elq-form.ce{overflow: visible !important; position: static;}.ce .sc-view.elq-form{overflow: visible !important; position: relative;}a img{border: none;}body,div,dl,dt,dd,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input,textarea,blockquote,th,td {margin:0;padding:0;}input,textarea,select { font-family:inherit;font-size:inherit;font-weight:inherit;}input,textarea,select {font-size:100%;}a { color: inherit; }.elq-page-view{min-width: 400px;}
+</style><!-- EndSystemheader -->
+<style type="text/css">
+#perm-box {
+    background-color: #F8F8F8;
+    border-bottom: 1px solid #EAEAEA;
+    border-left: 1px solid #EAEAEA;
+    border-radius: 4px 4px 4px 4px;
+    border-right: 1px solid #EAEAEA;
+}
+.pbSubheader h3 {
+    font-size: 9px;
+    color: #000000;
+    padding:0;
+    margin:0;
+}
+.pbSubheader {
+    background-color:#8370C2;
+    background-image: url("https://admin.increase.dk/yousee/eloqua/permission_weblink/images/{f9b21e90-9842-484a-ae36-7a042f2f2ed8}_opacity75.png");
+    border-width: 1px 0 0;
+    padding-left:16px;
+    padding-right:16px;
+    padding-top:4px;
+    padding-bottom:4px;
+    margin-bottom: 2px;
+    margin-top: 15px;
+}
+.pbSubsection {
+    font-size: 9px;
+    font-weight: normal;
+    color: #999999;
+    padding:10px;
+
+}
+body .bPageBlock .pbBody .labelCol {
+    color: #4A4A56;
+}
+.bPageBlock .labelCol {
+    font-weight: bold;
+    text-align: right;
+}
+body, td {
+    color: #222222;
+    font-family: Arial,Helvetica,sans-serif;
+    font-size:14px;
+}
+.btn-elq {
+    -moz-border-bottom-colors: none;
+    -moz-border-left-colors: none;
+    -moz-border-right-colors: none;
+    -moz-border-top-colors: none;
+    background: url("https://admin.increase.dk/yousee/eloqua/permission_weblink/images/{30e39fd7-501c-45f0-9d77-251cbf13f02f}_btn_sprite.png") repeat-x scroll right top #E8E8E9;
+    border-color: #B5B5B5 #B5B5B5 #7F7F7F;
+    border-image: none;
+    border-radius: 3px 3px 3px 3px;
+    border-style: solid;
+    border-width: 1px;
+    color: #333333;
+    font-weight: bold;
+    padding: 2px 3px;
+    font-size:11px;
+}
+.btn-elq:hover {
+    background-color:#eee;
+    background-image:none;
+}
+</style>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+<script type="text/javascript">
+
+function getParameterByName(name) {
+    name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+        results = regex.exec(location.search);
+    return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+}
+
+function getParameterByName(name) {
+    name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+        results = regex.exec(location.search);
+    return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+}
+
+function getPrettyValue() {
+    if('{!contact.email}'!='' && '{!contact.Eloqua_ID_Advanced__c}'=='') {   
+        //alert('{!contact.email}');    
+        return '{!contact.email}';
+    } else if ('{!contact.email}'!='' && '{!contact.Eloqua_ID_Advanced__c}'!='' && !hasElqRegistered) {
+        alert('right choice');
+        return '{!contact.email}';
+    } else {
+      // alert('WEN'+'{!contact.email}'+'h'+'{!contact.Eloqua_ID_Advanced__c}');    
+        return '{!contact.Eloqua_ID_Advanced__c}';
+    }   
+}
+
+
+var splitUrl = document.URL.split("/");
+var initialPage = true;
+var hasValue = false;
+var elqRegisterEmail;
+var hasElqRegistered = false; 
+var EloquaSiteID = "1698286126";
+var _elqQ = _elqQ || [];
+_elqQ.push(['elqSetSiteId', EloquaSiteID]);
+_elqQ.push(['elqTrackPageView']);
+    
+(function () {
+    function async_load() {
+        var s = document.createElement('script'); s.type = 'text/javascript'; s.async = true;
+        s.src = '//img.en25.com/i/elqCfg.min.js';
+        var x = document.getElementsByTagName('script')[0]; x.parentNode.insertBefore(s, x);
+    }
+    if (window.addEventListener) window.addEventListener('DOMContentLoaded', async_load, false);
+    else if (window.attachEvent) window.attachEvent('onload', async_load); 
+})();
+
+function SetElqContent(){     
+   
+    hasElqRegistered = true;
+    if (this.GetElqContentPersonalizationValue){        
+        if(GetElqContentPersonalizationValue('C_Permission1')){
+            if(GetElqContentPersonalizationValue('C_Permission1')=="1"){
+                $('input[name="permission"]').attr("checked","true");
+            }
+        }
+              
+        if(GetElqContentPersonalizationValue('C_Permission_No_Thank1')){
+            if(GetElqContentPersonalizationValue('C_Permission_No_Thank1')=="1"){
+                $('input[name="permissionNoThank"]').attr("checked","true");
+            }
+        }
+         
+        elqRegisterEmail = GetElqContentPersonalizationValue('C_EmailAddress');       
+        //if(initialPage != true){
+          //  submitForm();
+        //}
+    } 
+    }
+
+var prettyPURL;
+
+_elqQ.push(['elqDataLookup', escape('d0566eff-2210-438e-bad0-f83daa21d34b'),'<C_EmailAddress>' + '{!contact.email}' + '</C_EmailAddress>']);
+_elqQ.push(['elqDataLookup', escape('d0566eff-2210-438e-bad0-f83daa21d34b'),'<C_EmailAddress>' + '{!contact.Eloqua_ID_Advanced__c}' + '</C_EmailAddress>']);
+
+
+var permission = "0";
+var permissionNoThank = "0";
+var SFDCPermission;
+
+function submitForm() {
+        permission = "0";
+        permissionNoThank = "0";
+        SFDCPermission = false;
+        if ($('input[name="permission"]').prop('checked')) {
+            permission = "on";
+            SFDCPermission = true;
+            //alert('debug checkbox'+permission);
+        }
+        
+        if ($('input[name="permissionNoThank"]').prop('checked')) {
+            permissionNoThank = "on";
+        }
+        $.ajax({
+            dataType: 'jsonp',
+            type: "POST",
+            url: 'https://s1698286126.t.eloqua.com/e/f2',
+            data: {
+                //emailAddress: $('input[name="emailAddress"]').val(),
+                emailAddress: elqRegisterEmail,
+                sFDCContactID: $('input[name="sFDCContactID"]').val(),
+                permission: permission,
+                permissionNoThank: permissionNoThank,
+                elqSiteId: '1698286126',
+                elqFormName: 'sfdc-weblink-permission'
+            },
+            success: function (data) {
+                           
+                $('h3').html('<span style="color:#666;font-style:italic;font-size:9px">Ændringen er gemt</span></h3>');
+                updatePermission(SFDCPermission);
+            },
+            error: function (data) {
+                //alert('error'+data.status);            
+                if (data.status == 200) {
+                   // alert('pretty'+prettyPURL);
+                    $('h3').html('<span style="color:#666;font-style:italic;font-size:9px">Ændringen er gemt</span></h3>');
+                    updatePermission(SFDCPermission);
+                    return;
+                }
+                $('h3').html('<span style="color:red;font-size:9px">Der er fejl. Ændringen er IKKE gemt</span></h3>');
+            }
+        });
+}
+
+$(document).ready(function () {
+    $('input[type="submit"]').click(function () {
+        if({!isUnknownAddress}) {
+            $('h3').html('<span style="color:#666;font-style:italic;font-size:9px">Ukendt adresse. Ændring gemmes ikke</span></h3>');
+            return false;
+        } else if(('{!contact.email}' == '' || '{!contact.email}' == null) && $('input[name="permission"]').prop('checked')) {
+            $('h3').html('<span style="color:#666;font-style:italic;font-size:9px">Indtast en e-mail-adresse for at registrere permission</span></h3>');
+            return false;
+        } else {
+            $('h3').html('<span style="color:#666;font-style:italic;font-size:9px">Saving...</span></h3>');
+            _elqQ.push(['elqDataLookup', escape('d0566eff-2210-438e-bad0-f83daa21d34b'),'<C_EmailAddress>' + '{!contact.email}' + '</C_EmailAddress>']);
+            _elqQ.push(['elqDataLookup', escape('d0566eff-2210-438e-bad0-f83daa21d34b'),'<C_EmailAddress>' + '{!contact.Eloqua_ID_Advanced__c}' + '</C_EmailAddress>']);
+            if(!hasElqRegistered) {       
+                elqRegisterEmail = '{!contact.email}';
+            }
+            //alert('isRegisted'+hasElqRegistered+', registerEmail'+elqRegisterEmail);        
+            submitForm();
+            return false;
+        }
+    });
+});
+
+    //--></script>
+    </head>
+    <body>
+     <!--div class='main'>
+              <div>
+                 <span class="remove-absolute">
+                 <div id="perm-box"-->
+                    <form method="post" name="sfdc-weblink-permission" action="https://s1698286126.t.eloqua.com/e/f2" id="form21">
+                        <input value="sfdc-weblink-permission" type="hidden" name="elqFormName"/>
+                        <input value="1698286126" type="hidden" name="elqSiteId"/>
+                        <input name="elqCampaignId" type="hidden"/>
+                        <input id="field0" name="sFDCContactID" type="hidden" value="{!contact.id}"/>
+                        <input name="sFDCLeadID" type="hidden" value="" />
+                        <input id="field1" name="emailAddress" type="hidden" value=""/>
+                        
+                        <!--div id="head_eloqua">
+                             <h3><span class="titleSeparatingColon">:</span></h3>
+                        </div-->
+                        
+                        <div>
+                            <input name="permission" type="checkbox"/>&nbsp;&nbsp;&nbsp;
+                            <input type="submit" name="save" class="btn-elq" value="Opdater permission"/>
+                            <h3><span class="titleSeparatingColon">:</span></h3>                            
+                        </div>
+
+                    </form>
+                    
+                    <apex:form >
+                     <p><apex:outputText value="" id="showstate" /></p>
+                        
+                        <apex:actionFunction action="{!updatePermission}" name="updatePermission" rerender="showstate">
+                            <apex:param name="permission" assignTo="{!permission}" value="" />
+                        </apex:actionFunction>
+                    </apex:form>
+
+                <!--/div>
+            </span>
+           
+          </div>              
+        </div--> <!--[if lt IE 7]>
+<script src='http://img03.en25.com/i/IE7.js'></script><script type='text/javascript'>var elements = document.all;var len = elements.length;for(var i = 0; i<len; i+=1){IE7.Layout.fixRight(elements[i]);IE7.Layout.fixBottom(elements[i]);}</script>
+<![endif]-->
+</body>
+<script type="text/javascript">
+<!--
+if (navigator.appName == 'Netscape' || navigator.appName == 'Opera'){
+     document.write('<layer hidden=true><img src="http://s1698286126.t.eloqua.com/visitor/v200/svrGP?pps=60&siteid=1698286126&PURLSiteID=3&optin=disabled&PURLSiteAlternateDNSID=0&LandingPageID=14&PURLRecordID=0&PURLGUID=426C195C98E3455E958FBCC95EF6D6B5&UseRelativePath=True&elq={00000000-0000-0000-0000-000000000000}&elq_ck=0&email=' + getParameterByName('email') + '" border=0 width=1 height=1 ><\/layer>');
+}else{
+     document.write('<img style="display:none" src="http://s1698286126.t.eloqua.com/visitor/v200/svrGP?pps=60&siteid=1698286126&PURLSiteID=3&optin=disabled&PURLSiteAlternateDNSID=0&LandingPageID=14&PURLRecordID=0&PURLGUID=426C195C98E3455E958FBCC95EF6D6B5&UseRelativePath=True&elq={00000000-0000-0000-0000-000000000000}&elq_ck=0&email=' + getParameterByName('email') + '" border=0 width=1 height=1 >');
+}
+-->
+</script>
+ 
+</apex:page>

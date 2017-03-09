@@ -1,0 +1,51 @@
+<apex:page standardController="Account" extensions="clsRelatedOCustomerRelationsController" showHeader="false" sidebar="false" cache="true"> 
+<apex:form >
+  <apex:pageMessages />
+  <script type="text/javascript">
+      function doSearch() {        
+        searchServer(document.getElementById("searchfilter").value);
+      }
+   </script>
+  <apex:actionFunction name="searchServer" action="{!runFilter}" rerender="idRelationsTable" status="status">
+          <apex:param name="searchfilter" value="" />          
+  </apex:actionFunction>
+  
+  <apex:pageBlock id="idRelatedOCustomerRelations">
+  <table cellpadding="2" cellspacing="2">
+      <tr>
+        <td style="font-weight:bold;">Filter<br/>
+            <input type="text" id="searchfilter"/>
+            <input type="submit" value="Opdater" onclick="doSearch();return false;"/>                        
+        </td>
+      </tr>
+  </table> 
+  <apex:outputpanel >
+        <apex:actionstatus id="status">
+            <apex:facet name="start">
+                <div class="waitingSearchDiv" id="el_loading" style="background-color: #fbfbfb;
+                       height: 100%;opacity:0.65;width:100%;"> 
+                    <div class="waitingHolder" style="top: 74.2px; width: 91px;">
+                        <img class="waitingImage" src="/img/loading.gif" title="Please Wait..." />
+                        <span class="waitingDescription">Loading...</span>
+                    </div>
+                </div>
+            </apex:facet>
+        </apex:actionstatus>
+    </apex:outputpanel>   
+    <apex:pageBlockTable value="{!billingRelations}" var="item" id="idRelationsTable">    
+        <apex:column headerValue="Anlægsnr"> 
+            <apex:outputLink value="{!URLFOR($Action.Account.View, item.cableUnit.Id)}" target="_blank">{!item.cableUnit.Cable_Unit__r.Cable_Unit_No__c}</apex:outputLink>
+        </apex:column>
+        <apex:column headerValue="Installationsadresser">
+            <apex:outputLink value="/apex/CableUnitInstallationsPage?id={!item.cableUnit.Cable_Unit__c}&isYFFMode=true" target="_blank">Vis installationsadresser</apex:outputLink>              
+        </apex:column> 
+        <apex:column headerValue="O-Kundenavn">
+            <apex:outputLink rendered="{!accountId!=item.accountId}" value="{!URLFOR($Action.Account.View, item.billingAccount)}" target="_blank">{!item.billingAccount.Name}</apex:outputLink> 
+            <apex:outputText rendered="{!accountId=item.accountId}" value="{!item.accountName}"/> 
+        </apex:column>        
+        <apex:column headerValue="Kundenr." value="{!item.billingAccount.Customer_No__c}" />
+        <apex:column headerValue="Relation type" value="{!item.relationType}"/>
+    </apex:pageBlockTable>    
+  </apex:pageBlock>
+ </apex:form>  
+</apex:page>

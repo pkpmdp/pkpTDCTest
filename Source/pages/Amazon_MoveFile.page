@@ -1,0 +1,18 @@
+<apex:page controller="Amazon_MoveFile_CT" tabStyle="Cloud_File__c">
+    <apex:pageMessages ></apex:pageMessages>
+    <apex:form >
+        <apex:pageBlock rendered="{!rendrd}">
+            <h2 class="maintitle">{!$Label.Doc_Cable_Unit_Number}&nbsp;&nbsp;</h2>
+            <apex:inputText id="searchCU" value="{!cuNo}"/> <br/><br/><br/>
+            <apex:commandButton id="submit" value="{!$Label.Doc_Move_File}" action="{!MoveFile}" onclick="return confirm('Are you sure, you want to move the file(s)?');"/>
+            &nbsp;&nbsp;&nbsp;
+            <apex:commandButton value="{!$Label.Doc_Cancel}" action="{!Cancel}"/>
+        </apex:pageBlock>
+        
+        <apex:pageBlock rendered="{!!rendrd}">            
+            <center>
+                <apex:commandButton value="{!$Label.Doc_Cancel}" action="{!cancel}"/>
+            </center>                                    
+        </apex:pageBlock>
+    </apex:form>   
+</apex:page>

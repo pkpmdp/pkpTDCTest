@@ -1,0 +1,9 @@
+<apex:page standardController="Cloud_File__c" extensions="Amazon_FileDelete_CTEX" action="{!deleteFile}">
+    <apex:pageMessages ></apex:pageMessages>
+    
+    <apex:form rendered="{!IF(isDeletable == False && docTypeNull == True, False, True)}">
+        <apex:pageBlock >
+            <center><apex:commandButton value="{!$Label.Doc_Cancel}" action="{!Cancel}"/></center>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

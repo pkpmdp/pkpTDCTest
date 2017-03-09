@@ -1,0 +1,26 @@
+<apex:page standardController="Account" extensions="clsPayerLegalCustomerController" showHeader="false" sidebar="false" cache="true">  
+ <apex:pageBlock >
+   	<apex:pageBlockSection columns="2">
+              <apex:pageBlockSection title="Juridisk" columns="1" collapsible="false">
+              		<apex:pageBlockSectionItem >
+						<apex:outputLabel value="Kundenavn" for="account__name"/>
+						<apex:outputLink rendered="{!hasLegal}" value="{!URLFOR($Action.Account.View, cableUnit.Legal_Account_No__c)}" target="_top">{!cableUnit.Legal_Account_No__r.Name}</apex:outputLink>
+					</apex:pageBlockSectionItem>
+              		<apex:outputField value="{!cableUnit.Legal_Account_No__r.PersonEmail}"/>
+              		<apex:outputField value="{!cableUnit.Legal_Account_No__r.Home_Phone__c}"/> 
+              		<apex:outputField value="{!cableUnit.Legal_Account_No__r.PersonMobilePhone}"/>
+              		<apex:outputField value="{!cableUnit.Legal_Account_No__r.Phone}"/>              		         		
+              </apex:pageBlockSection>              
+               <apex:pageBlockSection title="Betaler" columns="1" collapsible="false"> 
+               		<apex:pageBlockSectionItem >
+						<apex:outputLabel value="Kundenavn" for="account__name"/>
+						<apex:outputLink rendered="{!hasPayer}" value="{!URLFOR($Action.Account.View, cableUnit.Payment_Account_No__c)}" target="_top">{!cableUnit.Payment_Account_No__r.Name}</apex:outputLink>
+					</apex:pageBlockSectionItem>
+              		<apex:outputField value="{!cableUnit.Payment_Account_No__r.PersonEmail}"/>
+              		<apex:outputField value="{!cableUnit.Payment_Account_No__r.Home_Phone__c}"/>
+              		<apex:outputField value="{!cableUnit.Payment_Account_No__r.PersonMobilePhone}"/>
+              		<apex:outputField value="{!cableUnit.Payment_Account_No__r.Phone}"/>
+              </apex:pageBlockSection>
+    </apex:pageBlockSection>             
+  </apex:pageBlock>  
+</apex:page>

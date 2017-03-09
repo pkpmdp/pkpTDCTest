@@ -1,0 +1,337 @@
+<apex:page sidebar="false" showHeader="false" id="idPage" controller="DealerProductPageController31" action="{!initializeText}" applyHtmlTag="false">
+    <html class="cvi2015"> <!--spoc 2206-->
+
+<head>  
+    <meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+</head>
+<style>  
+ .fontVerdana{ font-family: 'Verdana'; }
+</style>
+<script type="text/javascript" src="https://yousee.dk/sitecore/content/data/export/export.aspx?itemguid={BD793F05-9B01-4210-BD63-F33431D1013A}&functions=true" > </script>
+<!-- Added for DW 750 -->
+<c:TopMenuComponent1 ></c:TopMenuComponent1>
+<script type="text/javascript">printHeader();</script>
+<script type="text/javascript">printTopMenu();</script>
+<script type="text/javascript">printContentAreaBegin();</script>
+<script type="text/javascript">
+var isYouBioSelected = {!isYouBioSelected}; 
+</script>
+<c:DealerComponent1 ></c:DealerComponent1>
+<c:ProductOfferORcampaign ></c:ProductOfferORcampaign>
+<script type="text/javascript">
+var myJSONObject={!jsonResponse};
+var subString = 'youbio-ga-valg';
+var boxString = 'youbio-eng-valg';
+var showSubSection = 'true';
+var showBoxSection = 'true';
+var firstJSONResponse = {!firstJsonResponse};   
+var custFlag = false; 
+//Added for BS 
+var freeChoiceFlag={!isFreeChoicePageFlag};   
+var currentKundeNumber = '{!cCustInstAdd.customerNumber}'; 
+var newCustFlag = '{!isNewCustomer}';   
+if(newCustFlag == "true"){
+    custFlag  = "false"; 
+}else if(newCustFlag == "false"){
+    custFlag  = "true";
+}
+getproductOffers();
+$(document).ready( function() {
+  $("table.zebra").find("tr:nth-child(even)").each(
+    function(i) {
+      if( 0 == $(this).find("th").length ) {
+        $(this).addClass("odd");
+      }
+    }
+  );
+});    
+function checkYouBioProducts(element){
+    var subId = "{!$Label.YouBioSubscription}";
+    var boxId = "{!$Label.YouBioBox}";
+    var selectedProducts = new Array(); 
+    selectedSubs = $("#subscriptionTable input:checked");
+    selectedBox = $("#boxTable input:checked");
+    if(element.id == subId){
+        if(selectedSubs.length > 0){
+            var selectedProduct=selectedSubs[0].value;
+            var isSelectedProductInValgNode='';
+            if(myJSONObject['kunde-data']['valgt']!=undefined){
+                isSelectedProductInValgNode=isProductInBasket(selectedProduct,myJSONObject['kunde-data']['valgt']);
+            }  
+            if(isSelectedProductInValgNode!='true'){
+                setSelectedProducts(selectedSubs,youbioSubs,subString);
+            }
+            else{
+                return false;
+            }
+        }
+        
+    }
+    if(element.id == boxId){
+    
+        var selectedProduct=selectedBox[0].value;
+        if(selectedBox.length > 0){
+            var isSelectedProductInValgNode='';
+            if(myJSONObject['kunde-data']['valgt']!=undefined){
+                isSelectedProductInValgNode=isProductInBasket(selectedProduct,myJSONObject['kunde-data']['valgt']);
+            }  
+            if(isSelectedProductInValgNode!='true'){
+                setSelectedProducts(selectedBox,youbioBox,boxString);   
+            }
+            else{
+                return false;
+            }       
+        }       
+    }
+    if(selectedSubs.length > 0 || selectedBox.length >0){
+    alert('***** bocs selected ******'+element.id);
+    document.getElementById(element.id).selected = true;
+        var kundeData = JSON.stringify(myJSONObject['kunde-data']);
+        var arrayInit = myJSONObject['array-init'];
+        var etag = myJSONObject['ETag'];
+        var mergedstring = kundeData +'@@@'+arrayInit+'@@@'+etag;
+        document.getElementById("mergedstring").value = mergedstring;  
+        if(etag!='' && etag!=undefined && arrayInit!='' && arrayInit!=undefined && kundeData!='' && kundeData!=undefined){
+            try{
+                addYoubioProducts(etag, kundeData, arrayInit);  
+                var errMsg = '';        
+                $("#errorBlock").html(errMsg);
+            }
+            catch(err){
+                alert("Error: in product selection: "+err.description);
+            }               
+        }
+        else
+            alert('Parameters to call Kasia is not correct.');
+                
+    }
+    
+    
+}
+
+function hasYouBioSubscription(aftaler){
+    var hasYBSubs = 'false';
+    try{
+          $.each(aftaler, function(i,aftalerNode){ 
+          //check for YouBio subscription in aftaler
+              if(aftalerNode.kundeid != undefined && kundeid == aftalerNode.kundeid && aftalerNode.aftaletype=='youbio'){
+                 hasYBSubs='true';
+              }
+          });
+          return hasYBSubs;
+     }
+     catch(err){         
+     }
+}
+function redirectCustomerInfo(){
+    var sub = $("#subscriptionTable input:checked");
+    var box = $("#boxTable input:checked");
+    if(sub.length <=0 && box.length <= 0){
+        var errMsg = 'Vælg venligst et produkt.';        
+        $("#errorBlock").html(errMsg);
+    }
+    else{
+        var errMsg = '';        
+        $("#errorBlock").html(errMsg);
+        gotoCustomerInfoPage();
+    }
+}
+
+function createOfferCampaign(prodArray){
+    if(prodArray.length > 0){
+        $.each(prodArray,function(i, product){
+            productSummary = '';
+            productoffervar = getOfferFlag(product.varenr);                                                                                             
+            if(productoffervar != undefined){                                                               
+                isProductOffer = productoffervar.ProductOfferExists;
+                isProductCampaign = productoffervar.ProductCampaignExists;
+                productSummary = productoffervar.ProductSummary;
+            }
+            product.productSummary = productSummary;
+            product.ProductOffer='';                                                            
+            if(isProductOffer=='true'){
+                product.ProductOffer = isProductOffer;
+            }
+            product.ProductCampaign='';
+            if(isProductCampaign=='true'){
+                product.ProductCampaign=isProductCampaign;
+            }
+        });  
+    }
+}
+</script>
+<script id="youBioSubsTemplate" type="text/x-jQuery-tmpl">  
+        <tr>
+            <td width="5%"><input type="radio" name="${varenr}" value="${varenr}" id="${varenr}" class="prodCheckbox" ${checked} ${disabled} onClick="checkYouBioProducts(this);"/> </td>
+            <td width="30%" class="fontVerdana">${navn}</td>
+            <td  width="30%" align="right"> 
+                 {{if ProductOffer =="true"}}
+                    <img src="{!$Resource.ProductOffer}" >
+                 {{/if}}
+                
+                 {{if ProductCampaign =="true"}}
+                    <img src="{!$Resource.ProductCampaign}">
+                 {{/if}}
+            </td>           
+            <td width="10%" class="fontVerdana">${price}</td>
+            <td width="25%" class="fontVerdana">${priceSuffix}</td>
+        </tr>
+        <tr><td></td><td style="text-align:left;font-size:11px;" COLSPAN="4">${productSummary}</td></tr>
+</script>
+
+
+<link class="user" href="{!$Resource.SalesFlowCSS}" rel="stylesheet" type="text/css" /> 
+<style type="text/css">
+    .leftContent2 {
+            float:left;
+            display: inline-block;
+            width:560px;
+            overflow:visible;
+            height:510px;
+            max-height:700px;
+            
+        }
+        .rightContent2 {
+            float:left;
+            display: inline-block;
+            width:330px;
+            overflow:visible;
+            height:510px;
+            max-height:700px;
+            
+        }
+        .leftContent3{float:left;width:555px;overflow:visible;min-height: 520px;height: auto !important;max-height:1100px;}
+        .rightContent3{float:left;width:370px;overflow:visible;min-height: 500px;height: auto !important;max-height:1100px;} 
+</style>
+<apex:form id="theform"><br/>
+<div id="errorBlock" class="errorMessage"></div>
+<br/>
+<apex:outputText value="{!salesFlowObj.messages[0]}" escape="false"/>
+
+<input type = "hidden" id="selectedProds" name = "selectedProds" value=""/>
+<input type = "hidden" id="mergedstring" name = "mergedstring" value=""/> 
+<input type = "hidden" id="existingYoubio" name = "existingYoubio" value=""/>  
+<apex:actionFunction action="{!addYoubioProducts}" name="addYoubioProducts" reRender="errorMessage,customerSection,jsonPanel" status="queryStatus">
+    <apex:param name="etag" assignTo="{!etag}" value="" />
+    <apex:param name="kundeData" assignTo="{!kundeData}" value="" />
+    <apex:param name="arrayInit" assignTo="{!arrayInit}" value="" />
+</apex:actionFunction>
+<apex:actionFunction action="{!callToKasia}" name="callToKasia" reRender="errorMessage,customerSection,jsonPanel,prodSection" status="queryStatus">
+    <apex:param name="url" assignTo="{!url}" value="" />
+    <apex:param name="etag" assignTo="{!etag}" value="" />
+    <apex:param name="kundeData" assignTo="{!kundeData}" value="" />
+    <apex:param name="arrayInit" assignTo="{!arrayInit}" value="" />
+</apex:actionFunction>
+<apex:actionFunction action="{!redirectCustomerInfo}" name="gotoCustomerInfoPage" />
+<apex:actionStatus id="queryStatus">
+    <apex:facet name="start">
+        <c:loadingComponent BackColor="#efefef" borderColor="#336699"
+            borderSize="3" height="50px" width="120px"
+            ImageUrl="{!$Resource.Loading}" Message="Loading..."
+            messageStyle="color:darkred;font-size:11pt;font-weight:bold;" />
+    </apex:facet>
+</apex:actionStatus> 
+
+<apex:panelGrid columns="2" columnClasses="leftContent3,rightContent3" width="100%" >
+<apex:outputPanel styleClass="leftContent3" layout="block" id="prodSection">
+    <apex:pageBlock id="yBProducts">
+        <apex:pageBlockSection title="Valg af YouBio abonnement" collapsible="false" columns="1" id="subsId">
+            <table id="subscriptionTable" class="zebra" width="100%" border="1" ></table>
+        </apex:pageBlockSection>
+        
+        <apex:pageBlockSection title="Valg af YouBio boks" collapsible="false" columns="1" id="yboxId">
+            <table id="boxTable" class="zebra" width="100%" border="1" ></table>
+        </apex:pageBlockSection>
+   
+        <apex:pageBlockButtons location="bottom">
+            <apex:commandButton action="{!cancel}" value="Annuller" style="margin-right:200px;"/>
+            <apex:commandButton action="{!backFlow}" value="Tilbage"/>
+            <input type="button" value="Videre" onclick="redirectCustomerInfo();" class="videreBtnCls" />
+        </apex:pageBlockButtons>
+    </apex:pageBlock>
+</apex:outputPanel>
+
+<apex:outputPanel styleclass="rightContent3" layout="block" id="customerSection">
+    <c:CustomerAndProductComponent isNewKunde="{!isNewCustomer}" kundeNumber="{!cCustInstAdd.customerNumber}"
+        kundeName="{!cCustInstAdd.firstName} {!cCustInstAdd.lastName}" Adresse="{!cCustInstAdd.addr1}"
+        Postnummer="{!cCustInstAdd.addr2}">
+    </c:CustomerAndProductComponent>
+</apex:outputPanel>
+</apex:panelGrid>
+<apex:outputPanel id="jsPanel" >
+<script type="text/javascript">
+    myJSONObject={!jsonResponse};
+    firstJSONResponse = {!firstJsonResponse}; 
+    myJSONObject=refreshFirstJSONResponse(firstJSONResponse,myJSONObject); 
+    displayBasket(); 
+</script>
+</apex:outputPanel>
+<apex:outputPanel id="jsonPanel">
+<script type="text/javascript">
+    var youbioSubs = new Array();
+    var youbioBox = new Array();
+    var selectedSubs = new Array();
+    var selectedBox = new Array();
+    var isProductOffer='';
+    var isProductCampaign='';
+    var productoffervar ='';
+    var productSummary='';
+    myJSONObject={!jsonResponse};
+    firstJSONResponse = {!firstJsonResponse}; 
+    myJSONObject=refreshFirstJSONResponse(firstJSONResponse,myJSONObject);
+    var basicHeader = ["","","",""];
+    
+    //For existing user check if user already has subscription
+    if(custFlag == "true" && myJSONObject['kunde-data']['aftaler']!=undefined){
+        var hasYouBioSub=hasYouBioSubscription(myJSONObject['kunde-data']['aftaler']);
+        //If user has active subscription, show only box on page
+        if(hasYouBioSub=='true'){
+            showSubSection = 'false';
+            document.getElementById('existingYoubio').value = 'true';                           
+        }
+        else{
+            youbioSubs = createProductsData(subString,'kr. pr. md.', custFlag);
+            document.getElementById('existingYoubio').value = 'false';   
+        }
+    }
+    else{
+        document.getElementById('existingYoubio').value = 'false';  
+        youbioSubs = createProductsData(subString,'kr. pr. md.', custFlag);          
+    }
+    
+    //Hide subscription section if subscription is not present in JSON response
+    if(youbioSubs.length <= 0) {
+       showSubSection = 'false';
+    }  
+      
+    youbioBox = createProductsData(boxString,'kr. pr. md.', custFlag);
+    
+    //Hide box section if box is not present in JSON response
+    if(youbioBox.length <= 0){
+        showBoxSection = 'false';
+    }  
+    
+    createOfferCampaign(youbioSubs);
+    createOfferCampaign(youbioBox);
+        
+    if(youbioSubs.length > 0 && showSubSection == 'true'){
+        $("#subscriptionTable").replaceWith('<table id=\"subscriptionTable\" class=\"zebra\" width=\"100%\" border=\"1\" ></table>');
+        $("#youBioSubsTemplate").tmpl(youbioSubs).appendTo(createHeaders(basicHeader,"#subscriptionTable"));    
+    }
+    else if(showSubSection == 'false'){
+        document.getElementById('{!$Component.idPage.theform.yBProducts.subsId}').style.display = 'none';
+    }
+        
+    if(youbioBox.length > 0 && showBoxSection == 'true'){
+        $("#boxTable").replaceWith('<table id=\"boxTable\" class=\"zebra\" width=\"100%\" border=\"1\" ></table>');
+        $("#youBioSubsTemplate").tmpl(youbioBox).appendTo(createHeaders(basicHeader,"#boxTable"));    
+    }  
+    else if(showBoxSection == 'false'){
+        document.getElementById('{!$Component.idPage.theform.yBProducts.yboxId}').style.display = 'none';
+    }  
+    displayBasket();  
+</script>
+</apex:outputPanel>
+</apex:form>
+    </html>
+</apex:page>

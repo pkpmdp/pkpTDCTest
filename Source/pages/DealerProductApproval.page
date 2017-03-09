@@ -1,0 +1,1539 @@
+<apex:page Controller="DealerProductPageController3" sidebar="false" showHeader="false" applyHtmlTag="false">
+<html class="cvi2015"> <!--spoc 2206-->
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+    <script type="text/javascript" src="https://yousee.dk/sitecore/content/data/export/export.aspx?itemguid={BD793F05-9B01-4210-BD63-F33431D1013A}&functions=true" > </script>
+    <script src="{!$Resource.JQuery}" type="text/javascript"></script>
+    <!-- Added for DW 750 -->
+    <c:TopMenuComponent ></c:TopMenuComponent>
+        <script type="text/javascript">printHeader();</script>
+        <script type="text/javascript">printTopMenu();</script>
+    <script type="text/javascript">printContentAreaBegin();</script>
+    <c:DealerComponent ></c:DealerComponent> 
+    <c:ProductOfferORcampaign ></c:ProductOfferORcampaign>
+    <style>
+      .fontVerdana{ font-family: 'Verdana'; }
+    </style>      
+    <script id="abbonometerTemplate" type="text/x-jQuery-tmpl">  
+        <tr>   
+            <td width="30%">${ProductCategory}</td>
+            <td width="70%">${ProductName}</td>
+        </tr>
+        {{if sorteringsgruppe != 1}}
+           <tr>
+            <td width="30%">&nbsp;</td>
+            <td width="70%" style="font-size:11px;">${productSummary}</td>
+           </tr>
+        {{/if}} 
+    </script> 
+    <script id="abbonometerWithPriceTemplate" type="text/x-jQuery-tmpl">  
+        <tr>
+            <td width="25%" nowrap colspan="1">${ProductCategory}</td>
+            <td width="45%" nowrap colspan="1">${ProductName}</td>
+            <td>&nbsp;</td>
+            <td width="10%" nowrap colspan="1">${pris}</td>
+            <td width="20%" nowrap colspan="1">${priceSuffix}</td>
+        </tr>
+    </script>
+    <script>var prodSrJSON = [];</script>
+    <script id="productSerialNoTemplate" type="text/x-jQuery-tmpl">  
+        <tr>
+            <td width="40%">&nbsp;${Product}</td>
+             {{if SerieNr != ''}}
+                <td width="80%">Serienr. ${SerieNr}</td>
+            {{/if}}  
+       </tr>
+    </script>   
+    <script type="text/javascript">
+        //alert("value of secondPayee in dealer product approval page is : "+{!secondPayee}); 
+        var productNameList = new Array();
+        var productsSold = '';
+        var oneTimePriceForBBnTFValue='';
+        //Added for BS
+        var freeChoiceFlag={!isFreeChoicePageFlag};
+        var currentKundeNumber = '{!cCustInstAdd.customerNumber}';
+        function getProductSubscriptionPeriod(productNumber){
+            try{
+                var varenr2 = new String(productNumber);                   
+                if(myJSONObject[varenr2] != null){  
+                    return myJSONObject[varenr2].betalingsperiode; 
+                } 
+            }catch(err){
+                 alert("Error: in getProductSubscription method: "+err.description);
+            }           
+        }
+        var productJsonArray = new Object();
+        function getMonthlySubscriptions(valgNode){
+           var returnValue='';
+           var ProductSubscriptionPeriod='';
+           abonometers= new Array();
+           var count = 0;
+           var productCategory = '';
+           try{
+               $.each(valgNode, function(i,valgtNode){       
+                  $.each(valgtNode.varer, function(j,varerNode){
+                       ProductSubscriptionPeriod = getProductSubscriptionPeriod(varerNode.varenr);
+                       if(ProductSubscriptionPeriod == 'maaned'){
+                           abonometer = new Object();
+                           if(valgtNode.aftaletype == 'bb'){
+                               abonometer.ProductCategory = 'Bredbånd';
+                           }
+                           else if(valgtNode.aftaletype == 'clear'){
+                               abonometer.ProductCategory = 'Kabel-tv';
+                           }
+                           else if(valgtNode.aftaletype == 'dtv'){
+                               abonometer.ProductCategory = 'YouSee Plus';
+                           }
+                           else if(valgtNode.aftaletype == 'tlf'){
+                               abonometer.ProductCategory = 'Telefoni';                                    
+                           }
+                            else if(valgtNode.aftaletype == 'youbio'){
+                               abonometer.ProductCategory = 'YouBio';                                    
+                           }
+                           else{
+                               abonometer.ProductCategory = valgtNode.aftaletype;
+                           }                               
+                           abonometer.ProductName = varerNode.navn; 
+                           productNameList[count] = varerNode.navn;
+                           
+                           if(count != 0){
+                              productsSold = productsSold + ', ';
+                           }
+                           productCategory = abonometer.ProductCategory;
+                           
+                           if(abonometer.ProductCategory == 'Kabel-tv'){
+                            productCategory = 'Clear';
+                           }
+                           productsSold = productsSold + productCategory + '@#$' + abonometer.ProductName;
+                           count = count + 1;
+                           getPrice(abonometer,varerNode.varenr);
+                           monthlyPrice = parseFloat(monthlyPrice) + parseFloat(abonometer.pris);
+                           abonometer.priceSuffix = 'Kr. / md'; 
+                           var productoffervar = getOfferFlag(varerNode.varenr);
+                           var productSummary = '';                                                                                             
+                           if(productoffervar != undefined){                                                                                              
+                              productSummary = productoffervar.ProductSummary;
+                           }
+                           abonometer.productSummary = productSummary;
+                           //if(valgtNode.aftaletype == 'dtv' && varerNode.sorteringsgruppe != '02-0090' && varerNode.sorteringsgruppe != '02-0010' && varerNode.sorteringsgruppe != '02-0000'){
+                           if(valgtNode.aftaletype == 'dtv' && varerNode.sorteringsgruppe != '02-0090' && varerNode.sorteringsgruppe != '02-0010'){
+                              if(productSummary.length > 0 && productSummary != ''){
+                                abonometer.sorteringsgruppe = varerNode.sorteringsgruppe;
+                              }else{
+                                abonometer.sorteringsgruppe = 1;
+                              } 
+                           }else{
+                               abonometer.sorteringsgruppe = 1;
+                               if(varerNode.varenr == '1201590'){
+                                  abonometer.sorteringsgruppe = varerNode.sorteringsgruppe;
+                               } 
+                           }
+                           if(valgtNode.aftaletype == 'clear' && varerNode.varenr != '1010001'){
+                              abonometer.sorteringsgruppe = varerNode.sorteringsgruppe;
+                           }
+                           if(valgtNode.aftaletype == 'bb' ||  valgtNode.aftaletype == 'tlf'){
+                              abonometer.sorteringsgruppe = varerNode.sorteringsgruppe;
+                           }
+                           //For showing description for YouBio we need to have sorteringsgruppe value otherthan 1.
+                           if(valgtNode.aftaletype == 'youbio'){
+                              abonometer.sorteringsgruppe = 123;
+                           }
+                           abonometers.push(abonometer);
+                       }
+                  });
+               });
+               if(abonometers.length > 0)
+                   return abonometers;
+               else return returnValue;
+           }catch(err){
+              alert("Error: in getMonthlySubscriptions method: "+err.description);
+           }
+        }
+       
+        var clearOnetimeCharge=0.0;
+        var TlfNpOnetimeCharge=0.0;
+        
+        // ADDED FOR 689 - youbio one time charge
+        var youbioOneTimeCharge = 0.0;
+        var bsxxDwnFee = 0.0;
+        
+        function getOneTimeSubscriptions(valgNode){
+            var returnValue='';
+            var ProductSubscriptionPeriod='';
+            oneTimePrice = 0;
+            installations= new Array();
+            try{
+                $.each(valgNode, function(i,valgtNode){       
+                       $.each(valgtNode.varer, function(j,varerNode){
+                            ProductSubscriptionPeriod=getProductSubscriptionPeriod(varerNode.varenr);
+                            //alert(ProductSubscriptionPeriod);
+                            if(ProductSubscriptionPeriod=='enkelt'){
+                                installation= new Object();
+                                if(valgtNode.aftaletype=='bb'){
+                                    installation.ProductCategory='Bredbånd';
+                                }
+                                else if(valgtNode.aftaletype=='clear'){
+                                    installation.ProductCategory='Kabel-tv';
+                                    
+                                }
+                                else if(valgtNode.aftaletype=='dtv'){
+                                    installation.ProductCategory='YouSee Plus';
+                                }
+                                else if(valgtNode.aftaletype=='tlf'){
+                                    installation.ProductCategory='Telefoni';
+                                }
+                                
+                                // ADDED for 689
+                                else if(valgtNode.aftaletype=='youbio'){
+                                    installation.ProductCategory='YouBio';
+                                }
+                                else{
+                                    installation.ProductCategory=valgtNode.aftaletype;
+                                }                               
+                                installation.ProductName= varerNode.navn; 
+                                getPrice(installation,varerNode.varenr);
+                                if(valgtNode.aftaletype=='clear'){
+                                    clearOnetimeCharge=parseFloat(installation.pris);
+                                }
+                                if(valgtNode.aftaletype=='tlf'){
+                                    if (varerNode.varenr=='1417006'){                                    
+                                        TlfNpOnetimeCharge=parseFloat(installation.pris);
+                                    }
+                                }
+                                //ADDED For DW-865
+                                if(valgtNode.aftaletype=='dtv' && varerNode.produktgruppe=='2BY' ){
+                                    bsxxDwnFee=parseFloat(installation.pris);
+                                }
+                                // ADDED FOR 689
+                                if(valgtNode.aftaletype=='youbio'){
+                                    youbioOneTimeCharge=parseFloat(installation.pris);
+                                }
+                                oneTimePrice = parseFloat(oneTimePrice) + parseFloat(installation.pris);
+                                installation.priceSuffix='Kr.'; 
+                                //For showing description for YouBio we need to have sorteringsgruppe value otherthan 1.
+                                if(valgtNode.aftaletype=='youbio'){
+                                    var productoffervar = getOfferFlag(varerNode.varenr);
+                                    var productSummary = '';                                                                                             
+                                    if(productoffervar != undefined){                                                                                              
+                                      productSummary = productoffervar.ProductSummary;
+                                    }
+                                    installation.sorteringsgruppe = 123;
+                                    installation.productSummary= productSummary;
+                                }else{
+                                    installation.sorteringsgruppe = 1;
+                                }
+                                //End of code for adding description for YouBio in Installation section.
+                                installations.push(installation);
+                            }
+                            //alert(valgtNode.aftaletype);
+                            /*if(varerNode.varenr == productNumber) {
+                                returnValue='true';
+                            }*/
+                       });
+                });
+                if(installations.length > 0){
+                    return installations;
+                }else{
+                    return returnValue;
+                }
+            }
+            catch(err){
+                 alert("Error: in getOneTimeSubscriptions method: "+err.description);
+            }
+        }
+        var extTelephoneId='{!extTelephoneId}';
+        var newTelephoneId='{!newTelephoneId}';
+        var tlfProductType='';
+        var tlfProductVal='';
+        var NPFutureDate = '{!NPFutureDate}';
+        var NPCurrentDate = '{!NPCurrentDate}';
+        var npFutureFlag = parseFloat(0);
+        /*
+        function addTelephoniPrice(){
+            
+            var objTlfPriceAndType = new Object(); 
+            var tlfPriceArray = new Array();
+            try {
+            
+                if (extTelephoneId!=null && extTelephoneId!=''){
+                    tlfProductType='Behold nuværende telefonnummer';
+                    tlfProductVal='95.00';
+                } 
+                if (newTelephoneId!=null && newTelephoneId!=''){
+                        tlfProductType='Vælg et nyt telefonnummer';
+                        tlfProductVal='0.00';
+                }
+                if (tlfProductType!=null && tlfProductType!=''){
+                    objTlfPriceAndType.ProductCategory=tlfProductType;
+                    objTlfPriceAndType.pris=tlfProductVal;
+                    objTlfPriceAndType.priceSuffix='Kr.'; 
+                }
+                tlfPriceArray.push(objTlfPriceAndType);
+                
+                return tlfPriceArray;
+            } catch(err){
+                 alert("Error: in addTelephoniPrice method: "+err.description);
+            }
+            
+        }*/
+                
+        function addTelofoniInfo(){
+            var installationsTlf = new Array();
+            var telePhoneDirectoryName = '{!telePhoneDirectoryName}';
+            var selectedNumberForNP = '{!selectedNumberForNP}';
+            var selectedNumber = '{!selectedNumber}';
+            var telephoniFlag = '{!telephoniFlag}';
+            var obJTelfoneNumberDir = new Object(); 
+            var objTelephoneNumberNP= new Object();
+            var objTelephoneNumberExisting = new Object();
+            var objNpCurrentDate = new Object(); 
+            var objNpFutureDate = new Object(); 
+            if (telePhoneDirectoryName=='visalt'){
+                telePhoneDirectoryName='';
+                telePhoneDirectoryName='Kunden ønsker at stå opført i telefonbogen';
+            } else if (telePhoneDirectoryName=='althemmeligt'){
+                telePhoneDirectoryName='';
+                telePhoneDirectoryName='Hemmelige kundedata';
+            } else if (telePhoneDirectoryName=='hemmeligtnummer'){
+                telePhoneDirectoryName='';
+                telePhoneDirectoryName='Hemmeligt nummer';
+            } else if (telePhoneDirectoryName=='hemmeligadresse'){
+                telePhoneDirectoryName='';
+                telePhoneDirectoryName='Hemmelig adresse';
+            }
+            try {
+                if(telePhoneDirectoryName!=null && telePhoneDirectoryName!=''){
+                    obJTelfoneNumberDir.ProductCategory = 'Telefonbogsoplysninger';
+                    obJTelfoneNumberDir.ProductName=telePhoneDirectoryName;
+                    installationsTlf.push(obJTelfoneNumberDir);
+                }
+                //Modified for DW-656
+                if(selectedNumberForNP!=null && selectedNumberForNP!='' && {!telephoniFlag}==false){
+                    objTelephoneNumberNP.ProductCategory = 'Nuværende telefonnummer';
+                    objTelephoneNumberNP.ProductName=selectedNumberForNP;
+                    installationsTlf.push(objTelephoneNumberNP);                  
+                }
+                if (selectedNumber!=null && selectedNumber!='' && {!telephoniFlag}==true){
+                    objTelephoneNumberExisting.ProductCategory = 'Valgte telefonnummer';
+                    objTelephoneNumberExisting.ProductName=selectedNumber;
+                    installationsTlf.push(objTelephoneNumberExisting);                 
+                } 
+                if (NPFutureDate!='' && NPFutureDate!=null){
+                    objNpFutureDate.ProductCategory = 'Når bindings-/opsigelsesperioden er afsluttet i nuværende teleselskab – typisk 30 dages opsigelse';
+                    objNpFutureDate.ProductName='';
+                    installationsTlf.push(objNpFutureDate);
+                }
+                if (NPCurrentDate!='' && NPCurrentDate!=null){
+                    objNpCurrentDate.ProductCategory = 'Ønskedato';
+                    objNpCurrentDate.ProductName = NPCurrentDate;
+                    installationsTlf.push(objNpCurrentDate);
+                }
+                return installationsTlf;
+            }
+            catch(err){
+                 alert("Error: in addTelofoniInfo method: "+err.description);
+            }
+        }
+        
+        function disableInputControls(){
+            try{
+                document.getElementById("wantNewsLetter").disabled = true;              
+            }
+            catch(err){
+                alert("Error: in disableInputControls method: "+err.description);
+            }
+        }
+        
+        
+       // updated placedOrderJs by navneet
+            var errMsg;
+            var bbTlfFlag = {!broadbandTelephonyCommonFlag};
+            //alert('bbSunscriptionIsPresent----'+{!bbSunscriptionIsPresent});
+            //alert('New customer----'+{!isNewCustomer});
+            var bbFlag = {!onlyBroadbandFlag};
+            var telefoniFlag = {!telefoniFlag};
+            var broadbandTelephonyCommonFlag = {!broadbandTelephonyCommonFlag};
+            //alert(broadbandTelephonyCommonFlag);
+            var plusFlag = {!plusFlag};
+            var ekstrakanalerFlag = {!ekstrakanalerFlag};
+            var broadbandUpgradationFlag = {!broadbandUpgradationFlag};
+           // alert(broadbandUpgradationFlag);
+           var Spflag={!onlySPFlag};
+           
+          var bbSPFlag = {!SPBroadbandFlag};
+          var TLFSPFlag = {!SPTlfFlag};
+          var bbSPTLFFlag = {!SPTlfBroadbandFlag};
+        function placeOrderJS(){   
+            //alert('place order test 742 ' +document.getElementById("newsletterEmail").firstChild.value);   
+            setJsonReceiptValues();
+            document.getElementById("jsErrorText").innerHTML = '';
+            document.getElementById("jsErrorSection").style.display = 'none'; 
+        
+            
+            if(document.getElementById("wantNewsLetter")!=null && document.getElementById("wantNewsLetter").firstChild.checked && (document.getElementById("newsletterEmail").firstChild.value==null || document.getElementById("newsletterEmail").firstChild.value==''))
+            {
+             document.getElementById("jsErrorSection").style.display = 'block'; 
+             document.getElementById("jsErrorText").innerHTML = 'Indtast venligst email adresse til YouSee nyhedsbrev.';
+             window.scrollTo(0,0); 
+             return false;
+            }
+                
+            try{
+                    if (bbTlfFlag || bbFlag ||plusFlag || ekstrakanalerFlag ||telefoniFlag || broadbandTelephonyCommonFlag|| bbSPFlag || TLFSPFlag || bbSPTLFFlag){
+                                               
+                        if(document.getElementById('hasDealerAcceptedMoney').checked==true){
+                                if (telefoniFlag || broadbandTelephonyCommonFlag|| TLFSPFlag || bbSPTLFFlag){
+                                    if(document.getElementById('IsCustomerHasModemForTelephony').checked==true && document.getElementById('IsCustomerHasModemForTelephony1').checked==true){
+                                        placeOrderForSelectedProducts();
+                                    }else{ 
+                                            if (document.getElementById('IsCustomerHasModemForTelephony').checked==false){
+                                                document.getElementById("jsErrorSection").style.display = 'block'; 
+                                                document.getElementById("jsErrorText").innerHTML = 'Marker i feltet vedr. udlevering af modem';
+                                                window.scrollTo(0,0);
+                                                return false;
+                                                
+                                            }  
+                                            if (document.getElementById('IsCustomerHasModemForTelephony1').checked==false){
+                                                document.getElementById("jsErrorSection").style.display = 'block'; 
+                                                document.getElementById("jsErrorText").innerHTML = 'Marker venligst at du har informeret kunden om betalingsmetoder.';
+                                                window.scrollTo(0,0);
+                                                return false;
+                                            }   
+                                    }
+                                }   else if (bbFlag|| bbSPFlag ){
+                                        if(document.getElementById('IsCustomerHasModemForBroadband').checked==true){
+                                            placeOrderForSelectedProducts();
+                                        }else{ 
+                                                if (document.getElementById('IsCustomerHasModemForBroadband').checked==false){
+                                                    document.getElementById("jsErrorSection").style.display = 'block'; 
+                                                    document.getElementById("jsErrorText").innerHTML = 'Marker i feltet vedr. udlevering af modem';
+                                                    window.scrollTo(0,0);
+                                                    return false;
+                                                }
+                                        }       
+                                } else if (plusFlag || ekstrakanalerFlag){
+                                        placeOrderForSelectedProducts();
+                                }
+                        } else{
+                            document.getElementById("jsErrorSection").style.display = 'block'; 
+                            document.getElementById("jsErrorText").innerHTML = 'Kvittering for modtagelse af engangsbeløb skal udfyldes.';
+                            window.scrollTo(0,0);
+                            return false;                            
+                         }
+                    } else {
+                    //alert('l');
+                        placeOrderForSelectedProducts();
+                    }
+            
+         }  catch(err){
+                 alert("Error: in placeOrderJS method: "+err.description);
+            }
+      
+      
+    }
+     
+    var receiptValgtResponse = '';
+    var priceJsonResponse =[];
+    
+    function setJsonReceiptValues(){
+     //alert('Mudasir have commented the call for placing orders so you will not be able to proceed further.');
+        var json ={!jsonResponse};
+        var varenrNumber ='';
+        var receiptValgtResponse = new Object();
+        var priceJsonResponse = new Object();
+            if(json != undefined){
+            //receiptValgtResponse = new Array();
+                if(json['kunde-data'] != undefined && json['kunde-data'].valgt != undefined){
+                    //console.log('434');
+                    if(json['kunde-data'].valgt.length > 0){
+                     receiptValgtResponse['valgt'] = json['kunde-data'].valgt;
+                     }
+                    }
+                if(json['pakkeforslag'] != undefined){
+                    receiptValgtResponse['pakkeforslag'] = json['pakkeforslag'];
+                }
+            }
+            if(receiptValgtResponse['valgt'] != undefined){
+        $.each(receiptValgtResponse['valgt'],function(i,valgtNode){
+            $.each(valgtNode.varer,function(i,varerNode){
+                    varenrNumber = varerNode.varenr;
+                    priceJsonResponse[varenrNumber] = myJSONObject[varenrNumber];
+            });
+        });
+        }
+        receiptValgtResponse = JSON.stringify(receiptValgtResponse);
+        priceJsonResponse = JSON.stringify(priceJsonResponse);
+        productJsonArray = JSON.stringify(productJsonArray);
+    document.getElementById('hiddenReceiptValgtResponse').value= receiptValgtResponse;
+    document.getElementById('hiddenPriceJsonResponse').value= priceJsonResponse;
+    }
+
+    function placeOrderForSelectedProducts() {
+        var url = '';
+        if(myJSONObject['links']!=undefined){
+            var isThereBestilLink='';
+            $.each(myJSONObject['links'], function(i,linksNode){
+               // DW - 861 Added condition for rel 'priser'
+               /**************** 22 apr 2015  replacing the IF condition keeping only bestil and removing priser
+                if(linksNode.rel=='bestil' || linksNode.rel == 'priser'){
+                **************/
+                if(linksNode.rel=='bestil'){
+                    isThereBestilLink='Yes';
+                    url = linksNode.href;
+                    return false;
+                }
+            });
+            if(isThereBestilLink=='Yes'){
+               // if(myJSONObject['kunde-data']['valgt']!=undefined){                         
+                    var kundeData = JSON.stringify(myJSONObject['kunde-data']);
+                    var arrayInit = myJSONObject['array-init'];
+                    var etag =   myJSONObject['ETag'];
+                    
+                    placeOrder(url, etag, kundeData, arrayInit, productsSold,receiptValgtResponse,priceJsonResponse,productJsonArray,oneTimePriceForBBnTFValue);
+               // }
+              /*  else{
+                    alert('There is no valgt node in Kunde Data.');
+                }*/
+            }else{
+             document.getElementById('blankBestilLink').style.display = "block";
+             window.scrollTo(0,0);
+            }
+        }
+    }
+       
+        
+        // end of placeOrder JS 
+        
+        function subscriptionUpdate(evt,val)
+        {
+            var valofchkbox = val;
+            if(valofchkbox == 'L'){
+                if(evt.checked) {
+                    document.getElementById("newsletterLabel").style.display = "block";
+                    document.getElementById("newsletterEmail").style.display = "block";
+                    document.getElementById("newsletterEmail").firstChild.value = '{!emailIdForNumberporting}';
+                }else {
+                    document.getElementById("newsletterLabel").style.display = "none";
+                    document.getElementById("newsletterEmail").style.display = "none";
+                }
+            } else if(valofchkbox == 'E'){
+                 if(evt.checked){
+                    document.getElementById("registerEkomLabel").style.display = "block";
+                    document.getElementById("registerEkomEmail").style.display = "block";
+                    document.getElementById("registerEkomEmail").firstChild.value = '{!emailIdForNumberporting}';
+                 }else{
+                    document.getElementById("registerEkomLabel").style.display = "none";
+                    document.getElementById("registerEkomEmail").style.display = "none";
+                     //document.getElementById("newsletterEmail").firstChild.value = '';
+                 }
+             }
+            //alert('added for testing 742 ' +document.getElementById("newsletterEmail").firstChild.value);
+        }
+       
+        function saveReceipt()
+        {
+            if(rec)
+             saveOrder();
+        }
+        
+
+        function redirectPrint()
+        { 
+           var docURL = '/servlet/servlet.FileDownload?file={!AttachmentID}';
+               
+            var receipt = window.open(docURL,'_Self','menubar=yes,width=680,height=692,toolbar=yes,scrollbars=yes');
+            receipt.focus();
+            return false;
+        }
+        
+        function getPakkeForSlagMessage(){
+            var message = '';
+            $.each(myJSONObject['pakkeforslag'], function(j, node){         
+                if(j == 'CLEAR1ST' || j == 'CLEAR1LT'){
+                    message = slagMessage;
+                }
+            });
+          return message;
+        }
+        
+        function validateSalesNumber(ev){
+            var keycode;
+            if(ev.keyCode) //For IE
+              keycode = ev.keyCode;
+            else if(ev.Which)
+              keycode = ev.Which; // For FireFox
+            else
+              keycode = ev.charCode;
+            if ((keycode >= 48 && keycode <= 57) || (keycode >= 65 && keycode <= 90) || (keycode >= 97 && keycode <= 122) || keycode == 13)
+                return true;
+            
+            return false; 
+        }
+        
+        
+    </script>   
+    <style>
+             .bold { font-weight:bold; }
+             .errorMessage {color: red; font-weight: bold;}
+             .mailError{
+                color: red; 
+                border-bottom: #000000 1px solid; 
+                border-left: #000000 1px solid; 
+                padding-bottom: 1px; 
+                background-color: #f1f1f1; 
+                padding-left: 4px; 
+                padding-right: 4px; 
+                font-family: Verdana; 
+                font-size: 9pt; border-top: #000000 1px solid; 
+                border-right: #000000 1px solid; 
+                padding-top: 1px; 
+            }
+            .gray {
+                background-color: #c0c0c0 !important;
+                height: 31px !important;
+                border: 1px solid #c0c0c0 !important;
+                padding-left: 1px !important;
+                vertical-align: middle !important;
+                font: bold 14px Arial, Helvetica, sans-serif !important;
+            }
+            .bPageBlock .requiredInput .requiredBlock {
+                background-color:crimson;
+            }
+            .videreBtnCls {
+            border-width: 0;
+            padding: 0 15px;
+            text-transform: capitalize;
+            margin: 0 2px;
+            background-position: left top;
+            background-repeat: repeat-x;
+            border-color: -moz-use-text-color #FF4500;
+            border-right: 1px solid #FF4500;
+            border-style: none solid solid none;
+            display: inline;
+            font-family: 'Verdana','Geneva',sans-serif;
+            font-size: 80%;color: #FFFFFF;
+            font-weight: bold;
+            height: 26px;
+            background-color: #FF4500;
+            width:76px;
+            }
+        </style>
+        <apex:form id="approvalForm" styleclass="fontVerdana">
+            <apex:actionFunction action="{!placeOrder}" name="placeOrder"  status="queryStatus" rerender="approvalPageBlock,jspanel" oncomplete="saveReceipt();">
+                    <apex:param name="url" assignTo="{!url}" value=""/>
+                    <apex:param name="etag" assignTo="{!etag}" value=""/>
+                    <apex:param name="kundeData" assignTo="{!kundeData}" value=""/>
+                    <apex:param name="arrayInit" assignTo="{!arrayInit}" value="" />
+                    <apex:param name="productsSold" assignTo="{!productsSelected}" value="" />
+                    <apex:param name="receiptValgtResponse" assignTo="{!receiptValgtResponse}" value=""/>
+                    <apex:param name="priceJsonResponse" assignTo="{!priceJsonResponse}" value=""/>
+                    <apex:param name="productJsonArray" assignTo="{!productJsonArray}" value=""/>
+                    <apex:param name="oneTimePriceForBBnTFValue" assignTo="{!oneTimePriceForBBnTFValue}" value=""/>
+            </apex:actionFunction>
+            <apex:actionFunction action="{!saveReceipt}" name="saveOrder"/>
+            <apex:actionStatus id="queryStatus"> 
+                <apex:facet name="start">
+                    <c:loadingComponent BackColor="#efefef" borderColor="#336699"
+                         borderSize="3" height="50px" width="120px" 
+                         ImageUrl="{!$Resource.Loading}" Message="Loading..." 
+                         messageStyle="color:darkred;font-size:11pt;font-weight:bold;"/>
+                </apex:facet>         
+            </apex:actionStatus>
+            <apex:pageBlock id="approvalPageBlock"> 
+                <div style="display:none;" id="blankBestilLink">
+                    <apex:pageMessage summary="Det er ikke muligt at gennemføre denne ordre. Kontakt Forhandlerservice." severity="error" strength="3"/>
+                </div>
+                <apex:messages globalOnly="true"  styleClass="mailError"/>
+                <div class="message errorM3" id="jsErrorSection" style="display:none">
+                    <table border="0" cellpadding="0" cellspacing="0" class="messageTable" style="padding:0px;margin:0px;">
+                        <tr valign="top">
+                                <td>
+                                    <img alt="Fejl" src="/s.gif" class="msgIcon" title="Fejl" />
+                                </td>
+                                <td class="messageCell">
+                                <div class="messageText">
+                                <span style="color:#cc0000">
+                                    <h4>Fejl:</h4>
+                                </span>
+                                <div id="jsErrorText"></div>
+                                <br/>
+                                </div>
+                                </td>
+                        </tr>
+                        <tr>
+                        </tr>
+                    </table>
+                </div> 
+                <!-- 
+                <table width="100%" id="tableFormat" border="1" cellpadding="0" cellspacing="5" class="list" >   
+                <script> 
+                 $("#tableFormat").html(errMsg);
+                </script> 
+                 </table>  
+                 -->
+                <!-- <div id="errorBlock" class="errorMessage"></div> -->
+                <apex:pageBlockSection columns="1" collapsible="false">
+                    <apex:outputPanel rendered="{!clearFlag}">                    
+                        <div id="ApprovalInfoForClear1"/>
+                        <input value="{!ApprovalInfoForClear1}" id="ApprovalInfoClear1" type="hidden"/>                     
+                        <script>$("#ApprovalInfoForClear1").html(document.getElementById('ApprovalInfoClear1').value);</script>
+                    </apex:outputPanel>
+                </apex:pageBlockSection>
+                
+                <apex:pageBlockSection title="Kundeinformation" columns="1" collapsible="false">
+                        <apex:pageBlockSectionItem rendered="{!AND(NOT(ISNULL(cCustInstAdd.customerNumber)),LEN(cCustInstAdd.customerNumber)>0)}">
+                            <apex:outputLabel value="Kundenummer:"/>
+                            <apex:outputLabel value="{!cCustInstAdd.customerNumber}"/> 
+                        </apex:pageBlockSectionItem>
+                        <apex:pageBlockSectionItem >
+                            <apex:outputLabel value="Fornavn/Efternavn:"/>
+                            <apex:outputLabel value="{!cCustInstAdd.firstName + ' ' +cCustInstAdd.lastName}"/> 
+                        </apex:pageBlockSectionItem>                                        
+                        <apex:pageBlockSectionItem >
+                            <apex:outputLabel value="Gade/Nr./Etage/Side/Dør:"/>
+                            <apex:outputLabel value="{!cCustInstAdd.addr1}" /> 
+                        </apex:pageBlockSectionItem>
+                        <apex:pageBlockSectionItem >
+                            <apex:outputLabel value="Postnr./By:"/>
+                            <apex:outputLabel value="{!cCustInstAdd.addr2}" /> 
+                        </apex:pageBlockSectionItem>
+                        <apex:pageBlockSectionItem rendered="{!AND(NOT(ISNULL(cCustInstAdd.contactNumber)),LEN(cCustInstAdd.contactNumber)>0)}">
+                            <apex:outputLabel value="Kundens fastnet nummer:"/>
+                            <apex:outputLabel value="{!cCustInstAdd.contactNumber}"/> 
+                        </apex:pageBlockSectionItem>
+                        <apex:pageBlockSectionItem rendered="{!AND(NOT(ISNULL(tlfNumberForNumberPorting)),LEN(tlfNumberForNumberPorting)>0)}">
+                            <apex:outputLabel value="Kundens mobilnummer:"/>
+                            <apex:outputLabel value="{!tlfNumberForNumberPorting}"/> 
+                        </apex:pageBlockSectionItem>
+<!--                        <apex:pageBlockSectionItem rendered="{!AND(NOT(ISNULL(cCustInstAdd.email)),LEN(cCustInstAdd.email)>0)}">-->
+<!--                            <apex:outputLabel value="E-mail -adresse:"/>-->
+<!--                            <apex:outputLabel value="{!cCustInstAdd.email}"/> -->
+<!--                        </apex:pageBlockSectionItem>-->
+                        <apex:pageBlockSectionItem rendered="{!AND(NOT(ISNULL(emailIdForNumberporting)),LEN(emailIdForNumberporting)>0)}">
+                            <apex:outputLabel value="E-mail -adresse:"/>
+                            <apex:outputLabel value="{!emailIdForNumberporting}"/> 
+                        </apex:pageBlockSectionItem>
+                 </apex:pageBlockSection>
+                
+                
+                <apex:pageBlockSection title="Oplysninger om betaler" columns="1" collapsible="false" rendered="{!secondPayee}">
+                        <apex:pageBlockSectionItem rendered="{!NOT(ISNULL(payeeCustInstAdd.customerNumber))}">
+                            <apex:outputLabel value="Kundenummer:"/>
+                            <apex:outputLabel value="{!payeeCustInstAdd.customerNumber}"/> 
+                        </apex:pageBlockSectionItem>
+                        <apex:pageBlockSectionItem >
+                            <apex:outputLabel value="Fornavn/Efternavn:"/>
+                            <apex:outputLabel value="{!payeeCustInstAdd.firstName  + ' ' +payeeCustInstAdd.lastName}"/> 
+                        </apex:pageBlockSectionItem>
+                       <!-- <apex:pageBlockSectionItem >
+                            <apex:outputLabel value="Efternavn:"/>
+                            <apex:outputLabel value="{!payeeCustInstAdd.lastName}"/>
+                        </apex:pageBlockSectionItem> -->
+                        <apex:pageBlockSectionItem >
+                            <apex:outputLabel value="Gade/Nr./Etage/Side/Dør:"/>
+                            <apex:outputLabel value="{!payeeCustInstAdd.addr1}" /> 
+                        </apex:pageBlockSectionItem>
+                        
+                        <apex:pageBlockSectionItem >
+                            <apex:outputLabel value="Postnr./By:"/>
+                            <apex:outputLabel value="{!payeeCustInstAdd.addr2}" /> 
+                        </apex:pageBlockSectionItem>
+                        <!--  <apex:pageBlockSectionItem >
+                            <apex:outputLabel value=""/>
+                            <apex:outputLabel value="" /> 
+                        </apex:pageBlockSectionItem> -->
+                        <apex:pageBlockSectionItem rendered="{!OR(NOT(ISNULL(payeeCustInstAdd.contactNumber)),LEN(payeeCustInstAdd.contactNumber)>0)}">
+                            <apex:outputLabel value="Kontakttlf."/>
+                            <apex:outputLabel value="{!payeeCustInstAdd.contactNumber}"/> 
+                        </apex:pageBlockSectionItem>
+                 </apex:pageBlockSection>
+                 
+                <apex:PageBlockSection title="Kundens valg"  collapsible="false" columns="1" id="kunensValgId">
+                    <div id="pakkeForSlagDiv" style="display:none;">                        
+                        <p style="color:blue;" id="pakkeforslag"></p>       
+                    </div>
+                    <apex:PageBlockSection title="Abonnementer" collapsible="false" columns="1" id="abnId">
+                        <table id="abonnementerTable" class="zebra" width="100%" border="1" ></table>
+                    </apex:PageBlockSection>
+                    
+                    <apex:PageBlockSection title="Installation" collapsible="false" columns="1" id="insId">
+                        <table id="installationTable" class="zebra" width="100%" border="1" ></table>
+                    </apex:PageBlockSection>
+                     <apex:outputPanel styleclass="receiptText" rendered="{!OR(telefoniFlag,broadbandTelephonyCommonFlag)}">
+                        <span>Kunden modtager en e-mail fra YouSee, som skal returneres som accept af, YouSee må overføre telefonnummeret til YouSee. Først herefter kan nummerporteringen sættes i gang. Kunden modtager en ordrebekræftelse med posten og en e-mail, når nummerporteringen er gennemført og YouSee Telefoni kan bruges.</span>
+                     </apex:outputPanel>
+                    
+                      <apex:PageBlockSection title="Udlevering af modem" collapsible="false" columns="1" rendered="{!OR(AND(checkBBFlag,onlyBroadbandFlag),SPBroadbandFlag)}">
+                        <apex:outputPanel >
+                            <table>
+                                <tr>
+                                    <td>
+                                        <apex:outputPanel styleClass="requiredInput" layout="block">
+                                            <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+                                            <input type="checkbox" id="IsCustomerHasModemForBroadband"></input>
+                                        </apex:outputPanel>
+                                    </td>                                   
+                                    <td> <p id="bbModemText"></p></td>
+                                </tr>                       
+                            </table>
+                        </apex:outputPanel>
+                    </apex:PageBlockSection>
+                    
+                    <apex:PageBlockSection title="Udlevering af modem" collapsible="false" columns="1" rendered="{!AND(checkTLFFlag, OR(telefoniFlag,broadbandTelephonyCommonFlag,SPTlfFlag,SPTlfBroadbandFlag))}">
+                        <apex:outputPanel >
+                            <table>
+                                <tr>
+                                    <td>
+                                        <apex:outputPanel styleClass="requiredInput" layout="block">
+                                            <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+                                            <input type="checkbox" id="IsCustomerHasModemForTelephony"></input>
+                                        </apex:outputPanel>
+                                    </td>                                   
+                                    <td> <p id="tlfModemText"></p></td>
+                                </tr>                       
+                            </table>
+                        </apex:outputPanel>
+                    </apex:PageBlockSection>
+                                                   
+                   <!--  <apex:outputPanel rendered="{!AND(bbSunscriptionIsPresent,broadbandTelephonyCommonFlag)}"> --> 
+                  <apex:outputPanel rendered="{!AND(OR(telefoniFlag,broadbandTelephonyCommonFlag,SPTlfFlag,SPTlfBroadbandFlag), AND(NOT(isNewCustomer), NOT(bbSunscriptionIsPresent)))}">
+                    <p> Aktiveringskoderne fra det gamle modem skal bruges til det nye udleverede modem. Har kunden ikke disse mere, kan de fås via YouSee Kundeservice.</p>
+                </apex:outputPanel>
+                   
+                   <apex:PageBlockSection title="Vilkår" collapsible="false" columns="1" rendered="{!OR(telefoniFlag,broadbandTelephonyCommonFlag,SPTlfFlag,SPTlfBroadbandFlag)}">
+                        <apex:outputPanel >
+                            <table>
+                                <tr>                                
+                                    <td>
+                                        <apex:outputPanel styleClass="requiredInput" layout="block">
+                                            <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+                                                <input type="checkbox" id="IsCustomerHasModemForTelephony1"></input>
+                                            </apex:outputPanel>  
+                                    </td>
+                                    <td><p>Jeg har oplyst kunden, at med tilmelding til Telefoni fra YouSee, siger kunden også ja til elektronisk kommunikation:</p>
+<p> <strong> Elektronisk kommunikation </strong> betyder, at du modtager  regninger, ordrebekræftelser, informationer og besked
+om eventuelle væsentlige prisstigninger elektronisk.
+YouSee sender besked via e-mail eller sms, når der er ny elektronisk post: </p>
+<p> -Den elektroniske telefonregningen kan du se på Mit YouSee under ”Telefoni”, ”Regning og betaling”.</p>
+<p> -Alle e-mails sendes også til din personlige elektroniske postkasse på YouSee’s hjemmeside på Mit YouSee under ”Indbakke”. </p>
+<br></br>
+<p> Din tilmelding til elektronisk kommunikation gælder for alle produkter fra YouSee. YouSee kan dog frit vælge at sende brevene som almindeligt brev, og indtil videre kan YouSee ikke sikre, at alle breve sendes elektronisk.</p>
+                                 </td>   
+                                </tr> 
+                            </table>                    
+                        </apex:outputPanel>
+                   </apex:PageBlockSection> 
+                    
+                    <!-- Ended for only telephony product section -->
+                    
+                    <apex:PageBlockSection title="Aktiveringskoder til Bredbånd" collapsible="false" columns="2" rendered="{!AND(broadbandTelephonyCommonFlag,NOT(bbSunscriptionIsPresent))}">
+                        
+                            <apex:pageBlockSectionItem >
+                                <!-- <apex:outputLabel value="YouSee sender aktiveringskoder til:" /> -->
+                                <span>YouSee sender aktiveringskoder til:</span>
+                            </apex:pageBlockSectionItem>
+                            <apex:pageBlockSectionItem rendered="{!AND(NOT(ISNULL(tlfNumberForNumberPorting)),LEN(tlfNumberForNumberPorting)>0,NOT(ISNULL(emailIdForNumberporting)),LEN(emailIdForNumberporting)>0)}">
+                              <apex:outputpanel rendered="{!AND(NOT(ISNULL(tlfNumberForNumberPorting)),LEN(tlfNumberForNumberPorting)>0,NOT(ISNULL(emailIdForNumberporting)),LEN(emailIdForNumberporting)>0)}"> 
+                                <!-- <apex:outputLabel value="{!tlfNumberForNumberPorting} og {!emailIdForNumberporting}" /> -->
+                              <span>{!tlfNumberForNumberPorting} og {!emailIdForNumberporting}</span>
+                              </apex:outputpanel>
+                            </apex:pageBlockSectionItem>
+                            
+                            <apex:pageBlockSectionItem rendered="{!AND(OR(NOT(ISNULL(tlfNumberForNumberPorting)),LEN(tlfNumberForNumberPorting)>0),OR(ISNULL(emailIdForNumberporting),LEN(emailIdForNumberporting)==0))}">
+                              <apex:outputpanel rendered="{!AND(OR(NOT(ISNULL(tlfNumberForNumberPorting)),LEN(tlfNumberForNumberPorting)>0),OR(ISNULL(emailIdForNumberporting),LEN(emailIdForNumberporting)==0))}">
+                               <!-- <apex:outputLabel value="{!tlfNumberForNumberPorting}"/> -->
+                               <span>{!tlfNumberForNumberPorting}</span> 
+                              </apex:outputpanel>
+                            </apex:pageBlockSectionItem>
+                            
+                            <apex:pageBlockSectionItem rendered="{!AND(OR(ISNULL(tlfNumberForNumberPorting),LEN(tlfNumberForNumberPorting)==0),OR(NOT(ISNULL(emailIdForNumberporting)),LEN(emailIdForNumberporting)>0))}">
+                              <apex:outputpanel rendered="{!AND(OR(ISNULL(tlfNumberForNumberPorting),LEN(tlfNumberForNumberPorting)==0),OR(NOT(ISNULL(emailIdForNumberporting)),LEN(emailIdForNumberporting)>0))}">
+                               <!-- <apex:outputLabel value="{!emailIdForNumberporting}"/> --> 
+                              <span>{!emailIdForNumberporting}</span>
+                              </apex:outputpanel>
+                            </apex:pageBlockSectionItem>
+                            
+                    </apex:PageBlockSection>
+                    
+                  
+                  <apex:outputPanel rendered="{!AND(onlyBroadbandFlag, AND(NOT(isNewCustomer), NOT(bbSunscriptionIsPresent)))}">
+                    <p> Aktiveringskoderne fra det gamle modem skal bruges til det nye udleverede modem. Har kunden ikke disse mere, kan de fås via YouSee Kundeservice.</p>
+                </apex:outputPanel>
+                
+                <apex:PageBlockSection title="YouSee sender aktiveringskoder til:" collapsible="false" columns="2" rendered="{!AND(onlyBroadbandFlag,NOT(bbSunscriptionIsPresent))}">
+                        
+                            <apex:pageBlockSectionItem rendered="{!AND(NOT(ISNULL(tlfNumberForNumberPorting)),LEN(tlfNumberForNumberPorting)>0)}">
+                                <!-- <apex:outputLabel value="Mobiltelefonnummer:" /> -->
+                                <span>Mobiltelefonnummer:</span>
+                            </apex:pageBlockSectionItem>
+                            
+                            <apex:pageBlockSectionItem rendered="{!AND(NOT(ISNULL(tlfNumberForNumberPorting)),LEN(tlfNumberForNumberPorting)>0)}">
+                               <!-- <apex:outputLabel value="{!tlfNumberForNumberPorting}" /> --> 
+                                <span>{!tlfNumberForNumberPorting}</span>
+                            </apex:pageBlockSectionItem>
+                            
+                            <apex:pageBlockSectionItem rendered="{!AND(NOT(ISNULL(emailIdForNumberporting)),LEN(emailIdForNumberporting)>0)}">
+                                <!-- <apex:outputLabel value="E-mail-adresse:"/> -->
+                                <span>E-mail-adresse:</span>
+                            </apex:pageBlockSectionItem>
+                            <apex:pageBlockSectionItem rendered="{!AND(NOT(ISNULL(emailIdForNumberporting)),LEN(emailIdForNumberporting)>0)}">
+                               <!--  <apex:outputLabel value="{!emailIdForNumberporting}"/> -->
+                                <span>{!emailIdForNumberporting}</span>
+                            </apex:pageBlockSectionItem> 
+                    </apex:PageBlockSection>
+                </apex:PageBlockSection>
+            
+                <apex:PageBlockSection title="Beløb" collapsible="false" columns="1" id="belobId">
+                    <!-- <apex:outputText value="Oprettelse"/> -->
+                    
+                    <apex:outputText value="Oprettelse" id="OprettelseId"/>
+                    <table id="installationPriceTable" class="zebra" width="100%" border="1" style="font-family:verdana;"></table>  
+                    <table class="zebra" width="100%" border="1" id="installationPriceTableTwo">
+                        <tr class="gray">
+                            <td colspan="2" width="70%" style="font-family:verdana; font-weight:bold;">&nbsp; I alt (engangsbeløb)&nbsp;&nbsp;&nbsp;</td>
+                            <td colspan="1" width="10%" style="font-family:verdana;"><div id="oneTimePrice"></div></td>
+                            <td colspan="1" width="20%" style="font-family:verdana;">Kr.</td>
+                        </tr>
+                    </table>
+                    <!-- <apex:outputText value="Faste manedsydelser"/> -->
+                    <apex:outputText value="Faste månedsydelser" id="fasteId"/>
+                    <table id="abonnementerPriceTable" class="zebra" width="100%" border="1" style="font-family:verdana;"></table>  
+                    <table class="zebra" width="100%" border="1" id="abonnementerPriceTableTwo">
+                        <tr class="gray">
+                            <td colspan="2" width="70%" style="font-family:verdana; font-weight:bold;">&nbsp; I alt (faste månedsydelser)</td>
+                            <td width="10%" style="font-family:verdana;"><div id="monthlyPrice"></div></td>
+                            <td width="20%" style="font-family:verdana;">Kr. / md</td>
+                        </tr>
+                        <tr>
+                            <td colspan="4">
+                                 <div id="ApprovalInfo4"/>
+                                 <input value="{!ApprovalInfoIalt}" id="Info4" type="hidden"/>                      
+                                 <script>$("#ApprovalInfo4").html(document.getElementById('Info4').value);</script>
+                            </td>
+                        </tr>
+                    </table>
+                    <!-- 
+                    <table class="zebra" width="100%" border="1" >
+                            <tr class="gray">                               
+                                <td>
+                                    <input type="checkbox" id="hasDealerAcceptedMoney"></input>
+                                </td>
+                                <td><b>Has dealer received Payment from Customer?</b></td>
+                            </tr>
+                     </table>    
+                      -->   
+                </apex:PageBlockSection>
+                
+                <!-- 
+                <apex:outputpanel rendered="{!AND(OR(plusFlag,ekstrakanalerFlag),hardwareSelection!='existingDTVCard')}">
+                        <apex:PageBlockSection title="Udleveret hardware" collapsible="false" columns="1" />    
+                            <table id="productList"  width="100%" border="1" ></table>
+                            <apex:repeat value="{!ProductSerialNumbersMapKeys}" var="k">
+                                <apex:repeat value="{!ProductSerialNumbersMapProp[k]}" var="m">
+                                    <script>
+                                        prodSrJSON.push({Product:'{!k}'.split('~')[1],SerieNr:'{!m}'});
+                                    </script>
+                                </apex:repeat>
+                            </apex:repeat>
+                            <script>
+                                $("#productSerialNoTemplate").tmpl(prodSrJSON).appendTo("#productList");
+                            </script>                                   
+                </apex:outputpanel>
+                 -->
+                
+                <apex:outputpanel rendered="{!AND(OR(plusFlag,ekstrakanalerFlag,isYoubioSelected),hardwareSelection!='existingDTVCard')}" id="udlevertPanelId">
+                        <apex:PageBlockSection title="Udleveret hardware" collapsible="false" columns="1" id="udlevertHardwareId"/>    
+                            <table id="productList"  width="100%" border="1" ></table>
+                </apex:outputpanel> 
+                
+               
+                <apex:PageBlockSection title="Kvittering for modtagelse af engangsbeløb" collapsible="false" columns="1" rendered="{!OR(broadbandTelephonyCommonFlag,onlyBroadbandFlag,telefoniFlag,plusFlag,ekstrakanalerFlag,SPBroadbandFlag,SPTlfFlag,SPTlfBroadbandFlag)}">  
+                    <apex:outputPanel >
+                        <table>
+                            <tr>                                
+                                <td>
+                                    <apex:outputPanel styleClass="requiredInput" layout="block">
+                                        <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+                                            <input type="checkbox" id="hasDealerAcceptedMoney"></input>
+                                        </apex:outputPanel> 
+                                </td>
+                                <td>Engangsbeløb modtaget fra kunden,</td>
+                                <td>&nbsp;Kr.&nbsp;</td>
+                                <td><div id="oneTimePriceForBBnTF"></div></td>
+                            </tr>
+                        </table>                    
+                    </apex:outputPanel>
+                </apex:PageBlockSection>  
+                
+                <div id="newsletterdivId">
+                <apex:PageBlockSection id="wantNewsLetterId" title="Tilmeld kunden til YouSee nyhedsbrev (Permission)" collapsible="false" columns="1" rendered="{!subscriptionFlag}">
+                    <apex:outputPanel >
+                        <table>
+                            <tr>
+                                <td>
+                                 <div id="wantNewsLetter">
+                                    <apex:inputCheckbox value="{!wantNewsLetter}" onclick="subscriptionUpdate(this,'L');" disabled="{!IF(receiptPage || newsLetterUser,true,false)}"></apex:inputCheckbox><!-- NewsLetter value -->
+                                 </div>
+                                </td>
+                                <td>                       
+                                    <div id="ApprovalInfo2"/>
+                                    <input value="{!ApprovalInfo2}" id="Info2" type="hidden"/>                      
+                                    <script>$("#ApprovalInfo2").html(document.getElementById('Info2').value);</script>
+                                </td>  
+                            </tr>
+                        </table>
+                        <table>
+                            <tr>
+                                <td>
+                                    <div id="newsletterLabel" style="display:none; font-family:verdana; font-weight: bold;">E-mail adresse:&nbsp;&nbsp;</div>
+                                </td>
+                                <td>
+                                     <apex:outputPanel styleClass="requiredInput" layout="block">                   
+                                      <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+                                       <div id="newsletterEmail" style="display:none;">
+                                        <apex:inputText value="{!emailIdForNumberporting}" id="emailText" rendered="{!NOT(receiptPage)}"/>
+                                       </div>
+                                      </apex:outputPanel>
+                                      <apex:outputText value="{!emailIdForNumberporting}" rendered="{!receiptPage}"/>
+                                </td>
+                            </tr>
+                        </table>                    
+                    </apex:outputPanel>
+                </apex:PageBlockSection>
+                </div> 
+                
+                <div id="eKommdivId">
+                <apex:PageBlockSection id="registerEkomId" title="Tilmeld kunden e-kommunikation" collapsible="false" columns="1" rendered="{!subscriptionFlag}">
+                    <apex:outputPanel >
+                        <table>
+                            <tr>
+                                <td>
+                                 <div id="registerEkom">
+                                    <apex:inputCheckbox value="{!registerEkom}" onclick="subscriptionUpdate(this,'E');" disabled="{!IF(receiptPage || ekomUser,true,false)}"></apex:inputCheckbox><!-- NewsLetter value -->
+                                 </div>
+                                </td>
+                                <td>                       
+                                    <div id="ApprovalInfo15"/>
+                                    <input value="{!ApprovalInfo15}" id="Info15" type="hidden"/>                      
+                                    <script>$("#ApprovalInfo15").html(document.getElementById('Info15').value);</script>
+                                </td>  
+                            </tr>
+                        </table>
+                        <table>
+                            <tr>
+                                <td>
+                                    <div id="registerEkomLabel" style="display:none; font-family:verdana; font-weight: bold;">E-mail adresse:&nbsp;&nbsp;</div>
+                                </td>
+                                <td>
+                                     <apex:outputPanel styleClass="requiredInput" layout="block">                   
+                                      <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+                                       <div id="registerEkomEmail" style="display:none;">
+                                        <apex:inputText value="{!emailIdForNumberporting}" id="emailText1" rendered="{!NOT(receiptPage)}"/>
+                                       </div>
+                                      </apex:outputPanel>
+                                      <apex:outputText value="{!emailIdForNumberporting}" rendered="{!receiptPage}"/>
+                                </td>
+                            </tr>
+                        </table>                    
+                    </apex:outputPanel>
+                </apex:PageBlockSection>
+                </div>
+                
+                
+                 
+                <div id="nyhedsbrevDivId">
+                <apex:PageBlockSection title="Nyhedsbrev" collapsible="false" columns="1" rendered="{!NOT(subscriptionFlag)}">
+                    <apex:outputPanel >
+                        Vi beklager men det lykkedes ikke at tilmelde dig til nyhedsbrevet. Prøv igen lidt senere på yousee.dk
+                    </apex:outputPanel>
+                </apex:PageBlockSection>
+                </div>
+                <apex:PageBlockSection id="forHandlerInofId" title="Forhandler information" collapsible="false" columns="2">                  
+                    <apex:outputLabel value="Bestillingsdato"/>
+                    <apex:outputText value=": {0,date,dd.MM.yyyy}" style="font-weight:bold;">
+                        <apex:param value="{!NOW()}" />
+                    </apex:outputText>
+                    <apex:outputLabel value="Forhandlernummer"/>
+                    <apex:outputLabel value=": {!obj.dealerNumber}"/> 
+                    <apex:outputLabel value="Navn"/>
+                    <apex:outputLabel value=": {!obj.userContact.LastName}"/> 
+                    <apex:outputLabel value="Adresse"/>
+                    <apex:outputLabel value=": {!obj.streetName}"/>  
+                    <apex:outputLabel value="Postnr./By"/>
+                    <apex:outputLabel value=": {!obj.postCode + ' / ' +obj.town}"/>
+                    <apex:outputLabel value="Sælgernummer" rendered="{!NOT(receiptPage)}"/> 
+                    <apex:inputText value="{!salesAgentNumber}" id="salesNumber1" onKeyPress="return validateSalesNumber(event);" rendered="{!NOT(receiptPage)}"/>
+                    <apex:outputLabel value="Sælgernummer" rendered="{!LEN(salesAgentNumber)>0}"/>
+                    <apex:outputText value=":{!salesAgentNumber}" id="salesNumber2" style="font-weight:bold;" rendered="{!AND(receiptPage,LEN(salesAgentNumber)>0)}"/>
+                
+                    <!-- need to assign it to an object in Salesforce 
+                    <apex:inputField value="{!salesAgent.salegernummer__c}"/>-->
+                </apex:PageBlockSection>
+                <br></br>
+                <apex:outputText value="Bemærk venligst" styleClass="bold" />                       
+                <apex:outputPanel rendered="{!clearFlag}" >  
+                        <br></br>                  
+                        <div id="ApprovalInfo3" style="font-family:verdana;"/>
+                        <input value="{!ApprovalInfoForClearFlow2}" id="Info3" type="hidden" />                      
+                        <script>$("#ApprovalInfo3").html(document.getElementById('Info3').value);</script>
+                </apex:outputPanel>            
+                <apex:outputPanel rendered="{!AND(OR(plusFlag,ekstrakanalerFlag), NOT(dtvtaflag))}"> 
+                         <br></br>                 
+                        <div id="YouSeePlusOrFreechoiceInfo" style="font-family:verdana;"/>
+                        <input value="{!ApprovalInfoForYouSeePlusOrFreechoice}" id="dtvInfo" type="hidden"/>                        
+                        <script>$("#YouSeePlusOrFreechoiceInfo").html(document.getElementById('dtvInfo').value);</script>
+                </apex:outputPanel>
+                <!-- <apex:outputPanel rendered="{!OR(onlyBroadbandFlag,telefoniFlag,broadbandTelephonyCommonFlag)}">    
+                         <br></br>                 
+                        <div id="divBBnTFInfo" style="font-family:verdana;"/>
+                        <input value="{!ApprovalInfoForBBorTF}" id="BBnTFInfo" type="hidden"/>
+                        <script>$("#divBBnTFInfo").html(document.getElementById('BBnTFInfo').value);</script>
+                </apex:outputPanel> -->
+                <apex:outputPanel rendered="{!onlyBroadbandFlag}">    
+                         <br></br>                 
+                        <div id="divBBInfo" style="font-family:verdana;"/>
+                        <input value="{!ApprovalInfoForBB}" id="BBInfo" type="hidden"/>
+                        <script>$("#divBBInfo").html(document.getElementById('BBInfo').value);</script>
+                </apex:outputPanel>
+                <apex:outputPanel rendered="{!telefoniFlag}">    
+                         <br></br>                 
+                        <div id="divTFInfo" style="font-family:verdana;"/>
+                        <input value="{!ApprovalInfoForTelefoni}" id="TlfInfo" type="hidden"/>
+                        <script>$("#divTFInfo").html(document.getElementById('TlfInfo').value);</script>
+                </apex:outputPanel>
+                <apex:outputPanel rendered="{!broadbandTelephonyCommonFlag}">    
+                         <br></br>                 
+                        <div id="divBBnTFInfo" style="font-family:verdana;"/>
+                        <input value="{!ApprovalInfoForBBorTF}" id="BBnTFInfo" type="hidden"/>
+                        <script>$("#divBBnTFInfo").html(document.getElementById('BBnTFInfo').value);</script>
+                </apex:outputPanel>
+                
+                 <apex:outputPanel rendered="{!isYouBioSelected}">    
+                         <br></br>                 
+                        <div id="divYouBioInfo" style="font-family:verdana;"/>
+                        <input value="{!ApprovalInfoForYouBio}" id="YouBioInfo" type="hidden"/>
+                        <script>$("#divYouBioInfo").html(document.getElementById('YouBioInfo').value);</script>
+                </apex:outputPanel>
+                
+                <apex:outputPanel rendered="{!dtvtaflag}">    
+                         <br></br>                 
+                        <div id="divBSXXInfo" style="font-family:verdana;"/>
+                        <input value="{!ApprovalInfoForBSXX}" id="BSXXInfo" type="hidden"/>
+                        <script>$("#divBSXXInfo").html(document.getElementById('BSXXInfo').value);</script>
+                </apex:outputPanel>
+                <br/><br/>
+                <div style="font-family:verdana; border-top:thin solid #7EAC6D;font-size:13px;">
+                    Kunden skal ved efterfølgende spørgsmål kontakte YouSee Kundeservice.<br></br>
+                    Hovedkontor: YouSee – Teglholmsgade 1 – 0900 København C<br></br>
+                    Telefon 70 70 40 40 – Fax 70 70 40 41 <br></br>
+                    YouSee A/S, CVR-nr. 25 76 75 78 - København
+                </div>
+                <apex:pageBlockButtons location="bottom">
+                   <apex:commandButton action="{!cancel}" value="Annuller" style="margin-right:300px;" rendered="{!NOT(receiptPage)}"/>
+               <!-- <apex:commandButton action="{!back}" value="Tilbage" rendered="{!NOT(receiptPage)}"/> -->
+                   <apex:commandButton action="{!back}" value="Tilbage" rendered="{!AND(NOT(receiptPage),OR(NOT(isYouBioSelected), AND(isYouBioSelected, existingYoubio == 'true')))}"/>
+                    <apex:commandButton value="Udskriv kvittering" rendered="{!receiptPage}" onclick="return redirectPrint();"/>
+                    <apex:commandButton value="Til forsiden" action="{!redirectToFrontPage}" rendered="{!receiptPage}"/>
+                    <apex:outputPanel rendered="{!NOT(receiptPage)}">
+                     <input type="button" onclick="placeOrderJS()"  value="Godkend" class="videreBtnCls" /> 
+                     </apex:outputPanel>
+                </apex:pageBlockButtons>
+            </apex:pageBlock>
+            <input type = "hidden" name="perviousPage" value = "{!$CurrentPage.parameters.perviousPage}"/>
+            <apex:inputHidden value="{!totalPrice}" id="hdnTotalPrice"/>
+            <input type="hidden" id="hiddenReceiptValgtResponse" name = "receiptValgtResponse" value="" />
+            <input type="hidden" id="hiddenPriceJsonResponse" name = "priceJsonResponse" value="" />
+        </apex:form>
+    <apex:outputPanel id="jspanel" >
+        <script type="text/javascript"> 
+            var rec={!receiptPage};
+            var myJSONObject={!jsonResponse};;
+            var firstJSONResponse = {!firstJsonResponse}; 
+            myJSONObject=refreshFirstJSONResponse(firstJSONResponse,myJSONObject);
+            
+            var pakkeForSlagMessage = '';
+            var slagMessage = '  Du har oplyst kunden, der kan være mulighed for, at det bedre kunne have svaret sig at opgradere til større tv-pakke end de valgte Ekstrakanaler';
+            
+            if(myJSONObject['pakkeforslag'] != undefined && '{!isYouBioSelected}' == 'false') {
+                pakkeForSlagMessage = getPakkeForSlagMessage();
+                document.getElementById('pakkeForSlagDiv').style.display = 'block';
+                $("#pakkeforslag").html(pakkeForSlagMessage);
+            }
+            if(document.getElementById("wantNewsLetter")!= null && document.getElementById("wantNewsLetter").firstChild.checked != null){
+                if(document.getElementById("wantNewsLetter").firstChild.checked){
+                    document.getElementById("newsletterLabel").style.display = "block";
+                    document.getElementById("newsletterEmail").style.display = "block";
+                }
+            }
+            if(document.getElementById("registerEkom")!= null && document.getElementById("registerEkom").firstChild.checked != null){
+                if(document.getElementById("registerEkom").firstChild.checked){
+                    document.getElementById("registerEkomLabel").style.display = "block";
+                    document.getElementById("registerEkomEmail").style.display = "block";
+                }
+            }
+            
+           /* if(document.getElementById('wantNewsLetter').checked != null){
+            if(document.getElementById('wantNewsLetter').checked == 'true'){
+             document.getElementById("newsletterLabel").style.display = "block";
+                document.getElementById("newsletterEmail").style.display = "block";
+                }
+                }*/
+
+
+            if('{!receiptPage}'=='true')
+            {   
+                if (bbTlfFlag || bbFlag ||plusFlag || ekstrakanalerFlag ||broadbandUpgradationFlag ||telefoniFlag || bbSPFlag || TLFSPFlag || bbSPTLFFlag){
+                    document.getElementById('hasDealerAcceptedMoney').checked = true;
+                    document.getElementById('hasDealerAcceptedMoney').disabled = true;
+                    if (bbFlag|| bbSPFlag){
+                        document.getElementById('IsCustomerHasModemForBroadband').checked =true;
+                        document.getElementById('IsCustomerHasModemForBroadband').disabled =true;
+                    }
+                }
+                if(telefoniFlag || broadbandTelephonyCommonFlag|| TLFSPFlag || bbSPTLFFlag){
+                    document.getElementById('IsCustomerHasModemForTelephony').checked =true;
+                    document.getElementById('IsCustomerHasModemForTelephony').disabled =true;
+                    document.getElementById('IsCustomerHasModemForTelephony1').checked =true;
+                    document.getElementById('IsCustomerHasModemForTelephony1').disabled =true;
+                }
+                if(document.getElementById("wantNewsLetter") != null && document.getElementById("wantNewsLetter").firstChild.checked){
+                  if(document.getElementById("newsletterLabel") != null){
+                    document.getElementById("newsletterLabel").style.display = "block";
+                  }
+                  if(document.getElementById("newsletterEmail") != null){  
+                    document.getElementById("newsletterEmail").style.display = "block";
+                  }  
+               }else{
+                  if(document.getElementById("newsletterdivId") != null){
+                    document.getElementById("newsletterdivId").style.display = "none";
+                  }
+                  if(document.getElementById("wantNewsLetter") != null){  
+                    document.getElementById("wantNewsLetter").style.display = "none";
+                  }
+                  if(document.getElementById("ApprovalInfo2") != null){                     
+                    document.getElementById("ApprovalInfo2").style.display = "none";
+                  }  
+                  if(document.getElementById("newsletterLabel") != null){
+                      document.getElementById("newsletterLabel").style.display = "none";
+                  }
+                  if(document.getElementById("newsletterEmail") != null){
+                     document.getElementById("newsletterEmail").style.display = "none";
+                  }
+               }
+                if(document.getElementById("registerEkom") != null && document.getElementById("registerEkom").firstChild.checked){
+                  if(document.getElementById("registerEkomLabel") != null){
+                    document.getElementById("registerEkomLabel").style.display = "block";
+                  }
+                  if(document.getElementById("registerEkomEmail") != null){  
+                    document.getElementById("registerEkomEmail").style.display = "block";
+                  }  
+                }else{
+                  if(document.getElementById("eKommdivId") != null){
+                    document.getElementById("eKommdivId").style.display = "none";
+                  }
+                  if(document.getElementById("registerEkom") != null){  
+                    document.getElementById("registerEkom").style.display = "none";
+                  }
+                  if(document.getElementById("ApprovalInfo15") != null){                     
+                    document.getElementById("ApprovalInfo15").style.display = "none";
+                  }                
+                  if(document.getElementById("registerEkomLabel") != null){
+                      document.getElementById("registerEkomLabel").style.display = "none";
+                  }
+                  if(document.getElementById("registerEkomEmail") != null){
+                     document.getElementById("registerEkomEmail").style.display = "none";
+                  }
+               }
+             
+            }
+            var abbonometers='';
+           
+            installations= new Array();
+            //alert('Page Load is called.');
+            //alert(myJSONObject['kunde-data']['valgt'])
+            var monthlyPrice=0; 
+            var oneTimePrice=0;
+            var oneTimePriceForDealer=0;
+            
+            var resetTlfFlagsInBackFlow = '{!resetTlfFlags}';
+           // alert('resetTlfFlagsInBackFlow----'+resetTlfFlagsInBackFlow);
+            if(myJSONObject['kunde-data']['valgt']!=undefined){ 
+                getproductOffers();
+                var basicHeader = ["","","",""];     
+                abbonometers = getMonthlySubscriptions(myJSONObject['kunde-data']['valgt']);
+                var abbonStrin = JSON.stringify(abbonometers);
+                var dummy='';
+                //alert('abbonometers.length '+abbonometers.length());
+                if(abbonometers != ''){     
+                    //document.getElementById("{!$Component.approvalForm.approvalPageBlock.kunensValgId.abnId}").style.display = block;        
+                    $("#abbonometerTemplate").tmpl(abbonometers).appendTo(createHeaders(basicHeader,"#abonnementerTable")); 
+                    $("#abbonometerWithPriceTemplate").tmpl(abbonometers).appendTo(createHeaders(basicHeader,"#abonnementerPriceTable"));
+                    dummy=monthlyPrice.toString();
+                    dummy=dummy.split('.');
+                    if(dummy.length==2){
+                        document.getElementById("monthlyPrice").innerHTML=monthlyPrice.toFixed(2);
+                    }
+                    else if (dummy.length==1){
+                        document.getElementById("monthlyPrice").innerHTML=monthlyPrice+'.00';
+                    }               
+                }else{
+                    //document.getElementById("{!$Component.approvalForm.approvalPageBlock.kunensValgId.abnId}").style.display = none;
+                }
+                
+                installations=getOneTimeSubscriptions(myJSONObject['kunde-data']['valgt']);                
+         
+                if(installations != ''){                    
+                    //document.getElementById("{!$Component.approvalForm.approvalPageBlock.kunensValgId.insId}").style.display = block;
+                     $("#abbonometerWithPriceTemplate").tmpl(installations).appendTo(createHeaders(basicHeader,"#installationPriceTable"));
+                    /* var  installationsWithPrice = addTelephoniPrice();
+                     if(installationsWithPrice.length > 0){
+                        $("#abbonometerWithPriceTemplate").tmpl(installationsWithPrice).appendTo(createHeaders(basicHeader,"#installationPriceTable"));
+                     }*/                        
+                    
+                     $("#abbonometerTemplate").tmpl(installations).appendTo(createHeaders(basicHeader,"#installationTable"));
+                     //alert('testing not a defect-----'+resetTlfFlagsInBackFlow);
+                     //var installationsWithoutPrice = addTelofoniInfo();
+                     var installationsWithoutPrice ='', instTable = '';
+                     if (resetTlfFlagsInBackFlow=='false'){
+                        installationsWithoutPrice = addTelofoniInfo();
+                     }
+                     if(installationsWithoutPrice.length > 0){
+                       $.each(installationsWithoutPrice, function(i, inst){
+                        if(inst.ProductCategory.indexOf('Når bindings') != -1){
+                            instTable += '<tr><td colspan=\"2\">'+inst.ProductCategory +'&nbsp;'+inst.ProductName+'</td></tr>';
+                        }else{
+                            instTable += '<tr><td width=\"30%\">'+inst.ProductCategory+'</td><td width=\"70%\">'+inst.ProductName+'</td></tr>';
+                        }
+                       });
+                       $(instTable).appendTo("#installationTable");
+                    } 
+                    dummy=oneTimePrice.toString();
+                    dummy=dummy.split('.');
+                    if(dummy.length==2){
+                        oneTimePriceForDealer=parseFloat(oneTimePrice)-parseFloat(clearOnetimeCharge);
+                        //ADDED For DW-865
+                        oneTimePriceForDealer=parseFloat(oneTimePriceForDealer)-parseFloat(bsxxDwnFee);
+                         // ADDED for 689 - youbio
+                        if('{!isYouBioSelected}' == 'true'){
+                            oneTimePriceForDealer=parseFloat(oneTimePrice)-parseFloat(youbioOneTimeCharge);
+                        }
+                        document.getElementById("oneTimePrice").innerHTML=oneTimePrice;
+                        if (bbTlfFlag || bbFlag ||plusFlag || ekstrakanalerFlag ||broadbandUpgradationFlag||telefoniFlag || bbSPFlag)
+                            document.getElementById("oneTimePriceForBBnTF").innerHTML=oneTimePriceForDealer.toFixed(2);
+                    }
+                    else if (dummy.length==1){
+             
+                       /*            
+                        if (extTelephoneId!=null && extTelephoneId!=''){
+                            oneTimePrice = oneTimePrice + 95.00;
+                            oneTimePriceForDealer=parseFloat(oneTimePrice)-parseFloat(clearOnetimeCharge) - 95.00;
+                        } else {
+                            oneTimePriceForDealer=parseFloat(oneTimePrice)-parseFloat(clearOnetimeCharge);
+                        }*/
+                        oneTimePriceForDealer=parseFloat(oneTimePrice)-parseFloat(clearOnetimeCharge)-parseFloat(TlfNpOnetimeCharge)-parseFloat(bsxxDwnFee);
+                        // ADDED for 689 - youbio
+                        if('{!isYouBioSelected}' == 'true'){
+                            oneTimePriceForDealer=parseFloat(oneTimePrice)-parseFloat(youbioOneTimeCharge);
+                        }
+                        document.getElementById("oneTimePrice").innerHTML=oneTimePrice+'.00';
+                        if (bbTlfFlag || bbFlag ||plusFlag || ekstrakanalerFlag||broadbandUpgradationFlag ||telefoniFlag || bbSPFlag ||bbSPTLFFlag)
+                            document.getElementById("oneTimePriceForBBnTF").innerHTML = oneTimePriceForDealer+'.00';
+                    }                    
+                    oneTimePriceForDealer = oneTimePriceForDealer - getOneTimeBoxingFee();
+                    if (bbTlfFlag || bbFlag ||plusFlag || ekstrakanalerFlag ||broadbandUpgradationFlag||telefoniFlag || bbSPFlag ||bbSPTLFFlag)
+                        document.getElementById("oneTimePriceForBBnTF").innerHTML = oneTimePriceForDealer+'.00';
+                    oneTimePriceForBBnTFValue = oneTimePriceForDealer+'.00'; 
+                }
+                else{   
+                    if (bbTlfFlag || bbFlag ||plusFlag || ekstrakanalerFlag ||broadbandUpgradationFlag||telefoniFlag || bbSPFlag ||bbSPTLFFlag)                
+                        document.getElementById("oneTimePriceForBBnTF").innerHTML = oneTimePriceForDealer+'.00';
+                    oneTimePriceForBBnTFValue = oneTimePriceForDealer+'.00'; 
+                    //document.getElementById("{!$Component.approvalForm.approvalPageBlock.kunensValgId.insId}").style.display = none;
+                }              
+               document.getElementById("{!$Component.approvalForm.hdnTotalPrice}").value=oneTimePriceForDealer.toFixed(2);
+            }
+            
+            function getOneTimeBoxingFee(){
+                var oneTimePriceForBoxingEvent=0.0;
+                try{
+                    $.each(myJSONObject['kunde-data']['valgt'], function(i,valgtNode){
+                        if(valgtNode.aftaletype=='dtv'){
+                            $.each(valgtNode.varer, function(j,varerNode){
+                                if(varerNode.varenr=='1204006' && myJSONObject[varerNode.varenr] != undefined){
+                                    oneTimePriceForBoxingEvent = parseFloat(myJSONObject[varerNode.varenr].totalpris); 
+                                    return;
+                                }
+                            });
+                        }
+                    });
+                }catch(err){
+                    alert("Error: in getOneTimeBoxingFee method: "+err.description);
+                }
+                return oneTimePriceForBoxingEvent;
+            }
+            
+            function removeHTMLTags(htmlString){
+                //if(htmlString){
+                    var mydiv = document.createElement("div");
+                    mydiv.innerHTML = htmlString;
+                    if (document.all){ // IE Stuff
+                        return mydiv.innerText;
+                    }else{ // Mozilla does not work with innerText
+                        return mydiv.textContent;
+                    }                           
+                //} 
+            } 
+            
+        //Added for DW-787 DW-784
+        if(bbFlag || broadbandTelephonyCommonFlag ||TLFSPFlag || bbSPFlag || bbSPTLFFlag ){
+            if(myJSONObject['bb-kraevet-valg'] != undefined){
+                $.each(myJSONObject['bb-kraevet-valg'].varer,function(i,kraevetNode){
+                    if(kraevetNode.varenr != undefined){
+                        if(kraevetNode.varenr == '1312004' || kraevetNode.varenr == '1314223' || kraevetNode.varenr == '1314225'){
+                            if(broadbandTelephonyCommonFlag || TLFSPFlag || bbSPTLFFlag){
+                                document.getElementById('tlfModemText').innerHTML = 'Der skal udleveres modem til kunden';
+                            }
+                            else{
+                                document.getElementById('bbModemText').innerHTML = 'Der skal udleveres modem til kunden';
+                            }
+                            
+                        }
+                        else if(kraevetNode.varenr == '1312002'){
+                            if(broadbandTelephonyCommonFlag|| bbSPTLFFlag){
+                                document.getElementById('tlfModemText').innerHTML = 'Der skal <b>ikke</b> udleveres modem til kunden';
+                            }
+                            else{
+                                document.getElementById('bbModemText').innerHTML = 'Der skal <b>ikke</b> udleveres modem til kunden';
+                            }
+                            
+                        }                       
+                    }                   
+                });
+            }
+        }
+        else if(telefoniFlag){
+            if(myJSONObject['tlf-kraevet-valg'] != undefined){
+                $.each(myJSONObject['tlf-kraevet-valg'].varer,function(i,kraevetNode){
+                    if(kraevetNode.varenr != undefined){
+                        if(kraevetNode.varenr == '1401112'){
+                            document.getElementById('tlfModemText').innerHTML = 'Der skal udleveres modem til kunden';
+                        }
+                        else if(kraevetNode.varenr == '1417010' || kraevetNode.varenr == '1417015' || kraevetNode.varenr == '1401111'){
+                            document.getElementById('tlfModemText').innerHTML = 'Der skal <b>ikke</b> udleveres modem til kunden';
+                        }                       
+                    }                   
+                });
+            }
+        }
+        
+        
+        </script>
+    </apex:outputPanel>
+    
+<apex:outputpanel rendered="{!AND(OR(plusFlag,ekstrakanalerFlag,isYouBioSelected),hardwareSelection!='existingDTVCard')}">
+
+<script type="text/javascript">
+    function extractSerialNo(){
+        var serProdArr = new Array();
+        var serialNr = {};
+        if(myJSONObject['kunde-data'] != undefined){
+            var json = myJSONObject['kunde-data'].valgt;
+                if(json != undefined){
+                    $.each(json,function(i,valgtNode){
+                        $.each(valgtNode.varer,function(i,varerNode){
+                        //alert('varerNode.serienumre '+varerNode.serienumre);
+                            if(varerNode.serienumre != undefined ){
+                            if(varerNode.varenr !='1201508' && varerNode.varenr !='1201509' && varerNode.varenr !='1201507'){
+                                $.each(varerNode.serienumre,function(key,value){
+                                //alert('Value '+value);
+                                    serialNr = {}
+                                    serialNr.Product = varerNode.navn
+                                    serialNr.SerieNr = value;
+                                    serProdArr.push(serialNr);
+                                });
+                                }
+                                else if(varerNode.varenr =='1201508' || varerNode.varenr =='1201509' || varerNode.varenr =='1201507')
+                                {
+                                    serialNr = {}
+                                    serialNr.Product = varerNode.navn
+                                    serialNr.SerieNr = varerNode.serienumre;
+                                    serProdArr.push(serialNr);
+                                }
+                            }else{
+                                if(varerNode.navn == 'YouBio Boks'){
+                                   serialNr = {} 
+                                   serialNr.Product = varerNode.navn
+                                   serialNr.SerieNr = ''; 
+                                   serProdArr.push(serialNr); 
+                               }
+                             } 
+                                                                                                       
+                        });
+                    });
+                }
+        }
+        productJsonArray = serProdArr;
+        return serProdArr;
+    }
+
+    var arr = extractSerialNo();
+    //console.log('arr'+arr);
+    $("#productSerialNoTemplate").tmpl(arr).appendTo("#productList");
+    //alert($("#productSerialNoTemplate").tmpl(arr).appendTo("#productList"));
+    //console.log($("#productSerialNoTemplate").tmpl(arr).appendTo("#productList"));
+  </script>
+</apex:outputpanel>
+<script>
+    hideEmptySection();
+    function hideEmptySection(){
+        var abbonometersPresent = false;
+        var installationsPresent = false;
+        
+        if(myJSONObject['kunde-data']['valgt'] != undefined){
+            abbonometersPresent = getMonthlySubscriptions(myJSONObject['kunde-data']['valgt']);
+            installationsPresent=getOneTimeSubscriptions(myJSONObject['kunde-data']['valgt']);
+        }
+        if(abbonometersPresent){
+                document.getElementById("{!$Component.approvalForm.approvalPageBlock.kunensValgId.abnId}").style.display = "block";
+                document.getElementById("{!$Component.approvalForm.approvalPageBlock.belobId.fasteId}").style.display = "block";
+                document.getElementById("abonnementerPriceTable").style.display = "block";
+                document.getElementById("abonnementerPriceTableTwo").style.display = "block";
+                
+            }else{
+                document.getElementById("{!$Component.approvalForm.approvalPageBlock.kunensValgId.abnId}").style.display = "none";
+                document.getElementById("{!$Component.approvalForm.approvalPageBlock.belobId.fasteId}").style.display = "none";
+                document.getElementById("abonnementerPriceTable").style.display = "none";
+                document.getElementById("abonnementerPriceTableTwo").style.display = "none";
+            }
+        if(installationsPresent){
+                document.getElementById("{!$Component.approvalForm.approvalPageBlock.kunensValgId.insId}").style.display = "block";
+                document.getElementById("{!$Component.approvalForm.approvalPageBlock.belobId.OprettelseId}").style.display = "block";
+                document.getElementById("installationPriceTable").style.display = "block";
+                document.getElementById("installationPriceTableTwo").style.display = "block";
+                 if(document.getElementById('{!$Component.approvalForm.approvalPageBlock.udlevertPanelId}') != undefined &&
+                    document.getElementById('{!$Component.approvalForm.approvalPageBlock.udlevertPanelId}') != null){
+                    document.getElementById("{!$Component.approvalForm.approvalPageBlock.udlevertPanelId}").style.display = "block";
+                    document.getElementById("{!$Component.approvalForm.approvalPageBlock.udlevertHardwareId}").style.display = "block";
+                    document.getElementById("productList").style.display = "block";
+                  }
+            }else{
+                document.getElementById("{!$Component.approvalForm.approvalPageBlock.kunensValgId.insId}").style.display = "none";
+                document.getElementById("{!$Component.approvalForm.approvalPageBlock.belobId.OprettelseId}").style.display = "none";
+                document.getElementById("installationPriceTable").style.display = "none";
+                document.getElementById("installationPriceTableTwo").style.display = "none";
+                if({!isYouBioSelected}){
+                 if(document.getElementById('{!$Component.approvalForm.approvalPageBlock.udlevertPanelId}') != undefined &&
+                    document.getElementById('{!$Component.approvalForm.approvalPageBlock.udlevertPanelId}') != null){
+                    document.getElementById("{!$Component.approvalForm.approvalPageBlock.udlevertPanelId}").style.display = "none";
+                    document.getElementById("{!$Component.approvalForm.approvalPageBlock.udlevertHardwareId}").style.display = "none";
+                    document.getElementById("productList").style.display = "none";
+                }
+            }
+         }
+        //}            
+    }
+</script>
+
+    <script type="text/javascript">printContentAreaEnd();</script>
+    <script type="text/javascript">printFooter();</script>
+</html>
+</apex:page>

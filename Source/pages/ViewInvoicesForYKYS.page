@@ -1,0 +1,559 @@
+<apex:page standardController="Account" extensions="netfeeinvoicesController" tabStyle="account" id="apexPage" action="{!invokeCI}" showHeader="false" sidebar="false">
+    <apex:includeScript value="{!URLFOR($Resource.DynaTree_JS,'jquery/jquery.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.jQueryUI)}"/> 
+    <apex:includeScript value="{!URLFOR($Resource.jPaginator,'jpaginator-master/jPaginator.js')}"/> 
+    <apex:includeScript value="{!URLFOR($Resource.jPaginator,'jpaginator-master/jPaginator-min.js')}"/> 
+    <apex:stylesheet value="{!URLFOR($Resource.jPaginator,'jpaginator-master/jPaginator.css')}"/>
+    <apex:stylesheet value="{!URLFOR($Resource.jqueryuicss)}"/>
+    <style>
+        .bPageBlock .detailList .labelCol {
+            width:0%;
+        }
+        .Betalings {
+            color: #4a4a56;
+            white-space: normal;
+            position: relative;   
+            //right:45px;
+            //padding-left: 2px;
+            //text-align: left;
+            font-size: 91%;
+            font-weight: bold;
+        }
+        .BetalingValue {
+             position: relative;
+             left:35px;
+            
+        }
+        .labelStyle
+        {
+                font-family: Arial, Helvetica, sans-serif;
+                font-size:12px;
+                font-weight:bold;
+                text-align:center;
+        }
+    </style>
+    <apex:outputPanel id="scriptPanel">
+        <script type="text/javascript">
+                
+                
+                $(document).ready(function(){
+                //Invoice Section Start
+                var invSize = {!invoiceTotalSize};
+                var invlistSize = Math.ceil(invSize/5);    
+                if(invlistSize <= 1){
+                    $("#pagePanelInv").hide();
+                }
+                else{
+                var invoiceCounter = document.getElementById("{!$Component.apexPage.form1.invoiceCounter}");
+                var invoiceRows = document.getElementById("{!$Component.apexPage.form1.invoiceRows}");
+                
+                $("#pagePanelInv").jPaginator({ 
+                    nbPages: invlistSize,
+                    nbVisible: 5,
+                    selectedPage:1,
+                    overBtnLeft:'#pagePanelInv_o_left', 
+                    overBtnRight:'pagePanelInv_o_right', 
+                    maxBtnLeft:'#pagePanelInv_m_left', 
+                    maxBtnRight:'#pagePanelInv_m_right',
+                    minSlidesForSlider:1,
+                    onPageClicked: function(a,num) {   
+                        if(isNaN(num)){                            
+                            invoiceCounter.value = 0;
+                            invoiceRows.value = invSize;
+                        }
+                        else{                           
+                            invoiceCounter.value = parseInt(num-1)*5;
+                            invoiceRows.value = 5;
+                        }
+                        getInvoiceList();
+                        if(isNaN(num) && invoiceRows.value == invSize){
+                            $('#InvPages').html(' Showing records ' + invSize + ' of ' + invSize);
+                        }
+                        else if(invlistSize == num){
+                            $('#InvPages').html(' Showing records ' + (parseInt(invoiceCounter.value) +1) + ' - ' +invSize + ' of ' + invSize);
+                        }              
+                        else{
+                            $('#InvPages').html(' Showing records ' + (parseInt(invoiceCounter.value) +1) + ' - ' +(parseInt(invoiceCounter.value) +5) + ' of ' + invSize);
+                        }
+                    }   
+                });     
+                $('#InvPages').html(' Showing records ' + (parseInt(invoiceCounter.value) +1) + ' - ' +(parseInt(invoiceCounter.value) +5) + ' of ' + invSize);             
+            }
+            //Invoice Section End
+            $(".allRecords").click(function(){               
+                $(this).addClass("selected");
+            });
+           
+            $("#loader").hide();
+        });
+        var amt = new Array();
+        var Paymethod;
+        </script>
+    </apex:outputPanel>
+    
+    <apex:outputPanel rendered="{!ispageLodaErr}"> 
+        <apex:pageMessages />
+    </apex:outputPanel>
+    
+    <apex:outputPanel id="error" rendered="{!!ispageLodaErr}"> 
+        <apex:pageMessages />
+    </apex:outputPanel>
+    
+       
+     <apex:form id="form1"> 
+     <!-- Pagination variables and action functions starts -->
+            <apex:inputHidden value="{!invoiceCounter}" id="invoiceCounter"/>
+            <apex:inputHidden value="{!invoiceRows}" id="invoiceRows"/>
+            <apex:actionFunction name="getInvoiceList" rerender="invBlock,panel" focus="invBlock" />
+     <!--Pagination variables and action functions ends -->
+    </apex:form>
+   
+   <div id="loader">
+        <c:CarrieHenterData BackColor="#efefef" borderColor="#336699" borderSize="3" height="50px" width="180px" ImageUrl="{!$Resource.CarrieLoading}" Message="Loading..." messageStyle="color:darkred;font-size:11pt;font-weight:bold;" id="loader"/>
+    </div>
+    
+        <apex:actionStatus id="actStatusId">
+              <apex:facet name="start">
+                    <c:CarrieHenterData BackColor="#efefef" borderColor="#336699" borderSize="3" height="50px" width="180px" ImageUrl="{!$Resource.CarrieLoading}" Message="Loading..." messageStyle="color:darkred;font-size:11pt;font-weight:bold;"/>               
+              </apex:facet>
+        </apex:actionStatus> 
+    
+    <apex:form id="form2">               
+           <apex:pageBlock id="panel">
+               <apex:pageBlockButtons location="top" style="align:right;"> 
+                    <apex:commandButton value="Leveringsmetode" onclick="openpopupINV(event);" disabled="{!!payProfilRender}"/> 
+                    <apex:commandButton value="Betalingsmetode" id="btmPayment" onclick="openpopup(event);" disabled="{!!payProfilRender}"/>               
+                    <apex:commandButton value="Betalingsservice Online Registrering" oncomplete="openpopupBS();" disabled="{!!payProfilRender}"/> 
+                    <apex:commandButton value="Luk" onclick="window.close();"/>
+                </apex:pageBlockButtons>
+            
+             <apex:outputPanel id="accountDetails" rendered="{!payProfilRender}">
+               <apex:pageBlockSection collapsible="false" columns="2" id="accountDetailsPBS1" title="Kunde Betalingsoplysninger">
+                      <!--  <apex:pageBlockSectionItem labelStyleClass="labelStyle" >
+                              <apex:outputLabel value="Payment Notification Method" for="Payment Notification Method" style="widht:100%;white-space: nowrap;overflow: hidden;"/>
+                              <apex:outputText value="{!mapPaymentProfToInfo['paymentNotificationMethod']}"/>  
+                      </apex:pageBlockSectionItem>-->
+                      <apex:pageBlockSectionItem >
+                              <apex:outputLabel value="Kundenavn" for="Customer Name" style="widht:100%;white-space: nowrap;overflow: hidden;"/>
+                              <apex:outputText value="{!AccName}"/>  
+                      </apex:pageBlockSectionItem>
+                     <apex:pageBlockSectionItem >
+                              <apex:outputLabel value="Leveringsmetode" for="Invoice Media" style="widht:100%;white-space: nowrap;overflow: hidden;"/>
+                              <apex:outputText value="{!mapPaymentProfToInfo['invoiceMedia']}" id="profinvMed"/>
+                      </apex:pageBlockSectionItem>
+                      <!-- <apex:pageBlockSectionItem >
+                              <apex:outputLabel value="Mobile No" for="Mobile No" style="widht:100%;white-space: nowrap;overflow: hidden;"/>
+                              <apex:outputText value="{!mapPaymentProfToInfo['mobileNo']}"/>
+                      </apex:pageBlockSectionItem> -->
+                      <apex:pageBlockSectionItem >
+                              <apex:outputLabel value="Kundenummer" for="Customer No." style="widht:100%;white-space: nowrap;overflow: hidden;"/>
+                              <apex:outputText value="{!AccNo}"/>
+                      </apex:pageBlockSectionItem>
+                      <apex:pageBlockSectionItem >
+                              <apex:outputLabel value="{!$Label.NetsFeeBetalingsMetode_profile}" for="Payment Method" style="widht:100%;white-space: nowrap;overflow: hidden;"/>
+                              <apex:outputText value="{!mapPaymentProfToInfo['paymentMethod']}" id="profPayMet"/>   
+                      </apex:pageBlockSectionItem> 
+                      <apex:pageBlockSectionItem />
+                      <apex:pageBlockSectionItem >
+                              <apex:outputLabel value="Saldo" for="Total Invoice" style="widht:100%;white-space: nowrap;overflow: hidden;"/>
+                              <apex:outputText value="{!strTotalInvoice}"/>   
+                      </apex:pageBlockSectionItem>                  
+                 </apex:PageBlockSection>
+           
+           </apex:outputpanel>
+            <apex:pageBlockSection collapsible="false" columns="3" id="accountDetailsPBS2" title="Customer Payment Information" rendered="{!!payProfilRender}">
+                <apex:outputLabel value="Ingen registreringer at vise" rendered="{!!payProfilRender}" styleClass="noRowsHeader"></apex:outputLabel>
+            </apex:pageBlockSection>
+            
+            <apex:pageBlocksection title="Faktura" id="invBlock" columns="1">               
+                    <apex:pageBlockTable value="{!list_Invoices}" var="item" first="{!invoiceCounter}" rows="{!invoiceRows}" rendered="{!((list_Invoices.size >0) && !isError)}"> 
+                     <apex:column headerValue="Faktura" style="text-align: center;">       
+<!--                 <a id="pdf" href="/apex/netfeeinvoicesBillPDF_Page?billSeqNo={!item.billSequenceNo}&accNo={!item.accountNumber}&accId={!Account.id}" target="_blank">-->
+                     <apex:outputlink value="/apex/netfeeinvoicesBillPDF_Page?billSeqNo={!item.billSequenceNo}&accNo={!item.accountNumber}&accId={!Account.id}" target="_blank">
+                        <apex:image value="{!$Resource.NetsFeePdf}"/>
+                    <!--  </a>-->
+                    </apex:outputlink>
+                    </apex:column>
+                    <apex:column headervalue="Faktura dato" value="{!item.documentDate}"/> 
+                    <apex:column headervalue="Fakturanummer" value="{!item.invoiceNumber}"/> 
+                    <apex:column headervalue="Beskrivelse" value="{!item.description}"/> 
+                    <apex:column headervalue="{!$Label.NetsFeeBetalingsMetode_Invoice}" value="{!mapforPaymentMethod[item.paymentMethod]}"/>   
+<!--                    <apex:column headervalue="Ialt" value="{!item.amountTotalInclVat}" style="text-align: right;"/>  -->
+                    <apex:column >
+                        <apex:facet name="header">
+                            <apex:outputPanel id="Ialt" style="align:center;">Ialt</apex:outputPanel> 
+                        </apex:facet>
+                        <apex:outputText value="{!item.amountTotalInclVat}" style="float:right;"/>
+                     </apex:column>               
+                    <!--  <apex:column headervalue="Saldo" value="{!item.balance}"/>--> 
+                     <apex:column headervalue="Betalingsfrist" value="{!item.lastPaymentDate}"/> 
+                    
+                      <apex:column headervalue="Betalt">
+                        <apex:inputText value="{!item.strPartialAmt}" rendered="{!IF((NOT(item.paid) && NOT(item.creditnote)),'true','false')}" size="10" onblur="push(this.value,'{!item.rowcount}');" id="strText" disabled="true" style="text-align:right;"/>
+                        <script>                            
+                            var intInd = '{!item.rowcount}';
+                            amt[intInd] = '{!item.strPartialAmt}'; 
+                            //alert(amt[intInd]);
+                            function push(val,cnt){ 
+                                //alert(val+'==='+cnt);
+                                amt[cnt] = val;                             
+                            }                           
+                        </script>
+                        <!--
+                            //SPOC 2094- added customerNo as parameter in below apex:outputLink tag
+                        -->
+                        <input type="hidden" name="cardMasknum" value="" id="cardMasknum"/>
+                        <script>                            
+                            var cardmask = document.getElementById('cardMask1').value;                             
+                                                      
+                        </script>
+                        
+                        <apex:outputLink value="#" rendered="{!IF((NOT(item.paid) && NOT(item.creditnote)),'true','false')}" onclick="openDibs(amt,'{!item.rowcount}','{!customerNo}','{!item.invoiceNumber}','{!item.strPartialAmt}','{!item.Sample}','{!item.lastpaymentFrCal}',cardmask);">
+                            Gå til betaling
+                        </apex:outputLink>
+                        <apex:outputText value="Kreditnotabeløb" rendered="{!IF((NOT(item.paid)&&(item.creditnote)),'true','false')}"/>
+                        <apex:image rendered="{!item.paid}" value="/resource/1402921477000/NetsFeepaid" width="25" height="25"/> 
+                    </apex:column> 
+                    </apex:pageBlockTable>    
+                 <apex:outputLabel value="{!$Label.NetsFeeEmptyInvoice}" rendered="{!((list_Invoices.size ==0) && !isError && !ispageLodaErr)}" styleClass="noRowsHeader"></apex:outputLabel>
+            </apex:pageBlocksection>
+            
+        </apex:pageBlock>
+         <apex:actionfunction action="{!updatepaymentMethod}" name="callupdatepayement" reRender="form2,panel,error,strPaymethod" status="actStatusId">
+            <apex:param id="tname" name="trasactionid" value=""/>
+            <apex:param id="expdate" name="expirationdate" value=""/>
+            <apex:param id="selPyMt" name="PayMeth" value=""/> 
+            <apex:param id="cardMask" name="cardNoMask" value=""/>
+            <!-- //Support-6470 added authkey-->
+             <apex:param id="authkey" name="authkey" value=""/>   
+            </apex:actionfunction>      
+            <apex:actionfunction action="{!updateInvoiceMedia}" name="callUpdateInvMed" reRender="form2,accountDetails,error,strInvMedia" status="actStatusId">
+                <apex:param id="invMed" name="selectInv" value=""/>
+            </apex:actionfunction>  
+            <apex:actionfunction action="{!payServiceMethod}" name="callpayinvoice" reRender="panel,error" status="actStatusId" oncomplete="calloutCheck()"> 
+                <apex:param id="tname1" name="transId" value=""/>
+                <apex:param id="order" name="orderid" value=""/>
+                <apex:param id="dcmAmt" name="dcmAmt" value=""/>
+                <apex:param id="invoice" name="strinvoice" value=""/>
+                <apex:param id="cardExp" name="strExp" value=""/>
+                <apex:param id="cardMask1" name="cardNoMask1" value=""/>
+                
+            </apex:actionfunction>
+            <apex:actionFunction action="{!invokeCallout}" name="callinvokeCI" reRender="apexPage"/>        
+    </apex:form>
+    
+    
+    
+    <div id="pagePanelInv">         
+        <!-- optional left control buttons -->
+        
+        <nav id="pagePanelInv_m_left"></nav><nav id="pagePanelInv_o_left"></nav>    
+        <a class='paginator_p allRecords' id="allInv">All</a>      
+        <div class='paginator_p_wrap'> 
+            <div class='paginator_p_bloc'> 
+                <!--<a class='paginator_p'></a> // page number : dynamically added --> 
+            </div> 
+        </div>     
+        <div id="InvPages"></div> 
+        <!-- optional right control buttons --> 
+        <nav id="pagePanelInv_o_right"></nav><nav id="pagePanelInv_m_right"></nav>         
+        <!-- slider --> 
+        <!--<div class='paginator_slider ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all'> 
+            <a class='ui-slider-handle ui-state-default ui-corner-all' href='#'></a> 
+        </div> 
+        --><br/><br/>    
+    </div>
+    
+    <!-- Payment Method Div -->
+    <div id="paymentDiv" style="display:none;">
+        <apex:form id="pay">
+        <apex:pageBlock id="PaymentMethod" title="Betalingsmetode">
+            <apex:pageBlockButtons location="bottom">
+                <!--<apex:commandButton value="Save" id="save" onclick="IntialOpen('{!$Component.strPaymethod}');"/>-->
+                <apex:commandButton value="Gem" id="save" onclick="checkRadio(event,'{!customerNo}');" oncomplete="calloutCheck()"/>
+                <apex:commandButton value="Annuller" id="cancel" onclick="closePay(event);" oncomplete="calloutCheck()"/>
+            </apex:pageBlockButtons>
+            <apex:selectRadio value="{!strPaymethod}" layout="pageDirection" id="strPaymethod">    
+                 <!--  <apex:selectOption itemValue="PBS" itemLabel="BetalingsService" itemDisabled="true"/>-->
+                 <br></br><apex:selectOption itemValue="CC" itemLabel="Kredit kort"/>
+                 <br></br><apex:selectOption itemValue="Giro" itemLabel="GIRO"/>
+            </apex:selectRadio>
+        </apex:pageBlock>
+        
+        </apex:form>
+    </div>
+    
+    <!-- End -->
+   <!-- Invoice Media Div -->
+   <div id="InvoiceMedia" style="display:none;">
+        <apex:form id="InvMed">
+        <apex:pageBlock id="invoicemedia" title="Leveringsmetode">
+            <apex:pageBlockButtons location="bottom">
+                <apex:commandButton value="Gem" id="save" onclick="checkRadioForInvMed()" oncomplete="calloutCheck()"/>
+                <apex:commandButton value="Annuller" id="cancel" onclick="closeInv(event);"/>
+            </apex:pageBlockButtons>
+            <apex:selectRadio value="{!strInvoiceMedia}" layout="pageDirection" id="strInvMedia">
+                 <apex:selectOption itemValue="REGNING-I-SELVBETJEN" itemLabel="REGNING-I-SELVBETJEN" itemDisabled="{!IF(NOT(selectInvMed) || (strInvoiceMedia == 'OIO' || strInvoiceMedia == 'EDI' || strInvoiceMedia == 'NETS') || (strInvoiceMedia == 'EBOKS' || strInvoiceMedia == 'EBOX'),'true','false')}"/><!--  -->
+                 <br></br><apex:selectOption itemValue="PDFMAIL" itemLabel="PDFMAIL" itemDisabled="{!IF(NOT(selectInvMed) || (strInvoiceMedia == 'OIO' || strInvoiceMedia == 'EDI' || strInvoiceMedia == 'NETS') || (strInvoiceMedia == 'EBOKS' || strInvoiceMedia == 'EBOX'),'true','false')}"/><!-- (strInvoiceMedia == 'EBOKS' || strInvoiceMedia == 'EBOX') ||  -->
+                 <br></br><apex:selectOption itemValue="PAPIR" itemLabel="PAPIR" itemDisabled="{!IF((strInvoiceMedia == 'OIO' || strInvoiceMedia == 'EDI' || strInvoiceMedia == 'NETS') || (strInvoiceMedia == 'EBOKS' || strInvoiceMedia == 'EBOX'),'true','false')}"/><!-- (strInvoiceMedia == 'EBOKS' || strInvoiceMedia == 'EBOX') ||  -->
+                 <br></br><apex:selectOption itemValue="NETS" itemLabel="NETS" itemDisabled="true"/><!-- (strInvoiceMedia == 'EBOKS' || strInvoiceMedia == 'EBOX') ||  -->
+                 <br></br><apex:selectOption itemValue="EBOX" itemLabel="EBOX" itemDisabled="true"/>
+                 <br></br><apex:selectOption itemValue="OIO" itemLabel="OIO" itemDisabled="true"/>
+                 <br></br><apex:selectOption itemValue="EDI" itemLabel="EDI" itemDisabled="true"/>
+            </apex:selectRadio>
+        </apex:pageBlock>     
+        </apex:form>
+    </div>
+    <!-- End -->
+    
+    <script>
+        var b;
+        function openpopupBS(){
+        
+         var url = 'https://www.betalingsservice.dk/BS/?id=0&pbs=114ab836a1db094efc77b572ef7cf881&dbnr={!cableUnitNumber}&dbgr=6&navn={!cuList[0].Name}&adr={!cuList[0].Street_YK__r.Full_Address__c}&postby=&knmin=&knmax=&allefelter=0';         
+         window.open(url,'_blank'); 
+        }
+        
+        function closeInv(e){
+            $( "#InvoiceMedia" ).dialog('close');
+            //window.location.reload();
+            if ((verOffset=nAgt.indexOf("MSIE"))!=-1) {
+                e.returnValue = false;
+            }
+            // In Chrome, the true version is after "Chrome" 
+            else{
+                 e.preventDefault();
+            }
+            return true;
+        }
+        
+        function closePay(e){
+        
+            $( "#paymentDiv" ).dialog('close');
+            //window.location.reload();
+            if ((verOffset=nAgt.indexOf("MSIE"))!=-1) {
+                e.returnValue = false;
+            }
+            // In Chrome, the true version is after "Chrome" 
+            else  {
+                 e.preventDefault();
+            }
+          return true;
+        }
+        function openpopup(e){
+            var pay = document.getElementById('{!$Component.apexPage:form2:panel:accountDetailsPBS1:j_id81:profPayMet}').innerHTML; 
+            
+            var theRadioButtonSet = document.getElementsByName('{!$Component.apexPage:pay:PaymentMethod:strPaymethod}');
+            
+            for (var x = 0; x < theRadioButtonSet.length; x++){
+                if (theRadioButtonSet[x].value == pay) {                    
+                     theRadioButtonSet[x].checked = true;
+                }
+            }           
+            $( "#paymentDiv" ).dialog();
+            if ((verOffset=nAgt.indexOf("MSIE"))!=-1) {
+                e.returnValue = false;
+            }
+            // In Chrome, the true version is after "Chrome" 
+            else  {
+                 e.preventDefault();
+            }
+            return false;
+        }
+        function openpopupINV(e){
+            
+            var inv = document.getElementById('{!$Component.apexPage:form2:panel:accountDetailsPBS1:j_id76:profinvMed}').innerHTML;      
+            
+            var theRadioButtonSet = document.getElementsByName('{!$Component.apexPage:InvMed:invoicemedia:strInvMedia}');      
+            for (var x = 0; x < theRadioButtonSet.length; x++){
+                if (theRadioButtonSet[x].value == inv ) {   
+                     theRadioButtonSet[x].checked = true;
+                }
+            }
+            
+            $( "#InvoiceMedia" ).dialog();
+            if ((verOffset=nAgt.indexOf("MSIE"))!=-1) {
+                e.returnValue = false;
+            }
+            // In Chrome, the true version is after "Chrome" 
+            else  {
+                 e.preventDefault();
+            }
+            return false;
+         }
+        
+        var strInvokeMeth;
+        var dcmAmt;
+        var strinvoice;
+        var newwin;
+        
+        function openDibs(amnt,ind,customerNo,invoice,bal,TotalBalance,paymethod,cardMask){ //SPOC 2094- added customerNo as parameter || SUPPOER-4681 Added Card Mask parameter
+            //alert('open Dibs '+cardMask);
+            var strBalance;
+            var floatbal;
+            var balance;
+            var amtEntered;
+            
+            if(paymethod =='payable'){
+                balance =  parseFloat(Math.abs(bal)).toFixed(2);
+                if(amnt !=''){
+                      
+                    strBalance = amnt[ind];
+                    amtEntered = parseFloat(strBalance).toFixed(2);
+                }
+                amtEntered = parseFloat(TotalBalance).toFixed(2);
+                if(amtEntered!=0.0){
+                    if(amtEntered!=null){
+                        if((Math.round(parseFloat(strBalance)*100)/100) > (Math.round(parseFloat(bal)*100)/100)){
+                            alert('Angiv en mængde mindre end eller lig med saldoen');         
+                        } 
+                        else if((Math.round(parseFloat(strBalance)*100)/100) <= (Math.round(parseFloat(bal)*100)/100)){               
+                            dcmAmt = amtEntered;
+                            strinvoice = invoice;
+                            var height = 500;
+                            var width = 800;
+                            strInvokeMeth = 'PayInvoice';  
+                            //SPOC 2094- added customerNo, invoiceNo in URL
+                            newwin = window.open('/apex/NetsFeeDIBSFlexWin?price='+ amtEntered*100 +'&customerNo='+ customerNo +'&invoiceNo='+invoice+'&card='+cardMask, 'paywin', 'scrollbars,status,width=' + width + ',height=' + height );  
+                            newwin.focus();
+                        }
+                   }
+                }
+                else if(amtEntered == 0.0 || amtEntered<0.0)
+                    alert('angiv en vis værdi');
+            }
+            else
+                alert('Du kan kun betale fakturaer hvor betalingsfrist er overskredet med 2 dage');            
+           return true;
+        }
+
+        function storeTransactionId(transactionId, allParams){ 
+            var cardExp;
+            var orderid;
+            var cardMask;
+            var authkey;
+            var statusCode;
+            //alert('in method storeTransactionId **'+transactionId+' params ** '+allParams);
+            debugger;
+            if((strInvokeMeth == 'UpdatePayMethod') || (strInvokeMeth == undefined)){
+                if(transactionId.length >  0){ 
+                    //SUPPORT-6470 Start
+                    if(allParams.indexOf('authkey') != -1){
+                        var startIndx = allParams.indexOf('authkey') + 8;
+                        var tmp = allParams.substring(startIndx);
+                        authkey = tmp.substring(0, tmp.indexOf('&'));
+                    }                    
+                    //SUPPORT-6470 End
+                                    
+                    if(allParams.indexOf('cardexpdate') != -1){
+                        var startIndex = allParams.indexOf('cardexpdate') + 12;
+                        var temp = allParams.substring(startIndex);
+                        cardExp = temp.substring(0, temp.indexOf('&'));     
+                    }
+                    if(allParams.indexOf('cardnomask') != -1){
+                        var startIndex = allParams.indexOf('cardnomask') + 11;
+                        var temp = allParams.substring(startIndex);
+                        cardMask = temp.substring(0, temp.indexOf('&'));     
+                        //alert('cardMask ** '+cardMask);
+                    }
+                    
+                    //SUPPORT-6470 added authkey to method parameterlist
+                    callupdatepayement(transactionId,cardExp,'CC',cardMask,authkey ); //called when the payment method is convtered to CC
+                    strInvokeMeth = '';          
+                }
+            }
+            else if(strInvokeMeth == 'PayInvoice'){
+            //alert('PayInvoice'+strInvokeMeth);
+                if(transactionId.length > 0){ 
+                    
+                    if(allParams.indexOf('orderid') != -1){
+                        var startIndex = allParams.indexOf('orderid') + 8;
+                        var temp = allParams.substring(startIndex);
+                        orderid = temp.substring(0, temp.indexOf('&'));                     
+                    }
+                    if(allParams.indexOf('cardexpdate') != -1){
+                        var startIndex = allParams.indexOf('cardexpdate') + 12;
+                        var temp = allParams.substring(startIndex);
+                        cardExp = temp.substring(0, temp.indexOf('&'));     
+                    }
+                    if(allParams.indexOf('cardnomask') != -1){
+                        var startIndex = allParams.indexOf('cardnomask') + 11;
+                        var temp = allParams.substring(startIndex);
+                        cardMask = temp.substring(0, temp.indexOf('&')); 
+                        //alert('cardMask '+cardMask);    
+                        //alert('cardMask ** '+cardMask);
+                    }
+                    callpayinvoice(transactionId,orderid,dcmAmt,strinvoice,cardExp,cardMask);//called when to make payment
+                    
+                    strInvokeMeth = '';
+                    dcmAmt = '';
+                    strinvoice = '';
+                }
+            }           
+           return true;
+        }
+        
+        
+        function checkRadio(e,customerNum){           
+           
+            var paymeth;
+            var theRadioButtonSet = document.getElementsByName('{!$Component.apexPage:pay:PaymentMethod:strPaymethod}');
+            
+            for (var x = 0; x < theRadioButtonSet.length; x++){
+                if (theRadioButtonSet[x].checked) {                    
+                    paymeth = theRadioButtonSet[x].value;
+                }
+            }
+            var height = 500;
+            var width = 800;
+            strInvokeMeth = 'UpdatePayMethod';
+            if(paymeth == 'CC'){                                
+                newwin = window.open('/apex/NetsFeeDIBSFlexWin?price=100&customerNo='+customerNum, 'paywin', 'scrollbars,status,width=' + width + ',height=' + height);
+                newwin.focus(); 
+            }
+            else{   
+                strInvokeMeth = '';        
+                callupdatepayement('','','Giro','');                  
+            }           
+           $( "#paymentDiv" ).dialog('close');
+           return true;
+        }
+        
+        function checkRadioForInvMed(){
+            var invMed;
+            var theRadioButtonSet = document.getElementsByName('{!$Component.apexPage:InvMed:invoicemedia:strInvMedia}');      
+            for (var x = 0; x < theRadioButtonSet.length; x++){
+                if (theRadioButtonSet[x].checked) {   
+                    invMed = theRadioButtonSet[x].value;
+                }
+            }
+            $( "#InvoiceMedia" ).dialog('close');
+            callUpdateInvMed(invMed);   
+            return true;
+        }
+        
+        function calloutCheck(){
+            //alert('in here');
+        }
+        
+        
+        /*function load(){
+            $("#loader").hide();
+        }
+        
+       /* $(window).load(function(){
+            //hide loader div here
+            $("#loader").hide();
+        });*/
+        
+        var nVer = navigator.appVersion;
+        var nAgt = navigator.userAgent;
+        var browserName  = navigator.appName;
+        var fullVersion  = ''+parseFloat(navigator.appVersion); 
+        var majorVersion = parseInt(navigator.appVersion,10);
+        var nameOffset,verOffset,ix;
+
+            
+
+    </script>
+</apex:page>

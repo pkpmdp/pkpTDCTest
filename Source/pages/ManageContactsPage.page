@@ -1,0 +1,242 @@
+<apex:page controller="ManageContactsController" showHeader="false" sidebar="false" extensions="GetProfileClass" applyHtmlTag="false">
+<html class="cvi2015">
+    <apex:includescript value="https://code.jquery.com/jquery-1.12.0.min.js" />
+    <apex:includescript value="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js" />
+    <apex:stylesheet value="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.min.css" /> 
+    <style>
+    	table.dataTable thead th{
+  		padding: 5px 14px;
+       }
+       .list tr.even td, .list tr.odd td {
+  			border-bottom-width: 1px;
+		}
+       .bPageBlock .list .last>td{
+  			border-bottom-width: 1px;
+		}
+       table.dataTable thead .sorting_asc {
+  		background-color: #676767;
+       }
+       table.dataTable thead .sorting_desc{
+       	background-color: #676767;
+       }
+        table.dataTable thead .sorting {
+       	background-color: #676767;
+       }
+       table.dataTable tr.odd { background-color: #FCF7F7;  border:1px lightgrey;}
+    table.dataTable tr.even{ background-color: #E3DCDB; border:1px lightgrey; }
+        .no-footer{margin-top: -22px;}
+    </style>
+    <script type="text/javascript">
+            j$ = jQuery.noConflict();
+            var TableId1;
+            j$(document).ready(function(){
+            TableId1 = j$('[id$="tableId1"]').DataTable({
+            "columnDefs": [ {
+      			"orderable": false,
+                "targets"  : [3] 
+    }],
+            "ordering":true,
+            "order": [[ 0, "asc" ]],
+            "paging":false,
+            "language":{
+                "info": "Vis _START_ til _END_ af _TOTAL_ poster",
+                 "infoEmpty": "Vis 0 til 0 af 0 poster",
+                 "search": "Søg",
+    		     "infoFiltered":   "(filtreret fra _MAX_ poster)",
+    			"loadingRecords": "Henter...",
+    		    "zeroRecords":    "Ingen poster fundet",
+                "emptyTable": "Ingen data fundet"
+                }
+         });
+        });
+</script> 
+    <script type="text/javascript" src="{!siteCoreUrl}/sitecore/content/data/export/export.aspx?itemguid={25D3B7CA-F6FA-46D6-A787-1A34AF420196}&functions=true"></script> 
+    <body id="servicepage" >
+   
+<apex:form id="frm1">
+<script type="text/javascript">printHeader();</script>
+<script type="text/javascript">printTopMenu();</script>
+<script type="text/javascript">printContentAreaBegin();</script>
+<script type="text/javascript"> var portalBrugerRole = '{!portalBrugerRole}'; </script>
+<apex:stylesheet value="{!URLFOR($Resource.scStyleCss,'myStyle/myStyle.css')}"/>
+ <c:SCLinksComponent CableUnitName="{!cableUnitName}" PortalBrugerRole="{!portalBrugerRole}"/>
+<apex:inputHidden id="hdnDeleteStatus" value="{!deleteFlag}"/>
+<apex:stylesheet value="{!URLFOR($Resource.tooltipZip, '/tooltip/tooltip.css.php')}" />
+<apex:includeScript value="{!URLFOR($Resource.tooltipZip, '/tooltip/mootools.js')}" /> 
+<apex:includeScript value="{!URLFOR($Resource.tooltipZip, '/tooltip/tooltip.js')}" />
+<apex:includeScript value="{!URLFOR($Resource.tooltipZip, '/tooltip/styles/')}" /> 
+<style type="text/css">
+       .customPopup{
+          background-color: white;
+          border-style: solid;
+          
+          padding:10px;
+          position: absolute;
+          left: 65%;
+          width: 258px;
+          margin-left: -150px;
+          border-width:1px; 
+          
+      }
+         </style>
+<script language="JavaScript">
+
+   function confirm_entry(){
+     var answer = confirm('Du er ved at slette en kontaktperson på dette kunde. Er du sikker?');
+     document.getElementById('confMsg').style.display ='block';
+     if (answer){
+       return true;
+     }else{
+       return false;
+     }
+      return true;
+   }
+   
+     function popup8(roleName,popupId, contactName){
+            new ToolTip('tooltip-3', 'The ToolTip plugin can display any kind of text inside a tooltip.', { mode: 'cursor', display: 'inline', width: 250, style: 'default', sticky: 0 });
+            document.getElementById(contactName).innerHTML='';
+            var divTag = document.getElementById(popupId);
+            divTag.style.visibility='visible';
+            var strRole=roleName.split(",");
+            
+            var divIdName = '<div>';
+            divIdName =divIdName+ '<center>' + contactName + '  Roles </center>';
+            for(var roleCount = 0 ; roleCount < strRole.length ; roleCount++){
+              divIdName =divIdName+ '<br>' + strRole[roleCount] + '</br>';
+            } 
+            divIdName = divIdName + '</div>';
+            document.getElementById(contactName).innerHTML=divIdName;
+      }
+        
+      function hideObject(htmlObject){
+         document.getElementById(htmlObject).style.visibility = "hidden";
+      } 
+ </script>
+<apex:messages globalOnly="true"  styleClass="successClass" rendered="{!successFlag == true}"/>   
+<apex:messages globalOnly="true"  styleClass="warningError" rendered="{!warningFlag == true}"/>
+    
+<!--<apex:pageMessages />-->
+<div class="bullets">
+        <ul>
+            <li><apex:outputText value="{!$Label.SC_ContactHeaderText}" /> </li> 
+        </ul>
+</div>
+<div id="confMsg" style="display:none;">
+</div>
+    <apex:pageBlock rendered="{!renderSection}">
+<apex:pageBlock > 
+    
+    <apex:stylesheet value="{!URLFOR($Resource.rowOddEvenStyle)}"/> 
+    <apex:pageBlockTable value="{!contactsList}" var="list" rowClasses="even,odd" id="tableId1" style="overflow:visible">
+      <apex:column headervalue="Navn" value="{!list.contactName}" style="width:35%;word-wrap:break-word;" headerClass="headerStyle"/>
+      <apex:column headervalue="E-mail" value="{!list.acr.Email__c}" style="width:30%;word-wrap:break-word;" headerClass="headerStyle"/>
+      <apex:column headervalue="Kontaktroller" style="width:15%;word-wrap:break-word;" headerClass="headerStyle" >
+         <apex:outputPanel id="popupId" style="visibility:hidden;word-wrap:break-word;" styleClass="customPopup">
+            <label id="{!list.contactName}" for="View Roles"></label>
+         </apex:outputPanel>
+         <apex:outputlink value="#" onclick="popup('{!list.RoleName}','{!$Component.popupId}', '{!list.contactName}');" id="labelRole">
+          Se Roller 
+         </apex:outputlink> 
+      
+      </apex:column>
+      <apex:column headerValue="Handling" style="width:30%;word-wrap:break-word;" headerClass="headerStyle"> 
+      
+        <apex:outputlink value="{!$Site.Prefix}/apex/ViewContactPage" title="Vis kontakt" styleclass="btnViewIcon">
+          <apex:param name="cableunitnumber" value="{!cableunitnumber}"/>
+            <apex:param name="accountId" value="{!list.accountId}"/> 
+            <apex:param name="contactId" value="{!list.acr.Contact__c}" />
+            <apex:param name="dataSyncLogId" value="{!$CurrentPage.parameters.dataSyncLogId}" />
+           <apex:param name="loggedInUserRoleName" value="{!$CurrentPage.parameters.loggedInUserRoleName}" />
+                  </apex:outputlink>
+     {!list.space}
+        <apex:outputlink value="{!$Site.Prefix}/apex/EditContactPage" title="Rediger kontakt" styleclass="btneditIcon"> 
+            <apex:param name="cableunitnumber" value="{!cableunitnumber}"/>
+            <apex:param name="contactId" value="{!list.acr.Contact__c}"/>
+            <apex:param name="accountId" value="{!list.accountId}"/>
+            <apex:param name="loggedInaccountId" value="{!accID}"/>
+            <apex:param name="dataSyncLogId" value="{!$CurrentPage.parameters.dataSyncLogId}" />
+            <apex:param name="loggedInUserRoleName" value="{!$CurrentPage.parameters.loggedInUserRoleName}" />
+            <apex:param name="emailUnique" value="true" />
+        </apex:outputlink>
+       {!list.space}
+        <apex:commandLink action="{!deleteContact}" onclick="return confirm_entry();" title="Slet kontakt" styleclass="btndeleteIcon">
+              <apex:param name="cableunitnumber" value="{!cableunitnumber}"/>
+           <apex:param name="contactId" value="{!list.acr.Contact__c}"/>
+           <apex:param name="roleName" value="{!list.RoleName}"/>
+            <apex:param name="loggedInUserRoleName" value="{!$CurrentPage.parameters.loggedInUserRoleName}" />
+        </apex:commandLink>        
+      </apex:column>
+      </apex:pageBlockTable>
+      <apex:facet name="footer">
+      <apex:outputPanel layout="Centre">
+      <br/>
+     <apex:commandButton action="{!addContact}" value="{!$Label.SC_ManageContactsPage_NewContact}" title="Opret kontakt" styleClass="dialogbutton_orange"></apex:commandButton>&nbsp;&nbsp;
+     <apex:commandButton action="{!exportExcel}" value="{!$Label.SC_ContactExportToExcel}" disabled="{!Not(contactSize)}" styleClass="dialogbutton_orange"/>
+     <apex:outputPanel rendered="{!displayFlag}">
+        <c:PagingComponentSC pageController="{!this}" userSelectedPage="{!userSelectedPage}"></c:PagingComponentSC>
+     </apex:outputPanel>  
+     </apex:outputPanel> 
+     </apex:facet>
+    </apex:pageBlock>
+     </apex:pageBlock>
+    <apex:pageMessage detail="{!$Label.CableUnitNotMatched}" rendered="{!!renderSection}" severity="error"></apex:pageMessage> 
+     <br></br>
+     <p></p>      
+     <p></p>
+     <h2 style="font-size:medium;"><b>Opret ny kontaktperson</b></h2>
+     <br></br>
+        <br></br>
+        <div class="bullets"><ul>
+        <li>Tryk "Ny kontakt"</li>
+        </ul></div>
+     <br></br>
+        
+    <h2 style="font-size:medium;"><b>Rediger eller slet en kontaktperson</b></h2>
+     <br></br>
+        <br></br>
+        <div class="bullets"><ul>
+        <li>Tryk "Slet" eller "Rediger"</li>
+        </ul></div>
+     <br></br>
+     
+     <script>
+      var previousControlId;
+     
+      function popup(roleName,popupId,contactName) {    
+        
+          if(previousControlId  != null && previousControlId != popupId){
+             hideObject(previousControlId);
+          }   
+            var divTag = document.getElementById(popupId);
+            divTag.style.visibility='visible';
+            //divTag.style.position='relative';
+            divTag.style.zIndex='100';
+            var strRole=roleName.split(",");
+            var divIdName = '<Table width="100%" style="background-color:#eeeeee;">';
+                       
+            divIdName =divIdName+ '<tr style="background-color:#eeeeee;">';
+            divIdName =divIdName+ '<td style="background-color:#eeeeee;"><center><b> Kontaktroller på dette kunde </b></center></td>';
+            divIdName =divIdName+ '<td style="background-color:#eeeeee;"><right><a href="javascript:hideObject(\'' + popupId + '\');" style="float: right"><img src="{!$Resource.Nej_icon}"></img></a></right></td>';
+            
+            divIdName=divIdName + '</tr>'; 
+            
+            for(var roleCount = 0 ; roleCount < strRole.length ; roleCount++){
+                if( strRole[roleCount] != 'Dummy Contact Role'){
+                  divIdName = divIdName+ '<tr style="background-color:#eeeeee;">';
+                  divIdName = divIdName+ '<td colspan=2 style="background-color:#eeeeee;">' + strRole[roleCount] + '</td>';
+                  divIdName = divIdName + '</tr>';
+               }
+            } 
+           divIdName = divIdName + '</Table>';
+           document.getElementById(contactName).innerHTML=divIdName;
+           previousControlId = popupId;
+                      
+     }    
+
+     </script>
+<script type="text/javascript">printContentAreaEnd();</script>
+<script type="text/javascript">printFooter();</script>
+</apex:form>
+</body>
+</html>
+</apex:page>

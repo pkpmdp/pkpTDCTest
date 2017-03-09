@@ -1,0 +1,226 @@
+<apex:page standardController="Account"  extensions="PermissionController" sidebar="false" showHeader="false" >
+  <apex:includeScript value="/soap/ajax/33.0/connection.js" />
+  <apex:includeScript value="/support/console/33.0/integration.js" /> 
+  <apex:form id="theform" >
+        <apex:pageBlock id="thepageblock" >
+            <apex:pageMessages id="pageMessage"/>
+            <!-- <div style="display:none;" id="emailValidationMessage">
+                 <apex:pageMessage summary="{!$Label.emailNecessaryForEcommAgreement}" severity="error" strength="3"/>
+            </div> -->
+            <apex:pageBlockSection id="thepageblocksection" columns="2"> 
+             <apex:pageBlockSectionItem >
+                <apex:pageBlockSectionItem >
+                <apex:outputPanel id="thePanel" layout="block">
+                    <apex:outputLabel value="{!$ObjectType.Permission__c.fields.Marketing_Permission__c.label}" style="width:20px"/>
+                    <span class="Custom Help text" >
+                        <img src="/s.gif" alt="Help" class="helpIcon" title="{!$ObjectType.Permission__c.fields.Marketing_Permission__c.inlineHelpText}"/>
+                    </span>
+                     <apex:inputField value="{!Permission.Marketing_Permission__c}" />
+                </apex:outputPanel>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+               <!--   <apex:outputLabel value="{!PermissionUpdatedDate}" /> -->
+              <apex:outputText value="{0,date,dd'-'MM'-'yyyy}">
+                <apex:param value="{!permission.Marketing_permission_Opdateret_Dato__c}" /> 
+                </apex:outputText>
+                <apex:outputLabel value=" via {!if(PermissionUpdatedBy=='default','automatisk',PermissionUpdatedBy)}" rendered="{!if(PermissionUpdatedBy=='',false,true)}" />
+                 </apex:pageBlockSectionItem>
+            </apex:pageBlockSectionItem>  
+                
+            <apex:pageBlockSectionItem >
+                <apex:pageBlockSectionItem >
+                    <apex:outputPanel id="thePane2" layout="block">
+                        <apex:outputLabel value="{!$ObjectType.Permission__c.fields.Robinsonlisten__c.label}  " style="width:20px"/>
+                        <span class="Custom Help text" style="width:5px">
+                            <img src="/s.gif" alt="Help" class="helpIcon" title="{!$ObjectType.Permission__c.fields.Robinsonlisten__c.inlineHelpText}"/>
+                        </span>
+                        <apex:outputField value="{!Permission.Robinsonlisten__c}"  />
+                    </apex:outputPanel>
+                </apex:pageBlockSectionItem>
+                <apex:outputLabel value="" />
+            </apex:pageBlockSectionItem>
+            
+            
+            
+            <apex:pageBlockSectionItem id="panel4">
+                <apex:pageBlockSectionItem id="panel4Id">
+                    <apex:outputPanel id="thePane4" layout="block">
+                        <apex:outputLabel value="{!$ObjectType.Permission__c.fields.Nej_til_markedsforing__c.label}" id="pan4Id" />
+                        <span class="Custom Help text" style="width:5px">
+                            <img src="/s.gif" alt="Help" class="helpIcon" title="{!$ObjectType.Permission__c.fields.Nej_til_markedsforing__c.inlineHelpText}"/>
+                        </span>
+                        <apex:inputField value="{!Permission.Nej_til_markedsforing__c}" />
+                    </apex:outputPanel>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+             <!--    <apex:outputLabel value="{!NoThankyouUpdatedDate}" /> -->
+             <apex:outputText value="{0,date,dd'-'MM'-'yyyy}">
+                <apex:param value="{!permission.Nej_til_markedsforing_Opdateret_Dato__c}" /> 
+                </apex:outputText>
+                <apex:outputLabel value=" via {!if(NoThankyouUpdatedBy=='default','automatisk',NoThankyouUpdatedBy)}" rendered="{!if(NoThankyouUpdatedBy=='',false,true)}" />
+                 </apex:pageBlockSectionItem>
+            </apex:pageBlockSectionItem>
+            
+            <apex:pageBlockSectionItem id="pane5" >
+                <apex:pageBlockSectionItem id="pane5Id">
+                    <apex:outputPanel id="thePane5" layout="block">
+                        <apex:outputLabel value="{!$ObjectType.Permission__c.fields.Driftsinfo_pa_email__c.label}  " />
+                        <span class="Custom Help text" style="width:5px">
+                            <img src="/s.gif" alt="Help" class="helpIcon" title="{!$ObjectType.Permission__c.fields.Driftsinfo_pa_email__c.inlineHelpText}"/>
+                        </span>
+                        <apex:inputField value="{!Permission.Driftsinfo_pa_email__c}" id="drift_email" />
+                    </apex:outputPanel>
+                 </apex:pageBlockSectionItem>
+                 <apex:pageBlockSectionItem >
+              <!--   <apex:outputLabel value="{!DriftEmailUpdatedDate}" />  -->
+              <apex:outputText value="{0,date,dd'-'MM'-'yyyy}">
+                <apex:param value="{!permission.Driftsinfo_pa_email_Opdateret_Dato__c}" /> 
+                </apex:outputText>
+                <apex:outputLabel value=" via {!if(DriftEmailUpdatedBy=='default','automatisk',DriftEmailUpdatedBy)}" rendered="{!if(DriftEmailUpdatedBy=='',false,true)}" />
+                 </apex:pageBlockSectionItem>
+            </apex:pageBlockSectionItem>
+            
+            <apex:pageBlockSectionItem >
+                <apex:pageBlockSectionItem >
+                    <apex:outputPanel id="thePane6" layout="block">
+                        <apex:outputLabel value="{!$ObjectType.Permission__c.fields.Nej_til_Telefonopkald__c.label}  " />
+                        <span class="Custom Help text" style="width:5px">
+                            <img src="/s.gif" alt="Help" class="helpIcon" title="{!$ObjectType.Permission__c.fields.Nej_til_Telefonopkald__c.inlineHelpText}"/>
+                        </span>
+                        <apex:inputField value="{!Permission.Nej_til_Telefonopkald__c}" />
+                    </apex:outputPanel>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+              <!--   <apex:outputLabel value="{!TelefonopkaldUpdatedDate}" />  -->
+              <apex:outputText value="{0,date,dd'-'MM'-'yyyy}">
+                <apex:param value="{!permission.Nej_til_Telefonopkald_Opdateret_Dato__c}" /> 
+                </apex:outputText>
+                <apex:outputLabel value=" via {!if(TelefonopkaldUpdatedBy=='default','automatisk',TelefonopkaldUpdatedBy)}" rendered="{!if(TelefonopkaldUpdatedBy=='',false,true)}"/>
+                 </apex:pageBlockSectionItem>
+            </apex:pageBlockSectionItem>
+            
+            <apex:pageBlockSectionItem id="pane7">
+                 <apex:pageBlockSectionItem id="pane7Id">
+                    <apex:outputPanel id="thePane7" layout="block">
+                         <apex:outputLabel value="{!$ObjectType.Permission__c.fields.Driftsinfo_pa_SMS__c.label}  " />
+                         <span class="Custom Help text" style="width:5px">
+                            <img src="/s.gif" alt="Help" class="helpIcon" title="{!$ObjectType.Permission__c.fields.Driftsinfo_pa_SMS__c.inlineHelpText}"/>
+                         </span>
+                         <apex:inputField value="{!Permission.Driftsinfo_pa_SMS__c}" id="drift_sms" />
+                   </apex:outputPanel>
+                 </apex:pageBlockSectionItem>
+                  <apex:pageBlockSectionItem >
+                <!-- <apex:outputLabel value="{!DriftSMSUpdatedDate}" />  -->
+                <apex:outputText value="{0,date,dd'-'MM'-'yyyy}">
+                <apex:param value="{!permission.Driftsinfo_pa_SMS_Opdateret_Dato__c}" /> 
+                </apex:outputText>
+                 <apex:outputLabel value=" via {!if(DriftSMSUpdatedBy=='default','automatisk',DriftSMSUpdatedBy)}" rendered="{!if(DriftSMSUpdatedBy=='',false,true)}"/>
+                 </apex:pageBlockSectionItem>
+            </apex:pageBlockSectionItem>
+            
+         </apex:pageBlockSection>
+            
+            <!--<apex:pageBlockButtons location="bottom" style="margin-top:0px"> --> 
+            <div class="pbBottomButtons" style="margin-top: 0px;">
+                <table cellspacing="0" cellpadding="0" border="0">
+                    <tbody>
+                        <tr>
+                            <td></td>   
+                            <td class="pbTitle">&nbsp;</td>
+                            <td class="pbButtonb " id="j_id0:j_id1:j_id2:j_id37:bottom">
+                                <apex:commandButton action="{!save}" value="{!if(updateFlag,'Update','Save')}" 
+                                    oncomplete="if({!!errorOccured})refreshPage();" rerender="pageMessage,thepageblocksection" id="saveCommandButton">
+                                </apex:commandButton>
+                            </td> 
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <!--</apex:pageBlockButtons>-->
+        </apex:pageBlock>
+    <!--    <apex:actionPoller action="{!autoRefreshPage}" rerender="thepageblocksection,saveCommandButton" interval="10"/>-->
+    </apex:form>
+    <script src="{!$Resource.jQuery}" type="text/javascript"></script>
+   <!-- <script src="{!$Resource.JQuery_tmpl}" type="text/javascript"></script>-->
+    <script type="text/javascript">
+        function enabledDato(){
+            var EkomBol = document.getElementById("{!$Component.theform:thepageblock:thepageblocksection:thepageblocksectionItemIdOne:thepageblocksectionItemIdTwo:commonAgreementid}");
+            if(EkomBol.checked){
+                document.getElementById("{!$Component.theform:thepageblock:thepageblocksection:thepageblocksectionItemIdOne:myid1:dato}").disabled = false;
+                var today = new Date();
+                var dd = today.getDate();
+                var mm = today.getMonth()+1; //January is 0!
+                var yyyy = today.getFullYear();
+                if(dd<10) {
+                    dd='0'+dd
+                } 
+ 
+                if(mm<10) {
+                    mm='0'+mm
+                } 
+                today = today = dd+'-'+mm+'-'+yyyy;
+                document.getElementById("{!$Component.theform:thepageblock:thepageblocksection:thepageblocksectionItemIdOne:myid1:dato}").value = today;
+                
+            }else{
+                document.getElementById("{!$Component.theform:thepageblock:thepageblocksection:thepageblocksectionItemIdOne:myid1:dato}").disabled = true;
+            }
+        }
+        
+        window.onload = function(){ 
+            var EkomBol = document.getElementById("{!$Component.theform:thepageblock:thepageblocksection:thepageblocksectionItemIdOne:thepageblocksectionItemIdTwo:commonAgreementid}");
+            if(EkomBol.checked){
+                document.getElementById("{!$Component.theform:thepageblock:thepageblocksection:thepageblocksectionItemIdOne:myid1:dato}").disabled = false;
+            }else{
+                document.getElementById("{!$Component.theform:thepageblock:thepageblocksection:thepageblocksectionItemIdOne:myid1:dato}").disabled = true;
+            } 
+        }
+        
+        function callCheckbox(){
+                var checkedValue = document.getElementById('drift').checked;
+                if(checkedValue){
+                    document.getElementById("{!$Component.theform.thepageblock.thepageblocksection.pane5.pane5Id.drift_email}").checked=true;
+                    document.getElementById("{!$Component.theform.thepageblock.thepageblocksection.pane5.pane5Id.drift_email}").disabled= true;
+                    document.getElementById("{!$Component.theform.thepageblock.thepageblocksection.pane7.pane7Id.drift_sms}").disabled= true;
+                    document.getElementById("{!$Component.theform.thepageblock.thepageblocksection.pane7.pane7Id.drift_sms}").checked=true;
+                }else{
+                    document.getElementById("{!$Component.theform.thepageblock.thepageblocksection.pane5.pane5Id.thePane5.drift_email}").disabled= false;
+                    document.getElementById("{!$Component.theform.thepageblock.thepageblocksection.pane7.pane7Id.drift_sms}").disabled= false;
+            }
+        }
+    <!--spoc-2291 start-->   
+    function refreshPage(){
+              var accurl = "{!baseUrl}/{!accountId}";
+                if (sforce.console.isInConsole()){ 
+                 sforce.console.getFocusedPrimaryTabId(showTabId);
+                } else {
+               // window.open(url,'_blank'); 
+               //location.reload();
+              // var accurl ="{!baseUrl}/{!accountId}";
+             window.top.location.href = accurl;
+                }
+        }
+         var showTabId = function showTabId(result){
+             //alert(result);
+             console.log(result);
+             var primaryTabId = result.id;
+             sforce.console.refreshPrimaryTabById(primaryTabId, true, null);
+         }
+       <!--spoc-2291 end-->
+          
+        //This function is used to make css changes. 
+        $(window).bind("load", function() {
+            var ss = document.getElementById("{!$Component.theform.thepageblock.thepageblocksection.panel4.panel4Id.pan4Id}");
+         //   ss.style.cssText= "padding-left: 5px;";
+            //alert('after Page Load............');
+        });
+    </script>
+ <style type="text/css">
+    .bPageBlock .detailList .labelCol {
+    width: 25%;
+}
+    </style>
+</apex:page>

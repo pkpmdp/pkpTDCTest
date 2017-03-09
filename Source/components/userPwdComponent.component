@@ -1,0 +1,10 @@
+<apex:component controller="PortalUserMailService" access="global">
+<form>
+<apex:outputPanel >
+<apex:outputText value="Brugernavn :"/>&nbsp;
+<apex:outputText value="{!userMailTest[0].email}"/><br/><br/>
+<apex:outputText value="Adgangskode :"/>
+<apex:outputLabel value="{!userPassword}"/>
+</apex:outputPanel>
+</form>
+</apex:component>

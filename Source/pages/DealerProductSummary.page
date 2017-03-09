@@ -1,0 +1,93 @@
+<apex:page standardController="Dealer_Product__c" extensions="DealerProductController" showHeader="false" sidebar="false" applyHtmlTag="false" >
+    <html class="cvi2015">
+<head>
+
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+</head>
+<style>
+ .fontVerdana{ font-family: 'Verdana'; }
+  body button, body .x-btn, body .btn, body .btnDisabled, body .btnCancel, body .menuButton .menuButtonButton {background-color:#585858;color:#FFFFFF;background:#585858;font-weight:bold;height:26px;}   
+ .GokendBtnCls {border-width: 0;padding: 0 15px;text-transform: capitalize;margin: 0 2px;background-position: left top;background-repeat: repeat-x;border-color: -moz-use-text-color #FF4500;border-right: 1px solid #FF4500;border-style: none solid solid none;display: inline;font-family: 'Verdana','Geneva',sans-serif;font-size: 80%;color: #FFFFFF;font-weight: bold;height: 26px;background-color: #FF4500;width:75px;}
+               
+</style> 
+    <apex:form styleClass="fontVerdana">
+    <script type="text/javascript" src="https://yousee.dk/sitecore/content/data/export/export.aspx?itemguid={F011BAAA-EF0B-4751-B782-587C8D8AD11F}&functions=true"></script>
+    <!-- Added for DW 750 -->
+    <c:TopMenuComponent ></c:TopMenuComponent>
+    <script type="text/javascript" language="javascript">printHeader();</script>
+    <script type="text/javascript">printTopMenu();</script>
+    <script type="text/javascript">printContentAreaBegin();</script>
+    <script type="text/javascript" language="javascript">
+        function approve(){
+            generatesOrder();       
+        }
+    </script>
+     <script type="text/javascript">
+         function displaynextPage(){
+                nextPage();
+         }
+         </script>
+    <body>
+        <apex:dataTable value="{!godkendInformation}" var="info">  
+            <apex:column value="{!info.Description__c}"  style="font-family:verdana;"/>
+        </apex:dataTable>   
+        <apex:actionFunction name="generatesOrder" action="{!generateOrder}"/>     
+        <apex:pageBlock >
+        <div class="fontVerdana">
+        <apex:actionFunction name="nextPage" action="{!generateOrder}"/>
+        <apex:pageMessages />
+        </div>
+        <apex:stylesheet value="{!URLFOR($Resource.rowOddEvenStyle)}"/>       
+        <apex:pageBlockSection title="Leveringsadresse" columns="1"  collapsible="false">
+            <apex:dataTable value="{!DealerSummary}" var="dealerSumm" border="0" styleClass="List" width="100%">
+                <apex:column width="40%" styleClass="fontVerdana">
+                    <apex:outputLabel value="{!dealerSumm.title}"/>
+                </apex:column>
+                <apex:column width="40%" styleClass="fontVerdana">
+                    <apex:outputLabel value="{!dealerSumm.value}"/>
+                </apex:column>
+            </apex:dataTable>
+        </apex:pageBlockSection> 
+        
+        <apex:pageBlockSection title="Du har valgt at bestille følgende produkter" columns="1"  collapsible="false">
+            <apex:dataTable value="{!orderedProducts}" var="dealerProd" border="0" styleClass="List" width="100%">
+                <apex:column width="10%" styleClass="fontVerdana">
+                    <apex:facet name="header"><b>Antal</b></apex:facet>
+                    <apex:outputField value="{!dealerProd.Quantity__c}" />
+                </apex:column>
+                <apex:column width="40%" styleClass="fontVerdana">
+                    <apex:facet name="header"><b>Varenavn</b></apex:facet>
+                    <apex:outputField value="{!dealerProd.Name}" />
+                </apex:column>
+                <apex:column width="40%" styleClass="fontVerdana">
+                    <apex:facet name="header"><b>Beskrivelse/varenr</b></apex:facet>
+                    <apex:outputField value="{!dealerProd.Product_Descriptions__c}" />
+                </apex:column>
+                <!-- 
+                <apex:column headerValue="Antal" width="10%">
+                    <apex:outputField value="{!dealerProd.Quantity__c}" />
+                </apex:column>
+                <apex:column headerValue="Varenavn" width="40%">
+                    <apex:outputLabel value="{!(dealerProd.Name)}"/>
+                </apex:column>
+                <apex:column headerValue="Beskrivelse/varenr" width="40%">
+                    <apex:outputLabel value="{!(dealerProd.Product_Descriptions__c)}"/>
+                </apex:column> -->
+            </apex:dataTable>
+          </apex:pageBlockSection>
+         
+            
+            &nbsp;<apex:commandButton value="Annuller" action="{!refreshDataDealerProductPage}"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <apex:commandButton id="pgBlockButtonID" value="Tilbage" action="{!backToDealerProductPage}"/> 
+            <input type="button" value="Godkend" onclick="approve();" class="GokendBtnCls"/>
+            <!-- <apex:commandButton value="Godkend" action="{!generateOrder}"/>--> 
+               
+    </apex:pageBlock>
+        
+        <script type="text/javascript">printContentAreaEnd();</script>
+        <script type="text/javascript" src="../js/s_code.js"></script>
+        <script type="text/javascript">printFooter();</script>
+    </body> 
+    </apex:form>
+    </html>
+</apex:page>

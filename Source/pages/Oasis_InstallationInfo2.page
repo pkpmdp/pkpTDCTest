@@ -1,0 +1,230 @@
+<apex:page sidebar="false" showHeader="false" showChat="false" controller="Oasis_InstallationInfo_CTE" id="thePage">
+    
+    <apex:composition template="Oasis_SiteTemplate"/>
+    <apex:define name="body">
+        <div class="container">
+            <apex:outputPanel rendered="{!NOT(duplicateCase) && createdCaseNumber!= ''}" id="successcase" >
+                <div class="alert alert-success">
+                    <a class="close" data-dismiss="alert" href="#">×</a>
+                    <span id = "alertSpan">Case#{!createdCaseNumber} created successfully.</span>
+                </div> 
+            </apex:outputPanel>
+            <!--SUPPORT-5484 show duplicate cases message-->
+            <apex:outputPanel rendered="{!duplicateCase && createdCaseNumber!= ''}" id="alreadycase">
+                <div class="alert alert-success">
+                    <a class="close" data-dismiss="alert" href="#">×</a>
+                    <span id = "alertSpan">Case#{!createdCaseNumber} have already been created.</span>
+                </div> 
+            </apex:outputPanel>
+            <!-- SUPPORT-5484 END-->
+            <apex:outputPanel rendered="{!oasisCase != null}">
+                <div class="alert"> 
+                    <a class="close" data-dismiss="alert" href="#">×</a>
+                    <span id = "warnSpan">
+                        Case present for this installation with following details:<br/>
+                        <b>Case&nbsp;Number</b>:&nbsp;{!oasisCase.CaseNumber}<br/>
+                        <b>Case&nbsp;Status</b>:&nbsp;{!oasisCase.Status}<br/>
+                        <b>Reg Code</b>:&nbsp;{!oasisCase.Oasis_Case__r.Oasis_Inst_Case_Registration_Code__c}<br/>
+                        <b>Strike</b>:&nbsp;{!oasisCase.Oasis_Case__r.Oasis_Strike__c}<br/>
+                        <!--<b>Fejltype</b>:&nbsp;{!oasisCase.Oasis_Case__r.Oasis_Error_type_Label__c}--><!-- Commented for EDM-738 -->                        
+                    </span>
+                </div>
+            </apex:outputPanel>
+            <legend>Kunde Oplysninger</legend>
+            <apex:outputPanel rendered = "{!lst_customerSubscription.size > 0}">           
+                <table class = "table table-hover" border = "0">
+                    <thead>
+                        <th style = "vertical-align: top">Kundenummer</th>
+                        <th style = "vertical-align: top">Fornavn</th>
+                        <th style = "vertical-align: top">Efternavn</th>
+                        <th style = "vertical-align: top">Kundetype</th>
+                        <th style = "vertical-align: top">Produkt</th>  
+                        <th style = "vertical-align: top">Kundebemærkninger</th> 
+                    </thead>
+                    <apex:repeat value="{!lst_customerSubscription}" var="c"> 
+                        <tr>
+                            <td>{!c.csObj.customer__r.Customer_No__c}</td>
+                            <td>{!c.csObj.customer__r.FirstName}</td>
+                            <td>{!c.csObj.customer__r.LastName}</td>
+                            <td>{!c.csObj.customer__r.Customer_type__c}</td>
+                            <td>{!c.csObj.Product__r.Name}</td> 
+                            <td>
+                                <apex:outputLink value="/apex/Oasis_kundeLog?id={!c.csObj.customer__r.id}" target="_blank">Vis</apex:outputLink>
+                            </td> 
+                        </tr> 
+                    </apex:repeat> 
+                </table>
+            </apex:outputPanel>
+            <apex:outputPanel rendered="{!lst_customerSubscription.size == 0}">
+                No individual customer present at this address.          
+            </apex:outputPanel>
+            
+            <legend>Installations Oplysninger</legend>                 
+            <apex:form styleclass="form-horizontal" id="theForm" >
+                <apex:actionFunction name="CaseReg"  action="{!registerCase}"/> 
+                <div class="control-group">
+                    <label class="control-label"><strong>Adresse</strong></label>                          
+                    <div class="controls readOnly">                                
+                        <apex:outputText styleClass="input-large" 
+                                         value="{!installationAddress}"/>
+                    </div>    
+                </div>
+                <div class="control-group">
+                    <label class="control-label"><strong>Lokation</strong></label>                             
+                    <div class="controls readOnly">                                
+                        <apex:outputText styleClass="input-large" 
+                                         value="{!installation.Location__c}"/>
+                    </div>    
+                </div> 
+                <div class="control-group">
+                    <label class="control-label"><strong>Kontrol dato</strong></label>                             
+                    <div class="controls readOnly">                                
+                        <apex:outputText styleClass="input-large" 
+                                         value="{0, date, MMM dd',' yyyy}">
+                            <apex:param value="{!installation.Control_Date__c}"/>     
+                        </apex:outputText>           
+                    </div>    
+                </div>
+                <div class="control-group">
+                    <label class="control-label"><strong>Anlægs ID</strong></label>                            
+                    <div class="controls readOnly">                                
+                        <apex:outputText styleClass="input-large" 
+                                         value="{!installation.Cable_Unit_No__c}"/>
+                    </div>    
+                </div>
+                <div class="control-group">
+                    <label class="control-label"><strong>Inst. status</strong></label>                             
+                    <div class="controls readOnly">                                
+                        <apex:outputText styleClass="input-large" 
+                                         value="{!installation.Status__c}"/>
+                    </div>    
+                </div>
+                
+                <div class="control-group">
+                    <label class="control-label"><strong>Stiktype</strong></label>                             
+                    <div class="controls readOnly">                                
+                        <apex:outputText styleClass="input-large" 
+                                         value="{!installation.Stiktype__c}"/>
+                    </div>    
+                </div>
+                <div class="control-group">     
+                    <label class="control-label"><strong>Registrering</strong></label>                            
+                    <div class="controls">                                
+                        <apex:selectList value="{!regCode}" size="1" label="Registrering" id="regCode" disabled="{!lockedCableUnit||isNetInstallationInMovement}">
+                            <apex:selectOption itemvalue="{!PICKLIST_OPTION_SELECT}" itemLabel="{!PICKLIST_OPTION_SELECT}"/>
+                            <apex:selectOptions value="{!listInstRegCodes}"/>
+                        </apex:selectList>
+                    </div>   
+                </div>                  
+                <!--<div class="control-group">     
+<label class="control-label"><strong>Fejltype</strong></label>                            
+<div class="controls">                                
+<apex:selectList value="{!errorTypeLabel}" size="1"  id="errorType" disabled="{!lockedCableUnit||isNetInstallationInMovement}">
+<apex:selectOption itemvalue="{!PICKLIST_OPTION_SELECT}" itemLabel="{!PICKLIST_OPTION_SELECT}"/>
+<apex:selectOptions value="{!listErrorTypeLabels}"/>
+</apex:selectList>
+</div>   
+</div>--><!-- Commented for EDM-738 --> 
+                <div class="control-group">     
+                    <label class="control-label"><strong>Strike</strong></label>                              
+                    <div class="controls">                                
+                        <apex:selectList value="{!strikeValue}" size="1" label="Strike Value" id="strike" disabled="{!lockedCableUnit||isNetInstallationInMovement}">
+                            <apex:selectOption itemvalue="{!PICKLIST_OPTION_SELECT}" itemLabel="{!PICKLIST_OPTION_SELECT}"/>
+                            <apex:selectOptions value="{!listStrikeValues}"/>
+                        </apex:selectList>
+                    </div>   
+                </div> 
+                <div class="control-group">     
+                    <label class="control-label"><strong>Kommentarer</strong></label>                           
+                    <div class="controls">                              
+                        <apex:inputTextarea label="Kommentarer" value="{!comments}" rows="4" 
+                                            cols="50" id="comments" disabled="{!lockedCableUnit||isNetInstallationInMovement}"/> 
+                    </div>   
+                </div> 
+                <div class="control-group">
+                    <div class="controls">                 
+                        <apex:commandButton id="register" value="Gem Registreringer" onclick=" return regCase();" styleClass="btn btn-primary" disabled="{!lockedCableUnit||isNetInstallationInMovement}" />  
+                    </div>
+                </div>                                    
+            </apex:form>
+            
+        </div>    
+    </apex:define> 
+    <script language = "javascript">
+    //document load 
+    $j(document).ready(function() {            
+        // define validation styles at the form level               
+        if($j('[id$=theForm]').length > 0) {
+            enableFormValidation($j('[id$=theForm]'));
+            
+            //  Register the method in the validator
+            $j.validator.addMethod("regCodeSelect",validateRegistrering,"Please select a code.");
+            
+            // validation definition at the field level                 
+            if($j('[id$=regCode]').length > 0)
+                $j('[id$=regCode]').rules("add",{regCodeSelect: true, messages: {regCodeSelect: "Registrering er påkrævet"}});
+            if($j('[id$=comments]').length > 0) 
+                $j('[id$=comments]').rules("add",{required:true, messages:{required: "Kommentarer er påkrævet"}});
+        }  
+        
+        // check cable unit status
+        checkCableunitLock();              
+    });     
+    
+    
+    // function to disable case registeration if cable unit is locked 
+    function checkCableunitLock(){
+        var lock = {!lockedCableUnit};
+        var inMovement={!isNetInstallationInMovement};
+        if(lock == true||inMovement==true){
+            disableRegistrationButton();                
+        }
+    }
+    
+    
+    //disable the registration button
+    function disableRegistrationButton() {
+        $j("[id$=registerCase]").attr("disabled","disabled");
+        $j("[id$=registerCase]").attr("class","btn btn-primary disabled");
+        $j("[id$=registerCase]").attr("style","cursor: not-allowed");   
+    }
+    function regCase(){
+        if($j('[id$=regCode]').val() != 'Vælg'&& $j('[id$=comments]').val() != ""){
+            //alert('call action func');
+            document.getElementById('thePage:theForm:register').disabled = true;
+            CaseReg();
+            
+        }
+        else{
+            
+            //document.getElementById("thePage:theForm").submit();
+            if($j('[id$=regCode]').val() == 'Vælg'){
+                document.getElementById("validaitonforRegcode").innerHTML = "Registrering er påkrævet";
+                $j("#registerDivID").addClass("error");
+                
+            }
+            else{
+                document.getElementById("validaitonforRegcode").innerHTML = "";
+                $j("#registerDivID").removeClass("error");
+            }
+            
+            if($j('[id$=comments]').val() == ""){
+                document.getElementById("validaitonforKommentarer").innerHTML = "Kommentarer er påkrævet";
+                $j("#commentDivID").addClass("error");
+            }else{
+                document.getElementById("validaitonforKommentarer").innerHTML = "";
+                $j("#commentDivID").removeClass("error");
+            }
+        }
+        
+        return false;
+    }
+    
+    function jsReload(){
+        if($j('[id$=regCode]').val() != 'Vælg' && $j('[id$=comments]').val() != ""){
+            
+            location.reload();
+        }
+    }
+    </script>
+</apex:page>

@@ -1,0 +1,53 @@
+<apex:page controller="ViewFuturePackageDetailsController" showHeader="false" sidebar="false" applyHtmlTag="false">
+ <html class="cvi2015">
+ <apex:form >
+ <script type="text/javascript" src="https://yousee.dk/sitecore/content/data/export/export.aspx?itemguid={6BB73624-FD1A-47A3-B2E5-C366F1D4A0B9}&amp;functions=true"></script>
+
+<style type="text/css">
+       .customPopup{
+          background-color: white;
+          border-style: solid;
+          border-width: 2px;
+          padding:10px;
+          position: absolute;
+          left: 65%;
+          width: 258px;
+          margin-left: -150px;
+          font-color:red;
+          
+      }
+</style>
+<script type="text/javascript">printHeader();</script>
+<script type="text/javascript">printTopMenu();</script>
+<script type="text/javascript">printContentAreaBegin();</script>
+ 
+ <apex:pageBlock >
+ <apex:pageBlockTable width="100%" value="{!futureSubscriptionList}" var="futureSubscList" rowClasses="even,odd" border="0" >
+     <apex:column headervalue="Tv-pakke" style="text-align:left" headerClass="headerStyleLeft">
+          <!-- <apex:outputLabel value="{!futureSubscList.futureSubsPackage}" rendered="{!AND(LEN(futureSubscList.effectiveDate) > 0, LEN(futureSubscList.effectiveEndDate) == 0)}"/> -->
+           
+         <apex:outputLabel value="{!futureSubscList.futureSubsPackage}" rendered="{!AND(LEN(futureSubscList.effectiveDate) > 0, LEN(futureSubscList.effectiveEndDate) == 0)}"/>
+         <apex:outputLabel value="AFBESTIL" rendered="{!AND(countFlag == 1,LEN(futureSubscList.effectiveEndDate) > 0)}"/> 
+     </apex:column>
+     <apex:column headervalue="Ønsket ikrafttrædelsesdato" style="text-align:left" headerClass="headerStyleLeft" rendered="{!AND(NOT(ISNULL(startDateCheck)),startDateCheck == 'true')}">
+       <apex:outputText value="{!futureSubscList.effectiveDate}" rendered="{!AND(LEN(futureSubscList.effectiveDate) > 0,LEN(futureSubscList.effectiveEndDate) == 0)}"/>
+     </apex:column>
+     <apex:column headervalue="Ønsket ophørsdato" style="text-align:left" headerClass="headerStyleLeft" rendered="{!AND(countFlag == 1,NOT(ISNULL(endDateCheck)),endDateCheck == 'true')}">
+        <apex:outputText value="{!futureSubscList.effectiveEndDate}" rendered="{!AND(countFlag == 1,LEN(futureSubscList.effectiveEndDate) > 0)}"/>
+     </apex:column>
+     <apex:column headervalue="Bestilt af" style="text-align:left" headerClass="headerStyleLeft">
+        <apex:outputText value="{!portalUser}" rendered="{!AND(LEN(futureSubscList.effectiveDate) > 0, LEN(futureSubscList.effectiveEndDate) == 0)}"/> 
+        <apex:outputText value="{!portalUser}" rendered="{!AND(countFlag == 1,LEN(futureSubscList.effectiveEndDate) > 0)}"/> 
+     </apex:column>    
+ </apex:pageBlockTable><br/><br/>
+ <table>
+   <tr>
+     <td style="text-align:left;">
+       I tilfælde af ændring af ordren, bedes du kontakte Foreningsservice på 70 70 40 44 eller på email foreningsservice@yousee.dk
+     </td>
+   </tr>
+  </table>               
+ </apex:pageBlock>
+ </apex:form>
+ </html>
+</apex:page>

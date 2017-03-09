@@ -1,0 +1,31 @@
+<apex:page standardController="Lead" extensions="clsProductsYKController" showHeader="false" sidebar="false" cache="true">
+  <style>
+    .activeTab { background-color: #ebaf59; color:white; background-image:none }
+    .inactiveTab { background-color: #D3D3D3; color:black; background-image:none }
+    .headerClass { text-align:right }
+  </style>
+  <apex:pageMessages />
+  <apex:form >        
+    <apex:pageBlock >    
+      <apex:inputHidden value="{!Lead.Affinium_Id__c}"/>
+      <apex:tabPanel switchType="ajax" height="200px" value="{!currentTab}" tabClass="activeTab" inactiveTabClass="inactiveTab">            
+        <apex:tab label="{!$Label.Campaign_History}" labelWidth="150px" id="campaignHistoryTab" status="campaignHistoryStatus">
+          <apex:actionStatus startText="Requesting..." id="campaignHistoryStatus">
+            <apex:facet name="stop"> 
+              <apex:pageBlockTable value="{!campaignHistory}" var="campaign" id="campaignHistoryTable">
+                <apex:column headerValue="{!$Label.Campaign_Name}" value="{!campaign.campaignName}"/>
+                <apex:column headerValue="{!$Label.Campaign_Type}" value="{!campaign.campaignType}"/>            
+                <apex:column headerValue="{!$Label.Channel}" value="{!campaign.channel}"/>            
+                <apex:column headerValue="{!$Label.Effective_From}" value="{!campaign.effectiveFromDate}"/>            
+                <apex:column headerValue="{!$Label.Expiration_Date}" value="{!campaign.expirationDate}"/>            
+                <apex:column headerValue="{!$Label.Product_Group}" value="{!campaign.productGroup}"/>
+                <apex:column headerValue="{!$Label.Offer_Name}" value="{!campaign.offerName}" />
+                <apex:column headerValue="{!$Label.Offer_Version_Name}" value="{!campaign.offerVersionName}" />           
+              </apex:pageBlockTable>   
+            </apex:facet>
+          </apex:actionStatus>
+        </apex:tab>
+      </apex:tabPanel>              
+    </apex:pageBlock>  
+  </apex:form>
+</apex:page>

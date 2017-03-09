@@ -1,0 +1,14 @@
+<apex:page standardController="Account" showHeader="true" sidebar="false" cache="true">
+  <apex:pageMessages />
+  <!-- <apex:form id="form"> -->
+    <!-- <apex:pageBlock id="productPageBlock"> -->
+
+      <!-- <apex:inputHidden value="{!Account.Customer_No__c}" /> -->
+
+      <!-- <apex:pageBlockSection columns="1" title="K2GUI"> -->
+        <apex:iframe width="100%" height="600" src="http://triple:8080/k2ui-v1/?klientId=SPOC&kundeId={!Account.Customer_No__c}" scrolling="true" frameborder="0" id="K2GuiFrame"/>
+      <!-- </apex:pageBlockSection> -->
+
+    <!-- </apex:pageBlock> -->
+  <!-- </apex:form> -->
+</apex:page>

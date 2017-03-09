@@ -1,0 +1,36 @@
+<apex:page >
+<b> 
+    <p>
+        7 nye klikkelikker 
+    </p>
+</b>
+<font size="1"> 
+    <p>
+        <font size="2">
+            Fra i dag kan du finde 7 nye klikkelikker i SPOC. Fællesnævneren for dem er, at de skal anvendes som velkomstmails til kunder, der køber et af vores produkter. På den måde kan du hjælpe kunden i forbindelse med opstart af produktet, daglig brug og introducere ham/hende til vores Supportunivers.
+        </font>
+    </p> 
+    <p>
+        <font size="2">
+        </font>
+    </p> 
+    <p>
+        <font size="2">
+            Her finder du direkte links til de 7 klikkelikker:
+        </font>
+    </p>
+    <font size="2"> 
+        <p>
+            <a href="https://emea.salesforce.com/servlet/servlet.FileDownload?file=01520000000ktwT">Tak for dit valg af YouSee Bredbånd</a>
+        </p>
+    </font>
+</font> 
+    <p><a href="https://emea.salesforce.com/servlet/servlet.FileDownload?file=01520000000ktwY">Tak for dit valg af YouSee Clear</a></p>
+    <p><a href="https://emea.salesforce.com/servlet/servlet.FileDownload?file=01520000000ktwd">Tak for dit valg af YouSee Plus</a></p> 
+    <p><a href="https://emea.salesforce.com/servlet/servlet.FileDownload?file=01520000000ktwi">Tak for dit valg af YouSee Telefoni</a></p> 
+    <p><a href="https://emea.salesforce.com/servlet/servlet.FileDownload?file=01520000000ktwE">Tak for dit valg af Kortlæser</a></p> 
+    <p><a href="https://emea.salesforce.com/servlet/servlet.FileDownload?file=01520000000ktwE">Tak for dit valg af Tvillingkort</a></p> 
+    <p><a href="https://emea.salesforce.com/servlet/servlet.FileDownload?file=01520000000ktwJ">Tak for dit valg af Programkort</a></p> 
+    <p>&nbsp;</p> <p>Du kan også finde klikkelikkerne på CC-portalen sammen med beskrivelse af formål, målgruppe og indhold for hver klikkelik.</p> <p>&nbsp;</p> <p>God arbejdslyst!</p>
+
+</apex:page>

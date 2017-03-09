@@ -1,0 +1,463 @@
+<apex:page standardController="Cloud_File__c" extensions="Amazon_DocSearch_CTE" >    
+   <apex:includeScript value="https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"/>     
+   <apex:includeScript value="https://ajax.microsoft.com/ajax/jquery.templates/beta1/jquery.tmpl.min.js"/>
+   <apex:stylesheet value="{!URLFOR($Resource.CalendarControl, 'CalendarControl/CalendarControl.css')}"/>
+   <apex:includeScript value="{!URLFOR($Resource.CalendarControl, 'CalendarControl/CalendarControl.js')}"/> 
+   <apex:stylesheet value="{!URLFOR($Resource.Amazon_File_Icons, 'sprite/css/sprite.css')}"/> 
+         <apex:form id="frm1">
+        <apex:pageBlock title="{!$Label.Doc_Search_Title}" id="pgb">
+            <apex:inputHidden value="{!calEndDate}" id="calEndDate"/>
+            <apex:inputHidden value="{!calStartDate}" id="calStartDate"/>
+            <apex:pageBlockSection title="{!$Label.DocSeachCriteria}" columns="1" id="pgBLKA">
+           
+                <apex:inputText id="title" value="{!Cloud_File__c.Cloud_file_Title__c}" label="{!$Label.Doc_Title}"/>
+                <apex:inputField id="cuNo" value="{!Cloud_File__c.Cloud_file_cu_no__c}"/>
+                <apex:inputField id="cpNo" value="{!Cloud_File__c.Cloud_File_Con_Proj_No__c}"/>
+                <apex:inputField id="hCustNo" value="{!Cloud_File__c.Cloud_file_Hierarchi_Cust_no__c}"/>
+                
+                <!-- <apex:inputField id="centaCat" value="{!Cloud_File__c.Cloud_File_Centa_Doc_Type__c}"/> 
+                <apex:inputField id="centaDocType" value="{!Cloud_File__c.Centa_Document_Name__c}"/>-->
+               
+               
+               <apex:pageBlockSectionItem id="centaBSI">
+                    <apex:outputLabel for="centaCat" value="{!$ObjectType.Cloud_File__c.fields.Cloud_File_Category__c.label}" />
+                    <apex:actionRegion >
+	                        <apex:selectList value="{!categoryVar}" title="category" size="1" id="centaCat" required="true" >
+	                            <apex:selectOptions value="{!categories}" />
+	                            <apex:actionSupport event="onchange" rerender="centaDocType" status="status"/>
+	                        </apex:selectList>
+                        <apex:actionstatus id="status">
+			            <apex:facet name="start">
+			                <div class="waitingSearchDiv" id="el_loading" style="background-color: #fbfbfb;
+			                       height: 100%;opacity:0.65;width:100%;"> 
+			                    <div class="waitingHolder" style="top: 74.2px; width: 91px;">
+			                        <img class="waitingImage" src="/img/loading.gif" title="Please Wait..." />
+			                        <span class="waitingDescription">Loading...</span>
+			                    </div>
+			                </div>
+			            </apex:facet>
+			        </apex:actionstatus>
+                    </apex:actionRegion>
+                </apex:pageBlockSectionItem> 
+                <apex:pageBlockSectionItem id="centaBSI2">
+                    <apex:outputLabel for="centaDocType" value="{!$ObjectType.Cloud_File__c.fields.Cloud_File_Document_Type__c.label}" />
+                    <apex:actionRegion >
+		                        <apex:selectList value="{!docTypeVar}" title="Document Type" size="1" id="centaDocType" required="true" disabled="{!!isCategorySelected}">
+		                            <apex:selectOptions value="{!docTypes}" />
+		                        </apex:selectList>
+                    </apex:actionRegion>
+				</apex:pageBlockSectionItem>
+				 
+				 
+				        
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="{!$Label.Doc_Start_Date}" />
+                    <apex:outputPanel >  
+                       <apex:inputText disabled="true" id="calStartDateID" value="{!calStrDate}"/>
+                       <apex:outputPanel onclick="openCalender('{!$Component.calStartDateID}','{!$Component.calStartDate}');" > 
+                        <img class="datePickerIcon" alt="Vælg en dato" title="Vælg en dato" src="/s.gif"/>
+                       </apex:outputPanel>
+                      </apex:outputPanel>  
+                      </apex:pageBlockSectionItem>
+                       <apex:pageBlockSectionItem >
+                      <apex:outputLabel value="{!$Label.Doc_End_Date}" />
+                      <apex:outputPanel >  
+                       <apex:inputText disabled="true" id="calEndDateID" value="{!calEnDate}" />
+                       <apex:outputPanel onclick="openCalender('{!$Component.calEndDateID}','{!$Component.calEndDate}');"> 
+                       <img class="datePickerIcon" alt="Vælg en dato" title="Vælg en dato" src="/s.gif"/>
+                       </apex:outputPanel>
+                    </apex:outputPanel> 
+                </apex:pageBlockSectionItem> 
+               
+                <apex:inputField id="centaDocTag" value="{!Cloud_File__c.Cloud_File_Document_Tag__c}" /> 
+               
+               <apex:outputPanel >
+                <button type="button" onclick="return search();">{!$Label.DocSearch}</button> 
+                <button type="button" onclick="resetPage()" >{!$Label.Doc_Clear}</button>
+                
+                <div id="searching" style="display:none"> {!$Label.DocSearching}</div>
+                <!--    <apex:commandButton value="{!$Label.DocSearch}" onclick="search();return false;"/>&nbsp;                   
+                    <apex:commandButton value="{!$Label.Doc_Clear}" onclick=" return reset();" action="{!reset}"/><br></br>
+                    <apex:actionStatus startText="{!$Label.DocSearching}" id="searchStatus"/>-->
+                </apex:outputPanel>      
+                  
+               <script type="text/javascript">
+               // At the top of your script:
+                    if ( ! window.console ) console = { log: function(){} };
+               var currentPage = 1;
+               var showPrev = new Boolean();
+               var showNext = new Boolean();
+               var noRecFound = '{!$Label.Doc_No_records_found}';
+               showPrev = false;
+               showNext = false;
+               var defaultSort = 'DESC';
+               var defaultField = 'CreatedDate';
+               var totalRec,size,toPage,fromPage,pageString = 0;
+               var title, cuNo, cpNo, hCustNo, centaDocType, startDate, endDate, centaCat,centaDocTag;
+               var ascPath = '{!$Resource.Amazon_Sort_Asc}';
+               var descPath = '{!$Resource.Amazon_Sort_Desc}';
+
+                function search()
+                {
+                    console.log('Valiadion start');
+                    fixCUNo(document.getElementById('{!$Component.cuNo}'));
+                    title = document.getElementById('{!$Component.title}').value;
+                    cuNo = document.getElementById('{!$Component.cuNo}').value;
+                    cpNo = document.getElementById('{!$Component.cpNo}').value;  
+                    hCustNo = document.getElementById('{!$Component.hCustNo}').value; 
+                     //centaDocType = document.getElementById('{!$Component.centaDocType}').value; 
+                    centaDocType = document.getElementById('{!$Component.frm1.pgb.pgBLKA.centaBSI2.centaDocType}').value;
+                    centaDocTag = document.getElementById('{!$Component.centaDocTag}').value;                 
+                    startDate = document.getElementById('{!$Component.calStartDate}').value;  
+                    endDate = document.getElementById('{!$Component.calEndDate}').value; 
+                    console.log('#startDate:'+startDate+' ##endDate:'+endDate);
+                     //centaCat = document.getElementById('{!$Component.centaCat}').value;
+                    centaCat = document.getElementById('{!$Component.frm1.pgb.pgBLKA.centaBSI.centaCat}').value;        
+                    console.log(title+','+cuNo+','+cpNo+','+hCustNo+','+centaDocType+','+startDate+','+endDate+','+centaCat+','+centaDocTag);
+                    var error = false; 
+                    //validate Cableunit Number, Construction Project Number and Construction Project Number 
+                    var re = /^[\w ]+$/;
+                    var numberRegex = /^[+-]?\d+(\.\d+)?([eE][+-]?\d+)?$/;
+                    
+                    if(cpNo != '' && ((!re.test(cpNo)) || (!numberRegex.test(cpNo)))){
+                        alert('Anlægsprojektnummer kan kun indeholde tal.');
+                        error = true;
+                    }               
+                    
+                    if(cpNo != '' && cpNo.length > 10){
+                        alert('Anlægsprojektnummer kan være på 10 cifre alene.');
+                        error = true;
+                    }
+                    
+                    if(cuNo != '' && ((!re.test(cuNo)) || (!numberRegex.test(cuNo)))){
+                        alert('Anlægsnummer kan kun indeholde tal.');
+                        error = true;
+                    }               
+                    
+                    if(cuNo != '' && cuNo.length > 10){
+                        alert('Anlægsnummer kan være på 10 cifre alene.');
+                        error = true;
+                    }                   
+                    
+                    // validate start and end date                                  
+                    
+                    //if(startDate != '' && endDate == '') {
+                      //  alert('Please enter an end date.');
+                        //error = true;
+                    //}                    
+                    
+                    //if(startDate == '' && endDate != '') {
+                      //  alert('Please enter a start date.');
+                        //error = true;
+                    //}                    
+                     
+                     if(startDate != '' && endDate != ''){ 
+	                     var dt1   = parseInt(startDate.substring(0,2));
+	                     var mon1  = parseInt(startDate.substring(3,5));
+	                     var yr1   = parseInt(startDate.substring(6,10));
+	                     var date1 = new Date(yr1, mon1-1, dt1);
+	                     var dt2   = parseInt(endDate.substring(0,2));
+	                     var mon2  = parseInt(endDate.substring(3,5));
+	                     var yr2   = parseInt(endDate.substring(6,10));
+	                     var date2 = new Date(yr2, mon2-1, dt2);
+                 
+                 /*     var strtDate=new Date();
+                        var endDate=new Date();
+                     
+                           var myIntDate;
+                           var myIntMonth;
+                           var myIntYear; 
+                           
+                           var startDateLiterals = startDate .split('\\.');                           
+                           myIntDate = parseInt(startDateLiterals [0],10);
+                           myIntMonth =  parseInt(startDateLiterals [1],10);
+                           myIntYear =  parseInt(startDateLiterals [2],10);
+                           strtDate.setFullYear(myIntYear,myIntMonth-1,myIntDate);
+                           console.log('#strtDate:'+strtDate);
+                          // var startDate_utc = Date.UTC( myIntYear , myIntMonth -1, myIntDate ,0,0,0,0);
+                           
+                           var endDateLiterals = startDate .split('\\.');                           
+                           myIntDate =  parseInt(endDateLiterals [0],10);
+                           myIntMonth =  parseInt(endDateLiterals [1],10);
+                           myIntYear =  parseInt(endDateLiterals [2],10);
+                           endDate.setFullYear(myIntYear,myIntMonth-1,myIntDate);
+                            console.log('#endDate:'+endDate);
+                         //  var endDate_utc = Date.UTC( myIntYear , myIntMonth -1, myIntDate ,23,59,59,59);
+                   */
+                            console.log('#date1 :'+date1+'#date2 :'+date2);
+                           if ( date1 > date2 )
+                             {
+                                 alert("Sørg for, at SlutDato er større end eller lig med Startdato.");
+                                 return false;
+                             }
+                            /*  var startDateTemp = new Date(startDate);     
+                              var endDateTemp = new Date(endDate);
+                              console.log('sd'+startDateTemp);
+                              console.log('ed'+endDateTemp); 
+                              if(startDateTemp>endDateTemp)
+                              {
+                                alert('Sørg for, at SlutDato er større end eller lig med Startdato.');
+                                error = true;
+                              }
+                             */
+                    } 
+                    //return false;                                   
+                   
+                    if(title.length==0 && cuNo.length==0 && cpNo.length==0 && hCustNo.length==0 && (centaCat.length==0||centaCat==' ') && startDate.length==0 && endDate.length==0){                      
+                        alert('Indtast søgningen værdi.');
+                        //return false;
+                        error = true;
+                    } 
+                    // alert('hello');
+                    console.log('error'+error);                                
+                var pagenumber1 = 1;
+                    if(!error) {
+                    document.getElementById("searching").style.display='block';
+                  //  alert('centaCat: '+centaCat);
+                  
+                   RemoteCall(pagenumber1,false,'nan',defaultField,defaultSort,title, cuNo, cpNo, hCustNo, centaDocType, startDate, endDate, centaCat,centaDocTag);
+                    
+                    } 
+                  //  document.getElementById("searching").style.display='none';   
+                }
+                
+                function RemoteCall(pagenumber,isGetmore,nav,defaultField,defaultSort,title, cuNo, cpNo, hCustNo, centaDocType, startDate, endDate, centaCat,centaDocTag){
+                	 Amazon_DocSearch_CTE.remotePagination(pagenumber,isGetmore,nav,defaultField,defaultSort,title, cuNo, cpNo, hCustNo, centaDocType, startDate, endDate,centaCat,centaDocTag, function (result, event) {
+                    if (event.status) {                     
+	                      currentPage = result.pageNumber;
+	                      showNext = result.hasNext;
+	                      showPrev = result.hasPre;
+	                      totalRec = result.totalRecords;
+	                      size = result.size;
+	                      if((currentPage * size) > totalRec)
+	                        toPage = totalRec;
+	                      else
+	                        toPage =(currentPage * size);
+	
+	                      fromPage = (currentPage * size)+1-size;
+	                      pageString = ''+fromPage+'-'+toPage+' of '+totalRec;
+	                       
+	                      if(totalRec==0)
+	                        document.getElementById("pagenumbers").innerHTML =noRecFound;
+	                      else
+	                        document.getElementById("pagenumbers").innerHTML =pageString;
+	                       
+	                       $('img[id^="sortingCloud_"]').remove(); 
+	                       $("#searchResults tbody").html('');
+	                      
+	                       if(showNext){
+		                       document.getElementById("nextt").disabled = false;
+		                       document.getElementById("lastt").disabled = false;
+	                       }else{
+		                       document.getElementById("nextt").disabled = true;
+		                       document.getElementById("lastt").disabled = true;
+	                       }
+	                       
+	                       if(showPrev){
+		                       document.getElementById("prevv").disabled = false;
+		                       document.getElementById("firstt").disabled = false;
+	                       }else{
+		                       document.getElementById("prevv").disabled = true;
+		                       document.getElementById("firstt").disabled = true;
+	                       }
+	                       
+	                       $.each(result.objects, function () {                
+	                         // for each result, apply it to template and append generated markup
+	                         // to the results table body.
+	                         var mydate = new Date(this.cfObj.CreatedDate);
+	                         this.convertedDate= mydate.getDate()+'/'+(mydate.getMonth()+1)+'/'+mydate.getFullYear(); 
+	                         
+	                        // console.log(this);
+	                             $("#resultTableRowTemplate" ).tmpl(this).appendTo( "#searchResults tbody" );
+	                          }
+	                        );
+	                       
+	                        document.getElementById("showsorting").style.display = 'none';
+	                    //  document.getElementById('res').innerHTML = result.objects;                  
+                    } else if (event.type === 'exception') {
+	                        document.getElementById("responseErrors").innerHTML = event.message;
+	                        document.getElementById("showsorting").style.display = 'none';
+                    } else {
+	                        document.getElementById("responseErrors").innerHTML = event.message;
+	                        document.getElementById("showsorting").style.display = 'none';
+                    }
+                    
+                   document.getElementById("showsorting").style.display = 'none';
+                   document.getElementById("searching").style.display='none';
+                   
+                   if(defaultField!=null){
+                
+			              /*  var AscStringId = 'sortingCloud_'+defaultField+'_asc';
+			                if(defaultSort=='ASC')
+			               $("#"+AscStringId).attr("src",ascPath);
+			               else
+			               $("#"+AscStringId).attr("src",descPath);
+			               */
+			            
+		               if(defaultSort=='ASC'){
+		                 $("<img src=\""+ascPath+"\" id=\"sortingCloud_"+defaultField+"_asc\" style=\"margin-top: -8px;\"/>").appendTo("a#"+defaultField);
+		                 }else{
+		                 $("<img src=\""+descPath+"\" id=\"sortingCloud_"+defaultField+"_asc\" style=\"margin-top: -8px;\"/>").appendTo("a#"+defaultField);
+		                 }
+		                 
+                 
+                  }
+                 }, { escape: true });
+                
+                }
+            
+                // this function pads the cable unit number with the necessary zeros
+                function fixCUNo(cuNoField)
+                {
+                    var cuNo = cuNoField.value;
+                    if(cuNo != '') {                        
+                        var cuLength =  cuNo.length;
+                        var diff = 10 - cuLength;
+                        var zeroStr = '';
+                        for(var i = 0; i<= diff-1; i++)
+                        {
+                            zeroStr = zeroStr + '0';
+                        }
+                        cuNoField.value = zeroStr + cuNo;
+                    }
+                }
+                
+                //Javascript function to clear search field values
+                function resetPage(){
+                   $("#searchResults tbody").html('');
+                   $('img[id^="sortingCloud_"]').remove(); 
+                   showPrev = false;
+                   showNext = false;
+                   defaultSort = 'DESC';
+                   defaultField = 'CreatedDate';
+                   currentPage = 1; 
+                   document.getElementById("nextt").disabled = true;
+                   document.getElementById("lastt").disabled = true;
+                   document.getElementById("firstt").disabled = true;
+                   document.getElementById("prevv").disabled = true;
+                   $('img[id^="sortingCloud_"]').attr("src",'');
+                   document.getElementById("pagenumbers").innerHTML = '';                                
+                   document.getElementById("j_id0:frm1").reset();
+                   document.getElementById('{!$Component.centaDocType}').disabled = true;
+                   return false;          
+                }
+               
+               
+	            function toggleSort(fieldname){
+	            
+	                if($("#searchResults tbody").html()!=''){
+	                 document.getElementById("showsorting").style.display = 'block';
+	                // alert(title+','+cuNo+' , '+ cpNo +' , '+ hCustNo+' , '+ centaDocType+' , '+ startDate+' , '+ endDate+' , '+ centaCat);
+	                if(defaultSort=='DESC')
+	              	  defaultSort = 'ASC';
+	                else
+	               	 defaultSort = 'DESC';
+	               	 
+	                defaultField = fieldname;
+	               // $('img[id^="sortingCloud_"]').attr("src",'');
+	                $('img[id^="sortingCloud_"]').remove();
+		                 if(defaultField!=null){               
+		                     //var AscStringId = 'sortingCloud_'+defaultField+'_asc';
+		                 	 console.log("<img src=\""+ascPath+"\" id=\"sortingCloud_"+defaultField+"_asc\" style=\"margin-top: -8px;\"/>");
+			                 if(defaultSort=='ASC'){
+			                 	 $("<img src=\""+ascPath+"\" id=\"sortingCloud_"+defaultField+"_asc\" style=\"margin-top: -8px;\"/>").appendTo("a#"+defaultField);
+			                 }else{
+			                 	 $("<img src=\""+descPath+"\" id=\"sortingCloud_"+defaultField+"_asc\" style=\"margin-top: -8px;\"/>").appendTo("a#"+defaultField);
+			                 }
+				           /*if(defaultSort=='ASC')
+				               $("#"+AscStringId).attr("src",ascPath);
+				             else
+				               $("#"+AscStringId).attr("src",descPath);*/
+		                  }
+	               		RemoteCall(1,true,'isFirst',defaultField,defaultSort,title, cuNo, cpNo, hCustNo, centaDocType, startDate, endDate, centaCat,centaDocTag);
+	                 }        
+	             }
+                
+                 function goNextt(){          
+                 RemoteCall(currentPage,true,'isNext',defaultField,defaultSort,title, cuNo, cpNo, hCustNo, centaDocType, startDate, endDate, centaCat,centaDocTag);
+                 }
+                 
+                 function goLastt(){
+                 RemoteCall(currentPage,true,'isLast',defaultField,defaultSort,title, cuNo, cpNo, hCustNo, centaDocType, startDate, endDate, centaCat,centaDocTag);         
+                 }
+                 
+                 function goFirstt(){
+                 RemoteCall(currentPage,true,'isFirst',defaultField,defaultSort,title, cuNo, cpNo, hCustNo, centaDocType, startDate, endDate, centaCat,centaDocTag);         
+                 }  
+                        
+                 function goPrevv(){             
+                  RemoteCall(currentPage,true,'isPrev',defaultField,defaultSort,title, cuNo, cpNo, hCustNo, centaDocType, startDate, endDate, centaCat,centaDocTag);
+                 }
+        
+                </script>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection columns="1" title="Søgeresultater" collapsible="false" id="resultPanel">
+      
+      <!--- dynamic table --->
+      <div id="showsorting" style="display:none"> sortering....</div>
+            <table cellspacing="0" cellpadding="0" border="0" id="searchResults" class="list ">
+        <colgroup span="2"></colgroup>
+        <thead class="rich-table-thead">
+            <tr class="headerRow ">
+                <th colspan="1" scope="col" class="headerRow"></th>  
+                <th colspan="1" scope="col" class="headerRow"><a id="Cloud_file_Title__c" onclick="toggleSort('Cloud_file_Title__c'); return false;"  href="">{!$Label.Doc_Title}</a></th>
+                <th colspan="1" scope="col" class="headerRow"><a id="Cloud_file_cu_no__c" onclick="toggleSort('Cloud_file_cu_no__c'); return false;"  href="">{!$Label.Doc_Cable_Unit_Number}</a></th>
+                <th colspan="1" scope="col" class="headerRow"><a id="Cloud_File_Con_Proj_No__c" onclick="toggleSort('Cloud_File_Con_Proj_No__c'); return false;"  href="">{!$Label.Doc_Construction_Project_Number}</a></th>
+                <th colspan="1" scope="col" class="headerRow"><a id="Cloud_file_Hierarchi_Cust_no__c" onclick="toggleSort('Cloud_file_Hierarchi_Cust_no__c'); return false;"  href="">{!$Label.Doc_Hierarchical_Customer_Number}</a></th>
+                <!--<th colspan="1" scope="col" class="headerRow" ><a id="Cloud_File_All_Document_Types__c" onclick="toggleSort('Cloud_File_All_Document_Types__c'); return false;"  href="">{!$Label.Doc_Document_Type}</a></th>  -->
+                <th colspan="1" scope="col" class="headerRow"><a id="Cloud_File_Document_Type__r" onclick="toggleSort('Cloud_File_Document_Type__r'); return false;"  href="">{!$Label.Doc_Document_Type}</a></th>
+                <th colspan="1" scope="col" class="headerRow"><a id="CreatedDate" onclick="toggleSort('CreatedDate'); return false;"  href="">{!$Label.Doc_CreatedDate}</a></th>
+                <th colspan="1" scope="col" class="headerRow"><a id="Cloud_File_MID__c" onclick="toggleSort('Cloud_File_MID__c'); return false;"  href="">MID</a></th>  
+            </tr>
+        </thead>
+    <!-- table body left empty for populating via row template using jquery -->
+        <tbody />
+    </table>
+    <script id="resultTableRowTemplate" type="text/x-jquery-tmpl">
+<tr onfocus="if (window.hiOn){hiOn(this);}" onblur="if (window.hiOff){hiOff(this);}" onmouseout="if (window.hiOff){hiOff(this);} " onmouseover="if (window.hiOn){hiOn(this);} " class="dataRow even  first">
+     <td class="dataCell">
+     <a id = "vf${cfObj.Id}" href = "/apex/Amazon_ViewFile?id=${cfObj.Id}" target = "_blank" title="View File"><div class=${fileType} style="display:inline-block"></div></a>    
+    </td>
+    <td class="dataCell"><p style="width:250px;word-break:break-all;">${cfObj.Cloud_file_Title__c}</p></td>
+    <td class="dataCell">${cfObj.Cloud_file_cu_no__c}</td>
+    <td class="dataCell">${cfObj.Cloud_File_Con_Proj_No__c}</td>
+    <td class="dataCell">${cfObj.Cloud_file_Hierarchi_Cust_no__c}</td>
+    <td class="dataCell">${documentType}</td>
+    <td class="dataCell">${convertedDate}</td>        
+    <td class="dataCell">${cfObj.Cloud_File_MID__c}</td>
+</tr>           
+</script>
+<br/>
+<input type="button" title="First Page"  value="|<" onclick="goFirstt(); return false;" name="firstt" id="firstt" />
+<input type="button" title="Previous Page"  value="<" onclick="goPrevv(); return false;" name="prevv" id="prevv" />
+<input type="button" title="Next Page" value=">" onclick="goNextt(); return false;" name="nextt" id="nextt" />
+<input type="button" title="Last Page" value=">|" onclick="goLastt(); return false;" name="lastt" id="lastt" /><div id="pagenumbers"/>
+ 
+</apex:pageBlockSection>
+<div id="res" />
+<div id="responseErrors" />
+</apex:pageBlock>
+</apex:form> 
+                 <!-- 
+Create a named jquery template 
+This template represents just a result row, with binding variables for each queried field from account.
+-->
+   <script type="text/javascript">
+	   if(showNext){
+	   document.getElementById("nextt").disabled = false;
+	   document.getElementById("lastt").disabled = false;
+	   }else{
+	   document.getElementById("nextt").disabled = true;
+	   document.getElementById("lastt").disabled = true;
+	   }
+	   
+	   if(showPrev){
+	   document.getElementById("prevv").disabled = false;
+	   document.getElementById("firstt").disabled = false;
+	   }else{
+	   document.getElementById("prevv").disabled = true;
+	   document.getElementById("firstt").disabled = true;
+	   }
+	   
+   </script>
+</apex:page>

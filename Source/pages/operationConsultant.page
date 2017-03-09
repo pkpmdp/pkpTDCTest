@@ -1,0 +1,68 @@
+<apex:page controller="KnowledgeHomeSidebar_CT" sidebar="false" showHeader="false" cache="false">
+	<apex:outputPanel id="YOTDSinfo" layout="block" rendered="{!showYOTDS}" >
+		<apex:pageBlock tabStyle="YO_OperationConsultant__c" >
+			<apex:PageBlockSection title="YOTDS" columns="1" collapsible="false" >
+				<table border = "0" cellpadding = "0" cellspacing = "0" id="table1">   
+                	<tr >
+	                    <td > 
+	                         <table cellpadding="0" cellspacing="0" border = "0" style="width:180px; table-layout:fixed;">
+	                           <tr>
+	                               <td style="width:60px;"><img src = "{!userData.SmallPhotoUrl}"/></td>
+	                               <td style="width:80px; word-wrap:break-word;">
+	                                   {!userData.Name}<br/>
+	                                   {!userData.email}<br/>
+	                                   {!userData.phone}
+	                               </td>
+	                           </tr>                                                                   
+	                         </table>                                
+	                    </td>
+                    </tr>                 
+                    <tr> 
+	                    <td >
+	                    	<apex:outputText value="{!sectionInfo}" escape="false" />
+	                    </td> 
+                    </tr>
+                    
+                    <tr>
+                    	<td>
+                    		<apex:outputText value="{!sectionTextInfo}" escape="false" />
+	                    </td>
+                    </tr>               
+                 </table>  
+			</apex:PageBlockSection>
+		</apex:pageBlock>
+	</apex:outputPanel>
+	
+	<apex:outputPanel id="Vagtinfo" layout="block" rendered="{!showVagtInfo}">
+		<apex:pageBlock tabStyle="YO_OperationConsultant__c">
+			<apex:PageBlockSection title="VagtInfo"  columns="1" collapsible="false">
+				<table border = "0" cellpadding = "0" cellspacing = "0" >   
+                	<tr >
+	                    <td > 
+	                         <table cellpadding="0" cellspacing="0" border = "0" style="width:180px; table-layout:fixed;">
+	                           <tr>
+	                               <td style="width:60px;"><img src = "{!userData.SmallPhotoUrl}"/></td>
+	                               <td style="width:80px; word-wrap:break-word;">
+	                                   {!userData.Name}<br/>
+	                                   {!userData.email}<br/>
+	                                   {!userData.phone}
+	                               </td>
+	                           </tr>                                                                   
+	                         </table>                                
+	                    </td>
+                    </tr>                 
+                    <tr> 
+	                    <td >
+	                    	<apex:outputText value="{!sectionInfo}" escape="false" />
+	                    </td> 
+                    </tr>
+                    <tr>
+                    	<td>
+	                		<apex:outputText value="{!sectionTextInfo}" escape="false" />
+	                	</td>
+	                </tr>
+	            </table>
+			</apex:PageBlockSection>
+		</apex:pageBlock>
+	</apex:outputPanel>
+</apex:page>

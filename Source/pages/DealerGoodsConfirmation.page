@@ -1,0 +1,67 @@
+<apex:page controller="DealerGoodsReceiptController" showHeader="false" sidebar="false">
+<apex:form >
+<script type="text/javascript" src="https://yousee.dk/sitecore/content/data/export/export.aspx?itemguid={0B93668E-7DA6-482D-B811-1C03BCEF8083}&functions=true"></script>
+<!-- Added for DW 750 -->
+<c:TopMenuComponent ></c:TopMenuComponent>
+		<script type="text/javascript">printHeader();</script>
+		<script type="text/javascript">printTopMenu();</script>
+<apex:includeScript value="{!$Resource.jquery}" />
+<body>
+        <script type="text/javascript">printContentAreaBegin();</script>
+        <script type="text/javascript">
+            var jsonResponse = {!approvalResponse};alert('{!approvalResponse}');
+            var summaryTable="";
+            displayStatus();
+            
+            function displayStatus()
+            {/*
+                for(x=0;x<jsonResponse.length;x++)
+                {
+                    if(jsonResponse[x].status=="201")
+                     summaryTable = summaryTable + "<tr><td>" + jsonResponse[x].serienummer + "</td><td>Success</td><td></td></tr>";
+                    else
+                     summaryTable = summaryTable + "<tr><td>" + jsonResponse[x].serienummer + "</td><td>Failed</td><td>" + jsonResponse[x].beskrivelse + "</td></tr>"; 
+                }*/
+                
+                for(x=0;x<jsonResponse.logistik.length;x++)
+                {
+                    if(jsonResponse.logistik[x].status=="201")
+                     summaryTable = summaryTable + "<tr><td>" + jsonResponse.logistik[x].serienummer + "</td><td>Success</td><td></td></tr>";
+                    else
+                     summaryTable = summaryTable + "<tr><td>" + jsonResponse.logistik[x].serienummer + "</td><td>Failed</td><td>" + jsonResponse.logistik[x].beskrivelse + "</td></tr>"; 
+                }
+            }
+            
+        </script>
+             
+<apex:dataTable value="{!FinalPageInformation}" var="info">
+     <apex:column value="{!info.Description__c}" style="font-family:verdana;"/>
+</apex:dataTable>  
+
+<br/><br/>
+
+<br/><br/>
+<div style="font-family:verdana;">
+<span style="FONT-SIZE: 14pt;"> 
+<strong>Forhandler</strong> 
+</span>
+<br/>
+{!objCommon.dealerNumber} <br></br>
+{!objCommon.userContact.Name} <br></br>
+</div>
+<apex:outputLabel value="Addresse" style="font-weight:bold; font-family:verdana;" /><br/>
+
+<c:DealerAddress />
+<br/><br/>
+
+      <br/>
+      <div align="center">
+       <apex:commandButton value="Tilbage" action="{!backToGoodsPage}"/>    
+      </div>
+
+<script type="text/javascript">printContentAreaEnd();</script>
+<script type="text/javascript">printFooter();</script>
+</body> 
+    
+</apex:form>
+</apex:page>

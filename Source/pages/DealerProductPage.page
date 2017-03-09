@@ -1,0 +1,144 @@
+<apex:page standardController="Dealer_Product__c" extensions="DealerProductController" showHeader="false" sidebar="false" applyHtmlTag="false">
+<html class="cvi2015"><!--spoc 2206-->
+<apex:form rendered="{!$Label.DE_Login_Access}">
+    <center>
+    <apex:image url="{!$Resource.DW_Maintenance_Image_2}" width="400" height="400"/>
+        <br></br>
+    <apex:outputText style="color: #629E00;font-size: large;" value="{!$Label.DW_Maintenance_message}">
+        
+    </apex:outputText>
+    <br></br>
+    <a class="dialogbutton_orange Right" href="/secur/logout.jsp" style="position: relative; left: -15px;"><span>Back</span></a>
+    </center>
+</apex:form>
+<!-- Added for DW 750 -->
+<!--<c:TopMenuComponent ></c:TopMenuComponent>
+<script type="text/javascript">printHeader();</script>
+<script type="text/javascript">printTopMenu();</script>
+<script type="text/javascript">printContentAreaBegin();</script>-->
+<style>
+.fontVerdana{ font-family: 'Verdana'; }
+body button, body .x-btn, body .btn, body .btnDisabled, body .btnCancel, body .menuButton .menuButtonButton {background-color:#585858;color:#FFFFFF;background:#585858;font-weight:bold;height:26px;}   
+.videreBtnCls {border-width: 0;padding: 0 15px;text-transform: capitalize;margin: 0 2px;background-position: left top;background-repeat: repeat-x;border-color: -moz-use-text-color #FF4500;border-right: 1px solid #FF4500;border-style: none solid solid none;display: inline;font-family: 'Verdana','Geneva',sans-serif;font-size: 80%;color: #FFFFFF;font-weight: bold;height: 26px;background-color: #FF4500;width:76px;}
+.historyBtnCls {border-width: 0;padding: 0 15px;text-transform: capitalize;margin: 0 2px;background-position: left top;background-repeat: repeat-x;border-color: -moz-use-text-color #FF4500;border-right: 1px solid #FF4500;border-style: none solid solid none;display: inline;font-family: 'Verdana','Geneva',sans-serif;font-size: 80%;color: #FFFFFF;font-weight: bold;height: 26px;background-color: #FF4500;width:85px;}
+        
+ 
+</style> 
+    <script>
+    function noenter(ev)
+            {
+                        var keycode;
+                        if(ev.keyCode) //For IE
+                            keycode = ev.keyCode;
+                        else if(ev.Which)
+                            keycode = ev.Which; // For FireFox
+                        else
+                            keycode = ev.charCode;
+                        if ((keycode > 31 && (keycode < 48 || keycode > 57)) || keycode == 46 ){
+                            return false;
+                        }
+                        if(window.event && window.event.keyCode == 13) {
+                            nextAF();
+                            return false;
+                        }
+                            return true;     
+            }
+
+    </script>
+
+<script type='text/javascript'>
+    function noenter1(ev)  {
+        if (window.event && window.event.keyCode == 13 || ev.which == 13) {
+            nextAF();
+            return false;
+         } else {
+              return true;
+         }
+     }
+</script>
+<script>
+function viewProductSummary(){
+            viewSummary();
+    }
+</script>
+<script type="text/javascript">
+    
+    function viewHistory1(){
+            viewHistoryOrder();
+    }
+</script>
+
+<body>
+<apex:form rendered="{! If($Label.DE_Login_Access =='False' ,true,false) }">
+    <script type="text/javascript" src="https://yousee.dk/sitecore/content/data/export/export.aspx?itemguid={F011BAAA-EF0B-4751-B782-587C8D8AD11F}&functions=true"></script>
+
+<c:TopMenuComponent ></c:TopMenuComponent>
+<script type="text/javascript">printHeader();</script>
+<script type="text/javascript">printTopMenu();</script>
+<script type="text/javascript">printContentAreaBegin();</script>
+<div style="text-align: center; margin-left: 40px;">
+<p class="MsoNormal" style="text-align: center;"><b><span style="font-size: 16pt;">Varer bestilles ikke længere i Forhandlerweb. Brug i stedet iStore. <br></br>Kontakt Forhandlersupport for yderligere information. </span></b></p>
+</div>
+<!--
+<apex:dataTable value="{!productValginformation}" var="info" >
+     <apex:column value="{!info.Description__c}"/>
+</apex:dataTable> 
+ <div align="right">
+    <input type="button" value="Se Historik" class="historyBtnCls" onClick="viewHistory1();"/>
+    </div>  
+      <br/>   
+    
+<apex:pageBlock rendered="{!IF(products.size>0,true,false)}">
+               
+<div class="fontVerdana">    
+<apex:pageMessages escape="false"/>
+</div>
+<apex:stylesheet value="{!URLFOR($Resource.rowOddEvenStyle)}"/> 
+       <apex:repeat value="{!products}" var="prod">        
+         <apex:pageBlockSection title="{!prod.productGroup}" columns="1"  collapsible="false">
+            <apex:dataTable value="{!prod.dealerProduct}" var="dealerProd" border="0"  width="100%">
+                <apex:column width="10%" style="font-family:verdana;">
+                        <apex:facet name="header"><b>Antal</b></apex:facet>
+                        <apex:inputfield style="width:45%;" value="{!dealerProd.Quantity__c}" onkeypress="return noenter(event);"/>
+               </apex:column>
+                <apex:column width="40%" style="font-family:verdana;"> 
+                        <apex:facet name="header"><b>Varenavn</b></apex:facet>
+                        <apex:outputText value="{!dealerProd.Name}"/>
+                </apex:column>
+                <apex:column width="40%" style="font-family:verdana;">
+                        <apex:facet name="header"><b>Beskrivelse/varenr</b></apex:facet>
+                        <apex:outputText value="{!dealerProd.Product_Descriptions__c}"/>
+                </apex:column>     
+                <apex:column width="10%" style="text-align: right; font-family:verdana;">
+                        <apex:facet name="header"><b>Max-antal</b></apex:facet>
+                        <apex:outputField value="{!dealerProd.Max_Items_Allowed__c}"/>
+                </apex:column> 
+        </apex:dataTable>
+            
+        </apex:pageBlockSection>  
+    </apex:repeat>  
+               <br></br>  
+               <table>
+                    <apex:pageBlockButtons id="pgBlockButtonID" location="bottom">
+                        <tr align="center">
+                            <td>
+                                &nbsp;&nbsp;<apex:commandButton value="Nulstil" action="{!resetInputData}"  rendered="{!IF(products.size>0,true,false)}"/> 
+                            </td>
+                            <td align="center">
+                                &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                                
+                                <input type="button" id="btnVidere" value="Videre" onclick="viewProductSummary();" class="videreBtnCls" />
+                            </td>
+                        </tr>
+                    </apex:pageBlockButtons>   
+                </table> 
+        </apex:pageBlock>
+        <apex:actionFunction name="viewSummary" action="{!viewDealerProductSummary}"/>
+        <apex:actionFunction name="viewHistoryOrder" action="{!viewHistory}"/> -->
+     </apex:form>
+    </body> 
+    
+   <script type="text/javascript">printContentAreaEnd();</script>
+       <script type="text/javascript">printFooter();</script>
+</html>
+</apex:page>

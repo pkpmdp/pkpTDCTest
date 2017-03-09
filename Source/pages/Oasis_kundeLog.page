@@ -1,0 +1,106 @@
+<apex:page sidebar="false" showHeader="false" showChat="false" controller="Oasis_kundeLogController" id="kundeLogPage" standardstylesheets="false"  doctype="HTML-5.0" cache="false">
+    <style> 
+        .unlocked:tr {  background:green !important; }
+        .locked:hover { background-color: #F78181; }
+        .locked{ background-color: #F78181;}
+        .CasperAct{ background-color: #F78181;}
+        .locked_CasperAct{ background-color: #F78181; }
+        #nohover tr.locked:hover{
+        background-color: #F78181;
+        color: #F78181;
+        }
+        #nohover tr.CasperAct:hover{
+        background-color: #F78181;
+        color: #F78181;
+        }
+    </style>
+    <apex:composition template="Oasis_SiteTemplate"/>
+    <apex:define name="body">       
+        <div class="container-fluid">                
+            <apex:form styleclass="form-horizontal" id="theForm" >
+                <apex:messages />
+                <br/>
+                <div class="control-group">
+                    <div class="controls">
+                        <apex:commandButton value="Logs over 2 år" action="{!showAllLogs}" oncomplete="if('{!ResponseFromCon}'=='recordspresent') alert('{!$Label.CustomerLogPresent}'); window.location.reload();" styleclass="btn" id="openPopup" reRender="kundeLogPage" />                        
+                    </div>
+                </div> 
+                <apex:outputPanel id="listId" rendered="{!show != null}" layout="block"> 
+                    <apex:outputPanel rendered="{!show.size != 0}"> 
+                        <div class="row-fluid">
+                            <div class="span6"><b>Page Size</b>&nbsp;
+                                <apex:selectList value="{!pageSize}" size="1" onchange="changPaging();" style="width:80px" >
+                                    <apex:selectOption itemValue="10" itemLabel="10" ></apex:selectOption>
+                                    <apex:selectOption itemValue="20" itemLabel="20" ></apex:selectOption>
+                                    <apex:selectOption itemValue="50" itemLabel="50" ></apex:selectOption>
+                                    <apex:selectOption itemValue="100" itemLabel="100"></apex:selectOption>
+                                    <apex:selectOption itemValue="500" itemLabel="500"></apex:selectOption> 
+                                </apex:selectList>
+                            </div>
+                        </div>
+                        <legend></legend>
+                    </apex:outputPanel>
+                    <apex:actionFunction name="changPaging" action="{!changPaging}"></apex:actionFunction>
+                    <legend>Kundebemærkninger</legend>
+                    <apex:outputPanel rendered="{!show.size != 0}" layout="block" >
+                        <table class = "table" border = "0" id="nohover">
+                            <thead>   
+                                <th style = "vertical-align: top">Nummer</th>
+                                <th style = "vertical-align: top">Oprettet dato</th>
+                                <th style = "vertical-align: top">Bemærkning</th>
+                                <th style = "vertical-align: top">Bruger</th>
+                                <th style = "vertical-align: top">Bruger ID</th>
+                                <th style = "vertical-align: top">Henvendelsesform</th>
+                                <th style = "vertical-align: top">Seneste ændringsdato</th>
+                            </thead> 
+                            <apex:repeat value="{!show}" var="c">
+                                <tr>
+                                    <td>{!c.Name}</td>
+                                    <td>{!c.Creation_Date__c}</td>
+                                    <td>{!c.Text__c}</td>
+                                    <td>{!c.User_Name__c}</td>
+                                    <td>{!c.User_MID__c}</td>
+                                    <td>{!c.Inquiry_Type__c}</td>
+                                    <td>{!c.Date__c}</td>
+                                </tr>
+                            </apex:repeat>
+                        </table>
+                        <apex:outputPanel rendered="{!show.size != 0}" layout="block">
+                            <div align="right">
+                                <apex:outputLabel value="{!currentCountText}" rendered="true" style="text-align:right; font-weight:bold;"></apex:outputLabel>
+                                <ul class="pager" style="text-align:right">
+                                    
+                                    <li><apex:commandLink value="Første" rendered="{!NOT(pageNumber == 1)}" action="{!first}" /></li>
+                                    <li class="disabled">
+                                        <apex:outputLink value="javascript: void(0)" rendered="{!(pageNumber == 1)}">Forste</apex:outputLink>
+                                    </li>
+                                    
+                                    <li><apex:commandLink value="Forrige" rendered="{!hasPrevious}" action="{!previous}"/></li>
+                                    <li class="disabled">
+                                        <apex:outputLink value="javascript: void(0)" rendered="{!NOT(hasPrevious)}">Forrige</apex:outputLink>
+                                    </li>
+                                    
+                                    <li><apex:commandLink value="Næste" rendered="{!hasNext}" action="{!next}"/></li>
+                                    <li class="disabled">
+                                        <apex:outputLink value="javascript: void(0)" rendered="{!NOT(hasNext)}">Næste</apex:outputLink>
+                                    </li>
+                                    
+                                    <li><apex:commandLink value="Sidste" rendered="{!hasNext}" action="{!last}"/></li>
+                                    <li class="disabled">
+                                        <apex:outputLink value="javascript: void(0)" rendered="{!NOT(hasNext)}">Sidste</apex:outputLink>
+                                    </li>
+                                </ul>
+                            </div> 
+                        </apex:outputPanel>
+                    </apex:outputPanel>
+                    <apex:outputPanel rendered="{!show.size == 0}" layout="block" >
+                            Kundebemærkninger ingen fundet.
+                </apex:outputPanel> 
+                </apex:outputPanel>
+            </apex:form> 
+        </div>
+    </apex:define>
+    <apex:define name="footer">
+        <apex:includeScript value="{!URLFOR($Resource.Bootstrap,'js/bootstrap-tooltip.js')}"/>         
+    </apex:define>
+</apex:page>

@@ -1,0 +1,125 @@
+<apex:page standardController="Account" extensions="clsCustomInteractionLog" tabStyle="Task">    
+    <apex:includeScript value="/support/console/29.0/integration.js"/>
+    <apex:form >
+        <apex:pageBlock title="Interaction Log" id="thePageBlock" mode="edit" >            
+            <apex:pageMessages />
+            <apex:pageBlockButtons location="top">
+                <apex:commandButton value="Save Log" action="{!save}" reRender="updateable, relatedList"/>
+                <apex:commandButton value="Save & New Log" action="{!saveAndNew}" reRender="updateable, relatedList"/>
+            </apex:pageBlockButtons>
+            <apex:actionFunction action="{!updateWhoWhatId}" name="updateWhoWhatIdJS" reRender="updateable">
+                <apex:param name="newAccountId" assignTo="{!accountId}" value=""/>
+            </apex:actionFunction>               
+            <apex:actionFunction action="{!setCallAttachedData}" name="setCallAttachedDataJS" reRender="updateable">
+                <apex:param name="CallObject" assignTo="{!CallObject}" value=""/>
+                <apex:param name="ANI" assignTo="{!ANI}" value=""/>
+            </apex:actionFunction>
+            <apex:actionFunction action="{!setCallEndData}" name="setCallEndDataJS" reRender="updateable, relatedList">
+                <apex:param name="CallDuration" assignTo="{!CallDurationInSeconds}" value=""/>
+                <apex:param name="CallDisposition" assignTo="{!CallDisposition}" value=""/>
+            </apex:actionFunction>            
+            <apex:actionFunction action="{!setCallType}" name="setCallTypeJS" reRender="updateable, relatedList">
+                <apex:param name="CallType" assignTo="{!CallType}" value=""/>
+            </apex:actionFunction>              
+            <apex:outputPanel id="updateable">
+                 &nbsp;&nbsp;&nbsp;<apex:outputText value="{!statusMessage}" />                  
+                 <apex:pageBlockSection columns="3">
+                    <apex:inputField value="{!task.whoId}"/>                        
+                     <apex:inputField value="{!task.whatId}"/>  
+<!--                    <apex:selectList id="whoSelectList" value="{!   -->
+<!--                    <apex:inputField style="width:230px;" value="{!task.subject}"/>            -->
+                    <apex:selectList value="{!task.subject}" size="1" >                    
+                      <apex:selectOptions value="{!subjectItems}"/>
+                    </apex:selectList>                    
+                       
+                    <apex:inputField style="height:70px;width:350px;" value="{!task.description}"/>                                        
+<!--                    <apex:inputField value="{!task.ANI__c}"/>                     -->
+                </apex:pageBlockSection>
+                <apex:pageBlockSection columns="1">
+<!--                <apex:inputField style="height:100px;width:350px;" value="{!task.description}"/>  -->
+                    <br/><apex:outputText value="{!statusMessage}" />                                       
+                </apex:pageBlockSection>
+            </apex:outputPanel>            
+         
+        </apex:pageBlock>
+    </apex:form>
+    <script type="text/javascript">
+        
+        var callObjectId = null;
+        
+        var onFocusedSubtabCallback = function (result) {
+            if (window.console && window.console.log) console.log('CustomInteractionLog DEBUG: onFocusedSubtabCallback : ENTRY');        
+            if (window.console && window.console.log) console.log('CustomInteractionLog DEBUG: object ID='+result.objectId);
+            var entityId = result.objectId;
+            if (entityId.substr(0,3) === '500') {
+                updateWhoWhatIdJS(result.objectId);
+            }
+            if (window.console && window.console.log) console.log('CustomInteractionLog DEBUG: onFocusedSubtabCallback : EXIT');                    
+        };  
+        sforce.console.onFocusedSubtab(onFocusedSubtabCallback);
+
+        var getCallAttachedDataCallback = function (result) {    
+            
+            if (window.console && window.console.log) console.log('CustomInteractionLog DEBUG: getCallAttachedDataCallback : ENTRY');        
+            if (window.console && window.console.log) console.log('CustomInteractionLog DEBUG: result.data='+result.data); 
+
+            if(result.type == "INBOUND"){                          
+                 setCallTypeJS('Inbound');
+                 if (window.console && window.console.log) console.log('CustomInteractionLog DEBUG: getCallAttachedDataCallback : CallType=Inbound');                                    
+            }
+            else if (result.type == "OUTBOUND"){
+                setCallTypeJS('Outbound');
+                if (window.console && window.console.log) console.log('CustomInteractionLog DEBUG: getCallAttachedDataCallback : CallType=Outbound');    
+            }
+                         
+            //setCallAttachedDataJS(callObjectId, JSON.parse(result.data).ANI);
+            
+            if (window.console && window.console.log) console.log('CustomInteractionLog DEBUG: getCallAttachedDataCallback : EXIT');                    
+        };
+        
+    
+        /* Retrieving call id of first call that came in and
+        * calling getCallAttachedData() to retrieve call data.
+        * Note that we are using the cti submodule here
+        */                  
+        var getCallObjectIdsCallback = function (result) {        
+            if (window.console && window.console.log) console.log('CustomInteractionLog DEBUG: getCallObjectIdsCallback : ENTRY');        
+
+              if (result.ids !== 'null') {        
+                if (window.console && window.console.log) console.log('CustomInteractionLog DEBUG: getCallObjectIdsCallback : result.ids='+result.ids);        
+         
+                var ids = String(result.ids).split(',');        
+                if (ids.length > 0) {   
+                    callObjectId = ids[0];     
+                    sforce.console.cti.getCallAttachedData(callObjectId, getCallAttachedDataCallback);        
+                }        
+            }        
+            if (window.console && window.console.log) console.log('CustomInteractionLog DEBUG: getCallObjectIdsCallback : EXIT');                    
+        };
+        sforce.console.cti.getCallObjectIds(getCallObjectIdsCallback);
+                       
+        var onCallBeginCallback = function (result) {
+            if (window.console && window.console.log) console.log('CustomInteractionLog DEBUG: onCallBeginCallback : ENTRY');        
+            if (window.console && window.console.log) console.log('CustomInteractionLog DEBUG: onCallBeginCallback : result.id='+result.id);        
+
+            callObjectId = result.id;            
+            sforce.console.cti.getCallAttachedData(result.id, getCallAttachedDataCallback);
+            
+            if (window.console && window.console.log) console.log('CustomInteractionLog DEBUG: onCallBeginCallback : EXIT');                    
+        };
+        sforce.console.cti.onCallBegin(onCallBeginCallback);
+
+        var onCallEndCallback = function (result) {
+            if (window.console && window.console.log) console.log('CustomInteractionLog DEBUG: onCallEndCallback : ENTRY');        
+            if (window.console && window.console.log) console.log('CustomInteractionLog DEBUG: onCallEndCallback : Duration='+result.duration);        
+            if (window.console && window.console.log) console.log('CustomInteractionLog DEBUG: onCallEndCallback : Disposition='+result.disposition);        
+
+            setCallEndDataJS(result.duration, result.disposition);
+            
+            if (window.console && window.console.log) console.log('CustomInteractionLog DEBUG: onCallEndCallback : EXIT');                    
+        };
+     
+        sforce.console.cti.onCallEnd(onCallEndCallback);
+        
+    </script>
+</apex:page>

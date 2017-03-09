@@ -1,0 +1,107 @@
+<apex:component controller="ConsoleSogPaKundenr_CT" allowDML="true"> 
+    
+    <apex:includeScript value="/soap/ajax/28.0/connection.js"/> 
+    <apex:includeScript value="/support/console/28.0/integration.js"/>
+    <apex:includeScript value="{!URLFOR($Resource.jQuery160)}"/>
+   <script>
+    var strText;
+   </script>
+    
+    <apex:outputPanel style="background-color:#FFFFFF;background-image:none;" >
+        <br/>
+       <!-- <apex:inputText value="{!strSearchKunde}" id="searchtext" onkeypress="searchBykey(event);"/>&nbsp;&nbsp; -->
+        <apex:inputText value="{!strSearchKunde}" style="width:160px ; margin-left:5px" id="searchtext" />&nbsp;&nbsp; <!-- onkeypress="searchBykey(event);" onkeydown="searchBykey(event);" -->
+        <script>
+            strText = document.getElementById('{!$Component.searchtext}');
+        </script>
+        <!--  <apex:commandButton value="Søg" action="{!btnSearch}" oncomplete="openAccount('{!strAccountId}','{!strAccountName}','{!strErrMessage}');" rerender="error"/>-->
+       <input type="button" value="Søg"  onclick="searchKunde();" id="btn"/>
+   </apex:outputPanel>
+   <apex:actionfunction action="{!btnSearch}" name="search" oncomplete="openAccount('{!strAccountId}','{!strAccountName}','{!strErrMessage}');" rerender="error"/>
+   <br></br><br></br>
+   <apex:outputPanel id="error">
+       <apex:outputpanel rendered="{!blnErrMessage}">
+           <div style="padding:2px 5px 2px 5px;background-color:#F0F0F0;background-image:none;width:200px;word-wrap:break-word;border:1px solid #BDBDBD;font-size:12;font-weight:bold;">{!strErrMessage}</div>
+       </apex:outputpanel>
+   </apex:outputPanel>
+   <script>
+           var j$ = jQuery.noConflict();
+           j$(document).ready(function(){
+                //alert(strText);
+                
+           });
+           /*****SPOC 1869***********/
+           j$(strText).keydown(function(event) {
+                //alert('in here keydown');
+                if(event.keyCode == 13 || event.keyCode == 10){
+                   searchKunde();
+                   event.preventDefault();
+                   
+                }
+           });
+           
+          /*j$(strText).keypress(function(event) {
+                alert('in here keypress');
+                if(event.keyCode == 13 || event.keyCode == 10){
+                   searchKunde();
+                   //event.preventDefault();
+                   
+                }
+           });*/
+           
+           function searchBykey(event){     
+                if(event.keyCode == 13 || event.keyCode == 10){
+                   searchKunde();
+                   event.preventDefault();
+                   
+                }
+           }
+           /****************************/
+           function searchKunde(){
+               
+               search();
+           }
+           function openAccount(strid,strnm,msg){
+               var accId = strid;
+               var accfinal = accId.substring(0,15);               
+               var accname = strnm;                
+               var err = msg;    
+               var ids = new Array(); 
+               var myValues = new Array();
+                       
+               if (sforce.console.isInConsole()){
+                   if(err == ''){
+
+                        sforce.console.getPrimaryTabIds(function(obj){
+                            myValues = obj.ids;
+                            //alert('**'+obj);
+                            console.log(obj);
+                                for(var i = 0;i < myValues.length; i++){                                                            
+                                    var accURL = '/'+accId; 
+                                    sforce.console.getTabLink(sforce.console.TabLink.PARENT_AND_CHILDREN, obj.ids[i], function(showTabLink){
+                                        sforce.console.openPrimaryTab(obj.ids[i],result.tabLink,true,accname,function(opensuccess){
+                                    });                                                                     
+                                    });
+                                    
+                                }                               
+                            }); 
+                                                        
+                        var accURL = '/'+accId;                     
+                        sforce.console.openPrimaryTab(null,accURL,true,accname,function(opensuccess){
+                        },accname); 
+ 
+                        sforce.console.getEnclosingTabId(function (success){
+                            sforce.console.getEnclosingPrimaryTabId(function (PrimaryId){                                                       
+                                sforce.console.refreshPrimaryTabById(PrimaryId.id,false);                           
+                            });
+                        });                                   
+                   }   
+               }
+           }
+           
+            
+            
+           
+
+   </script>
+</apex:component>

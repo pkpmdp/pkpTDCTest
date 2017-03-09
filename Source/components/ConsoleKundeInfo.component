@@ -1,0 +1,109 @@
+<apex:component controller="ConsoleKundeInfo_CT">
+    <apex:attribute name="currentId1" description="This is the Account Id for displaying Acccount Notes" type="Id" required="true" assignTo="{!currentId1}"/>
+    <style>
+      fieldset
+	 {
+	    border: 1px solid #ddd;
+	    padding: 0 1.4em 1.4em 1.4em;
+	    margin: 0 0 1.5em 0;
+	    border-radius: 8px;
+	    margin: 0 5px;
+	    height: 100%; 
+	    display:inline-block;
+	    display:inline;
+	 }
+    </style>
+    <script>
+        //setTimeout(function(){invoke()}, 50);
+    </script>
+
+           <fieldset><!-- 87px -->
+            <legend style="color:#B8B8B8;font-family:Calibri,sans-serif;font-size:15px;">Kundeinfo</legend>
+            <apex:outputpanel id="tab">
+                <table id="kundeTable" style="border-collapse: separate;table-layout:fixed;width:100%;">
+            </table>
+            </apex:outputpanel>
+        </fieldset>
+    
+    
+    
+    <script>        
+
+    var intcol ='{!strColumnNo}';  
+    var table = document.getElementById("kundeTable");  
+    var row;        
+    var intColumns = parseInt(intcol);
+    var widthInt = 100/intColumns; // to adjust column width based on columns provided
+    
+        <apex:variable value="{!0}" var="index"/>
+            
+      <apex:repeat value="{!acclist}" var="f">    
+                
+            <apex:repeat value="{!$ObjectType.Account.fieldsets.Console_Highlights_Panel}" var="fieldValue">             
+                
+                var intCounter = parseInt('{!index}');
+                 
+                if(intCounter % intColumns == 0) {   //after every columns defined in custom setting add a new row and change the row variable to point to it
+                    row = table.insertRow(-1);      
+                }
+                var cell = row.insertCell(-1);  //simply insert the row
+
+                var val = "{!(f[fieldValue])}";
+                if(val == '')
+                    val = '-';
+                var val1 = "JSENCODE(f[fieldValue])";                
+                
+                
+                //cell.innerHTML = '<b>'+'{!fieldValue.label}'+'</b>'+'<br/>'+ val;
+                cell.innerHTML = '<b>'+'<span style="white-space:nowrap;word-wrap: none;">'+'{!fieldValue.label}'+'</span>'+'</b>'+'<br/>'+'<span style="word-wrap:break-word;">'+val+'</span>';        
+                cell.setAttribute('valign','top');
+                cell.setAttribute('text-align','left');
+                
+                <apex:variable value="{!index + 1}" var="index" />
+            </apex:repeat>
+        </apex:repeat>
+        
+     
+
+    </script>
+    <script>
+        
+    var nVer = navigator.appVersion;
+    var nAgt = navigator.userAgent;
+    var browserName  = navigator.appName;
+    var fullVersion  = ''+parseFloat(navigator.appVersion); 
+    var majorVersion = parseInt(navigator.appVersion,10);
+    var nameOffset,verOffset,ix;
+    
+    // In Opera, the true version is after "Opera" or after "Version"
+    if ((verOffset=nAgt.indexOf("Opera"))!=-1) {
+        
+    }
+    // In MSIE, the true version is after "MSIE" in userAgent
+    else if ((verOffset=nAgt.indexOf("MSIE"))!=-1) {
+        
+    }
+    // In Chrome, the true version is after "Chrome" 
+    else if ((verOffset=nAgt.indexOf("Chrome"))!=-1) {
+         
+    }
+    // In Safari, the true version is after "Safari" or after "Version" 
+    else if ((verOffset=nAgt.indexOf("Safari"))!=-1) {
+        
+    }
+    // In Firefox, the true version is after "Firefox" 
+     else if ((verOffset=nAgt.indexOf("Firefox"))!=-1) {
+        
+     }
+    // In most other browsers, "name/version" is at the end of userAgent 
+     else if ( (nameOffset=nAgt.lastIndexOf(' ')+1) < (verOffset=nAgt.lastIndexOf('/')) ) 
+     {
+         browserName = nAgt.substring(nameOffset,verOffset);
+         fullVersion = nAgt.substring(verOffset+1);
+         if (browserName.toLowerCase()==browserName.toUpperCase()) {
+             browserName = navigator.appName;
+         }
+     }
+     
+    </script>
+</apex:component>

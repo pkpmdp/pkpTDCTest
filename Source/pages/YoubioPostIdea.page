@@ -1,0 +1,10 @@
+<apex:page showHeader="false" sidebar="false" standardStylesheets="false" >
+<apex:composition template="youbioIdeasTemplate">
+    
+    
+    <apex:define name="MainPanel">
+        <c:YoubioIdeasPost DeveloperName="PostIdeaHome"></c:YoubioIdeasPost>    
+    </apex:define>
+     
+</apex:composition>
+</apex:page>

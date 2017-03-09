@@ -1,0 +1,48 @@
+<apex:page showHeader="false" id="SiteTemplate" applyHtmlTag="false">
+<html class="cvi2015"><!--SPOC 2206-->
+<style type="text/css">
+.luksag a:link, a:visited, a:hover,a:active
+{
+color: #000000;
+}
+.bPageBlock .pbTitle {width:18%;}
+.luksag #topbanner
+{
+overflow:hidden;
+}
+.luksag .apexp
+{
+posititon:relative;
+margin: 10px;
+}
+
+.bPageBlock {
+border:0px;
+background: none #ffffff;
+background-color: #ffffff;
+}
+body .bPageBlock.secondaryPalette, .bPageBlock.secondaryPalette
+{
+background: none #ffffff;
+background-color: #ffffff;
+}
+
+</style>
+<script type="text/javascript" src="https://yousee.dk/sitecore/content/data/export/export.aspx?itemguid={93B973EA-52AB-4C19-AA14-2D1A09BE7734}&functions=true"></script>
+   <apex:insert name="header">
+       <script type="text/javascript">printHeader();</script>
+       <script type="text/javascript">printTopMenu();</script>
+   </apex:insert>
+  <apex:insert name="body"/>
+  <script type="text/javascript" language="javascript">
+            $j(document).ready(function () {
+                if ($j("#mainarea").height() < $(window).height() - 425) {
+                //alert($j('#mainarea').height());
+                //alert($(window).height());
+                heightNumb = $(window).height() - 425
+                $j('#mainarea .wrapper').height(heightNumb);
+                }
+            });
+  </script>
+  </html>
+  </apex:page>

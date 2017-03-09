@@ -1,0 +1,346 @@
+<apex:page sidebar="false" showHeader="false" controller="DealerExchangeInShop" action="{!GettextAreaDetails}" applyHtmlTag="false">
+<html class="cvi2015"><!--spoc 2206-->
+<head> 
+<link class="user" href="{!$Resource.SalesFlowCSS}" rel="stylesheet" type="text/css" />   
+<title> Ombyt lejeboks </title> 
+<script type="text/javascript" src="https://yousee.dk/sitecore/content/data/export/export.aspx?itemguid={2AE76805-70CA-4F63-9DC4-BC2DF507483E}&functions=true" > </script>
+<!-- Added for DW 750 -->
+<c:TopMenuComponent ></c:TopMenuComponent>
+        <script type="text/javascript">printHeader();</script>
+        <script type="text/javascript">printTopMenu();</script>
+<style>
+ .fontVerdana{ font-family: 'Verdana'; }
+ .leftContent {float:left;overflow:visible;width:570px;min-height:400px;height: auto !important;height:500px;max-height:900px;}
+ .rightContent {float:left;overflow:visible;width:350px;min-height:400px;height: auto !important;height:500px;max-height:900px;}
+ .SøgBtnCls {border-width: 0;padding: 0 15px;text-transform: capitalize;margin: 0 2px;background-position: left top;background-repeat: repeat-x;border-color: -moz-use-text-color #FF4500;border-right: 1px solid #FF4500;border-style: none solid solid none;display: inline;font-family: 'Verdana','Geneva',sans-serif;font-size: 80%;color: #FFFFFF;font-weight: bold;height: 26px;background-color: #FF4500;width:76px;}
+  body button, body .x-btn, body .btn, body .btnDisabled, body .btnCancel, body .menuButton .menuButtonButton {background-color:#585858;color:#FFFFFF;background:#585858;font-weight:bold;height:26px;}   
+     
+</style>
+ 
+    
+ <script>
+     var validated = false;
+     var radioSelected =false;
+     var radioValue;
+     var myJson = {!response};
+     function numberValidate()
+     { 
+                var radios = document.getElementsByName( 'group1' );
+                var radio1 = document.getElementById( 'radio1' );
+                var radio2 = document.getElementById( 'radio2' );                               
+                
+                if(!( radio1.checked ))
+                {
+                    if(!( radio2.checked ))
+                    {                   
+                    radioSelected = false;                  
+                    }
+                    else
+                    {
+                        radioSelected = true;
+                        radioValue = radio2.value;                                  
+                    }
+                }
+                else
+                {
+                    radioSelected = true;
+                    radioValue = radio1.value;
+                }
+                                        
+                if(radioSelected)
+                {           
+                    if({!DisplayNewSerialNumber})
+                    {
+                        document.getElementById("jsErrorSection").style.display = 'none'; 
+                        document.getElementById("jsErrorText").innerHTML = ''; 
+                                            
+                        var numberStr =  document.getElementById("div2").firstChild.value;
+                            numberStr= numberStr.trim();
+                            //alert(numberStr.length);
+                        if(numberStr.length > 0 && numberStr != '' && !(isNaN(numberStr)))
+                        {               
+                                if(numberStr.length == 12)
+                                {
+                                    validated = true;
+                                }
+                                else
+                                {
+                                    validated = false;                      
+                                    document.getElementById("jsErrorSection").style.display = 'block'; 
+                                    document.getElementById("jsErrorText").innerHTML = 'Nummeret skal være 12 cifre.';
+                                }               
+                        }
+                        else
+                        {
+                            validated = false;  
+                            document.getElementById("jsErrorSection").style.display = 'block'; 
+                            document.getElementById("jsErrorText").innerHTML = 'Angiv gyldigt serienummer.';            
+                        }
+                        if(validated)
+                        {
+                            Next(radioValue);
+                        } 
+                    }
+                    else
+                    {
+                        Next(radioValue);
+                    }
+                }
+                else
+                {
+                        document.getElementById("jsErrorSection").style.display = 'block'; 
+                        document.getElementById("jsErrorText").innerHTML = 'vælg venligst Boks modtaget i OK stand / Boks modtaget i beskadiget tilstand'; 
+                }   
+            }
+     
+    String.prototype.trim = function() {
+        return this.replace(/^\s+|\s+$/g, "");
+    };
+    
+    function showComments(selectedValue)
+    {
+        //alert('inside comment'+document.getElementById("commentDiv"));        
+        
+            document.getElementById("commentDiv").style.display = 'block';
+            document.getElementById("{!$Component.theform.returnBoxCond}").value =selectedValue;
+    
+                
+    }
+    function hideComments(selectedValue)
+    {
+        //alert('inside comment'+document.getElementById("commentDiv"));                                
+        document.getElementById("commentDiv").style.display = 'none';
+            document.getElementById("{!$Component.theform.returnBoxCond}").value =selectedValue;                
+    }  
+ </script>
+    
+<script type='text/javascript'>
+    function noenter(ev)  {
+        if (window.event && window.event.keyCode == 13 || ev.which == 13) {
+            numberValidate();
+            return false;
+         } else {
+              return true;
+         }
+     }
+</script>
+    
+    
+    <style type="text/css">
+
+    .green {
+        background: #DEFDB0 url(/resource/1302065562000/bg_green) repeat-x !important;
+        height: 31px !important;
+        border: 1px solid #98b954 !important;
+        border-bottom-width:5px !important;
+        border-bottom-color: white !important;
+        padding-left: 1px !important;
+        vertical-align: middle !important;
+        font: bold 14px Arial, Helvetica, sans-serif !important;
+    }
+    .gray {
+        background-color: #c0c0c0  !important;
+        height: 31px !important;
+        border: 1px solid #c0c0c0 !important;
+        border-bottom-width:5px !important;
+        border-bottom-color: white !important;         
+        padding-left: 1px !important;
+        vertical-align: middle !important;        
+        font: bold 14px Arial, Helvetica, sans-serif !important;
+    }
+</style>
+    
+</head>
+<style> 
+     .textHeader {    font-weight:bold;    font-size:18px;     }
+     .textProduct {    font-weight:bold;    font-size:12px;     }
+     .OrderFlow .column66{ width : 100%;!important }
+     .columnA{ width : 70%;} 
+     .columnB{ width : 30%;} 
+</style>
+
+<body>
+<apex:form id="theform" styleClass="fontVerdana">
+ <script type="text/javascript">printContentAreaBegin();</script>
+ 
+
+<apex:inputhidden id="returnBoxCond" value="{!returnBoxCond}" /> 
+<apex:pageMessage summary="{!ErrorValue}" severity="warning" strength="3" rendered="{!ErrorValue != ''}"/>
+           <!-- <apex:pageMessages rendered="true" id="msg2" /> -->       
+                <div class="message errorM3" id="jsErrorSection" style="display:none; font-family: 'verdana';">
+                    <table border="0" cellpadding="0" cellspacing="0" class="messageTable" style="padding:0px;margin:0px;" >
+                        <tr valign="top">
+                            <td>
+                                <img alt="Fejl" src="/s.gif" class="msgIcon" title="ERROR"/>
+                            </td>
+                            <td class="messageCell">
+                                <div class="messageText">
+                                    <span style="color:#cc0000">
+                                        <h4>Fejl:</h4>
+                                    </span> 
+                                <div id="jsErrorText"></div>
+                                        
+                                </div>
+                            </td>
+                        </tr>
+                    <tr>
+                    </tr>
+                </table>
+        </div>
+        <apex:actionFunction name="Next" action="{!Next}" />
+<apex:panelGrid id="Pgd" columns="2" columnClasses="leftContent,rightContent" width="100%">
+    <apex:outputPanel styleClass="leftContent" >
+    <apex:pageblock id="pbblk" >
+    
+        <apex:pageBlockSection title="Ombytning af lejeboks " columns="1" collapsible="false">
+         
+             <table width="100%" id="tableFormat"  border="0" cellpadding="0" cellspacing="5">
+             <tr>
+             <td>
+              <apex:OutputText id="textArea1" value="{!ToptextArea1}"  rendered="{!textAreaRendering != true}" style="width :500px;background: #DEFDB0;font-family:Verdana;" />
+              <apex:OutputText id="textArea2" value="{!ToptextArea2}" rendered="{!textAreaRendering}" style="width :500px;background: #DEFDB0;font-family:Verdana;" />                    
+                </td>
+                </tr>
+                                 
+                <tr>
+                    <td>
+                        <apex:outputLabel value="Indtast serienr. på kundens defekte boks: " style="font-weight:bold; font-size:9pt; font-family: Verdana;" >
+                        </apex:outputLabel>                         
+                        <apex:outputpanel >
+                        <apex:OutputText id="SerialNo" value="{!SerialNo}" styleClass="Verdana"/> &nbsp;&nbsp;                       
+                
+                            <!--    <apex:commandButton value=" SØG "  onclick="parseJson();" rendered="{!DisPBoxCondParam != true}" rerender="Pgd"/> -->
+                        </apex:outputpanel>
+                    </td> 
+                </tr>  
+            
+            
+                <tr>
+                <td>
+               <!--  <apex:selectRadio id="radBtnGrp" value="{!returnBoxCond}" rendered="{!DisPBoxCondParam}">
+                    <apex:selectOptions value="{!BoxCond}"/>
+                    <apex:actionSupport event="onclick"  action="{!renderCommentTextBox}" rerender="pbblk" />
+                </apex:selectRadio>  -->
+                 <input type="radio" name="group1" id="radio1" value="Ok" onClick="hideComments(this.value)">Boks modtaget i OK stand</input>
+                    
+                    <input type="radio" name="group1" id="radio2" value="beskadiget" onClick="showComments(this.value)">Boks modtaget i beskadiget tilstand</input>
+                </td></tr>
+                <tr><td>
+                <apex:outputpanel id="commentout">
+                <div id="commentDiv" style="display:none">
+                    <apex:OutputText value="Skriv evt. Bemærkning:" styleClass="fontVerdana"/> &nbsp;&nbsp; 
+                     <apex:inputTextArea id="comment" value="{!damageComment}" style="width: 421px;font-family:Verdana"/></div></apex:outputpanel>                      
+                
+                </td></tr>  
+                    <tr><td>
+                <apex:outputPanel id="out" rendered="{!DisPBoxCondParam}">              
+                <apex:outputLabel value="Indtast/scan serienr. på den nye udleverede boks: " style="font-weight:bold; font-size:9pt; font-family: Verdana;" rendered="{!DisplayNewSerialNumber}">
+                </apex:outputLabel> <br></br>                  
+                <div  id="div2"><apex:inputText id="newSerialNo" value="{!newSerialNo}" rendered="{!DisplayNewSerialNumber}" onkeypress="return noenter(event);" styleClass="fntVerdana"/> </div>&nbsp;&nbsp;<br></br>
+                 <center>
+                 <apex:commandButton value=" Tilbage" action="{!BacktoSearchpage}" id="pgBlockButtonId"/>
+                 <input type="button" value=" Videre " class="SøgBtnCls" onClick="numberValidate()" onComplete=""/>
+                <!-- <apex:commandButton value=" Videre "  onclick="numberValidate()" oncomplete="" /> <!-- action="{!Next}"  style="background-color:orangeRed;color:#FFFFFF;font-weight:bold;height:26px" -->
+               </center>
+                </apex:outputPanel>
+                </td></tr></table> 
+                <!-- <apex:outputpanel id="outputpanel1" >
+               
+                 </apex:outputpanel>  -->
+            </apex:pageBlockSection>
+           
+            <br> </br>  
+         
+                        
+</apex:pageBlock>
+</apex:outputPanel>
+<apex:outputPanel styleClass="rightContent">
+<apex:pageBlock id="Pbblk2" rendered="{!CustInfoRendering}">
+               
+  <!--   <apex:pageBlockSection title="Kundeoplysninger" columns="1" collapsible="false">            
+        <apex:pageBlockSectionItem >               
+             <apex:outputLabel value="{!cCustInstAdd.Name}" id="Name" /> 
+        </apex:pageBlockSectionItem>
+         
+        <apex:pageBlockSectionItem >
+            <apex:outputLabel value="Gade/Nr./Etage/Side/DÃ¸r:"/>
+            <apex:outputLabel value="{!cCustInstAdd.addr1}" /> 
+        </apex:pageBlockSectionItem>
+        
+        <apex:pageBlockSectionItem >
+            <apex:outputLabel value="Postnr./By:"/>
+            <apex:outputLabel value="{!cCustInstAdd.addr2}" /> 
+        </apex:pageBlockSectionItem>         
+    </apex:pageBlockSection>  -->
+
+     <div style="fontVerdana">
+     <apex:pageBlockSection title="Kunde Information" columns="1"  collapsible="false">                   
+                   <apex:pageBlockSectionItem >                   
+                        <apex:outputLabel value="Kunde Nr:" styleClass="fontVerdana"/>
+                        <apex:outputLabel value="{!cCustInstAdd.customerNumber}" />
+                    </apex:pageBlockSectionItem>    
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="Kunde Navn:" styleClass="fontVerdana"/>
+                        <apex:outputLabel value="{!cCustInstAdd.Name}" />
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="Adresse:" styleClass="fontVerdana"/>
+                        <apex:outputLabel value="{!cCustInstAdd.addr1}" />
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="Postnummer:" styleClass="fontVerdana"/>
+                        <apex:outputLabel value="{!cCustInstAdd.addr2}" />
+                    </apex:pageBlockSectionItem>
+      </apex:pageBlockSection>       
+      </div>                 
+                      
+ </apex:pageBlock>
+  </apex:outputPanel> 
+        </apex:panelGrid>
+         
+            <!-- <apex:param name="radioValue" assignTo="{!returnBoxCond}" value=""/> 
+         </apex:actionFunction> --> 
+       <apex:outputpanel id="out2"> 
+        <script>        
+            
+            
+        //document.getElementById("commentDiv").firstChild.style.Visibility = 'hidden';
+            var e = '{!error}';
+            //alert('****   '+e);
+            if(e != '' && e.length > 0)
+            {
+                //alert('inside eerrrr');
+                document.getElementById("jsErrorSection").style.display = 'block'; 
+                document.getElementById("jsErrorText").innerHTML = '{!error}';
+            }
+            else
+            {
+                //alert('inside eerrrr else');
+                document.getElementById("jsErrorSection").style.display = 'none'; 
+            } 
+                
+                //alert('**** '+{!returnBoxCond});
+                if('{!returnBoxCond}' != '')
+                {
+                    var radios = document.getElementsByName( 'group1' );
+                    var radio1 = document.getElementById( 'radio1' );
+                    var radio2 = document.getElementById( 'radio2' );
+                    if ('{!returnBoxCond}' == radio1.value)
+                    {                   
+                        radio1.checked = true;
+                    }
+                    if ('{!returnBoxCond}' == radio2.value)
+                    {                   
+                        radio2.checked = true;
+                        document.getElementById("commentDiv").style.display = 'block';
+                        
+                    }
+                }       
+        
+        </script></apex:outputpanel>  
+        <script type="text/javascript">printContentAreaEnd();</script>
+<script type="text/javascript">printFooter();</script>
+</apex:form>
+        </body>
+</html>
+</apex:page>

@@ -1,0 +1,123 @@
+<apex:component controller="spoc2019compController">
+<apex:attribute type="spoc2019cmp_cls" name="Caseobj" description="Selected case" assignTo="{!objwrap}"/>
+    <style type="text/css">   
+        .imgclass:hover{   
+            background-image: url(/img/help/helpOrbs.gif);   
+            background-repeat: no-repeat;   
+            width: 16px;   
+            height: 15px;      
+            background-position: right;   
+          
+        }   
+        .imgclass{   
+            background-image: url(/img/help/helpOrbs.gif);   
+            background-repeat: no-repeat;   
+            width: 16px;   
+            height: 15px;   
+        }   
+    </style> 
+<apex:pageBlock mode="maindetail">       	
+        	<apex:pageBlockSection showHeader="false" columns="1">
+        		<apex:pageBlockSectionItem >
+        			Hvilken film/trailer/preview drejer henvendelsen sig om?
+                    <apex:outputpanel >
+                        <div class="requiredInput">
+                           <div class="requiredBlock"></div>
+        					 <apex:inputText id="brwser" value="{!objWrap.selectMovie}"/>
+                        </div>
+                    </apex:outputpanel>
+        		</apex:pageBlockSectionItem>
+        		<apex:pageBlockSectionItem >
+        			Omhandler din henvendelse fejl på billede eller lyd?
+                    <apex:outputpanel >
+                        <div class="requiredInput">
+                           <div class="requiredBlock"></div>
+                             <apex:selectList value="{!objWrap.selectVidAud}" multiselect="false" size="1">
+                                <apex:selectOptions value="{!objWrap.listAudVidMac}"/>
+                             </apex:selectList>
+                        </div>
+                    </apex:outputpanel>
+        		</apex:pageBlockSectionItem>
+        		<apex:pageBlockSectionItem >
+        			Hvad er dit postnr.?
+                    <apex:outputpanel >
+                        <div class="requiredInput">
+                          <div class="requiredBlock"></div>
+        					<apex:inputText value="{!objWrap.strPostnr}"/>
+                        </div>
+                    </apex:outputpanel>
+        		</apex:pageBlockSectionItem>
+        		<apex:pageBlockSectionItem >
+        			Hvilken internetudbyder har du?
+                    <apex:outputpanel >
+                       <div class="requiredInput">
+                          <div class="requiredBlock"></div>
+                            <apex:selectList value="{!objWrap.strInterSupp}" multiselect="false" size="1">
+                                <apex:selectOptions value="{!objWrap.listIntSupplMac}"/>
+                            </apex:selectList>
+                       </div>
+                    </apex:outputpanel>
+        		</apex:pageBlockSectionItem>
+        		<apex:pageBlockSectionItem >
+        			Hvad er din bredbåndshastighed
+                   <!-- <apex:outputpanel >
+                       <div class="requiredInput">
+                         <div class="requiredBlock"></div>-->
+        					<apex:inputText value="{!objWrap.strBBSpeed}"/>
+                      <!--  </div>
+                    </apex:outputpanel>-->
+        		</apex:pageBlockSectionItem>
+        		<apex:pageBlockSectionItem >
+        			Tidspunkt for hændelse i filmen
+                    <apex:outputpanel >
+                       <div class="requiredInput">
+                          <div class="requiredBlock"></div>
+        					<apex:inputText value="{!objWrap.TimeOfInciMv}"/>
+                       </div>
+                    </apex:outputpanel>
+        		</apex:pageBlockSectionItem>
+        		
+        		<apex:pageBlockSectionItem >
+        			Tidspunkt for hændelse på dagen
+                    <apex:outputpanel >
+                        <div class="requiredInput">
+                           <div class="requiredBlock"></div>
+        					 <apex:inputText value="{!objWrap.TimeOfInciday}"/>
+                        </div>
+                    </apex:outputpanel>
+        		</apex:pageBlockSectionItem>
+        		<apex:pageBlockSectionItem >
+        			Hvad er din IP <img src="/s.gif" Class="imgclass" title="{!$ObjectType.Case.fields.BBW2C_IP_Address__c.InlineHelpText}" /> 
+                  <!--  <apex:outputpanel >
+                       <div class="requiredInput">
+                          <div class="requiredBlock"></div>-->
+        					<apex:inputText value="{!objWrap.strIp}"/>
+                       <!-- </div>
+                    </apex:outputpanel>-->
+        		</apex:pageBlockSectionItem>
+        		<apex:pageBlockSectionItem >
+        			Er dit Smart TV forbundet til internettet via kabel eller Wifi?
+                    <apex:outputpanel >
+                       <div class="requiredInput">
+                          <div class="requiredBlock"></div>
+                            <apex:selectList value="{!objWrap.selectIntCnType}" multiselect="false" size="1">
+                                <apex:selectOptions value="{!objWrap.listIntConTypeMac}"/>
+                            </apex:selectList>
+                        </div>
+                    </apex:outputpanel>
+        		</apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+        			Er dit Smart TV’s firmware opdateret?
+                    <apex:outputpanel >
+                       <div class="requiredInput">
+                          <div class="requiredBlock"></div>
+                            <apex:selectList value="{!objWrap.selectSmtTVUpd}" multiselect="false" size="1">
+                                <apex:selectOptions value="{!objWrap.listSmtTVUpd}"/>
+                            </apex:selectList>
+                        </div>
+                    </apex:outputpanel>
+        		</apex:pageBlockSectionItem>
+        	</apex:pageBlockSection>
+        	
+        </apex:pageBlock>   
+</apex:component>

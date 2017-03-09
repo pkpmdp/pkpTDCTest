@@ -1,0 +1,138 @@
+<apex:page standardController="Account" extensions="CPR_Status">
+<apex:includeScript value="{!URLFOR($Resource.jQuery160)}"/>
+<apex:includeScript value="{!URLFOR($Resource.jquery)}"/> 
+<apex:includeScript value="{!URLFOR($Resource.jQueryUI)}"/>
+<apex:includeScript value="/support/console/28.0/integration.js"/>
+<style>
+    .button {
+        display:block;
+        margin: 0 auto;
+    }
+    #apnd div {
+        float: left;
+        margin-left: 5px; 
+    }
+</style>
+<script>
+    var textbox;
+    var valbttn;
+    var saveToKas;
+    var j$ = jQuery.noConflict();
+</script>
+<!--SPOC-2024 to get the CPR Response and display on SPOC  -->
+
+         <apex:actionStatus id="actStatusId">
+              <apex:facet name="start">
+                    <c:CarrieHenterData BackColor="#efefef" borderColor="#336699" borderSize="3" height="50px" width="180px" ImageUrl="{!$Resource.CarrieLoading}" Message="Henter data..." messageStyle="color:darkred;font-size:11pt;font-weight:bold;"/>               
+              </apex:facet>
+        </apex:actionStatus> 
+     <!--   <apex:actionStatus id="actStatusSave">
+              <apex:facet name="start">
+                    <c:CarrieHenterData BackColor="#efefef" borderColor="#336699" borderSize="3" height="100px" width="180px" ImageUrl="{!$Resource.CarrieLoading}" Message="{!loadMsg}" messageStyle="color:darkred;font-size:11pt;font-weight:bold;margin-left:2px;"/>               
+              </apex:facet>
+        </apex:actionStatus> -->
+<apex:form id="theform">
+    <apex:pageBlock title="CPR Nr (ddmmååxxxx)" mode="maindetail">
+        <apex:pagemessages id="err"/>
+            <apex:panelGrid id="panel" width="75%" border="0" cellpadding="0" cellspacing="0" columns="3"> 
+          <apex:outputPanel id="op">
+            <div id="apnd">
+            <!--<div><apex:outputlabel value="CPR Nr."/></div>-->
+            <div><apex:inputSecret value="{!strCPRNumber}" style="width:90%;float:left;height:17px;margin-left:9px;" id="searchTerm" title="{!$Label.CPRHelpText}">
+                <apex:actionSupport event="onkeydown" reRender="err,oppb,sv"/>
+            </apex:inputSecret>
+            <script>
+                textbox = document.getElementById('{!$Component.searchTerm}');          
+            </script></div>
+             <div><apex:commandButton value="CPR opslag" id="valid" style="float:left;">
+             <script>
+                valbttn = document.getElementById('{!$Component.valid}');
+             </script>
+             </apex:commandButton> </div> 
+             <div><apex:commandButton value="Cancel" action="{!btnCancel}" style="float:left;"/></div>
+             </div>
+          </apex:outputPanel>      
+          </apex:panelGrid>
+        
+        <br></br>
+    
+    <apex:outputpanel id="oppb">
+        <div align="center" draggable="false"> <!-- id="sv" style="align:center;draggable:false;"> -->
+            <apex:commandButton onclick="savecheck(event,'{!strMatch}')" id="saveToKas" styleClass="button" value="Save" rendered="{!listCPRResp.size>0 && strMatch=='Matched'}" rerender="oppb,err">
+                <script>
+                    saveToKas = document.getElementById('{!$Component.saveToKas}');
+                </script>
+            </apex:commandButton>
+        </div>
+        <br></br>
+        <apex:pageBlockTable rendered="{!listCPRResp.size>0}" value="{!listCPRResp}" var="CRP">
+            <apex:column headerValue="Source">
+                <apex:outputText value="{!CRP.source}"/>
+            </apex:column>
+            <apex:column headerValue="Name">
+                <apex:outputText value="{!CRP.NameFull}"/>
+            </apex:column>
+            <apex:column headerValue="Street">
+                <apex:outputText value="{!CRP.street}"/>
+            </apex:column>  
+            <apex:column headerValue="Street Number">
+                <apex:outputText value="{!CRP.streetnumber}"/>
+            </apex:column>  
+            <apex:column headerValue="House No">
+                <apex:outputText value="{!CRP.houseLetter}"/>
+            </apex:column>
+            <apex:column headerValue="Floor">
+                <apex:outputText value="{!CRP.floor}"/>
+            </apex:column>
+            <apex:column headerValue="Floor Side">
+                <apex:outputText value="{!CRP.floorside}"/>
+            </apex:column>
+            <apex:column headerValue="ZipCode">
+                <apex:outputText value="{!CRP.zipCode}"/>
+            </apex:column>
+            <apex:column headerValue="City">
+                <apex:outputText value="{!CRP.city}"/>
+            </apex:column>          
+        </apex:pageBlockTable>
+      </apex:outputpanel>
+    </apex:pageBlock>
+    <apex:actionfunction name="validate" action="{!btnCallOutToBC}" rerender="oppb,err,sv,match" status="actStatusId"/>
+    <apex:actionfunction name="saveToSpoc" action="{!btnSaveToKasia}" oncomplete="savetokasia();" rerender="err" status="actStatusId"/>
+    <apex:actionfunction name="savetokasia" action="{!btnSaveToSpoc}" rerender="oppb"/><!-- status="actStatusSave" -->
+    <apex:actionFunction name="saveToLog" action="{!btnsaveMismatchtoLog}" rerender="oppb,err"/>
+  </apex:form>
+  <script>
+    j$(textbox).keypress(function(event){   
+        if(event.keyCode == 13){
+           validate();
+           return false;
+        }
+        else
+            return true;  
+    });
+    
+    j$(valbttn).click(function(event){     
+          validate();  
+          return false;  
+    });
+    
+    j$(saveToKas).click(function(event){     
+          savetokasia();   
+          return false;   
+    });
+    
+    function savecheck(e,strMt){
+        if(strMt == 'UnMatched'){
+            alert('Kundeinformationer stemmer ikke overns. Har kunden fået nyt navn eller adresse, skal du rette i Salesforce og forsøg at gemme igen.');   
+            e.preventDefault();
+            saveToLog();
+            //window.location.href="/{!Account.id}";
+         }
+         else{
+         //alert('in save');
+           saveToSpoc();
+         }  
+           
+    }
+  </script>  
+</apex:page>

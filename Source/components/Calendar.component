@@ -1,0 +1,63 @@
+<apex:component controller="CalendarController">
+  <apex:attribute name="StartHour" type="Integer" description="Begining of working hours (e.g. 6.00)" assignTo="{!StartHour}"/>  
+  <apex:attribute name="EndHour" type="Integer" description="End of working hours (e.g. 23.00)" assignTo="{!EndHour}"/>
+  <apex:attribute name="NumberOfDays" type="Integer" description="Number of days displayed (e.g. 7 days => full week)" assignTo="{!NumberOfDays}"/>
+  <apex:attribute name="DateFrom" type="Date" description="Starting date (e.g. today())" assignTo="{!BaseDate}"/>
+  <apex:attribute name="CallbackBookingSlots" type="CallbackBookingSlot[]" description="Collection of slots" assignTo="{!CallbackSlots}"/>  
+  <apex:stylesheet value="{!URLFOR($Resource.calendar, 'calendar.css')}"/>
+  <apex:form >
+  <apex:pageBlock >
+  <div id="cb_fixedHeaderDiv">
+  <table width="100%" cellspacing="0" cellpadding="0" id="cb_calTableHead" class="cb_calendarDayWeekView">
+    <tbody>
+    <tr id="cb_daynamerow" class="cb_headerRow">
+    <apex:repeat value="{!Week}" var="wk">
+      <th scope="col" class="cb_timeColumnDnD cb_firstWeekCell">&nbsp;</th>
+      <apex:repeat value="{!wk.Days}" var="day">
+        <th scope="col" class="cb_calDays">{! day.DayLabel }</th>
+      </apex:repeat>
+    </apex:repeat>
+    </tr>
+    <tr id="cb_daynumberrow">
+      <apex:repeat value="{!Week}" var="wk">
+      <th>&nbsp;</th>
+        <apex:repeat value="{!wk.Days}" var="day">
+          <td class="cb_dateDnD"><div><span class="cb_dayOfWeekName">{! day.DayOfMonth }</span></div></td>
+        </apex:repeat>
+      </apex:repeat>
+    </tr>
+    </tbody>
+  </table>
+  </div>
+  <div id="cb_scrollContainerDiv">
+  <table width="100%" cellspacing="0" cellpadding="0" id="cb_calTable" class="cb_calendarDayWeekView">
+    <tbody>   
+      <tr>
+      <apex:repeat value="{!Week}" var="wk">
+        <td class="cb_fixedTable">
+          <apex:repeat value="{!wk.WorkingHours}" var="hour">
+            <div class="cb_hourRowLabel cb_timeCellDnD evenHour"><apex:outputText value="{0, number, ##.00}"><apex:param value="{!hour}" /></apex:outputText></div>
+            <div class="cb_hourRowLabel cb_timeCellDnD oddHour"></div>
+          </apex:repeat>
+        </td>                       
+        <apex:repeat value="{!wk.Days}" var="day">
+          <td class="cb_dayBlock">
+            <apex:repeat value="{!day.WorkingHours}" var="hour">
+              <div class='cb_hourRowDnD even'>
+                <apex:repeat value="{!hour.Slots}" var="slot">
+                  <apex:variable var="js_slot_w_href" value="jsCreateCBCase('{! slot.mD5}');" />
+                  <div class="slot {! IF(slot.Available == 0, 'full', 'free') } {! IF(slot.Interval != '', IF(slot.Available == 0, 'full' + slot.Interval, 'free' + slot.Interval), '') }"><div class="available" onclick="{! IF(slot.Available == 0, '', js_slot_w_href ) }"><apex:outputText value="{! slot.Available}"/></div></div>                  
+                </apex:repeat>
+              </div>
+              <div class='cb_hourRowDnD odd'></div>
+            </apex:repeat>
+          </td>
+        </apex:repeat>
+      </apex:repeat>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+  </apex:pageBlock>  
+  </apex:form>
+</apex:component>

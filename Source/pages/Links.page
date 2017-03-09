@@ -1,0 +1,31 @@
+<apex:page standardController="Account" extensions="Links" showHeader="false" sidebar="false" cache="true" standardStylesheets="true">
+    <apex:form >
+        <apex:pageBlock >
+            <apex:panelGrid id="panel" bgcolor="#F5F5F5" width="100%" border="0" cellpadding="0" cellspacing="0">
+                <apex:pageBlockTable value="{!Links}" var="link">
+                    <apex:column value="{!Link.URL__c}" />
+                    <apex:column value="{!Link.Category__c}" />                   
+                    <apex:column headerValue="{!$ObjectType.Links__c.Fields.Cable_Unit__c.Label}">
+                        <!--  <apex:outputLink value="#" onclick="window.open('/{!Link.Cable_Unit__r.ID}','_blank');"  styleClass="viewLink">{!Link.Cable_Unit__r.Cable_Unit_No__c}</apex:outputLink>-->
+                        <apex:outputLink value="#" onclick="testIsInConsole('{!Link.Cable_Unit__r.ID}','{!Link.Cable_Unit__r.name}')"  styleClass="viewLink">{!Link.Cable_Unit__r.Cable_Unit_No__c}</apex:outputLink>
+                    </apex:column>  
+                </apex:pageBlockTable>
+                <!--<apex:outputText value="{!Links}" id="Links" rendered="{!IF(ISNULL(Links), false, true)}"/>  
+<apex:outputText value="Links" id="Links1" rendered="{!IF(ISNULL(Links), true, false)}"/>-->
+            </apex:panelGrid>
+        </apex:pageBlock>
+    </apex:form>
+    <apex:includeScript value="/support/console/22.0/integration.js"/>
+    
+    <script type="text/javascript">
+    function testIsInConsole(cableUnitIDParam, name) {
+        if (sforce.console.isInConsole()) {
+            //alert('in console ::::'+cableUnitIDParam);
+            sforce.console.openPrimaryTab(null, '/' + cableUnitIDParam + '?isdtp=vw', true, name);
+        } else {
+            // alert('not in console ::::'+cableUnitIDParam);
+            window.open('/'+cableUnitIDParam, target='_blank')
+        }
+    }
+    </script>
+</apex:page>

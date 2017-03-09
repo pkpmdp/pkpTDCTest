@@ -1,0 +1,60 @@
+<apex:page standardController="account" tabStyle="Account">  
+<style>
+    .divRow  
+    {  
+        height: auto;   
+    }
+
+    fieldset
+    {
+        border: 1px solid #ddd;
+        padding: 0 1.4em 1.4em 1.4em;
+        margin: 0 0 1.5em 0;
+        border-radius: 8px;
+        margin: 0 5px;
+        height: 100%;
+    }
+    
+    legend
+    {
+        color: #B8B8B8;
+        font-family :Calibri,sans-serif;
+        font-size :15px;
+    }
+
+    .Container{
+        width: 100%;
+        height: 100%;
+    }
+    
+    .Column1{
+       width: 20%;
+       height: 100%;
+    }
+    .Column2{
+       width: 40%;
+       height: 100%;
+    }
+    .Column3{
+       width: 40%;
+       height: 100%; 
+    }
+</style>        
+        <table class="Container">
+        <tr ><!-- style="height:100%" class="divRow"-->
+            <!--<td width="13%">
+                <c:ConsoleKundeLog currentId="{!Account.Id}"/>
+            </td>-->
+            
+            <td class="Column1"><!-- width="16%"  -->
+                <c:ConsoleAlertsComponent currentId2="{!Account.Id}"/>
+            </td> 
+            <td class="Column2"> <!--width="20%"    -->
+                <c:ConsoleKundeInfo currentId1="{!Account.Id}"/>
+            </td>
+            <td class="Column3"> <!--width="27%"   --> 
+                <c:ConsolePermissionComponentHighLtPanel acctId="{!Account.Id}"/>
+            </td>
+        </tr>
+        </table> 
+</apex:page>

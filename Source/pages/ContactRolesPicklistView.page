@@ -1,0 +1,41 @@
+<apex:page standardController="Account_Contact_Role__c" extensions="ContactRolesPicklistController" tabStyle="Account_Contact_Role__c"> 
+<apex:pagemessages rendered="{!mode_string == 'Error'}" escape="false"/>
+<apex:form rendered="{!mode_string != 'Error'}">  
+  <apex:sectionHeader title="{!IF(OR(mode_string == 'NewObj', mode_string == 'Clone'), 'Ny kontaktpersonrolle', 'Rediger kontaktpersonrolle')}" />  
+  <apex:pageBlock > 
+    <apex:pageBlockButtons location="both">
+              <apex:commandButton value="{!$Label.Save}" action="{!save}" />
+              <apex:commandButton value="Gem & Ny" action="{!saveNew}"/>
+              <apex:commandButton value="Gem & Dupliker" action="{!saveNewAndDuplicate}"/>
+              <apex:commandButton value="{!$Label.Cancel}" action="{!cancel}"/>
+    </apex:pageBlockButtons>
+   <apex:pagemessages escape="false"/> 
+    <apex:pageBlockSection title="Kontaktrolle oplysninger" columns="2"> 
+    	<apex:pageblockSectionItem >            
+            <apex:outputLabel value="{!$ObjectType.Account_Contact_Role__c.fields.Customer__c.label}"></apex:outputLabel>
+            <apex:outputPanel styleClass="requiredInput" layout="block">
+            	<apex:outputPanel styleClass="requiredBlock" layout="block"/>             
+              		<apex:inputField value="{!acr.Customer__c}" />                            
+            </apex:outputPanel>
+        </apex:pageblockSectionItem> 
+        <apex:pageblockSectionItem > 
+        	<apex:outputLabel value="{!$ObjectType.Account_Contact_Role__c.fields.Contact__c.label}"></apex:outputLabel>           
+            <apex:outputPanel styleClass="requiredInput" layout="block">
+            	<apex:outputPanel styleClass="requiredBlock" layout="block"/>            
+              		 <apex:inputField id="Contact" value="{!acr.Contact__c}" />                            
+            </apex:outputPanel>
+        </apex:pageblockSectionItem>
+        <apex:inputField id="Role" value="{!acr.Total_Insight__c}"/>
+        <apex:pageblockSectionItem >
+            <apex:outputLabel value="{!$ObjectType.Account_Contact_Role__c.fields.Role__c.label}"></apex:outputLabel>
+            <apex:outputPanel styleClass="requiredInput" layout="block">
+            	<apex:outputPanel styleClass="requiredBlock" layout="block"/>            
+                <apex:selectList id="ContactRolesPicklist" value="{!acr.Role__c}" size="1">     
+                    <apex:selectOptions value="{!ContactRoles}"/>   
+                 </apex:selectList> 
+            </apex:outputPanel>
+        </apex:pageblockSectionItem> 
+    </apex:pageBlockSection>
+    </apex:pageBlock> 
+  </apex:form>  
+  </apex:page>

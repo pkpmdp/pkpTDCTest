@@ -1,0 +1,18 @@
+<apex:component controller="PaginationController" >
+  <apex:attribute name="pageController" 
+      type="ViewDealerOrdersController" 
+      assignTo="{!pageController}" 
+      required="true" 
+      description="The controller for the page." />
+  <apex:attribute name="rows" 
+      type="integer" 
+      assignTo="{!rows}" 
+      required="true" 
+      description="No of rows on page" />
+ <div align="right">
+  <apex:commandLink action="{!first}" value="Første" rendered="{!AND(NOT(onFirstPage),showPaging)}" style="color:blue"/> &nbsp;&nbsp;
+  <apex:commandLink action="{!previous}" value="Forrige" rendered="{!AND(NOT(onFirstPage),showPaging)}" style="color:blue"/> &nbsp;&nbsp;
+  <apex:commandLink action="{!next}" value="Næste" rendered="{!AND(NOT(onLastPage),showPaging)}" style="color:blue"/> &nbsp;&nbsp;
+  <apex:commandLink action="{!last}" value="Sidste" rendered="{!AND(NOT(onLastPage),showPaging)}" style="color:blue"/>
+ </div>
+</apex:component>

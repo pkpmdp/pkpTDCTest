@@ -1,0 +1,37 @@
+<apex:page sidebar="false" showHeader="false" controller="NetsFeeDIBSController" action="{!generateMD5Key}">
+    <head>
+        <title>DIBS Payment form</title> 
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta http-equiv="Content-Script-Type" content="text/javascript" />
+        <meta http-equiv="Content-Style-Type" content="text/css" />
+    </head>
+    <body>
+        <form name="payform" method="post" action="https://payment.architrade.com/paymentweb/start.action">
+          <input type="hidden" name="merchant" value="{!$Setup.NetsFee_DIBS_Settings__c.Merchant_Id__c}" />
+          <input type="hidden" id="orderid" name="orderid" value="{!orderId}" />
+          <input type="hidden" name="lang" value="{!$Setup.NetsFee_DIBS_Settings__c.Language__c}" />
+          <!--
+              SPOC 2094- added price as value in below input field
+          -->
+          <input type="hidden" name="amount" value="{!price}" id="amount"/>
+           <!-- SUPPORT-4681 -->
+          <input type="hidden" name="cardnomask" value="{!cardNum}" id="cardnomask"/>
+<!--           <input type="hidden" name="test" value="1" /> -->
+          <apex:outputPanel rendered="{!$Setup.NetsFee_DIBS_Settings__c.Test__c == '1'}" >
+            <input type="hidden" name="test" value="{!$Setup.NetsFee_DIBS_Settings__c.Test__c}" />
+          </apex:outputPanel> 
+          <input type="hidden" name="currency" value="{!$Setup.NetsFee_DIBS_Settings__c.Currency__c}" />
+          <input type="hidden" name="accepturl" value="{!$Setup.NetsFee_DIBS_Settings__c.Accept_URL__c}" />
+           <input type="hidden" name="preauth" value="{!preauth}" /><!-- SUPPORT-6470 -->
+          <input type="hidden" name="md5key" value="{!md5Coded2}" />
+           <input type="hidden" name="account" value="" /> 
+        </form>
+    </body>
+    <script type="text/javascript">
+ 
+        window.onload = function (evt) {            
+        document.payform.submit(); 
+            
+        }
+    </script>
+</apex:page>

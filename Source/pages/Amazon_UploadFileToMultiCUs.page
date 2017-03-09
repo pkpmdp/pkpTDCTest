@@ -1,0 +1,151 @@
+<apex:page standardController="Cloud_File__c" extensions="Amazon_DocUploadMultiCU_CT" >    
+    <apex:pageMessages />
+    
+    <apex:form >
+        <apex:inputHidden value="{!serverURL}" id="hiddenServerURL" />
+        <script  type="text/javascript">
+            document.getElementById('{!$Component.hiddenServerURL}').value = '{!$Api.Enterprise_Server_URL_140}'; 
+            
+            function checkCount(chk){
+                var inputElem = document.getElementsByTagName("input");
+                var c = 0;
+                
+                for (var i = 0; i < inputElem.length; i++) {
+                    if (inputElem[i].checked) {
+                        c = c + 1;
+                        
+                        if(c > 5){
+                            alert('Du kan vælge maksimalt fem Kundenr.');
+                            //inputElem[i].checked = false;
+                            chk.checked = false;
+                            
+                            //for(var j = 0; j < inputElem.length; j++){
+                              //  inputElem[j].checked = false;
+                            //}
+                        }
+                    }
+                }
+                //if (c > 5) {
+                  //  alert('Only 5 can be selected.');
+                    //inputElem.checked = false;
+                    //return false;
+               // }
+            }       
+            
+            
+            function limitfieldvalue(field){
+                if(document.getElementById(field).value.length > 254){
+                    document.getElementById(field).value  = document.getElementById(field).value.substring(0, 254);
+                }
+            }    
+        </script>
+        <apex:pageBlock title="{!$Label.Doc_Search_Cable_Unit}">
+            <apex:inputText value="{!cuNo}" maxlength="10"/>
+            <apex:commandButton value="{!$Label.DocSearch}" action="{!searchCU}"/>
+        </apex:pageBlock>
+        
+        <apex:pageBlock title="{!$Label.Doc_Seached_Cable_Units}">
+            <apex:outputPanel id="multiselectPanel" layout="block" styleClass="duelingListBox">
+                
+                <table align = "center" border = "0" cellpadding = "0" cellspacing = "1" width = "80%">
+                    <tr>
+                        <td align = "center" width = "40%"><b>{!$Label.Doc_Seached_Cable_Units}</b></td>
+                        <td width = "20%">&nbsp;</td>
+                        <td align = "center" width = "40%"><b>{!$Label.Doc_Selected_Cable_units}</b></td>                     
+                    </tr>
+                    <tr>
+                        <td valign = "top" class="selectCell">
+                            <apex:dataTable value="{!CWLst}" var="cu" border="1" cellpadding="4" title="Searched Cable Units" width="100%">
+                                    <apex:column >                        
+                                        <apex:inputCheckbox value="{!cu.selected}" id="checkedone" onclick="checkCount(this)"/>                       
+                                    </apex:column>                    
+                                    <apex:column headerValue="{!$Label.Doc_Cable_Unit_Number}" value="{!cu.accw.Cable_Unit_No__c}"/>
+                                    <apex:column headerValue="{!$Label.Doc_Cable_Unit_Name}" value="{!cu.accw.Cable_Unit_Name__c}"/>
+                            </apex:dataTable>
+                        </td>
+                        <td align = "center" valign = "middle">
+                                <apex:commandButton action="{!getSelected}" value="{!$Label.Doc_Add} >" style = "width:70px;margin-top:20px;"/><br/>
+                                <apex:commandButton action="{!getUnSelected}" value="< {!$Label.Doc_Remove}" style="width:70px;margin-bottom:20px"/>                      
+                        </td>
+                        <td class="selectCell">
+                             <apex:dataTable value="{!SelectedCUs}" var="s" border="1" cellpadding="4" 
+                                        id="Selected_PBS" title="Salected Cable Units" width="100%">
+                                    <apex:column >                        
+                                        <apex:inputCheckbox value="{!s.selected}" id="checkedone"/>                       
+                                    </apex:column> 
+                                    <apex:column headerValue="{!$Label.Doc_Cable_Unit_Number}" value="{!s.accw.Cable_Unit_No__c}"/>
+                                    <apex:column headerValue="{!$Label.Doc_Cable_Unit_Name}" value="{!s.accw.Cable_Unit_Name__c}"/>
+                             </apex:dataTable> 
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan = "3" align = "center">
+                            <br/><apex:commandButton action="{!renderPB}" value="{!$Label.Doc_Upload_Document}"/>
+                        </td>                       
+                    </tr>
+                </table>                     
+                                            
+            </apex:outputPanel>           
+        </apex:pageBlock>
+        
+        <apex:pageBlock title="{!$Label.Doc_New_Document}" mode="edit" rendered="{!rndrd == true}">
+            <apex:pageBlockSection columns="1">
+                <!-- <apex:inputField value="{!Cloud_File__c.Cloud_File_Centa_Doc_Type__c}" required="true"/>
+                <apex:inputField value="{!Cloud_File__c.Centa_Document_Name__c}" required="true"/> -->
+                
+                
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel for="category" value="{!$ObjectType.Cloud_File__c.fields.Cloud_File_Category__c.label}" />
+                    <apex:actionRegion >
+                        <div class="requiredInput">
+                            <div class="requiredBlock"></div>
+                            <apex:selectList value="{!categoryVar}" title="category" size="1" id="category" required="true">
+                                <apex:selectOptions value="{!categories}" />
+                                <apex:actionSupport event="onchange" rerender="docType" status="status"/>
+                            </apex:selectList>
+                       </div>
+                        <apex:actionstatus id="status">
+                        <apex:facet name="start">
+                            <div class="waitingSearchDiv" id="el_loading" style="background-color: #fbfbfb;
+                                   height: 100%;opacity:0.65;width:100%;"> 
+                                <div class="waitingHolder" style="top: 74.2px; width: 91px;">
+                                    <img class="waitingImage" src="/img/loading.gif" title="Please Wait..." />
+                                    <span class="waitingDescription">Loading...</span>
+                                </div>
+                            </div>
+                        </apex:facet>
+                    </apex:actionstatus>
+                    </apex:actionRegion>
+                </apex:pageBlockSectionItem> 
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel for="docType" value="{!$ObjectType.Cloud_File__c.fields.Cloud_File_Document_Type__c.label}" />
+                    <apex:actionRegion >
+                        <div class="requiredInput">
+                            <div class="requiredBlock"></div>
+                                <apex:selectList value="{!docTypeVar}" title="Document Type" size="1" id="docType" required="true" disabled="{!!isCategorySelected}">
+                                    <apex:selectOptions value="{!docTypes}" />
+                                </apex:selectList>
+                        </div>
+                    </apex:actionRegion>
+                </apex:pageBlockSectionItem> 
+                <apex:inputField value="{!Cloud_File__c.Cloud_file_Status__c}"/>
+                <!--<apex:inputField value="{!Cloud_File__c.Cloud_File_Department__c}"/> -->
+                <!--<apex:inputField value="{!Cloud_File__c.Cloud_File_Description__c}"/>-->
+                <apex:inputTextarea value="{!Cloud_File__c.Cloud_File_Description__c}" cols="100" rows="4" onkeypress="limitfieldvalue('{!$Component.fieldId}');" id="fieldId"
+                                    onkeydown="limitfieldvalue('{!$Component.fieldId}');" onkeyup="limitfieldvalue('{!$Component.fieldId}');"/>
+
+            </apex:pageBlockSection>
+            <center>
+                <apex:commandButton action="{!Save1}" value="{!$Label.Doc_Continue}"/>                
+            </center>            
+        </apex:pageBlock>  
+    </apex:form>
+    
+    <apex:form >
+        <apex:pageBlock >
+            <center>
+                <apex:commandButton action="{!Cancel}" value="{!$Label.Doc_Cancel}"/>
+            </center> 
+        </apex:pageBlock>                       
+    </apex:form>       
+</apex:page>

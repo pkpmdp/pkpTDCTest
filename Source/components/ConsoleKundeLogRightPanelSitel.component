@@ -1,0 +1,151 @@
+<apex:component controller="ConsoleKundeLog_CT" allowDML="true"><!--SPOC-2294 -->
+    <apex:includeScript value="{!URLFOR($Resource.jQuery160)}"/>
+  
+
+  
+    <apex:includeScript value="/support/console/31.0/integration.js"/>
+    <apex:attribute name="currentId6" description="This is the Account Id for displaying Acccount Notes" type="String" required="true" assignTo="{!currentId}"/>
+    
+    <apex:form >
+    <body>
+    
+<!--        <fieldset id="formid"> -->
+<!--            <legend style="color:#B8B8B8;font-family:Calibri,sans-serif;font-size:15px;">Kundelog</legend> -->
+    
+            <table cellpadding="0" cellspacing="0">
+                    <tr>
+                        <td>
+                            <apex:inputTextArea value="{!strNotes}" style="width:257px;float:left;height:59px;margin-left:2px;margin-bottom:2px" id="notes"/>
+                        </td>
+                    </tr>
+                    <apex:outputPanel rendered="{!enable}">
+                    <tr>
+                        <td colspan="2">
+                            <apex:inputField value="{!objNotes.Inquiry_Type__c}"  />
+                            <span id="processingStatus2"></span>
+                            <input type="button" style="float:centre" value="Kaldsregistrering" onclick="OpenPage('Call registration');return false;"  width="100"/>
+                            <input type="button" value="Gem" onclick="callAction();"  style="float: right" />
+                            <apex:actionFunction name="actioncall" action="{!btnSave}" oncomplete="refresh();" status="actStatusId" />
+                        </td>
+                    </tr>
+                    </apex:outputPanel>
+                    <apex:outputPanel rendered="{!NOT(enable)}">
+                    <tr>
+                        <td align="right" colspan="2" >
+                            <span id="processingStatus"></span>
+                            <input type="button" style="float:centre" value="Kaldsregistrering" onclick="OpenPage('Call registration');return false;"  width="100"/>
+                            <input type="button" value="Gem"  onclick="callAction();" />
+                            <apex:actionFunction name="actioncall" action="{!btnSave}" oncomplete="refresh();" status="actStatusId2" />
+                            <apex:actionStatus id="actStatusId2" onstart="start()" onstop="stop()" ></apex:actionStatus>
+                        </td>
+                    
+                    </tr>
+                    
+                    </apex:outputPanel> 
+                    <apex:actionStatus id="actStatusId" onstart="start2()" onstop="stop2()">
+                    <!--<apex:facet name="start" >
+                        Saving...                 
+                    </apex:facet> -->
+                    </apex:actionStatus>
+                </table>
+<!--        </fieldset> -->
+    
+    </body>
+    <apex:outputpanel id="op"></apex:outputpanel>
+    <script>    
+      
+        //function setFocusOnLoad() {} ;
+        function OpenPage(sourcePage){
+    
+    // sforce.console.getEnclosingPrimaryTabId(openSubtab);
+
+    if(sourcePage == 'Call registration'){
+        // var win=window.open('http://kundeservice.cc.local/kaldsreg/', '_blank');
+        // chnged URL as per Lars for SPOC-2294
+         var win=window.open('http://gos.cc.local/kaldsreg/', '_blank');
+        win.focus();
+    } 
+}
+    /*var openSubtab = function openSubtab(result) {
+        var primaryTabId = result.id;
+        sforce.console.openSubtab(primaryTabId , 'http://kundeservice.cc.local/kaldsreg/', true,'Kaldsregistrering', null, null, 'salesforceSubtab');
+};*/
+        function start(){
+            document.getElementById("processingStatus").innerHTML = "Saving...";
+            document.getElementById("processingStatus2").innerHTML = "Saving...";
+        }
+        
+        function stop(){
+            document.getElementById("processingStatus").innerHTML = "";
+            document.getElementById("processingStatus2").innerHTML = "";
+        }
+        
+        function start2(){
+            
+            document.getElementById("processingStatus2").innerHTML = "Saving...";
+        }
+        
+        function stop2(){
+            
+            document.getElementById("processingStatus2").innerHTML = "";
+        } 
+        
+        function callAction() {
+            actioncall();
+        
+        }
+        
+        function refresh(){    
+            sforce.console.getEnclosingTabId(function (success){
+                     sforce.console.getFocusedPrimaryTabId(function (PrimaryId){        
+                         sforce.console.focusPrimaryTabById(PrimaryId.id);                                              
+                         sforce.console.refreshPrimaryTabById(PrimaryId.id, true);       
+                         //sforce.console.refreshNavigationTab();         
+                 });
+                
+             });                  
+        }
+        
+    var nVer = navigator.appVersion;
+    var nAgt = navigator.userAgent;
+    var browserName  = navigator.appName;
+    var fullVersion  = ''+parseFloat(navigator.appVersion); 
+    var majorVersion = parseInt(navigator.appVersion,10);
+    var nameOffset,verOffset,ix;
+    
+    // In Opera, the true version is after "Opera" or after "Version"
+    if ((verOffset=nAgt.indexOf("Opera"))!=-1) {
+        
+    }
+    // In MSIE, the true version is after "MSIE" in userAgent
+    else if ((verOffset=nAgt.indexOf("MSIE"))!=-1) {
+        
+    }
+    // In Chrome, the true version is after "Chrome" 
+    else if ((verOffset=nAgt.indexOf("Chrome"))!=-1) {
+         //var formid1 = document.getElementById('form');
+         //var btnSave = document.getElementById('{!$Component.cmdGem}');   
+         //formid1.style.width= "102%";
+
+    }
+    // In Safari, the true version is after "Safari" or after "Version" 
+    else if ((verOffset=nAgt.indexOf("Safari"))!=-1) {
+        
+    }
+    // In Firefox, the true version is after "Firefox" 
+     else if ((verOffset=nAgt.indexOf("Firefox"))!=-1) {
+        
+     }
+    // In most other browsers, "name/version" is at the end of userAgent 
+     else if ( (nameOffset=nAgt.lastIndexOf(' ')+1) < (verOffset=nAgt.lastIndexOf('/')) ) 
+     {
+         browserName = nAgt.substring(nameOffset,verOffset);
+         fullVersion = nAgt.substring(verOffset+1);
+         if (browserName.toLowerCase()==browserName.toUpperCase()) {
+             browserName = navigator.appName;
+         }
+     }
+    </script>
+    
+    </apex:form> 
+</apex:component>

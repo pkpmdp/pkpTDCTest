@@ -1,0 +1,37 @@
+<apex:page controller="ManualOrderingDocController" standardStyleSheets="false" renderAs="pdf" wizard="false" showHeader="false">
+<html class="cvi2015">   <!--spoc 2206--> 
+<style> 
+     .textHeader {    font-weight:bold;    font-size:16px;    color:green ;width:70px;   }
+  </style>  
+<!-- <p style="color: green; font-size:15px; font-weight:bold;">Bestilling af YouSee Bredbånd</p>-->
+<apex:outputText value="{!formHeader}" styleClass="textHeader"  />        
+<apex:form >
+<p style="font-size:5px;">
+<apex:pageBlock >
+
+       <apex:outputLabel value="Forhandlernavn: {!dealerName}" /> <br></br>
+       <apex:outputLabel value="Forhandlernummer: {!dealerNumber}" />  <br></br>
+       <apex:outputLabel value="Dato : {!longDate}" /> <br></br>
+        
+       <apex:dataTable value="{!orderingList}" var="list" width="100%" cellspacing="8" >
+           <apex:column rendered="{!(list.document.FieldType__c == 'TextBox')}" style="{!list.document.FontStyling__c}" >  
+                    <apex:outputText value="{!list.document.Description__c}" /> &nbsp; &nbsp; &nbsp;
+                    <apex:outputText value="{!list.document.FieldValue__c}"  />
+           </apex:column> 
+            <apex:column rendered="{!(list.document.FieldType__c == 'RadioButton')}" style="{!list.document.FontStyling__c}" > 
+               <img src="{!IF((list.fieldValue == list.description),$Resource.RadionButton_Checked,$Resource.RadionButton_UnChecked)}" style="width: 12px;height: 8px;" />  
+               &nbsp;  <apex:outputText value="{!list.description}"  />
+           </apex:column> 
+           <apex:column rendered="{!(list.document.FieldType__c == 'CheckBox')}" style="{!list.document.FontStyling__c}" > 
+               <img src="{!IF((list.document.FieldValue__c == 'true'),$Resource.CheckBox_Checked,$Resource.CheckBox_UnChecked)}" style="width: 12px;height: 8px;" />  
+               &nbsp;  <apex:outputText value="{!list.document.Description__c}"  />
+           </apex:column> 
+           <apex:column rendered="{!(list.document.FieldType__c == 'Text')}" style="{!list.document.FontStyling__c}" > 
+                <apex:outputText value="{!list.document.Description__c}"  /> &nbsp; &nbsp; &nbsp;
+           </apex:column> 
+       </apex:dataTable>
+</apex:pageBlock>
+</p>       
+</apex:form> 
+</html>
+</apex:page>

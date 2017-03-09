@@ -1,0 +1,225 @@
+<apex:page sidebar="false" showHeader="true" controller="KnowledgeHome_Controller" extensions="LatestNews"
+ tabStyle="Knowledge_Home__tab">
+ <apex:includeScript value="/support/console/31.0/integration.js"/>
+<apex:includeScript value="{!URLFOR($Resource.jQueryUI192, '/jquery-ui-1.9.2.custom/js/jquery-1.8.3.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.jQueryUI192, '/jquery-ui-1.9.2.custom/js/jquery-ui-1.9.2.custom.min.js')}"/>
+<apex:stylesheet value="{!URLFOR($Resource.jQueryUI192, '/jquery-ui-1.9.2.custom/css/ui-lightness/jquery-ui-1.9.2.custom.min.css')}"/> 
+<style>
+      .activeTab {background-color: #63a4c5; color:white; background-image:none;-webkit-border-radius:10px; -moz-border-radius:10px; padding:5px;}
+    .inactiveTab { background-color: #D6ECF3; color:black; background-image:none; -webkit-border-radius:10px; -moz-border-radius:10px; padding:5px;}
+    .headerClass { text-align:right }
+    .viewLink {font-size: 8pt; font-weight:bold}
+    .latestUsageGrid td {vertical-align:top}
+       .ui-widget-content { word-wrap:break-word;white-space: pre-line;}
+        div.ui-tooltip {
+      max-width: 520px;
+      white-space: pre-line;
+    }
+    .tooltip{
+    display: inline;
+    position: relative;
+}   
+ </style>  
+<script type="text/javascript">
+    
+        //no conflict
+        var $j = jQuery.noConflict();  
+        // function added to get the view port size of browser and call action method of controller;
+    $j( document ).tooltip();
+        $j(document).ready(function(){
+    
+        var viewportwidth;
+         var viewportheight;
+          
+         // the more standards compliant browsers (mozilla/netscape/opera/IE7) use window.innerWidth and window.innerHeight
+          
+         if (typeof window.innerWidth != 'undefined')
+         {
+             //alert('if');
+                viewportwidth = window.innerWidth,
+                  viewportheight = window.innerHeight
+         }
+          // older versions of IE
+         else
+         {   
+                 viewportwidth = document.getElementsByTagName('body')[0].clientWidth,
+                 viewportheight = document.getElementsByTagName('body')[0].clientHeight
+         }
+         
+       //  if(viewportwidth > 1200){
+            //   alert('ViewPort**'+viewportheight);
+               callNewsArticle(viewportheight);
+      //   }
+           });
+
+          function turnColor(id) {
+             var myPara = document.getElementById(id);
+             myPara.style.color = "purple";
+            }
+  </script>
+<script>
+    function redirect(dept){
+        if(sforce.console.isInConsole()){
+            window.location.assign(location.protocol + '//' + location.hostname + '/apex/KnowledgeHome?tab=' + dept+'&isdtp=nv');
+        }
+        else{
+            window.location.assign(location.protocol + '//' + location.hostname + '/apex/KnowledgeHome?tab=' + dept);
+        }
+    }
+</script>
+<apex:form id="test">
+<!--  Action function called when viewport size is larger  -->
+  <!--  <apex:inputText id="inputhiddentest" value="{!test}"/>-->
+<apex:actionFunction action="{!getNewsArticles}" name="callNewsArticle" reRender="focusTab">
+                   <apex:param name="firstParam" value=""  assignTo="{!viewPortHeight}" />
+  <!--  <apex:param name="firstParam" value="" />-->
+ </apex:actionFunction> 
+</apex:form>
+<table width="100%">
+    <tr>
+    <td width="70%" valign="top">
+    <apex:tabPanel switchType="client" height="200px" tabClass="activeTab" inactiveTabClass="inactiveTab" id="focusTab" 
+                   value="{!tabtype}" width="100%" rerender="values">
+            
+                        <apex:tab label="Salg news" labelWidth="150px" id="ykTab" name="YK" ontabenter="redirect('YK')" >
+                        <table border="0" width="100%" style="font-size:12px">
+                        <tr>
+                            <td width="45%" rowspan="2" valign="top" >
+                                <apex:pageBlock >
+                                     <apex:pageBlockSection title="YK News" columns="2" collapsible="false">
+                                         <apex:repeat value="{!listAllNews}" var="lstnws"> 
+                                             <apex:panelGrid >                         
+                                                   <apex:outputPanel >
+                                                     <!-- <a href = "/{!lstnws.id}" target = "_blank" style="color: #54A7EB; font-weight: bold;" onhover"">
+                                                             {!lstnws.Name}                                  
+                                                         </a> -->    
+                                                        
+                                                      <apex:outputLink value="/{!lstnws.id}" 
+                                                                       target="_blank" 
+                                                                       style="color: #0d5b85; font-weight: bold;" id="check" onclick="turnColor('{!$Component.check}')" styleClass="tooltip">
+                                                        <span title="{!lstnws.Article__c}">
+                                                        {!lstnws.Name}
+                                                       </span>
+                                                       </apex:outputLink>
+                                                      
+                                                      
+                                                       <!--  <apex:outputLink value="/{!lstnws.id}" title="{!categoryArticle}" target="_blank" style="color: #54A7EB; font-weight: bold;">{!lstnws.Name}  </apex:outputLink> -->
+                                                         <apex:outputText value="New" 
+                                                                          style="color:red;font-size:xx-small; vertical-align:top;"
+                                                                          rendered="{!lstnws.Start_Featuring__c == TODAY()}" />
+                                      <!--                                rendered="{!(TODAY() - lstnws.Start_Featuring__c) * 24 * 60 <= 60}" />-->
+                                                              
+                                                   </apex:outputPanel>                                                
+                                                                                         
+                                                   <apex:outputText style="font-weight: normal;" value="{!lstnws.Teaser__c}"></apex:outputText>
+                                                   <apex:outputPanel >
+                                                     <apex:outputField value="{!lstnws.Start_Featuring__c}"></apex:outputField>                             
+                                                   </apex:outputPanel>
+                                             </apex:panelGrid> 
+                                         </apex:repeat>   
+                                        <apex:panelGrid > 
+                                            <apex:outputLink rendered="{!checkDisplay == TRUE}" target="_blank" style="color:green;text-align:right;" value="{!viewId}">See All</apex:outputLink>
+                                            <apex:outputLink rendered="{!checkDisplay == FALSE}" target="_blank" style="color:green;text-align:right;" value="{!YKviewId}" >See All</apex:outputLink> 
+                                            <apex:outputLink rendered="{!ShouldDisplay == FALSE}" target="_blank" value="/{!topLinksKeyPrefix}/o">Top systemlinks / Sager</apex:outputLink>
+                                        </apex:panelGrid> 
+                                     </apex:pageBlockSection>
+                                   </apex:pageBlock>
+                            </td>
+    <!--                        <td width="35%" rowspan="2" valign="top">                            -->
+    <!--                           <div style="height: 800px; overflow-y: auto;" id="feeds_yk">-->
+    <!--                              <c:BusinessFeeds />      -->
+    <!--                           </div>                    -->
+    <!--                        </td>-->
+                            <td width="20%" valign="top">                        
+                                <apex:outputPanel >                            
+                                     <apex:form > 
+                                        <c:OpConsultant view_id="BKINFO"/>                                
+                                    </apex:form>    
+                                </apex:outputPanel>
+                                <apex:outputPanel >                            
+                                     <apex:form > 
+                                        <c:OpConsultant view_id="YKInfo"/>                                
+                                    </apex:form>    
+                                </apex:outputPanel>
+                            </td>
+                        </tr>
+                        
+                  </table>
+            </apex:tab>
+            
+            <!---YO News Teb section------------------------>
+         
+            <apex:tab label="Support news" labelWidth="150px" id="yoTab" name="YO" ontabenter="redirect('YO')">
+                <table border="0" width="100%" style="font-size:12px" >
+                        <tr>
+                            <td width="45%" rowspan="2" valign="top" >
+                            <apex:pageBlock >
+                                <apex:pageBlockSection title="YO News" columns="2" collapsible="false">
+                                         <apex:repeat value="{!listAllNews}" var="lstnws"> 
+                                             <apex:panelGrid >                         
+                                                   <apex:outputPanel >
+                                                    <apex:outputLink value="/{!lstnws.id}" 
+                                                                       target="_blank"
+                                                                       style="color: #0d5b85; font-weight: bold;" styleClass="tooltip" id="check" onclick="turnColor('{!$Component.check}')">
+                                                       <span title="{!lstnws.Article__c}">
+                                                        {!lstnws.Name}
+                                                       </span>
+                                                        </apex:outputLink>
+                                                      <apex:outputText value="New" 
+                                                                          style="color:red;font-size:xx-small; vertical-align:top;"
+                                                                          rendered="{!lstnws.Start_Featuring__c == TODAY()}" />
+                            <!--                                   rendered="{!DATEVALUE(lstnws.CreatedDate) == TODAY()}" />-->
+                                                   </apex:outputPanel>                                                
+                                                                                         
+                                                   <apex:outputText style="font-weight: normal;" value="{!lstnws.Teaser__c}"></apex:outputText>
+                                                   <apex:outputPanel >
+                                                     <apex:outputField value="{!lstnws.Start_Featuring__c}"></apex:outputField>                             
+                                                   </apex:outputPanel>
+                                             </apex:panelGrid> 
+                                         </apex:repeat>   
+                                        <apex:panelGrid > 
+                                            <apex:outputLink rendered="{!checkDisplay == TRUE}" target="_blank" style="color:green;text-align:right;" value="{!viewId}">See All</apex:outputLink> 
+                                            <apex:outputLink rendered="{!checkDisplay == FALSE}" target="_blank" style="color:green;text-align:right;" value="{!YKviewId}" >See All</apex:outputLink> 
+                                            <apex:outputLink rendered="{!ShouldDisplay == FALSE}" target="_blank" value="{!$Label.URL_Link}">Top systemlinks / Sager</apex:outputLink>                                       
+                                                                                                                              
+                                            
+                                            </apex:panelGrid> 
+                                    </apex:pageBlockSection>
+                                    
+                                   </apex:pageBlock>
+    <!--                             <c:LatestNewsComponent /> -->
+                            </td>
+    <!--                        <td width="35%" rowspan="2" valign="top">                            -->
+    <!--                           <div style="height: 800px; overflow-y: auto;" id="feeds_yo">-->
+    <!--                              <c:BusinessFeeds />   -->
+    <!--                           </div>                    -->
+    <!--                        </td>-->
+                            <td width="20%" valign="top">                        
+                                <apex:outputPanel >                            
+                                     <apex:form > 
+                                        <c:OpConsultant view_id="Specialdrift"/>                                 
+                                    </apex:form>    
+                                </apex:outputPanel>
+                                <apex:outputPanel >                            
+                                     <apex:form > 
+                                        <c:OpConsultant view_id="VAGT"/>                               
+                                    </apex:form>      
+                                </apex:outputPanel>
+                            </td>
+                        </tr>
+                        
+                  </table> 
+            </apex:tab> 
+         </apex:tabPanel>
+         </td>
+            <td width="30%" valign="top"> 
+                <br/>
+                <br/>
+                <div style="height: 800px; overflow-y: auto;">
+                <c:BusinessFeeds businessGroupId="{!chatterGroupId}"/>
+                </div>
+            </td>
+        </tr>
+     </table>
+    
+</apex:page>

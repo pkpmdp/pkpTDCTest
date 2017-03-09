@@ -1,0 +1,177 @@
+<apex:page standardController="Cloud_File__c" extensions="Amazon_DocUpload_CT" action="{!page2onLoad}">
+
+    <script type="text/javascript" >
+    var cloudFileId = '{!Cloud_File__c.id}';
+    var bucketName = '{!Cloud_File__c.Cloud_File_Bucket_Name__c}';
+    var cuNo = '{!Cloud_File__c.Cloud_File_Customer_Numbers__c}';
+    var serverURL = '{!serverURL}'; 
+    var prefix = '{!Cloud_File__c.Cloud_File_Path_Prefix__c}';
+    
+        function CancelFunction()
+        {
+            Cancel();
+        }
+        
+        function checkIt()
+        {           
+            if (document.frm1.file.value=="")
+            {
+                alert("Vælg venligst fil....");
+                document.frm1.file.focus();
+                return false;
+            }
+            return true;
+        }
+        
+        function processFile(file)
+        {
+          var i = file.value.lastIndexOf('.');
+          var fileExt = file.value.substring(i + 1);
+          var fileType = getFileContentType(fileExt);
+          var contentType = document.getElementById('contentType');
+          
+          if(contentType)
+          {
+             contentType.value = fileType;  
+          } 
+             
+          if (document.frm1.file.value!="")
+          {         
+            Visualforce.remoting.Manager.invokeAction(
+            '{!$RemoteAction.Amazon_DocUpload_CT.processFile}',
+             cloudFileId, fileExt, fileType, serverURL, 
+             handleResult
+            );  
+          }else if(document.frm1.file.value===""){
+            cloudFilePath.innerHTML = '';   
+           }
+        }
+    
+        function handleResult(result, event) {
+          if(event.status)
+            {
+               if(result != null)
+               {                  
+                  var filePath = document.getElementById('cloudFilePath'); 
+                  if(cloudFilePath)
+                      {
+                          cloudFilePath.innerHTML =  bucketName + '/' + prefix + '/' + cuNo + '/' + result.fileTitle;
+                      }
+                  
+                  var key = document.getElementById('key');
+                  if(key)
+                  {
+                      key.value = prefix + '/' + cuNo + '/' + result.fileTitle;  
+                  } 
+                  
+                  var policy = document.getElementById('policy');
+                  if(policy)
+                  {
+                     policy.value = result.policy;   
+                  } 
+                   
+                  var signature = document.getElementById('signature');
+                  if(signature)
+                  {
+                     signature.value = result.signature;   
+                  }
+               }           
+            }       
+        }    
+    
+        function getFileContentType(fileExt)
+        {
+            switch (fileExt)
+                {
+                  case "jpg":
+                  case "jpeg":
+                  case "jpe":      
+                        return "image/jpeg";
+                  
+                    case "png" :
+                    case "gif" :
+                    case "bmp" :
+                    case "tiff" :
+                        return "image/" + fileExt;
+                        
+                    case "doc" :
+                    case "docx" :
+                        return "application/msword";
+                        
+                    case "xls" :
+                    case "xlsx" :                    
+                        return "application/vnd.ms-excel";   
+                        
+                    case "ppt" :
+                    case "pps" :
+                        return "application/vnd.ms-powerpoint";
+                        
+                    case "pdf" :
+                    case "PDF" :
+                        return "application/pdf";
+                    
+                    case "txt" :
+                        return "text/plain";
+                    
+                    case "zip" :
+                        return "application/zip";    
+                      
+                  default:
+                        return "unknown/" + fileExt;
+                }
+        }
+    </script>
+    
+    <form action="https://s3-eu-west-1.amazonaws.com/{!Cloud_File__c.Cloud_File_Bucket_Name__c}" 
+        method="post" enctype="multipart/form-data" id="frm1" name="frm1">
+        
+        <!--<input type="hidden" name="key" 
+        value="{!Cloud_File__c.Cloud_file_cu_no__c}/{!Cloud_File__c.Name}" /> -->
+        <input type="hidden" name="key" id = "key" 
+        value="{!Cloud_File__c.Cloud_File_Path_Prefix__c}/{!Cloud_File__c.Cloud_File_Customer_Numbers__c}/{!Cloud_File__c.Cloud_file_Title__c}" />
+        <input type="hidden" name="AWSAccessKeyId" value="{!key}" /> 
+        <input type="hidden"  name="policy" id="policy" value="" /> 
+        <input type="hidden"  name="signature" id="signature" value="" /> 
+        <input type="hidden"  name="acl" value="{!Cloud_File__c.Cloud_File_Access__c}" />         
+        <input type="hidden"  name="Content-Type" id = "contentType" value="{!Cloud_File__c.Cloud_file_content_Type__c}" />
+        <!--<input type="hidden" name="success_action_redirect" 
+        value="https://{!serverURL}/{!Cloud_File__c.id}" />-->
+        <input type="hidden" name="success_action_redirect" 
+        value="https://{!serverURL}/apex/Amazon_UpdateIsActive?ID={!Cloud_File__c.id}&callback=True" />
+        
+        <apex:pageBlock title="{!$Label.Doc_New_Document}" mode="edit">
+            <apex:pageBlockSection title="{!$Label.Doc_Local_File_to_load}" columns="1">
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="{!$Label.Doc_File_to_upload}"/>
+                    <input type="file" size="50" name="file" id="file" required="true" onchange = "processFile(this);"  />
+                </apex:pageBlockSectionItem> 
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="{!$Label.Doc_Storage_Path}" />                    
+                    <!--<apex:outputText id = "cloudFilePath" >
+                        {!Cloud_File__c.Cloud_File_Bucket_Name__c}/{!Cloud_File__c.Cloud_file_Title__c}
+                     </apex:outputText>  -->
+                    <span id = "cloudFilePath"/>
+                </apex:pageBlockSectionItem> 
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+        
+        <apex:pageBlock >
+            <center>                
+              <input class="btn" type="submit" value="Upload" onclick="return checkIt();"/>
+              <input class="btn" type="button" value="{!$Label.Doc_Cancel}" onclick="CancelFunction()"/>
+            </center>                                    
+        </apex:pageBlock>
+
+    </form>
+    
+    
+    <apex:form id="frm2">
+        <apex:actionFunction name="Cancel" action="{!cancel1}" rerender="out" status="CancelStatus"/>   
+        <apex:outputPanel id="out">
+            <apex:actionStatus startText="{!$Label.Doc_Canceling}" id="CancelStatus">
+                <apex:facet name="stop"></apex:facet>
+            </apex:actionStatus>
+        </apex:outputPanel>
+    </apex:form> 
+    
+</apex:page>

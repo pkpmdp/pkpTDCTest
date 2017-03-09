@@ -1,0 +1,8 @@
+<apex:page controller="clsCasesTabController" tabStyle="Case" action="{!retrieveNextCase2}">
+  <apex:form >
+    <apex:pageMessages />
+    <apex:pageBlock title="{!$Label.Choose_New_Queue}">
+      <apex:outputLink value="/500/o">{!$Label.Choose_Queue}</apex:outputLink>
+    </apex:pageBlock>
+  </apex:form>
+</apex:page>
